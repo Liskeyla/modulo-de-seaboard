@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import seedData from '@/data/estimacionesSeed.json';
 import type { ComentarioSeaboard, Estimacion, EstadoEstimacion } from '@/types/estimacion';
 
-const STORAGE_KEY = 'dms-estimaciones-prototipo';
+const STORAGE_KEY = 'dms-estimaciones-prototipo-v3';
 
 function ahoraFmt() {
   const d = new Date();
@@ -51,6 +51,13 @@ export const useEstimacionesStore = create<EstimacionesState>()(
       estimaciones: seedData as Estimacion[],
 
       hydrate: () => {
+        // Descarta claves viejas para que el seed demo se recargue en clientes existentes
+        try {
+          localStorage.removeItem('dms-estimaciones-prototipo');
+          localStorage.removeItem('dms-estimaciones-prototipo-v2');
+        } catch {
+          /* ignore */
+        }
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return;
         try {
