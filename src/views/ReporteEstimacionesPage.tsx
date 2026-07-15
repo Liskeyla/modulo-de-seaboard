@@ -140,7 +140,7 @@ function AccionesEstimacion({
     }
   }
 
-  return <div className="dms-actions-stack max-w-[220px]">{acciones}</div>;
+  return <div className="dms-actions-stack">{acciones}</div>;
 }
 
 export default function ReporteEstimacionesPage() {
@@ -399,17 +399,17 @@ export default function ReporteEstimacionesPage() {
                     <td className="font-semibold text-rfs-navy">{row.contenedor}</td>
                     <td className="text-xs">{row.modeloMaquina || '—'}</td>
                     <td>{row.codigoRfs || '—'}</td>
-                    <td className="max-w-[140px] text-[11px] leading-snug">{row.naviera}</td>
+                    <td className="text-[11px]">{row.naviera}</td>
                     <td>
-                      <select className="dms-select h-8 w-16 text-[10px]" defaultValue={row.actividad}>
+                      <select className="dms-select h-8 min-w-[4.5rem] text-[10px]" defaultValue={row.actividad}>
                         <option>{row.actividad}</option>
                       </select>
                     </td>
                     <td>{row.lugarEstimacion}</td>
                     <td className="text-xs text-gray-500">{row.lugarAsistencia || '—'}</td>
-                    <td className="whitespace-nowrap text-[11px] tabular-nums">{row.fechaGateIn}</td>
-                    <td className="whitespace-nowrap text-[11px] tabular-nums">{row.fechaElaboracion}</td>
-                    <td className="whitespace-nowrap text-[11px] tabular-nums text-gray-500">
+                    <td className="text-[11px] tabular-nums">{row.fechaGateIn}</td>
+                    <td className="text-[11px] tabular-nums">{row.fechaElaboracion}</td>
+                    <td className="text-[11px] tabular-nums text-gray-500">
                       {row.fechaReparacion || '—'}
                     </td>
                     <td>{row.tipoEstimacion}</td>

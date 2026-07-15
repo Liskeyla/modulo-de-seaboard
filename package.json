@@ -7,7 +7,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "dev": "next dev --hostname 127.0.0.1 -p 3040 --turbopack",
+    "dev": "next dev --hostname 127.0.0.1 -p 3040",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

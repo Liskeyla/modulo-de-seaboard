@@ -132,16 +132,23 @@
   }
 
   .dms-table {
-    @apply w-full min-w-[1100px] bg-white text-[13px];
+    @apply w-max min-w-full border-collapse bg-white text-[13px];
   }
 
   .dms-table th {
-    @apply overflow-hidden border-b-2 border-slate-200 bg-slate-50 px-3 py-2.5 text-left text-[11px] font-semibold leading-tight text-slate-600;
-    word-break: break-word;
+    @apply whitespace-nowrap border-b-2 border-slate-200 bg-slate-50 px-3 py-2.5 text-left text-[11px] font-semibold leading-none text-slate-600;
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: none;
   }
 
   .dms-table td {
-    @apply overflow-hidden border-b border-slate-100 px-3 py-2.5 align-middle text-slate-800;
+    @apply whitespace-nowrap border-b border-slate-100 px-3 py-2.5 align-middle text-slate-800;
+  }
+
+  .dms-table td.dms-cell-wrap {
+    @apply whitespace-normal;
+    max-width: 10rem;
   }
 
   .dms-table tbody tr {
@@ -169,7 +176,11 @@
   }
 
   .dms-actions-stack {
-    @apply flex min-w-[7rem] flex-wrap gap-1.5;
+    @apply flex min-w-[9.5rem] flex-col flex-nowrap gap-1;
+  }
+
+  .dms-actions-stack .dms-btn-action {
+    @apply w-full justify-start whitespace-nowrap;
   }
 
   .dms-table-legend {
@@ -241,7 +252,7 @@
   }
 
   .dms-badge {
-    @apply inline-flex max-w-full items-center gap-1 truncate rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ring-1;
+    @apply inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ring-1;
   }
 
   .dms-badge--reparado {

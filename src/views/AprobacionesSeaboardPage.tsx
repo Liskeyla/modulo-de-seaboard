@@ -504,8 +504,8 @@ export default function AprobacionesSeaboardPage() {
                       <td className="font-semibold text-rfs-navy">{row.contenedor}</td>
                       <td>{row.actividad}</td>
                       <td className="text-xs">{row.modeloMaquina}</td>
-                      <td className="max-w-[120px] text-[11px] leading-snug">{row.tipoContenedor}</td>
-                      <td className="max-w-[140px] text-[11px] leading-snug">{row.buque}</td>
+                      <td className="text-[11px]">{row.tipoContenedor}</td>
+                      <td className="text-[11px]">{row.buque}</td>
                       <td>{row.viaje}</td>
                       <td className="whitespace-nowrap text-[11px] tabular-nums">
                         {row.fechaElaboracion}

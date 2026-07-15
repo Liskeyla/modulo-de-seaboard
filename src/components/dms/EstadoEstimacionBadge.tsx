@@ -18,7 +18,7 @@ export function EstadoEstimacionBadge({ estado }: { estado: EstadoEstimacion }) 
   const cfg = MAP[estado] ?? MAP.PENDIENTE;
   const Icon = cfg.Icon;
   return (
-    <span className={cn('dms-badge', cfg.className)}>
+    <span className={cn('dms-badge whitespace-nowrap', cfg.className)}>
       <Icon className="h-3 w-3 shrink-0" />
       {estado}
     </span>
