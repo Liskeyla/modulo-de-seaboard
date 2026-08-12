@@ -2,7 +2,6 @@
 
 import { ReactNode } from 'react';
 import { Filter, Link2, Search } from 'lucide-react';
-import { PageHero } from '@/components/layout/PageHero';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
@@ -83,9 +82,9 @@ function FilterFields({ fields }: { fields: FilterField[] }) {
 }
 
 export function DmsReportLayout({
-  title,
-  subtitle = 'Consulta, filtros y acciones operativas',
-  heroIcon,
+  title: _title,
+  subtitle: _subtitle,
+  heroIcon: _heroIcon,
   infoMessage,
   filtros,
   onFiltrar,
@@ -95,12 +94,6 @@ export function DmsReportLayout({
 }: DmsReportLayoutProps) {
   return (
     <div>
-      <PageHero
-        title={title}
-        subtitle={subtitle}
-        icon={heroIcon ?? <Filter className="h-5 w-5" />}
-      />
-
       <div className="dms-report-layout">
         <aside className="dms-sidebar-panel">
           <div className="dms-sidebar-box">

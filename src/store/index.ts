@@ -62,3 +62,4 @@ export const useAuthStore = create<AuthState>()(
 );
 
 export { useEstimacionesStore } from './estimacionesStore';
+export { useUiStore } from './uiStore';

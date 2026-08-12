@@ -10,10 +10,10 @@ export function Button({
   size?: 'default' | 'sm' | 'lg' | 'icon';
 }) {
   const variants = {
-    default: 'bg-[#337ab7] text-white hover:bg-[#286090] border border-[#2e6da4]',
-    secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300 border border-gray-300',
+    default: 'bg-rfs-orange text-white hover:bg-[#e05310] border border-[#ba3d0f]',
+    secondary: 'bg-rfs-navy text-white hover:bg-rfs-navy-dark border border-rfs-navy-dark',
     outline: 'border border-gray-300 bg-white hover:bg-gray-50 text-gray-700',
-    ghost: 'hover:bg-white/10 text-white',
+    ghost: 'hover:bg-slate-100 text-slate-700',
     success: 'bg-[#5cb85c] text-white hover:bg-[#449d44] border border-[#4cae4c]',
     info: 'bg-[#5bc0de] text-white hover:bg-[#46b8da] border border-[#46b8da]',
     danger: 'bg-[#d9534f] text-white hover:bg-[#c9302c] border border-[#d43f3a]',

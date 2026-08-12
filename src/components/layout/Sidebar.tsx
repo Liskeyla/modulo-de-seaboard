@@ -39,7 +39,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
     <>
       <div
         className={cn(
-          'fixed inset-0 top-14 z-40 bg-black/50 backdrop-blur-sm transition-opacity',
+          'fixed inset-0 top-16 z-40 bg-black/50 backdrop-blur-sm transition-opacity',
           open ? 'opacity-100' : 'pointer-events-none opacity-0'
         )}
         onClick={onClose}
@@ -47,7 +47,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       />
       <aside
         className={cn(
-          'fixed left-0 top-14 z-50 flex h-[calc(100vh-3.5rem)] w-80 flex-col border-r border-gray-200 bg-white shadow-2xl transition-transform duration-300',
+          'fixed left-0 top-16 z-50 flex h-[calc(100vh-4rem)] w-80 flex-col border-r border-gray-200 bg-white shadow-2xl transition-transform duration-300',
           open ? 'translate-x-0' : '-translate-x-full'
         )}
       >
@@ -94,7 +94,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                     className={cn(
                       'flex items-start gap-3 rounded-xl px-3 py-3 transition-all',
                       active
-                        ? 'bg-gradient-to-r from-[#002b5c] to-[#003d7a] text-white shadow-md'
+                        ? 'bg-rfs-navy text-white shadow-md'
                         : 'text-gray-700 hover:bg-gray-50'
                     )}
                   >

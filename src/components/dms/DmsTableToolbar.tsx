@@ -70,7 +70,7 @@ export function DmsTableToolbar({
         </div>
 
         {totalCount !== undefined && (
-          <span className="rounded-lg bg-[#002b5c]/5 px-2.5 py-1.5 text-xs font-semibold text-[#002b5c]">
+          <span className="rounded-lg bg-[#152483]/5 px-2.5 py-1.5 text-xs font-semibold text-[#152483]">
             {totalCount.toLocaleString('es-EC')} en pantalla
           </span>
         )}

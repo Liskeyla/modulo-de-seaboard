@@ -76,7 +76,7 @@ export function ComentarioModal({
               ref={textareaRef}
               name="comentario"
               rows={4}
-              className="w-full rounded-lg border border-gray-300 p-3 text-sm shadow-sm transition-colors focus:border-[#337ab7] focus:outline-none focus:ring-2 focus:ring-[#337ab7]/20"
+              className="w-full rounded-lg border border-gray-300 p-3 text-sm shadow-sm transition-colors focus:border-[#f16e26] focus:outline-none focus:ring-2 focus:ring-[#f16e26]/20"
               placeholder="Ingrese el comentario…"
               required={required}
             />

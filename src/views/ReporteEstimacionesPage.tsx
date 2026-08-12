@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { FileBarChart, FileText, RefreshCw, SearchX, Send } from 'lucide-react';
+import { Header } from '@/components/layout/Header';
 import { DmsReportLayout } from '@/components/dms/DmsReportLayout';
 import { DmsTableToolbar } from '@/components/dms/DmsTableToolbar';
 import { EstadoEstimacionBadge } from '@/components/dms/EstadoEstimacionBadge';
@@ -218,6 +219,12 @@ export default function ReporteEstimacionesPage() {
 
   return (
     <>
+      <Header
+        title="Reporte de Estimaciones"
+        subtitle="Consulta operativa DMS · Envío a aprobación Seaboard"
+      />
+      <main className="px-3 py-4 md:px-5 md:py-6">
+        <div className="dms-shell">
       <DmsReportLayout
         title="Reporte de Estimaciones"
         subtitle="Consulta operativa DMS · Envío a aprobación Seaboard"
@@ -478,6 +485,8 @@ export default function ReporteEstimacionesPage() {
           </div>
         </div>
       </DmsReportLayout>
+        </div>
+      </main>
 
       <ComentarioModal
         open={!!reversarId}

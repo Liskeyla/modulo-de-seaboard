@@ -4,32 +4,58 @@
 
 @layer base {
   :root {
-    --background: 210 25% 96%;
+    --background: 225 33% 97%;
     --foreground: 210 40% 10%;
-    --primary: 210 100% 18%;
+    --primary: 231 72% 30%;
     --primary-foreground: 0 0% 100%;
-    --border: 210 15% 85%;
-    --input: 210 15% 85%;
-    --ring: 210 100% 18%;
+    --border: 214 20% 88%;
+    --input: 214 20% 88%;
+    --ring: 20 87% 55%;
     --radius: 0.5rem;
   }
 
   body {
-    @apply bg-[#e8eef4] text-foreground font-sans antialiased;
+    @apply bg-[#f4f6fb] text-foreground font-sans antialiased;
     background-image:
-      radial-gradient(circle at 0% 0%, rgba(0, 43, 92, 0.04) 0%, transparent 50%),
-      radial-gradient(circle at 100% 100%, rgba(247, 148, 29, 0.05) 0%, transparent 50%);
+      radial-gradient(circle at 0% 0%, rgba(21, 36, 131, 0.04) 0%, transparent 50%),
+      radial-gradient(circle at 100% 100%, rgba(241, 110, 38, 0.05) 0%, transparent 50%);
     background-attachment: fixed;
   }
 }
 
 @layer components {
+  .dms-field {
+    @apply w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400;
+  }
+
+  .dms-field:hover {
+    @apply border-slate-400;
+  }
+
+  .dms-field:focus {
+    @apply border-rfsorange-500 ring-4 ring-rfsorange-500/15;
+  }
+
+  .dms-scroll-claro::-webkit-scrollbar {
+    width: 8px;
+  }
+  .dms-scroll-claro::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .dms-scroll-claro::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 999px;
+  }
+  .dms-scroll-claro::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+
   .dms-shell {
     @apply mx-auto w-full max-w-[1600px];
   }
 
   .dms-page-hero {
-    @apply relative overflow-hidden rounded-lg border border-white/60 bg-gradient-to-r from-[#002b5c] via-[#003d7a] to-[#005a9e] px-4 py-2.5 text-white shadow-md md:px-5 md:py-3;
+    @apply relative overflow-hidden rounded-lg border border-white/60 bg-gradient-to-r from-[#152483] via-[#2a339c] to-[#3f4bb8] px-4 py-2.5 text-white shadow-md md:px-5 md:py-3;
   }
 
   .dms-page-hero::after {
@@ -62,7 +88,7 @@
   }
 
   .dms-sidebar-header--filtros {
-    @apply bg-gradient-to-r from-[#002b5c] to-[#004080];
+    @apply bg-gradient-to-r from-[#152483] to-[#111d6b];
   }
 
   .dms-sidebar-header--fecha {
@@ -86,7 +112,7 @@
   }
 
   .dms-filter-control {
-    @apply box-border h-9 w-full min-w-0 max-w-full rounded-md border border-[#c6c6c6] bg-white px-2 text-[11px] text-gray-800 shadow-none transition-colors placeholder:text-gray-400 focus:border-[#337ab7] focus:outline-none focus:ring-1 focus:ring-[#337ab7]/25 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:opacity-60;
+    @apply box-border h-9 w-full min-w-0 max-w-full rounded-md border border-[#c6c6c6] bg-white px-2 text-[11px] text-gray-800 shadow-none transition-colors placeholder:text-gray-400 focus:border-[#f16e26] focus:outline-none focus:ring-1 focus:ring-[#f16e26]/25 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:opacity-60;
   }
 
   .dms-select {
@@ -95,7 +121,7 @@
   }
 
   .dms-btn-filter {
-    @apply flex h-9 w-full items-center justify-center gap-1 rounded-md bg-gradient-to-r from-[#002b5c] to-[#003d7a] px-2 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm transition-all hover:shadow-md active:scale-[0.99];
+    @apply flex h-9 w-full items-center justify-center gap-1 rounded-md bg-gradient-to-r from-[#152483] to-[#2a339c] px-2 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm transition-all hover:shadow-md active:scale-[0.99];
   }
 
   .dms-btn-search {
@@ -172,7 +198,7 @@
   }
 
   .dms-cell-container-code {
-    @apply block truncate font-mono text-xs font-bold text-[#002b5c];
+    @apply block truncate font-mono text-xs font-bold text-[#152483];
   }
 
   .dms-actions-stack {
@@ -220,7 +246,7 @@
   }
 
   .dms-btn-modo-revision {
-    @apply inline-flex items-center gap-1.5 rounded-lg border border-[#2e6da4] bg-gradient-to-r from-[#337ab7] to-[#286090] px-3 py-2 text-xs font-bold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98];
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-[#ba3d0f] bg-gradient-to-r from-[#f16e26] to-[#e05310] px-3 py-2 text-xs font-bold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98];
   }
 
   .dms-btn-pdf {
@@ -228,7 +254,7 @@
   }
 
   .dms-btn-ver {
-    @apply border-blue-200 bg-blue-50 text-[#337ab7] hover:bg-blue-100;
+    @apply border-blue-200 bg-blue-50 text-[#f16e26] hover:bg-blue-100;
   }
 
   .dms-btn-info {
@@ -244,7 +270,7 @@
   }
 
   .dms-btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#337ab7] to-[#286090] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#f16e26] to-[#e05310] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98];
   }
 
   .dms-filters-row {
@@ -292,7 +318,7 @@
   }
 
   .dms-pagination-btn {
-    @apply inline-flex min-h-[36px] min-w-[36px] items-center justify-center border-r border-gray-300 bg-white px-3.5 text-sm font-normal text-[#337ab7] transition-colors hover:bg-gray-50 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#337ab7]/30 disabled:cursor-not-allowed disabled:text-gray-400 disabled:hover:bg-white;
+    @apply inline-flex min-h-[36px] min-w-[36px] items-center justify-center border-r border-gray-300 bg-white px-3.5 text-sm font-normal text-[#f16e26] transition-colors hover:bg-gray-50 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f16e26]/30 disabled:cursor-not-allowed disabled:text-gray-400 disabled:hover:bg-white;
   }
 
   .dms-pagination-btn--nav {
@@ -300,7 +326,7 @@
   }
 
   .dms-pagination-btn--nav:not(:disabled) {
-    @apply text-[#337ab7];
+    @apply text-[#f16e26];
   }
 
   .dms-pagination-btn--page {
@@ -324,7 +350,7 @@
   }
 
   .dms-link-option {
-    @apply flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs text-[#337ab7] transition-colors hover:bg-sky-50 hover:underline;
+    @apply flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs text-[#f16e26] transition-colors hover:bg-sky-50 hover:underline;
   }
 
   .dms-link-option--disabled {
@@ -340,7 +366,7 @@
   }
 
   .dms-modal-header {
-    @apply bg-gradient-to-r from-[#002b5c] to-[#003d7a] px-5 py-3.5 text-sm font-bold text-white;
+    @apply bg-gradient-to-r from-[#152483] to-[#2a339c] px-5 py-3.5 text-sm font-bold text-white;
   }
 
   .dms-modal-body {
@@ -360,7 +386,212 @@
   }
 
   .dms-login-panel {
-    @apply relative hidden flex-col justify-between overflow-hidden rounded-2xl bg-gradient-to-br from-[#002b5c] via-[#003d7a] to-[#005a9e] p-8 text-white shadow-xl lg:flex;
+    @apply relative hidden flex-col justify-between overflow-hidden rounded-2xl bg-gradient-to-br from-[#152483] via-[#2a339c] to-[#3f4bb8] p-8 text-white shadow-xl lg:flex;
+  }
+
+  /* ── Login page (RFS mockup) ─────────────────────────────────────── */
+  .login-page {
+    @apply relative flex min-h-screen items-center justify-center overflow-hidden bg-white px-4 py-8 md:px-8;
+  }
+
+  .login-page__blob {
+    @apply pointer-events-none absolute z-0;
+  }
+
+  .login-page__blob--purple {
+    top: -18%;
+    right: -8%;
+    width: min(52vw, 560px);
+    height: min(52vw, 560px);
+    border-radius: 48% 52% 45% 55% / 55% 42% 58% 45%;
+    background: radial-gradient(circle at 35% 40%, #2a339c 0%, #152483 55%, #0d1650 100%);
+    opacity: 0.95;
+  }
+
+  .login-page__blob--orange {
+    bottom: -22%;
+    left: -10%;
+    width: min(48vw, 480px);
+    height: min(48vw, 480px);
+    border-radius: 55% 45% 52% 48% / 42% 58% 42% 58%;
+    background: radial-gradient(circle at 60% 35%, #fb8038 0%, #f16e26 50%, #e05310 100%);
+    opacity: 0.92;
+  }
+
+  .login-page__layout {
+    @apply relative z-10 grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[1fr_minmax(280px,380px)] lg:gap-12 xl:gap-16;
+  }
+
+  .login-form-col {
+    @apply mx-auto flex w-full max-w-md flex-col items-stretch;
+  }
+
+  .login-brand {
+    @apply mb-6 flex flex-col items-center gap-1;
+  }
+
+  .login-brand__logo {
+    @apply h-16 w-auto object-contain md:h-[72px];
+  }
+
+  .login-brand__countries {
+    @apply text-[11px] font-semibold tracking-[0.18em] text-[#152483];
+  }
+
+  .login-form-col__header {
+    @apply mb-6 text-center;
+  }
+
+  .login-form-col__header h1 {
+    @apply text-2xl font-bold tracking-tight text-[#2c3e50] md:text-[1.65rem];
+  }
+
+  .login-form-col__header p {
+    @apply mt-2 text-sm text-gray-500;
+  }
+
+  .login-form {
+    @apply space-y-4;
+  }
+
+  .login-field {
+    @apply w-full;
+  }
+
+  .login-label {
+    @apply mb-1.5 block text-sm font-medium text-gray-600;
+  }
+
+  .login-input-wrap {
+    @apply relative;
+  }
+
+  .login-input {
+    @apply box-border h-12 w-full rounded-xl border border-[#cfcfcf] bg-white px-4 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-[#152483] focus:ring-2 focus:ring-[#152483]/15;
+  }
+
+  .login-input-wrap .login-input {
+    @apply pr-11;
+  }
+
+  .login-eye {
+    @apply absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600;
+  }
+
+  .login-remember {
+    @apply flex cursor-pointer items-center gap-2.5 text-sm text-gray-600;
+  }
+
+  .login-remember input {
+    @apply h-4 w-4 rounded border-gray-300 accent-[#152483];
+  }
+
+  .login-error {
+    @apply rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 ring-1 ring-red-100;
+  }
+
+  .login-btn-primary {
+    @apply flex h-12 w-full items-center justify-center rounded-xl bg-[#f16e26] text-sm font-bold uppercase tracking-wide text-white shadow-md shadow-orange-500/25 transition-all hover:bg-[#e05310] hover:shadow-lg active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .login-links {
+    @apply mt-5 space-y-1.5 text-center text-sm text-gray-500;
+  }
+
+  .login-links a {
+    @apply font-semibold text-[#5ba8d9] underline-offset-2 hover:underline;
+  }
+
+  .login-secondary-actions {
+    @apply mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2;
+  }
+
+  .login-btn-secondary {
+    @apply flex h-11 items-center justify-center rounded-xl bg-[#152483] px-3 text-center text-sm font-semibold text-white transition-all hover:bg-[#0d1650] active:scale-[0.99];
+  }
+
+  .login-demo-hint {
+    @apply mt-5 text-center text-[11px] text-gray-400;
+  }
+
+  .login-promo {
+    @apply relative mx-auto w-full max-w-sm lg:mx-0 lg:max-w-none;
+  }
+
+  .login-promo__inner {
+    @apply relative flex min-h-[520px] flex-col overflow-hidden rounded-[1.75rem] bg-[#152483] shadow-2xl shadow-purple-900/30;
+  }
+
+  .login-promo__logo {
+    @apply absolute left-0 right-0 top-0 z-20 flex items-center justify-center gap-2 bg-white/95 px-4 py-3 backdrop-blur-sm;
+  }
+
+  .login-promo__logo-text {
+    @apply text-lg font-extrabold tracking-tight text-[#152483] md:text-xl;
+  }
+
+  .login-promo__logo-mark {
+    width: 22px;
+    height: 18px;
+    background: #f16e26;
+    clip-path: polygon(15% 100%, 50% 0%, 85% 100%);
+    border-radius: 2px;
+  }
+
+  .login-promo__media {
+    @apply relative flex-1;
+    min-height: 280px;
+  }
+
+  .login-promo__photo {
+    @apply object-cover object-center;
+    filter: saturate(0.85) contrast(1.05);
+  }
+
+  .login-promo__overlay {
+    @apply absolute inset-0 bg-gradient-to-b from-[#152483]/25 via-transparent to-[#152483]/55;
+  }
+
+  .login-promo__footer {
+    @apply relative z-10 -mt-10 flex flex-col items-center gap-4 overflow-hidden px-6 pb-9 pt-12 text-center;
+    background:
+      radial-gradient(ellipse 90% 120% at 0% 100%, #f16e26 0%, #f16e26 42%, transparent 43%),
+      radial-gradient(ellipse 95% 130% at 100% 110%, #152483 0%, #152483 48%, transparent 49%),
+      linear-gradient(105deg, #f16e26 0%, #f16e26 38%, #152483 38%, #152483 100%);
+  }
+
+  .login-promo__footer h2 {
+    @apply relative z-10 max-w-[14ch] text-[1.35rem] font-extrabold leading-tight tracking-wide text-white drop-shadow-sm md:text-2xl;
+  }
+
+  .login-promo__cta {
+    @apply relative z-10 inline-flex h-11 items-center justify-center rounded-full bg-[#0d1650] px-8 text-sm font-bold text-white shadow-lg transition-all hover:bg-[#160448] hover:shadow-xl active:scale-[0.98];
+  }
+
+  @media (max-width: 1023px) {
+    .login-page__blob--purple {
+      width: 280px;
+      height: 280px;
+      top: -80px;
+      right: -60px;
+    }
+
+    .login-page__blob--orange {
+      width: 240px;
+      height: 240px;
+      bottom: -100px;
+      left: -80px;
+    }
+
+    .login-promo__inner {
+      @apply min-h-[340px];
+    }
+  }
+
+  @media (max-width: 639px) {
+    .login-promo {
+      @apply hidden;
+    }
   }
 
   .dms-toast {

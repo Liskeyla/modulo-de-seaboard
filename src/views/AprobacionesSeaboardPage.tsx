@@ -3,7 +3,6 @@
 import { useMemo, useState } from 'react';
 import {
   Check,
-  ClipboardCheck,
   Eye,
   FileText,
   Filter,
@@ -12,7 +11,7 @@ import {
   SearchX,
   X,
 } from 'lucide-react';
-import { PageHero } from '@/components/layout/PageHero';
+import { Header } from '@/components/layout/Header';
 import { DmsTableToolbar } from '@/components/dms/DmsTableToolbar';
 import { EstadoEstimacionBadge } from '@/components/dms/EstadoEstimacionBadge';
 import { ComentarioModal } from '@/components/aprobaciones/ComentarioModal';
@@ -199,17 +198,17 @@ export default function AprobacionesSeaboardPage() {
 
   return (
     <>
-      <PageHero
+      <Header
         title="Aprobación de Estimaciones Seaboard"
         subtitle={
           modoRevision
             ? 'Modo revisión · Estimaciones incompletas / pendientes'
             : 'Solo estimaciones ENVIADAS listas para decidir'
         }
-        icon={<ClipboardCheck className="h-5 w-5" />}
       />
-
-      <div className="mt-3 space-y-3">
+      <main className="px-3 py-4 md:px-5 md:py-6">
+        <div className="dms-shell">
+      <div className="space-y-3">
         <div className="dms-info-box">
           <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sky-200/60 text-xs font-bold">
             i
@@ -351,7 +350,7 @@ export default function AprobacionesSeaboardPage() {
             {!modoRevision && (
               <div className="flex flex-wrap items-center gap-2 border-t border-gray-100 pt-3">
                 {selectedIds.length > 0 && (
-                  <span className="rounded-full bg-[#002b5c]/8 px-3 py-1 text-xs font-semibold text-[#002b5c]">
+                  <span className="rounded-full bg-[#152483]/8 px-3 py-1 text-xs font-semibold text-[#152483]">
                     {selectedIds.length} seleccionada(s)
                   </span>
                 )}
@@ -561,6 +560,8 @@ export default function AprobacionesSeaboardPage() {
           </div>
         </div>
       </div>
+        </div>
+      </main>
 
       <ComentarioModal
         open={modalAction === 'rechazar'}
