@@ -7,14 +7,18 @@ import {
   ChevronDown,
   ChevronRight,
   Database,
+  Download,
+  Eye,
   FileBarChart,
   FileText,
   Info,
   MessageSquare,
   RefreshCw,
+  RotateCcw,
   SearchX,
   Send,
   Ship,
+  Trash2,
 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { DmsReportLayout } from '@/components/dms/DmsReportLayout';
@@ -97,6 +101,7 @@ export default function ReporteEstimacionesPage() {
   const [pageSize, setPageSize] = useState(20);
   const [page, setPage] = useState(1);
   const [filtroActivo, setFiltroActivo] = useState(false);
+  const [soloLiquidaciones, setSoloLiquidaciones] = useState(false);
   const [expandidas, setExpandidas] = useState<Set<string>>(new Set());
   const [dialogo, setDialogo] = useState<Dialogo>({ tipo: 'NINGUNO' });
 
@@ -121,6 +126,8 @@ export default function ReporteEstimacionesPage() {
 
     return estimaciones.filter((e) => {
       if (patio !== 'Todos' && e.lugarEstimacion !== patio) return false;
+      if (estado !== 'Todos' && e.estado !== estado) return false;
+      if (soloLiquidaciones && contarComentariosPendientes(e.danos) === 0) return false;
       if (!hayCriterio) return true;
 
       if (filtroActivo) {
@@ -130,7 +137,6 @@ export default function ReporteEstimacionesPage() {
         if (naviera !== 'Todas' && e.naviera !== naviera) return false;
         if (codigoRfs !== 'Todos' && e.codigoRfs !== codigoRfs) return false;
         if (tipo !== 'Todos' && e.tipoEstimacion !== tipo) return false;
-        if (estado !== 'Todos' && e.estado !== estado) return false;
         if (actividad !== 'Todas' && e.actividad !== actividad) return false;
         if (tecnico !== 'Todos' && e.tecnico !== tecnico) return false;
         if (aplica !== 'Todos' && e.enviarAprobacion !== aplica) return false;
@@ -156,7 +162,7 @@ export default function ReporteEstimacionesPage() {
     });
   }, [
     estimaciones, desde, hasta, naviera, codigoRfs, patio, tipo, estado, actividad, tecnico,
-    aplica, completas, busqueda, parametro, search, filtroActivo,
+    aplica, completas, busqueda, parametro, search, filtroActivo, soloLiquidaciones,
   ]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
@@ -175,6 +181,48 @@ export default function ReporteEstimacionesPage() {
     { hh: 0, pvpHh: 0, pvpMat: 0, pvpTotal: 0 }
   );
 
+  const conteos = useMemo(() => {
+    const base =
+      patio === 'Todos'
+        ? estimaciones
+        : estimaciones.filter((e) => e.lugarEstimacion === patio);
+    const porEstado = (est: string) => base.filter((e) => e.estado === est).length;
+    return {
+      todos: base.length,
+      PENDIENTE: porEstado('PENDIENTE'),
+      ENVIADO: porEstado('ENVIADO'),
+      APROBADO: porEstado('APROBADO'),
+      REPARADO: porEstado('REPARADO'),
+      RECHAZADO: porEstado('RECHAZADO'),
+      liquidaciones: base.filter((e) => contarComentariosPendientes(e.danos) > 0).length,
+    };
+  }, [estimaciones, patio]);
+
+  function limpiarFiltros() {
+    setDesde('2026-08-17');
+    setHasta('2026-08-23');
+    setNaviera('Todas');
+    setCodigoRfs('Todos');
+    setPatio('Todos');
+    setTipo('Todos');
+    setEstado('Todos');
+    setActividadFiltro('Todas');
+    setTecnico('Todos');
+    setAplica('Todos');
+    setCompletas(false);
+    setBusqueda('');
+    setSearch('');
+    setFiltroActivo(false);
+    setSoloLiquidaciones(false);
+    setPage(1);
+    toast('Filtros restablecidos.', 'info');
+  }
+
+  function filtrarPorEstado(valor: string) {
+    setEstado(valor);
+    setPage(1);
+  }
+
   const seleccionada = (id: string) => estimaciones.find((e) => e.id === id) ?? null;
   const activa =
     dialogo.tipo !== 'NINGUNO' && 'id' in dialogo ? seleccionada(dialogo.id) : null;
@@ -189,144 +237,114 @@ export default function ReporteEstimacionesPage() {
   }
 
   function accionesDe(row: Estimacion) {
+    const abrir = () => router.push(`/reportes/estimaciones/${row.codigo}`);
+
     if (row.sinDanos) {
       return (
-        <div className="dms-actions-stack">
+        <div className="dms-icon-actions">
           <button
             type="button"
-            className="dms-btn-action dms-btn-sin-danos"
-            onClick={() => setDialogo({ tipo: 'INFO', id: row.id })}
+            className="dms-icon-action dms-icon-action--ver"
+            title="Abrir estimado"
+            onClick={abrir}
           >
-            No hay Daños
+            <Eye className="h-3.5 w-3.5" />
           </button>
           <button
             type="button"
-            className="dms-btn-action dms-btn-ver"
-            onClick={() => router.push(`/reportes/estimaciones/${row.codigo}`)}
+            className="dms-icon-action dms-icon-action--info"
+            title="Sin daños registrados"
+            onClick={() => setDialogo({ tipo: 'INFO', id: row.id })}
           >
-            Ver
+            <Info className="h-3.5 w-3.5" />
           </button>
         </div>
       );
     }
 
-    const botones = [];
-
-    if (['ENVIADO', 'APROBADO', 'REPARADO', 'RECHAZADO'].includes(row.estado)) {
-      botones.push(
+    return (
+      <div className="dms-icon-actions">
         <button
-          key="pdf-p"
           type="button"
-          className="dms-btn-action dms-btn-pdf"
-          onClick={() => setDialogo({ tipo: 'INFORME', id: row.id, variante: 'PRELIMINAR' })}
+          className="dms-icon-action dms-icon-action--ver"
+          title="Abrir estimado"
+          onClick={abrir}
         >
-          PDF Preliminar
+          <Eye className="h-3.5 w-3.5" />
         </button>
-      );
-    }
-    if (['APROBADO', 'REPARADO'].includes(row.estado)) {
-      botones.push(
+        {['ENVIADO', 'APROBADO', 'REPARADO', 'RECHAZADO'].includes(row.estado) && (
+          <button
+            type="button"
+            className="dms-icon-action dms-icon-action--pdf"
+            title="PDF preliminar"
+            onClick={() => setDialogo({ tipo: 'INFORME', id: row.id, variante: 'PRELIMINAR' })}
+          >
+            <FileText className="h-3.5 w-3.5" />
+          </button>
+        )}
+        {['APROBADO', 'REPARADO', 'RECHAZADO'].includes(row.estado) && (
+          <button
+            type="button"
+            className="dms-icon-action dms-icon-action--nota"
+            title="Ver nota de la naviera"
+            onClick={() => setDialogo({ tipo: 'NOTA', id: row.id })}
+          >
+            <Ship className="h-3.5 w-3.5" />
+          </button>
+        )}
+        {(row.analisisObservacion || row.niveles) && (
+          <button
+            type="button"
+            className="dms-icon-action dms-icon-action--info"
+            title="Información adicional"
+            onClick={() => setDialogo({ tipo: 'INFO', id: row.id })}
+          >
+            <Info className="h-3.5 w-3.5" />
+          </button>
+        )}
+        {['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) && (
+          <button
+            type="button"
+            className="dms-icon-action dms-icon-action--enviar"
+            title="Enviar a aprobación"
+            onClick={() => setDialogo({ tipo: 'ENVIAR', id: row.id })}
+          >
+            <Send className="h-3.5 w-3.5" />
+          </button>
+        )}
+        {['APROBADO', 'REPARADO'].includes(row.estado) && (
+          <button
+            type="button"
+            className="dms-icon-action dms-icon-action--reversar"
+            title="Reversar aprobación"
+            onClick={() => setDialogo({ tipo: 'REVERSAR', id: row.id })}
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+          </button>
+        )}
+        {row.estadoPti && (
+          <button
+            type="button"
+            className="dms-icon-action dms-icon-action--log"
+            title="Descargar data log"
+            onClick={() => {
+              const n = descargarDataLog(row);
+              toast(`Data Log descargado (${n} registros).`, 'success');
+            }}
+          >
+            <Download className="h-3.5 w-3.5" />
+          </button>
+        )}
         <button
-          key="pdf-f"
           type="button"
-          className="dms-btn-action dms-btn-pdf"
-          onClick={() => setDialogo({ tipo: 'INFORME', id: row.id, variante: 'FINAL' })}
+          className="dms-icon-action dms-icon-action--borrar"
+          title="Eliminar estimación"
+          onClick={() => setDialogo({ tipo: 'ELIMINAR', id: row.id })}
         >
-          PDF Final
+          <Trash2 className="h-3.5 w-3.5" />
         </button>
-      );
-    }
-    if (['APROBADO', 'REPARADO', 'RECHAZADO'].includes(row.estado)) {
-      botones.push(
-        <button
-          key="nota"
-          type="button"
-          className="dms-btn-action dms-btn-nota"
-          onClick={() => setDialogo({ tipo: 'NOTA', id: row.id })}
-        >
-          Ver Nota Naviera
-        </button>
-      );
-    }
-
-    botones.push(
-      <button
-        key="ver"
-        type="button"
-        className="dms-btn-action dms-btn-ver"
-        onClick={() => router.push(`/reportes/estimaciones/${row.codigo}`)}
-      >
-        Ver
-      </button>
+      </div>
     );
-
-    if (row.analisisObservacion || row.niveles) {
-      botones.push(
-        <button
-          key="info"
-          type="button"
-          className="dms-btn-action dms-btn-info"
-          onClick={() => setDialogo({ tipo: 'INFO', id: row.id })}
-        >
-          Información
-        </button>
-      );
-    }
-
-    botones.push(
-      <button
-        key="del"
-        type="button"
-        className="dms-btn-action dms-btn-eliminar"
-        onClick={() => setDialogo({ tipo: 'ELIMINAR', id: row.id })}
-      >
-        Eliminar
-      </button>
-    );
-
-    if (['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado)) {
-      botones.push(
-        <button
-          key="env"
-          type="button"
-          className="dms-btn-action dms-btn-enviar-sm"
-          onClick={() => setDialogo({ tipo: 'ENVIAR', id: row.id })}
-        >
-          Enviar Aprobación
-        </button>
-      );
-    }
-
-    if (['APROBADO', 'REPARADO'].includes(row.estado)) {
-      botones.push(
-        <button
-          key="rev"
-          type="button"
-          className="dms-btn-action dms-btn-reversar"
-          onClick={() => setDialogo({ tipo: 'REVERSAR', id: row.id })}
-        >
-          Reversar Aprobación
-        </button>
-      );
-    }
-
-    if (row.estadoPti) {
-      botones.push(
-        <button
-          key="log"
-          type="button"
-          className="dms-btn-action dms-btn-datalog"
-          onClick={() => {
-            const n = descargarDataLog(row);
-            toast(`Data Log descargado (${n} registros).`, 'success');
-          }}
-        >
-          Descargar Data Log
-        </button>
-      );
-    }
-
-    return <div className="dms-actions-stack">{botones}</div>;
   }
 
   return (
@@ -342,11 +360,19 @@ export default function ReporteEstimacionesPage() {
             subtitle="Consulta operativa DMS · Envío a aprobación Seaboard"
             heroIcon={<FileBarChart className="h-5 w-5" />}
             infoMessage={
-              <span>
-                <strong>Filtros:</strong> Debe seleccionarse un Depósito para poder visualizar
-                registros. Use <strong>Ver</strong> para abrir el estimado con su listado de daños y
-                la conversación con liquidaciones.
-              </span>
+              <div className="dms-howto">
+                <span>
+                  <strong>1</strong> Pulse un estado arriba o filtre por depósito.
+                </span>
+                <span>
+                  <strong>2</strong> El ojo naranja abre el estimado. También puede pulsar el código
+                  o hacer doble clic en la fila.
+                </span>
+                <span>
+                  <strong>3</strong> El punto naranja junto al código significa que liquidaciones
+                  pidió un cambio.
+                </span>
+              </div>
             }
             filtros={[
               { label: 'Desde', type: 'date', value: desde, onChange: (v) => setDesde(String(v)) },
@@ -419,6 +445,7 @@ export default function ReporteEstimacionesPage() {
               setPage(1);
               toast('Filtros aplicados.', 'success');
             }}
+            onLimpiar={limpiarFiltros}
             buscador={{
               termino: busqueda,
               onTerminoChange: setBusqueda,
@@ -449,23 +476,59 @@ export default function ReporteEstimacionesPage() {
               </div>
             }
           >
-            <div className="dms-table-legend">
+            <div className="dms-kpi-bar">
               {(
                 [
-                  ['Enviado', 'bg-teal-500'],
-                  ['Pendiente', 'bg-amber-400'],
-                  ['Aprobado', 'bg-blue-500'],
-                  ['Reparado', 'bg-emerald-500'],
-                  ['Rechazado', 'bg-red-500'],
+                  ['Todos', conteos.todos, 'todos', 'Todos'],
+                  ['Pendiente', conteos.PENDIENTE, 'pendiente', 'PENDIENTE'],
+                  ['Enviado', conteos.ENVIADO, 'enviado', 'ENVIADO'],
+                  ['Aprobado', conteos.APROBADO, 'aprobado', 'APROBADO'],
+                  ['Reparado', conteos.REPARADO, 'reparado', 'REPARADO'],
+                  ['Rechazado', conteos.RECHAZADO, 'rechazado', 'RECHAZADO'],
                 ] as const
-              ).map(([label, color]) => (
-                <span key={label} className="dms-table-legend-item">
-                  <span className={cn('dms-table-legend-dot', color)} /> {label}
-                </span>
+              ).map(([label, n, tono, valor]) => (
+                <button
+                  key={label}
+                  type="button"
+                  className={cn(
+                    'dms-kpi-card',
+                    `dms-kpi-card--${tono}`,
+                    estado === valor && 'dms-kpi-card--activo'
+                  )}
+                  onClick={() => filtrarPorEstado(valor)}
+                >
+                  <span>{label}</span>
+                  <strong>{n}</strong>
+                </button>
               ))}
-              <span className="dms-table-legend-item ml-auto text-gray-400">
-                <MessageSquare className="h-3 w-3" /> El punto naranja indica cambios solicitados por
-                liquidaciones
+              <button
+                type="button"
+                className={cn(
+                  'dms-kpi-card dms-kpi-card--alerta',
+                  soloLiquidaciones && 'dms-kpi-card--activo'
+                )}
+                title="Estimaciones con cambios pedidos por liquidaciones"
+                onClick={() => {
+                  setSoloLiquidaciones((v) => !v);
+                  setPage(1);
+                }}
+              >
+                <span className="inline-flex items-center gap-1">
+                  <MessageSquare className="h-3 w-3" /> Liquidaciones
+                </span>
+                <strong>{conteos.liquidaciones}</strong>
+              </button>
+            </div>
+
+            <div className="dms-resumen-strip">
+              <span>
+                Mostrando <strong>{filtered.length}</strong> de {conteos.todos} estimaciones
+              </span>
+              <span>
+                Total filtrado <strong>${formatMoney(totales.pvpTotal)}</strong>
+              </span>
+              <span className="hidden sm:inline">
+                Pase el cursor sobre cada icono de la columna Acciones para ver qué hace.
               </span>
             </div>
 
@@ -493,16 +556,19 @@ export default function ReporteEstimacionesPage() {
                 </div>
                 <p className="text-sm font-semibold text-gray-700">Sin resultados</p>
                 <p className="mt-1 max-w-sm text-xs text-gray-500">
-                  Ajuste los filtros o seleccione un depósito para visualizar estimaciones.
+                  No hay estimaciones con estos criterios. Limpie los filtros o cambie el depósito.
                 </p>
+                <button type="button" className="dms-btn-azul mt-3 px-3 py-1.5 text-xs" onClick={limpiarFiltros}>
+                  Limpiar filtros
+                </button>
               </div>
             ) : (
               <div className="dms-table-scroll">
                 <table className="dms-table dms-table--reporte">
                   <thead>
                     <tr>
-                      <th className="w-8">···</th>
-                      <th>Codigo</th>
+                      <th className="dms-sticky-col dms-sticky-col--1 w-8">···</th>
+                      <th className="dms-sticky-col dms-sticky-col--2">Codigo</th>
                       <th>Semana</th>
                       <th>Año</th>
                       <th>Estado</th>
@@ -535,7 +601,7 @@ export default function ReporteEstimacionesPage() {
                       <th>Análisis de observación</th>
                       <th>Fecha de modificación</th>
                       <th>Usuario de Modificacion</th>
-                      <th>Acciones</th>
+                      <th className="dms-sticky-col dms-sticky-col--right">Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -544,8 +610,13 @@ export default function ReporteEstimacionesPage() {
                       const pendientes = contarComentariosPendientes(row.danos);
                       return (
                         <Fragment key={row.id}>
-                          <tr className={cn(abierta && 'dms-row-selected')}>
-                            <td className="text-center">
+                          <tr
+                            className={cn(abierta && 'dms-row-selected')}
+                            onDoubleClick={() =>
+                              router.push(`/reportes/estimaciones/${row.codigo}`)
+                            }
+                          >
+                            <td className="dms-sticky-col dms-sticky-col--1 text-center">
                               <button
                                 type="button"
                                 className="dms-expander"
@@ -559,7 +630,7 @@ export default function ReporteEstimacionesPage() {
                                 )}
                               </button>
                             </td>
-                            <td>
+                            <td className="dms-sticky-col dms-sticky-col--2">
                               <button
                                 type="button"
                                 className="dms-cell-container-code dms-cell-link"
@@ -584,7 +655,7 @@ export default function ReporteEstimacionesPage() {
                             <td className="text-xs">{row.modeloMaquina || '—'}</td>
                             <td className="text-center">{row.codigoRfs || '—'}</td>
                             <td className="dms-cell-wrap text-[10px]">{row.naviera}</td>
-                            <td>
+                            <td onDoubleClick={(e) => e.stopPropagation()}>
                               <select
                                 className="dms-select dms-select-actividad"
                                 value={row.actividad}
@@ -669,7 +740,12 @@ export default function ReporteEstimacionesPage() {
                               {row.fechaModificacion || '—'}
                             </td>
                             <td className="text-xs">{row.usuarioModificacion || 'N/A'}</td>
-                            <td>{accionesDe(row)}</td>
+                            <td
+                              className="dms-sticky-col dms-sticky-col--right"
+                              onDoubleClick={(e) => e.stopPropagation()}
+                            >
+                              {accionesDe(row)}
+                            </td>
                           </tr>
 
                           {abierta && (

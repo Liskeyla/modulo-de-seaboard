@@ -20,6 +20,7 @@ interface DmsReportLayoutProps {
   infoMessage?: ReactNode;
   filtros: FilterField[];
   onFiltrar: () => void;
+  onLimpiar?: () => void;
   buscador?: {
     termino: string;
     onTerminoChange: (v: string) => void;
@@ -88,6 +89,7 @@ export function DmsReportLayout({
   infoMessage,
   filtros,
   onFiltrar,
+  onLimpiar,
   buscador,
   opcionesRelacionadas,
   children,
@@ -105,6 +107,11 @@ export function DmsReportLayout({
               <button type="button" className="dms-btn-filter" onClick={onFiltrar}>
                 Filtrar
               </button>
+              {onLimpiar && (
+                <button type="button" className="dms-btn-limpiar" onClick={onLimpiar}>
+                  Limpiar filtros
+                </button>
+              )}
             </div>
           </div>
 

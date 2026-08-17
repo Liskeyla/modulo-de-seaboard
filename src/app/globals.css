@@ -120,8 +120,159 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   }
 
-  .dms-btn-filter {
-    @apply flex h-9 w-full items-center justify-center gap-1 rounded-md bg-gradient-to-r from-[#152483] to-[#2a339c] px-2 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm transition-all hover:shadow-md active:scale-[0.99];
+  .dms-btn-limpiar {
+    @apply flex h-9 w-full items-center justify-center gap-1 rounded-md border border-slate-300 bg-white px-2 text-[10px] font-bold uppercase tracking-wide text-slate-600 transition-all hover:bg-slate-50 active:scale-[0.99];
+  }
+
+  .dms-howto {
+    @apply flex flex-col gap-1.5 text-[12px] leading-snug text-[#31708f] sm:flex-row sm:flex-wrap sm:gap-x-5;
+  }
+
+  .dms-howto strong {
+    @apply mr-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#152483] text-[9px] font-extrabold text-white;
+  }
+
+  .dms-kpi-bar {
+    @apply grid grid-cols-2 gap-2 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-3 py-3 sm:grid-cols-4 xl:grid-cols-7;
+  }
+
+  .dms-kpi-card {
+    @apply flex flex-col items-start rounded-lg border border-slate-200 bg-white px-3 py-2 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md;
+  }
+
+  .dms-kpi-card span {
+    @apply text-[10px] font-bold uppercase tracking-wide text-slate-500;
+  }
+
+  .dms-kpi-card strong {
+    @apply mt-0.5 text-xl font-extrabold tabular-nums text-slate-800;
+  }
+
+  .dms-kpi-card--activo {
+    @apply border-[#152483] ring-2 ring-[#152483]/20;
+  }
+
+  .dms-kpi-card--todos strong {
+    @apply text-[#152483];
+  }
+
+  .dms-kpi-card--pendiente strong {
+    @apply text-amber-600;
+  }
+
+  .dms-kpi-card--enviado strong {
+    @apply text-teal-600;
+  }
+
+  .dms-kpi-card--aprobado strong {
+    @apply text-blue-600;
+  }
+
+  .dms-kpi-card--reparado strong {
+    @apply text-emerald-600;
+  }
+
+  .dms-kpi-card--rechazado strong {
+    @apply text-red-600;
+  }
+
+  .dms-kpi-card--alerta strong {
+    @apply text-[#e05310];
+  }
+
+  .dms-resumen-strip {
+    @apply flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-slate-100 bg-white px-4 py-2 text-[11px] text-slate-500;
+  }
+
+  .dms-resumen-strip strong {
+    @apply font-bold text-slate-800;
+  }
+
+  .dms-icon-actions {
+    @apply flex min-w-[7.5rem] flex-wrap items-center gap-1;
+  }
+
+  .dms-icon-action {
+    @apply inline-flex h-7 w-7 items-center justify-center rounded-md border text-white shadow-sm transition-all hover:shadow-md active:scale-95;
+  }
+
+  .dms-icon-action--ver {
+    @apply border-[#e05310] bg-[#f16e26];
+  }
+
+  .dms-icon-action--pdf {
+    @apply border-red-300 bg-[#d9534f];
+  }
+
+  .dms-icon-action--nota {
+    @apply border-sky-300 bg-[#31b0d5];
+  }
+
+  .dms-icon-action--info {
+    @apply border-slate-300 bg-slate-500;
+  }
+
+  .dms-icon-action--enviar {
+    @apply border-fuchsia-300 bg-[#c026d3];
+  }
+
+  .dms-icon-action--reversar {
+    @apply border-amber-300 bg-[#f0ad4e] text-slate-900;
+  }
+
+  .dms-icon-action--log {
+    @apply border-teal-300 bg-teal-600;
+  }
+
+  .dms-icon-action--borrar {
+    @apply border-slate-300 bg-slate-400;
+  }
+
+  .dms-sticky-col {
+    @apply sticky z-[2];
+  }
+
+  .dms-table thead .dms-sticky-col {
+    @apply z-[4] bg-slate-50;
+  }
+
+  .dms-sticky-col--1 {
+    left: 0;
+    min-width: 2.25rem;
+  }
+
+  .dms-sticky-col--2 {
+    left: 2.25rem;
+    min-width: 9.5rem;
+    box-shadow: 4px 0 8px -6px rgba(15, 23, 42, 0.18);
+  }
+
+  .dms-sticky-col--3 {
+    left: 11.75rem;
+    min-width: 7.5rem;
+    box-shadow: 6px 0 10px -6px rgba(15, 23, 42, 0.2);
+  }
+
+  .dms-sticky-col--right {
+    right: 0;
+    min-width: 8rem;
+    box-shadow: -6px 0 10px -6px rgba(15, 23, 42, 0.18);
+  }
+
+  .dms-table tbody td.dms-sticky-col {
+    @apply bg-white;
+  }
+
+  .dms-table tbody tr:nth-child(even) td.dms-sticky-col {
+    @apply bg-slate-50;
+  }
+
+  .dms-table tbody tr:hover td.dms-sticky-col {
+    @apply bg-sky-50;
+  }
+
+  .dms-table tbody tr.dms-row-selected td.dms-sticky-col {
+    @apply bg-[#d9edf7];
   }
 
   .dms-btn-search {
