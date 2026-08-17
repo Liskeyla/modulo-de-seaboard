@@ -304,7 +304,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
             </div>
           </div>
 
-          <div className="grid items-start gap-3 xl:grid-cols-[minmax(0,1fr)_340px]">
+          <div className="grid items-start gap-3 xl:grid-cols-[minmax(0,1fr)_380px]">
             <div className="min-w-0 space-y-3">
               <section className="dms-card">
                 <div className="dms-card-body">
@@ -436,10 +436,9 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   i
                 </span>
                 <div className="min-w-0">
-                  Seleccione un daño para ver a la derecha las fotos de la inspección y la
-                  información de garantía. La columna <strong>Comentarios</strong> guarda la
-                  conversación con liquidaciones y deja la trazabilidad de lo que se debe
-                  modificar.
+                  Seleccione un daño para ver a la derecha la garantía, las fotos de inspección y
+                  la Información del Daño (carga de imágenes, videos, data logs y PDF). La columna{' '}
+                  <strong>Comentarios</strong> guarda la conversación con liquidaciones.
                 </div>
               </div>
 
@@ -498,18 +497,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
             </div>
           </section>
 
-            <InfoDanoPanel
-              estimacion={estimacion}
-              dano={danoSeleccionado}
-              editable={editable}
-              onActualizar={(cambios, resumen) => {
-                if (!danoSeleccionado) return;
-                cambiarDano(danoSeleccionado, cambios, resumen);
-              }}
-              onVerFotos={(d) => setDialogo({ tipo: 'FOTOS', danoId: d.id })}
-              onVerVideo={(d) => setDialogo({ tipo: 'VIDEO', dano: d })}
-            />
-
             <section className="dms-card">
               <header className="dms-card-header">
                 <ClipboardList className="h-3.5 w-3.5" /> Últimos movimientos
@@ -543,6 +530,10 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
             </section>
             </div>
 
+            <aside
+              id="panel-derecho-estimacion"
+              className="space-y-3 xl:sticky xl:top-3 xl:max-h-[calc(100vh-1.25rem)] xl:overflow-y-auto"
+            >
             <InfoLateralCards
               estimacion={estimacion}
               danoSeleccionado={danoSeleccionado}
@@ -569,6 +560,18 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 toast('Foto importada a la línea de daño.', 'success');
               }}
             />
+            <InfoDanoPanel
+              estimacion={estimacion}
+              dano={danoSeleccionado}
+              editable={editable}
+              onActualizar={(cambios, resumen) => {
+                if (!danoSeleccionado) return;
+                cambiarDano(danoSeleccionado, cambios, resumen);
+              }}
+              onVerFotos={(d) => setDialogo({ tipo: 'FOTOS', danoId: d.id })}
+              onVerVideo={(d) => setDialogo({ tipo: 'VIDEO', dano: d })}
+            />
+            </aside>
           </div>
         </div>
       </main>

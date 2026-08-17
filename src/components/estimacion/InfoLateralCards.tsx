@@ -83,7 +83,7 @@ export function InfoLateralCards({
   }
 
   return (
-    <div id="panel-derecho-estimacion" className="space-y-3 xl:sticky xl:top-3">
+    <div className="space-y-3">
       <section className="dms-card">
         <header className="dms-card-header">
           <Briefcase className="h-3.5 w-3.5" /> Información de Garantía
