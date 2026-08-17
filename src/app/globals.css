@@ -1089,4 +1089,105 @@
   .dms-lightbox-nav {
     @apply absolute top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-2.5 text-white transition-colors hover:bg-white/25;
   }
+
+  /* ── Panel Información del Daño (carga de evidencias) ───────────── */
+  .dms-file-native {
+    @apply block w-full text-[11px] text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-[11px] file:font-semibold file:text-slate-700 hover:file:bg-slate-200;
+  }
+
+  .dms-upload-btn {
+    @apply inline-flex min-h-[2.5rem] items-center justify-center gap-1 rounded-md px-2 py-1.5 text-center text-[10px] font-bold leading-tight text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .dms-upload-btn--img {
+    @apply bg-[#31b0d5] hover:bg-[#269abc];
+  }
+
+  .dms-upload-btn--video {
+    @apply bg-[#5cb85c] hover:bg-[#449d44];
+  }
+
+  .dms-upload-btn--log {
+    @apply bg-[#6b7280] hover:bg-[#4b5563];
+  }
+
+  .dms-upload-btn--pdf {
+    @apply bg-[#14b8a6] hover:bg-[#0f9b8e];
+  }
+
+  .dms-zip-btn {
+    @apply inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-[#3b82f6] px-3 py-2 text-[11px] font-bold text-white shadow-sm transition-all hover:bg-[#2563eb] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .dms-anexo-grid {
+    @apply mt-2 grid grid-cols-2 gap-1.5 sm:grid-cols-3;
+  }
+
+  .dms-anexo-thumb {
+    @apply relative overflow-hidden rounded-md border border-slate-200 bg-slate-100;
+  }
+
+  .dms-anexo-thumb img {
+    @apply h-20 w-full object-cover transition-transform duration-200 group-hover:scale-105;
+  }
+
+  .dms-anexo-thumb .dms-foto-tag {
+    @apply absolute bottom-1 left-1;
+  }
+
+  .dms-archivo-grupo {
+    @apply rounded-lg border border-slate-200 bg-slate-50/80 p-2.5;
+  }
+
+  .dms-archivo-grupo > p {
+    @apply mb-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-600;
+  }
+
+  .dms-archivo-accion {
+    @apply inline-flex w-full items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-[10px] font-bold text-white shadow-sm transition-all hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .dms-archivo-accion--ver {
+    @apply bg-[#14b8a6] hover:bg-[#0f9b8e];
+  }
+
+  .dms-archivo-accion--bajar {
+    @apply bg-[#6b7280] hover:bg-[#4b5563];
+  }
+
+  .dms-archivo-accion--borrar {
+    @apply bg-[#d9534f] hover:bg-[#c9302c];
+  }
+
+  .dms-insp-grid {
+    @apply grid grid-cols-2 gap-2;
+  }
+
+  .dms-insp-foto {
+    @apply overflow-hidden rounded-md border border-slate-200 bg-white;
+  }
+
+  .dms-insp-foto-img {
+    @apply relative block w-full;
+  }
+
+  .dms-insp-foto-img img {
+    @apply h-28 w-full object-cover;
+  }
+
+  .dms-insp-foto-fecha {
+    @apply pointer-events-none absolute inset-x-0 bottom-0 bg-black/45 px-1 py-0.5 text-center text-[9px] font-semibold text-white;
+  }
+
+  .dms-insp-importar {
+    @apply flex w-full items-center justify-center gap-1 bg-[#3b82f6] px-2 py-1.5 text-[10px] font-bold text-white transition-colors hover:bg-[#2563eb] disabled:cursor-default disabled:opacity-80;
+  }
+
+  .dms-insp-importar--ok {
+    @apply bg-emerald-600 hover:bg-emerald-600;
+  }
+
+  .dms-archivo-accion--reversar {
+    @apply bg-[#3b82f6] hover:bg-[#2563eb];
+  }
 }

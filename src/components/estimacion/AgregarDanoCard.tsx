@@ -113,6 +113,7 @@ export function AgregarDanoCard({ editable, seccionSugerida, onAgregar }: Agrega
       tieneVideo: false,
       seccion: tarifa.seccion,
       fotos,
+      archivos: [],
       comentarios: [],
     });
     limpiar();

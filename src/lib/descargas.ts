@@ -1,4 +1,4 @@
-import type { DanoEstimacion, Estimacion, FotoDano } from '@/types/estimacion';
+import type { ArchivoDano, DanoEstimacion, Estimacion, FotoDano } from '@/types/estimacion';
 
 const MONEDA = (n: number) => `$${n.toFixed(2)}`;
 
@@ -90,10 +90,61 @@ export async function descargarFotosZip(est: Estimacion, grupo: GrupoFotos): Pro
   return fotos.length;
 }
 
+/** Empaqueta un listado concreto de fotos (por ejemplo, las de una sola línea de daño). */
+export async function descargarFotosListaZip(
+  fotos: FotoDano[],
+  codigo: string,
+  contenedor: string
+): Promise<number> {
+  if (fotos.length === 0) return 0;
+  const { default: JSZip } = await import('jszip');
+  const zip = new JSZip();
+  const carpeta = zip.folder(`Fotos_${codigo}`) ?? zip;
+  let indice = 1;
+  const usados = new Set<string>();
+
+  await Promise.all(
+    fotos.map(async (foto) => {
+      const res = await fetch(foto.url);
+      if (!res.ok) return;
+      const buffer = await res.arrayBuffer();
+      const base = foto.descripcion.replace(/[^\w.\-]+/g, '_') || `foto_${indice}.jpg`;
+      const ext = foto.url.match(/\.\w+$/)?.[0] ?? '.jpg';
+      let nombre = base.includes('.') ? base : `${base}${ext}`;
+      while (usados.has(nombre)) {
+        nombre = nombre.replace(/(\.\w+)$/, `_${indice}$1`);
+        indice += 1;
+      }
+      usados.add(nombre);
+      carpeta.file(nombre, buffer);
+    })
+  );
+
+  const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+  descargarBlob(blob, `Fotos_${contenedor}_${codigo}.zip`);
+  return fotos.length;
+}
+
+export function descargarDesdeUrl(url: string, nombre: string) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = nombre;
+  a.target = '_blank';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
 // ------------------------------------------------------------------ data log
 
-/** Genera el data log del reefer como CSV, tal como lo entrega el DMS de producción. */
-export function descargarDataLog(est: Estimacion) {
+export function nombreDataLog(contenedor: string, fechaElaboracion: string) {
+  const m = fechaElaboracion.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  const yymmdd = m ? `${m[3].slice(2)}${m[2]}${m[1]}` : '260817';
+  return `${contenedor}_${yymmdd}A.V1a`;
+}
+
+/** CSV del data log de máquina, listo para descargar o previsualizar. */
+export function construirDataLogCsv(est: Estimacion): string {
   const filas: string[] = [
     'Fecha;Hora;Setpoint (C);Supply (C);Return (C);Ambiente (C);Humedad (%);Estado;Alarma',
   ];
@@ -133,12 +184,42 @@ export function descargarDataLog(est: Estimacion) {
     '',
   ];
 
-  // El BOM permite que Excel reconozca los acentos al abrir el CSV.
-  const blob = new Blob([`\ufeff${encabezado.join('\r\n')}${filas.join('\r\n')}`], {
-    type: 'text/csv;charset=utf-8',
-  });
-  descargarBlob(blob, `DataLog_${est.contenedor}_${est.codigo}.csv`);
-  return filas.length - 1;
+  return `${encabezado.join('\r\n')}${filas.join('\r\n')}`;
+}
+
+/** Genera el data log del reefer como CSV, tal como lo entrega el DMS de producción. */
+export function descargarDataLog(est: Estimacion, nombre?: string) {
+  const csv = construirDataLogCsv(est);
+  const blob = new Blob([`\ufeff${csv}`], { type: 'text/csv;charset=utf-8' });
+  descargarBlob(blob, nombre ?? `DataLog_${est.contenedor}_${est.codigo}.csv`);
+  return csv.split('\r\n').length - 8;
+}
+
+export async function descargarDataLogsZip(
+  est: Estimacion,
+  archivos: ArchivoDano[]
+): Promise<number> {
+  const logs = archivos.filter((a) => a.clase === 'DATALOG');
+  if (logs.length === 0) return 0;
+
+  const { default: JSZip } = await import('jszip');
+  const zip = new JSZip();
+
+  await Promise.all(
+    logs.map(async (a) => {
+      if (a.sintetico || !a.url) {
+        zip.file(`${a.nombre}.csv`, `\ufeff${construirDataLogCsv(est)}`);
+        return;
+      }
+      const res = await fetch(a.url);
+      if (!res.ok) return;
+      zip.file(a.nombre, await res.arrayBuffer());
+    })
+  );
+
+  const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+  descargarBlob(blob, `DataLogs_${est.contenedor}_${est.codigo}.zip`);
+  return logs.length;
 }
 
 // ------------------------------------------------------------------ informes

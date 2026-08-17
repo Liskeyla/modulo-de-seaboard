@@ -35,6 +35,7 @@ import { DescargasMenu } from '@/components/estimacion/DescargasMenu';
 import { EditarDanoModal } from '@/components/estimacion/EditarDanoModal';
 import { GaleriaFotosModal } from '@/components/estimacion/GaleriaFotosModal';
 import { HistorialActividadModal } from '@/components/estimacion/HistorialActividadModal';
+import { InfoDanoPanel } from '@/components/estimacion/InfoDanoPanel';
 import { InfoLateralCards } from '@/components/estimacion/InfoLateralCards';
 import { InformePreviewModal } from '@/components/estimacion/InformePreviewModal';
 import { ListadoDanosTable } from '@/components/estimacion/ListadoDanosTable';
@@ -303,7 +304,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
             </div>
           </div>
 
-          <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="grid items-start gap-3 xl:grid-cols-[minmax(0,1fr)_340px]">
             <div className="min-w-0 space-y-3">
               <section className="dms-card">
                 <div className="dms-card-body">
@@ -424,17 +425,8 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   )}
                 </div>
               </section>
-            </div>
 
-            <InfoLateralCards
-              estimacion={estimacion}
-              danoSeleccionado={danoSeleccionado}
-              onVerFotos={(d) => setDialogo({ tipo: 'FOTOS', danoId: d.id })}
-              onVerComentarios={(d) => setDialogo({ tipo: 'COMENTARIOS', danoId: d.id })}
-            />
-          </div>
-
-          <section className="dms-card">
+            <section className="dms-card min-w-0">
             <header className="dms-card-header">
               <ListChecks className="h-3.5 w-3.5" /> Listado de Daños
             </header>
@@ -444,9 +436,10 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   i
                 </span>
                 <div className="min-w-0">
-                  Seleccione un Daño para poder ver información de la Tarifa e Información
-                  adicional. La columna <strong>Comentarios</strong> guarda la conversación con
-                  liquidaciones y deja la trazabilidad de lo que se debe modificar.
+                  Seleccione un daño para ver a la derecha las fotos de la inspección y la
+                  información de garantía. La columna <strong>Comentarios</strong> guarda la
+                  conversación con liquidaciones y deja la trazabilidad de lo que se debe
+                  modificar.
                 </div>
               </div>
 
@@ -454,7 +447,16 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 danos={estimacion.danos}
                 seleccionadoId={danoSelId}
                 editable={editable}
-                onSeleccionar={(d) => setDanoSelId(d.id)}
+                onSeleccionar={(d) => {
+                  setDanoSelId(d.id);
+                  if (typeof window !== 'undefined' && window.matchMedia('(max-width: 1279px)').matches) {
+                    window.setTimeout(() => {
+                      document
+                        .getElementById('panel-derecho-estimacion')
+                        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 50);
+                  }
+                }}
                 onAplicaChange={(d, aplica: AplicaDano) =>
                   cambiarDano(
                     d,
@@ -496,37 +498,78 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
             </div>
           </section>
 
-          <section className="dms-card">
-            <header className="dms-card-header">
-              <ClipboardList className="h-3.5 w-3.5" /> Últimos movimientos
-            </header>
-            <div className="dms-card-body">
-              <ul className="space-y-2">
-                {estimacion.auditoria
-                  .slice(-4)
-                  .reverse()
-                  .map((ev) => (
-                    <li key={ev.id} className="dms-nota-item">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-[11px] font-bold uppercase tracking-wide text-rfs-700">
-                          {ev.accion}
-                        </span>
-                        <span className="dms-chip-user">{ev.usuario || 'sistema'}</span>
-                        <span className="text-[10px] tabular-nums text-gray-400">{ev.fecha}</span>
-                      </div>
-                      <p className="mt-1 text-xs leading-relaxed text-gray-600">{ev.detalle}</p>
-                    </li>
-                  ))}
-              </ul>
-              <button
-                type="button"
-                className="dms-btn-action dms-btn-info mt-3"
-                onClick={() => setDialogo({ tipo: 'HISTORIAL' })}
-              >
-                <ClipboardList className="h-3 w-3" /> Ver historial completo
-              </button>
+            <InfoDanoPanel
+              estimacion={estimacion}
+              dano={danoSeleccionado}
+              editable={editable}
+              onActualizar={(cambios, resumen) => {
+                if (!danoSeleccionado) return;
+                cambiarDano(danoSeleccionado, cambios, resumen);
+              }}
+              onVerFotos={(d) => setDialogo({ tipo: 'FOTOS', danoId: d.id })}
+              onVerVideo={(d) => setDialogo({ tipo: 'VIDEO', dano: d })}
+            />
+
+            <section className="dms-card">
+              <header className="dms-card-header">
+                <ClipboardList className="h-3.5 w-3.5" /> Últimos movimientos
+              </header>
+              <div className="dms-card-body">
+                <ul className="space-y-2">
+                  {estimacion.auditoria
+                    .slice(-4)
+                    .reverse()
+                    .map((ev) => (
+                      <li key={ev.id} className="dms-nota-item">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-[11px] font-bold uppercase tracking-wide text-rfs-700">
+                            {ev.accion}
+                          </span>
+                          <span className="dms-chip-user">{ev.usuario || 'sistema'}</span>
+                          <span className="text-[10px] tabular-nums text-gray-400">{ev.fecha}</span>
+                        </div>
+                        <p className="mt-1 text-xs leading-relaxed text-gray-600">{ev.detalle}</p>
+                      </li>
+                    ))}
+                </ul>
+                <button
+                  type="button"
+                  className="dms-btn-action dms-btn-info mt-3"
+                  onClick={() => setDialogo({ tipo: 'HISTORIAL' })}
+                >
+                  <ClipboardList className="h-3 w-3" /> Ver historial completo
+                </button>
+              </div>
+            </section>
             </div>
-          </section>
+
+            <InfoLateralCards
+              estimacion={estimacion}
+              danoSeleccionado={danoSeleccionado}
+              editable={editable}
+              onGuardarGarantia={(cambios, resumen) => {
+                if (!danoSeleccionado) return;
+                cambiarDano(danoSeleccionado, cambios, resumen);
+              }}
+              onImportarFoto={(foto) => {
+                if (!danoSeleccionado) return;
+                if (foto.importada) {
+                  toast('Esta foto ya fue importada a la línea.', 'info');
+                  return;
+                }
+                cambiarDano(
+                  danoSeleccionado,
+                  {
+                    fotos: danoSeleccionado.fotos.map((f) =>
+                      f.id === foto.id ? { ...f, importada: true } : f
+                    ),
+                  },
+                  `Línea ${danoSeleccionado.linea} · foto importada desde inspección`
+                );
+                toast('Foto importada a la línea de daño.', 'success');
+              }}
+            />
+          </div>
         </div>
       </main>
 

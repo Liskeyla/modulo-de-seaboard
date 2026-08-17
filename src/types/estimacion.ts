@@ -54,6 +54,23 @@ export interface FotoDano {
   tipo: 'DANO' | 'REPARADO';
   descripcion: string;
   fecha: string;
+  /** La foto de inspección ya fue importada a la línea del estimado. */
+  importada?: boolean;
+}
+
+/** Clasificación del adjunto, igual que el combo "Tipo Archivo" del DMS. */
+export type GrupoArchivo = 'ESTIMACION' | 'REPARADO';
+export type ClaseArchivo = 'IMAGEN' | 'VIDEO' | 'DATALOG' | 'PDF';
+
+export interface ArchivoDano {
+  id: string;
+  url: string;
+  clase: ClaseArchivo;
+  grupo: GrupoArchivo;
+  nombre: string;
+  fecha: string;
+  /** Data log de demostración generado al vuelo; no hay blob persistido. */
+  sintetico?: boolean;
 }
 
 export interface DanoEstimacion {
@@ -68,6 +85,9 @@ export interface DanoEstimacion {
   newMetRep: string;
   serieAnterior: string;
   serieEntregado: string;
+  fechaAceptacion?: string;
+  ncGenerada?: string;
+  montoNc?: number;
   largo: number;
   ancho: number;
   area: number;
@@ -86,6 +106,9 @@ export interface DanoEstimacion {
   /** Marca la línea como estructural (BOX) o de máquina, igual que en el DMS de producción. */
   seccion: 'MAQUINA' | 'ESTRUCTURAL';
   fotos: FotoDano[];
+  /** Videos, data logs y PDF. Si es undefined, el panel muestra un data log de ejemplo. */
+  archivos?: ArchivoDano[];
+  archivosReversados?: ArchivoDano[];
   comentarios: ComentarioDano[];
 }
 

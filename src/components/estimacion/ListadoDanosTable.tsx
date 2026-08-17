@@ -115,7 +115,7 @@ export function ListadoDanosTable({
             return (
               <tr
                 key={d.id}
-                className={cn(activo && 'dms-row-selected')}
+                className={cn('cursor-pointer', activo && 'dms-row-selected')}
                 onClick={() => onSeleccionar(d)}
               >
                 <td className="text-center">
