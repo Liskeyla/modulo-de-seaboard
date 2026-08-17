@@ -1,0 +1,203 @@
+/**
+ * Catálogo de tarifas usado por el bloque "Agregar Daño".
+ * Los costos son unitarios: el formulario los multiplica por la cantidad.
+ */
+export interface Tarifa {
+  codigo: string;
+  comp: string;
+  descripcion: string;
+  dano: string;
+  ubicacion: string;
+  metRep: string;
+  medida: string;
+  horasHombre: number;
+  costoHoraHombre: number;
+  costoMaterial: number;
+  seccion: 'MAQUINA' | 'ESTRUCTURAL';
+}
+
+export const TARIFAS: Tarifa[] = [
+  {
+    codigo: 'T-MQ-001',
+    comp: 'SVL-R54',
+    descripcion: 'Reajuste de bushing en panel de control de drive',
+    dano: 'RN-REPAIR NECESSARY',
+    ubicacion: 'mzznn',
+    metRep: 'RP',
+    medida: 'UN',
+    horasHombre: 0.5,
+    costoHoraHombre: 20,
+    costoMaterial: 0,
+    seccion: 'MAQUINA',
+  },
+  {
+    codigo: 'T-MQ-002',
+    comp: 'SEN-AMB',
+    descripcion: 'Reemplazo de sensor de ambiente',
+    dano: 'ER-ERROR MARK',
+    ubicacion: 'senrb',
+    metRep: 'RN',
+    medida: 'UN',
+    horasHombre: 0.75,
+    costoHoraHombre: 6.75,
+    costoMaterial: 48.9,
+    seccion: 'MAQUINA',
+  },
+  {
+    codigo: 'T-MQ-003',
+    comp: 'CTP-CTL',
+    descripcion: 'Reemplazo de tarjeta controladora',
+    dano: 'CN-CONTROLLER FAIL',
+    ubicacion: 'ctrlp',
+    metRep: 'RP',
+    medida: 'UN',
+    horasHombre: 2.1,
+    costoHoraHombre: 18.9,
+    costoMaterial: 260.6,
+    seccion: 'MAQUINA',
+  },
+  {
+    codigo: 'T-MQ-004',
+    comp: 'CMP-SCR',
+    descripcion: 'Cambio de compresor scroll',
+    dano: 'NF-NOT FUNCTIONING',
+    ubicacion: 'compz',
+    metRep: 'RP',
+    medida: 'UN',
+    horasHombre: 6,
+    costoHoraHombre: 54,
+    costoMaterial: 1240,
+    seccion: 'MAQUINA',
+  },
+  {
+    codigo: 'T-MQ-005',
+    comp: 'FAN-EVA',
+    descripcion: 'Reemplazo de motor de ventilador evaporador',
+    dano: 'BR-BROKEN',
+    ubicacion: 'evapf',
+    metRep: 'RN',
+    medida: 'UN',
+    horasHombre: 1.5,
+    costoHoraHombre: 13.5,
+    costoMaterial: 186.4,
+    seccion: 'MAQUINA',
+  },
+  {
+    codigo: 'T-MQ-006',
+    comp: 'CBL-460',
+    descripcion: 'Empalme de cable de fuerza 460V con splice',
+    dano: 'CU-CUT',
+    ubicacion: 'cblpw',
+    metRep: 'RP',
+    medida: 'MT',
+    horasHombre: 1.2,
+    costoHoraHombre: 10.8,
+    costoMaterial: 32.5,
+    seccion: 'MAQUINA',
+  },
+  {
+    codigo: 'T-MQ-007',
+    comp: 'PTI-CTL',
+    descripcion: 'Ejecución de Short PTI y pre-cool',
+    dano: 'SI-SHORT INSPECTION',
+    ubicacion: 'ptipn',
+    metRep: 'MR',
+    medida: 'UN',
+    horasHombre: 0,
+    costoHoraHombre: 0,
+    costoMaterial: 15,
+    seccion: 'MAQUINA',
+  },
+  {
+    codigo: 'T-BX-001',
+    comp: 'PNL-LAT',
+    descripcion: 'Parche overlap en panel lateral',
+    dano: 'HO-HOLE',
+    ubicacion: 'LX7N',
+    metRep: 'PX',
+    medida: 'CM',
+    horasHombre: 2.45,
+    costoHoraHombre: 24.5,
+    costoMaterial: 37.23,
+    seccion: 'ESTRUCTURAL',
+  },
+  {
+    codigo: 'T-BX-002',
+    comp: 'PSO-TBL',
+    descripcion: 'Reemplazo de tabla de piso',
+    dano: 'BR-BROKEN',
+    ubicacion: 'FL2C',
+    metRep: 'RN',
+    medida: 'CM',
+    horasHombre: 3.2,
+    costoHoraHombre: 28.8,
+    costoMaterial: 64.15,
+    seccion: 'ESTRUCTURAL',
+  },
+  {
+    codigo: 'T-BX-003',
+    comp: 'PRT-DER',
+    descripcion: 'Lavado simple de puerta derecha',
+    dano: 'DY-DIRTY',
+    ubicacion: 'DR1R',
+    metRep: 'WW',
+    medida: 'UN',
+    horasHombre: 0,
+    costoHoraHombre: 0,
+    costoMaterial: 10,
+    seccion: 'ESTRUCTURAL',
+  },
+  {
+    codigo: 'T-BX-004',
+    comp: 'TCH-PNL',
+    descripcion: 'Enderezado de panel de techo',
+    dano: 'DT-DENT',
+    ubicacion: 'TX12',
+    metRep: 'PX',
+    medida: 'CM',
+    horasHombre: 3.22,
+    costoHoraHombre: 32.2,
+    costoMaterial: 44.68,
+    seccion: 'ESTRUCTURAL',
+  },
+  {
+    codigo: 'T-BX-005',
+    comp: 'ESQ-SUP',
+    descripcion: 'Reemplazo de esquinero superior',
+    dano: 'CR-CRACKED',
+    ubicacion: 'CP4L',
+    metRep: 'RN',
+    medida: 'UN',
+    horasHombre: 4.5,
+    costoHoraHombre: 40.5,
+    costoMaterial: 128.9,
+    seccion: 'ESTRUCTURAL',
+  },
+  {
+    codigo: 'T-BX-006',
+    comp: 'RIL-TBL',
+    descripcion: 'Endereza de riel de tabla',
+    dano: 'BE-BENT',
+    ubicacion: 'TR3C',
+    metRep: 'PX',
+    medida: 'CM',
+    horasHombre: 1.8,
+    costoHoraHombre: 16.2,
+    costoMaterial: 22.4,
+    seccion: 'ESTRUCTURAL',
+  },
+];
+
+export const ALMACENES_SAP = [
+  'RFS1-BOD01 · Bodega principal RFS 1',
+  'RFS1-BOD02 · Repuestos de máquina RFS 1',
+  'RFS3-BOD01 · Bodega principal RFS 3',
+  'RFS3-BOD04 · Materiales estructurales RFS 3',
+];
+
+export const ITINERARIOS_SAP = [
+  'IT-2026-0834 · SEABOARD OCEAN V-238N',
+  'IT-2026-0835 · SEABOARD GEMINI V-142S',
+  'IT-2026-0841 · ONE MADRID V-311N',
+  'IT-2026-0847 · SEABOARD PACER V-205N',
+];

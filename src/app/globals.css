@@ -609,4 +609,484 @@
   .dms-toast--info {
     @apply border-sky-200 bg-sky-50 text-sky-900;
   }
+
+  /* ── Reporte: columnas de producción ─────────────────────────────── */
+  .dms-table--reporte th {
+    @apply sticky top-0 z-10;
+  }
+
+  .dms-cell-link {
+    @apply cursor-pointer text-left underline-offset-2 transition-colors hover:text-[#f16e26] hover:underline;
+  }
+
+  .dms-expander {
+    @apply inline-flex h-6 w-6 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 transition-colors hover:border-[#152483] hover:text-[#152483];
+  }
+
+  .dms-pendiente-dot {
+    @apply ml-1 inline-block h-1.5 w-1.5 rounded-full bg-[#f16e26] align-middle;
+    box-shadow: 0 0 0 2px rgba(241, 110, 38, 0.2);
+  }
+
+  .dms-select-actividad {
+    @apply h-8 min-w-[5.5rem] px-1.5 text-[10px] font-bold text-[#152483];
+  }
+
+  .dms-si-no {
+    @apply inline-flex min-w-[2rem] justify-center rounded-md px-1.5 py-0.5 text-[10px] font-bold;
+  }
+
+  .dms-si-no--si {
+    @apply bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200;
+  }
+
+  .dms-si-no--no {
+    @apply bg-slate-100 text-slate-500 ring-1 ring-slate-200;
+  }
+
+  .dms-row-detalle > td {
+    @apply whitespace-normal bg-[#eef1fb]/60 px-3 py-2;
+  }
+
+  .dms-detalle-inline {
+    @apply flex flex-wrap items-center gap-x-6 gap-y-2;
+  }
+
+  .dms-detalle-inline > div {
+    @apply flex flex-col;
+  }
+
+  .dms-detalle-inline > div > span {
+    @apply text-[9px] font-bold uppercase tracking-wider text-slate-400;
+  }
+
+  .dms-detalle-inline > div > strong {
+    @apply text-[11px] font-bold text-[#152483];
+  }
+
+  .dms-detalle-inline-acciones {
+    @apply ml-auto flex flex-row items-center gap-1.5;
+  }
+
+  .dms-btn-nota {
+    @apply border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100;
+  }
+
+  .dms-btn-datalog {
+    @apply border-teal-200 bg-teal-50 text-teal-700 hover:bg-teal-100;
+  }
+
+  .dms-btn-enviar-sm {
+    @apply border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700 hover:bg-fuchsia-100;
+  }
+
+  .dms-danos-total td {
+    @apply whitespace-nowrap border-t-2 border-[#152483]/20 bg-[#eef1fb] px-3 py-2 text-[11px] font-extrabold text-[#152483];
+  }
+
+  /* ── Detalle del estimado ────────────────────────────────────────── */
+  .dms-detalle-hero {
+    @apply flex flex-wrap items-center justify-between gap-3 rounded-xl bg-gradient-to-r from-[#152483] via-[#1c2b96] to-[#2a339c] px-4 py-3 shadow-md;
+  }
+
+  .dms-detalle-hero h1 {
+    @apply truncate text-lg font-extrabold tracking-tight text-white md:text-xl;
+  }
+
+  .dms-detalle-hero p {
+    @apply mt-0.5 truncate text-[11px] font-semibold uppercase tracking-wider text-white/70;
+  }
+
+  .dms-hero-chip {
+    @apply inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white ring-1 ring-inset ring-white/20;
+  }
+
+  .dms-hero-chip--money {
+    @apply bg-white text-[#152483] ring-white;
+  }
+
+  .dms-hero-chip--alerta {
+    @apply bg-[#f16e26] text-white ring-[#f16e26];
+  }
+
+  .dms-detalle-toolbar {
+    @apply flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm;
+  }
+
+  .dms-btn-regresar {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-slate-800 bg-gradient-to-r from-slate-800 to-slate-900 px-3 py-2 text-xs font-bold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98];
+  }
+
+  .dms-btn-azul {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-[#3f4bb8] bg-gradient-to-r from-[#4a57c7] to-[#3f4bb8] px-3 py-2 text-xs font-bold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98];
+  }
+
+  .dms-btn-teal {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-[#0f9b8e] bg-gradient-to-r from-[#14b8a6] to-[#0f9b8e] px-3 py-2 text-xs font-bold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98];
+  }
+
+  .dms-btn-enviar {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-[#a21caf] bg-gradient-to-r from-[#c026d3] to-[#a21caf] px-4 py-2 text-xs font-bold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .dms-aviso-espera {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-[11px] font-semibold text-teal-700;
+  }
+
+  .dms-btn-descargas {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-gradient-to-b from-white to-slate-100 px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition-all hover:shadow-md active:scale-[0.98];
+  }
+
+  .dms-descargas-menu {
+    @apply absolute right-0 z-30 mt-1 w-[22rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-2xl;
+  }
+
+  .dms-descargas-item {
+    @apply flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-slate-700 transition-colors hover:bg-[#eef1fb] disabled:cursor-wait disabled:opacity-60;
+  }
+
+  .dms-descargas-item--sep {
+    @apply mt-1 border-t border-slate-100 pt-2.5;
+  }
+
+  .dms-descargas-count {
+    @apply shrink-0 rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-slate-500;
+  }
+
+  /* ── Tarjetas del detalle ────────────────────────────────────────── */
+  .dms-card {
+    @apply overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm;
+  }
+
+  .dms-card-header {
+    @apply flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-slate-600;
+  }
+
+  .dms-card-body {
+    @apply p-3;
+  }
+
+  .dms-info-row {
+    @apply flex items-baseline justify-between gap-2 border-b border-dashed border-slate-100 py-1 text-[11px] last:border-0;
+  }
+
+  .dms-info-row > span {
+    @apply shrink-0 text-slate-400;
+  }
+
+  .dms-info-row > strong {
+    @apply truncate text-right font-semibold text-slate-700;
+  }
+
+  .dms-mini-dato {
+    @apply rounded-lg bg-slate-50 px-2.5 py-1.5;
+  }
+
+  .dms-mini-dato dt {
+    @apply text-[9px] font-bold uppercase tracking-wider text-slate-400;
+  }
+
+  .dms-mini-dato dd {
+    @apply mt-0.5 truncate text-[11px] font-bold text-slate-700;
+  }
+
+  .dms-mini-badge {
+    @apply inline-flex items-center rounded bg-[#eef1fb] px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-[#152483];
+  }
+
+  .dms-chip-user {
+    @apply inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600;
+  }
+
+  .dms-nota-item {
+    @apply rounded-lg border border-slate-100 bg-slate-50/70 px-2.5 py-2;
+  }
+
+  .dms-resumen-valores {
+    @apply mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg bg-slate-50 px-3 py-2 text-[11px] text-slate-500;
+  }
+
+  .dms-resumen-valores strong {
+    @apply ml-1 tabular-nums text-slate-800;
+  }
+
+  .dms-resumen-total {
+    @apply ml-auto rounded-md bg-[#152483] px-2.5 py-1 text-white;
+  }
+
+  .dms-resumen-total strong {
+    @apply text-white;
+  }
+
+  /* ── Formularios compactos ───────────────────────────────────────── */
+  .dms-input-sm {
+    @apply h-9 w-full rounded-md border border-[#c6c6c6] bg-white px-2 text-[11px] text-slate-800 shadow-sm outline-none transition-colors placeholder:text-slate-400 focus:border-[#f16e26] focus:ring-2 focus:ring-[#f16e26]/15 disabled:bg-slate-50 disabled:text-slate-400;
+  }
+
+  .dms-input-inline {
+    @apply h-8 w-36 rounded-md border border-slate-200 bg-white px-2 text-[11px] text-slate-700 outline-none transition-colors placeholder:text-slate-300 focus:border-[#f16e26] focus:ring-2 focus:ring-[#f16e26]/15 disabled:border-transparent disabled:bg-transparent;
+  }
+
+  .dms-file-btn {
+    @apply flex h-9 w-full items-center gap-1.5 rounded-md border border-dashed border-[#c6c6c6] bg-slate-50 px-2 text-[11px] font-semibold text-slate-600 transition-colors hover:border-[#f16e26] hover:text-[#f16e26] disabled:opacity-50;
+  }
+
+  .dms-autocomplete {
+    @apply absolute left-0 right-0 z-30 mt-1 max-h-64 overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-2xl;
+  }
+
+  .dms-autocomplete-item {
+    @apply block w-full px-3 py-1.5 text-left text-[11px] transition-colors hover:bg-[#eef1fb];
+  }
+
+  .dms-tarifa-preview {
+    @apply mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-lg border border-[#bce8f1] bg-[#d9edf7]/60 px-3 py-2 text-[11px] text-[#31708f];
+  }
+
+  /* ── Listado de daños ───────────────────────────────────────────── */
+  .dms-table--danos td {
+    @apply px-2 py-2 text-[11px];
+  }
+
+  .dms-table--danos th {
+    @apply px-2 py-2 text-center text-[10px];
+  }
+
+  .dms-dano-check {
+    @apply inline-flex transition-colors;
+  }
+
+  .dms-dano-check--on {
+    @apply text-emerald-500;
+  }
+
+  .dms-dano-check--off {
+    @apply text-slate-200;
+  }
+
+  .dms-select-aplica {
+    @apply h-8 min-w-[8.5rem] px-1.5 text-[10px] font-bold;
+  }
+
+  .dms-aplica--linea {
+    @apply border-blue-200 bg-blue-50 text-blue-700;
+  }
+
+  .dms-aplica--dueno {
+    @apply border-purple-200 bg-purple-50 text-purple-700;
+  }
+
+  .dms-aplica--pendiente {
+    @apply border-amber-200 bg-amber-50 text-amber-700;
+  }
+
+  .dms-aplica--rechazado {
+    @apply border-red-200 bg-red-50 text-red-700;
+  }
+
+  .dms-aplica--na {
+    @apply border-slate-200 bg-slate-50 text-slate-500;
+  }
+
+  .dms-icon-btn {
+    @apply inline-flex h-7 items-center justify-center rounded-md px-1.5 text-white shadow-sm transition-all hover:shadow-md active:scale-95 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .dms-icon-btn--rojo {
+    @apply bg-[#d9534f] hover:bg-[#c9302c];
+  }
+
+  .dms-icon-btn--azul {
+    @apply bg-[#3f4bb8] hover:bg-[#2a339c];
+  }
+
+  .dms-icon-btn--indigo {
+    @apply bg-[#5f5fd6] hover:bg-[#4a4ac0];
+  }
+
+  .dms-icon-btn--verde {
+    @apply bg-[#5cb85c] hover:bg-[#449d44];
+  }
+
+  .dms-btn-comentarios {
+    @apply relative inline-flex h-7 items-center gap-1 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-bold text-slate-500 transition-all hover:border-[#152483] hover:text-[#152483];
+  }
+
+  .dms-btn-comentarios--pendiente {
+    @apply border-[#f16e26] bg-[#fff5ed] text-[#e05310];
+  }
+
+  .dms-btn-comentarios--ok {
+    @apply border-emerald-200 bg-emerald-50 text-emerald-700;
+  }
+
+  .dms-btn-comentarios-dot {
+    @apply absolute -right-1 -top-1 h-2 w-2 rounded-full bg-[#f16e26];
+  }
+
+  /* ── Hilo de comentarios con liquidaciones ──────────────────────── */
+  .dms-cmt-resumen {
+    @apply mb-3 grid grid-cols-2 gap-2 rounded-lg border border-slate-100 bg-slate-50 p-2.5 text-[11px] sm:grid-cols-3 lg:grid-cols-6;
+  }
+
+  .dms-cmt-resumen p {
+    @apply mt-0.5 truncate font-semibold text-slate-700;
+  }
+
+  .dms-cmt-resumen-label {
+    @apply block text-[9px] font-bold uppercase tracking-wider text-slate-400;
+  }
+
+  .dms-cmt-hilo {
+    @apply max-h-[38vh] space-y-2 overflow-y-auto pr-1;
+  }
+
+  .dms-cmt-item {
+    @apply rounded-lg border border-slate-200 bg-white p-2.5 shadow-sm;
+  }
+
+  .dms-cmt-item--propio {
+    @apply border-[#152483]/20 bg-[#eef1fb]/50;
+  }
+
+  .dms-cmt-rol {
+    @apply inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider;
+  }
+
+  .dms-cmt-rol--liq {
+    @apply bg-[#f16e26]/15 text-[#c2410c];
+  }
+
+  .dms-cmt-rol--tec {
+    @apply bg-[#152483]/10 text-[#152483];
+  }
+
+  .dms-cmt-rol--nav {
+    @apply bg-teal-100 text-teal-800;
+  }
+
+  .dms-cmt-rol--sup {
+    @apply bg-purple-100 text-purple-800;
+  }
+
+  .dms-cmt-tag {
+    @apply inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide;
+  }
+
+  .dms-cmt-tag--cambio {
+    @apply bg-amber-100 text-amber-800;
+  }
+
+  .dms-cmt-tag--aceptado {
+    @apply bg-emerald-100 text-emerald-800;
+  }
+
+  .dms-cmt-tag--rechazado {
+    @apply bg-red-100 text-red-800;
+  }
+
+  .dms-cmt-tag--info {
+    @apply bg-sky-100 text-sky-800;
+  }
+
+  .dms-cmt-nuevo {
+    @apply mt-3 rounded-lg border border-dashed border-slate-300 bg-slate-50/70 p-2.5;
+  }
+
+  .dms-cmt-autor {
+    @apply flex h-9 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2;
+  }
+
+  /* ── Timeline del historial ─────────────────────────────────────── */
+  .dms-timeline {
+    @apply relative space-y-3 pl-5;
+  }
+
+  .dms-timeline::before {
+    content: '';
+    @apply absolute bottom-2 left-[5px] top-2 w-0.5 bg-slate-200;
+  }
+
+  .dms-timeline-item {
+    @apply relative flex gap-3;
+  }
+
+  .dms-timeline-dot {
+    @apply absolute -left-5 top-1 h-3 w-3 shrink-0 rounded-full ring-2 ring-white;
+  }
+
+  .dms-timeline-dot--gray {
+    @apply bg-slate-400;
+  }
+  .dms-timeline-dot--blue {
+    @apply bg-blue-500;
+  }
+  .dms-timeline-dot--green {
+    @apply bg-emerald-500;
+  }
+  .dms-timeline-dot--red {
+    @apply bg-red-500;
+  }
+  .dms-timeline-dot--teal {
+    @apply bg-teal-500;
+  }
+  .dms-timeline-dot--purple {
+    @apply bg-purple-500;
+  }
+  .dms-timeline-dot--orange {
+    @apply bg-[#f16e26];
+  }
+
+  /* ── Galería de fotos ──────────────────────────────────────────── */
+  .dms-tab {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-600 transition-colors hover:border-[#152483];
+  }
+
+  .dms-tab--activo {
+    @apply border-[#152483] bg-[#152483] text-white;
+  }
+
+  .dms-tab-count {
+    @apply rounded-full bg-black/10 px-1.5 text-[10px] font-bold tabular-nums;
+  }
+
+  .dms-foto-card {
+    @apply block overflow-hidden rounded-lg border border-slate-200 bg-white text-left shadow-sm transition-all hover:border-[#152483] hover:shadow-md;
+  }
+
+  .dms-foto-card-body {
+    @apply block px-2 py-1.5;
+  }
+
+  .dms-foto-tag {
+    @apply inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider;
+  }
+
+  .dms-foto-tag--dano {
+    @apply bg-red-100 text-red-700;
+  }
+
+  .dms-foto-tag--reparado {
+    @apply bg-emerald-100 text-emerald-700;
+  }
+
+  .dms-lightbox {
+    @apply fixed inset-0 z-[60] flex items-center justify-center bg-black/85 p-6 backdrop-blur-sm;
+  }
+
+  .dms-lightbox-figure {
+    @apply relative m-0 flex max-w-5xl flex-col items-center gap-3;
+  }
+
+  .dms-lightbox-caption {
+    @apply max-w-2xl text-center text-[11px] text-white/80;
+  }
+
+  .dms-lightbox-close {
+    @apply absolute right-4 top-4 rounded-lg bg-white/10 p-2 text-white transition-colors hover:bg-white/25;
+  }
+
+  .dms-lightbox-nav {
+    @apply absolute top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-2.5 text-white transition-colors hover:bg-white/25;
+  }
 }

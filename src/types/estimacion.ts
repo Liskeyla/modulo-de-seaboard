@@ -6,6 +6,121 @@ export type EstadoEstimacion =
   | 'REPARADO'
   | 'REVERSADO';
 
+export const ESTADOS_ESTIMACION: EstadoEstimacion[] = [
+  'ENVIADO',
+  'PENDIENTE',
+  'APROBADO',
+  'REPARADO',
+  'RECHAZADO',
+];
+
+export const ACTIVIDADES = ['WTY', 'SVL', 'DM', 'NO APLICA'] as const;
+export type Actividad = (typeof ACTIVIDADES)[number];
+
+export const APLICA_DANO = [
+  'Aprobado Linea',
+  'Aprobado Dueño',
+  'Pendiente Revisión',
+  'Rechazado',
+  'No Aplica',
+] as const;
+export type AplicaDano = (typeof APLICA_DANO)[number];
+
+export const CARGOS_DANO = ['Línea', 'Dueño', 'Garantía'] as const;
+export type CargoDano = (typeof CARGOS_DANO)[number];
+
+/** Área funcional del autor del comentario, para la trazabilidad con liquidaciones. */
+export type RolComentario = 'LIQUIDACIONES' | 'TECNICO' | 'SEABOARD' | 'SUPERVISOR';
+
+/** Intención del comentario: permite ver de un vistazo qué se pidió cambiar y si ya se resolvió. */
+export type TipoComentario = 'SOLICITA_CAMBIO' | 'ACEPTADO' | 'RECHAZADO' | 'INFORMATIVO';
+
+export interface ComentarioDano {
+  id: string;
+  usuario: string;
+  rol: RolComentario;
+  fecha: string;
+  tipo: TipoComentario;
+  mensaje: string;
+  /** Campo del daño que el comentario pide modificar (ej. "Cs. Mat."). */
+  campoAfectado?: string;
+  valorAnterior?: string;
+  valorNuevo?: string;
+}
+
+export interface FotoDano {
+  id: string;
+  url: string;
+  tipo: 'DANO' | 'REPARADO';
+  descripcion: string;
+  fecha: string;
+}
+
+export interface DanoEstimacion {
+  id: string;
+  linea: number;
+  comp: string;
+  partNumber: string;
+  ubicacion: string;
+  dano: string;
+  obsAnalisis: string;
+  metRep: string;
+  newMetRep: string;
+  serieAnterior: string;
+  serieEntregado: string;
+  largo: number;
+  ancho: number;
+  area: number;
+  longitud: number;
+  cantidad: number;
+  horasHombre: number;
+  csHoraHombre: number;
+  csMaterial: number;
+  csTotal: number;
+  cargo: CargoDano;
+  aplica: AplicaDano;
+  medida: string;
+  remark: string;
+  contenedorDonante: string;
+  tieneVideo: boolean;
+  /** Marca la línea como estructural (BOX) o de máquina, igual que en el DMS de producción. */
+  seccion: 'MAQUINA' | 'ESTRUCTURAL';
+  fotos: FotoDano[];
+  comentarios: ComentarioDano[];
+}
+
+export interface NotaEstimacion {
+  id: string;
+  fecha: string;
+  usuario: string;
+  texto: string;
+}
+
+export interface EventoAuditoria {
+  id: string;
+  fecha: string;
+  usuario: string;
+  accion: string;
+  detalle: string;
+}
+
+export interface InfoGarantia {
+  enGarantia: boolean;
+  proveedor: string;
+  fechaInicio: string;
+  fechaFin: string;
+  ordenGarantia: string;
+  observacion: string;
+}
+
+export interface InfoInspeccion {
+  codigo: string;
+  fecha: string;
+  inspector: string;
+  resultado: string;
+  observacion: string;
+}
+
 export interface ComentarioSeaboard {
   id: string;
   fecha: string;
@@ -24,7 +139,7 @@ export interface Estimacion {
   modeloMaquina: string;
   codigoRfs: string;
   naviera: string;
-  actividad: string;
+  actividad: Actividad;
   lugarEstimacion: string;
   lugarAsistencia: string;
   fechaGateIn: string;
@@ -54,5 +169,31 @@ export interface Estimacion {
   buque: string;
   viaje: string;
   tipoContenedor: string;
+  itinerarioSap: string;
+  almacenSap: string;
+  garantia: InfoGarantia;
+  inspeccion: InfoInspeccion;
+  danos: DanoEstimacion[];
+  notas: NotaEstimacion[];
+  auditoria: EventoAuditoria[];
   comentariosSeaboard: ComentarioSeaboard[];
+}
+
+export function totalesDanos(danos: DanoEstimacion[]) {
+  return danos.reduce(
+    (acc, d) => ({
+      horasHombre: acc.horasHombre + d.horasHombre,
+      csHoraHombre: acc.csHoraHombre + d.csHoraHombre,
+      csMaterial: acc.csMaterial + d.csMaterial,
+      csTotal: acc.csTotal + d.csTotal,
+    }),
+    { horasHombre: 0, csHoraHombre: 0, csMaterial: 0, csTotal: 0 }
+  );
+}
+
+export function contarComentariosPendientes(danos: DanoEstimacion[]) {
+  return danos.reduce(
+    (acc, d) => acc + d.comentarios.filter((c) => c.tipo === 'SOLICITA_CAMBIO').length,
+    0
+  );
 }

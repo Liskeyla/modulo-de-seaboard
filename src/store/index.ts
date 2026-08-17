@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware';
 interface User {
   username: string;
   nombre: string;
-  rol: 'dms' | 'seaboard';
+  rol: 'dms' | 'seaboard' | 'liquidaciones';
 }
 
 interface AuthState {
@@ -18,6 +18,7 @@ interface AuthState {
 const DEMO_USERS: Record<string, { password: string; rol: User['rol']; nombre: string }> = {
   apptelink: { password: 'admin123', rol: 'dms', nombre: 'apptelink' },
   seaboard: { password: 'admin123', rol: 'seaboard', nombre: 'Usuario Seaboard' },
+  cesarvalencia: { password: 'admin123', rol: 'liquidaciones', nombre: 'César Valencia' },
 };
 
 export const useAuthStore = create<AuthState>()(
