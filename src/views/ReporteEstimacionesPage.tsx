@@ -107,6 +107,7 @@ export default function ReporteEstimacionesPage() {
   const [dialogo, setDialogo] = useState<Dialogo>({ tipo: 'NINGUNO' });
 
   const usuario = user?.username ?? 'apptelink';
+  const puedeEditarActividad = user?.rol === 'dms';
   const cerrar = () => setDialogo({ tipo: 'NINGUNO' });
 
   const porPais = useMemo(
@@ -568,23 +569,29 @@ export default function ReporteEstimacionesPage() {
                             <td className="text-center">{row.codigoRfs || '—'}</td>
                             <td className="dms-cell-wrap text-[10px]">{row.naviera}</td>
                             <td onDoubleClick={(e) => e.stopPropagation()}>
-                              <select
-                                className="dms-select dms-select-actividad"
-                                value={row.actividad}
-                                onChange={(e) => {
-                                  setActividad(row.id, e.target.value as Actividad, usuario);
-                                  toast(
-                                    `Actividad de ${row.codigo} cambiada a ${e.target.value}.`,
-                                    'success'
-                                  );
-                                }}
-                              >
-                                {ACTIVIDADES.map((a) => (
-                                  <option key={a} value={a}>
-                                    {a}
-                                  </option>
-                                ))}
-                              </select>
+                              {puedeEditarActividad ? (
+                                <select
+                                  className="dms-select dms-select-actividad"
+                                  value={row.actividad}
+                                  onChange={(e) => {
+                                    setActividad(row.id, e.target.value as Actividad, usuario);
+                                    toast(
+                                      `Actividad de ${row.codigo} cambiada a ${e.target.value}.`,
+                                      'success'
+                                    );
+                                  }}
+                                >
+                                  {ACTIVIDADES.map((a) => (
+                                    <option key={a} value={a}>
+                                      {a}
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : (
+                                <span className="text-xs font-semibold text-slate-700">
+                                  {row.actividad}
+                                </span>
+                              )}
                             </td>
                             <td className="text-center">{row.lugarEstimacion}</td>
                             <td className="text-center text-gray-400">
