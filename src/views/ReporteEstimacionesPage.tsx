@@ -505,6 +505,7 @@ export default function ReporteEstimacionesPage() {
                     <tr>
                       <th className="dms-sticky-col dms-sticky-col--1 w-8">···</th>
                       <th className="dms-sticky-col dms-sticky-col--2">Codigo</th>
+                      <th>Acciones</th>
                       <th>Semana</th>
                       <th>Año</th>
                       <th>Estado</th>
@@ -537,7 +538,6 @@ export default function ReporteEstimacionesPage() {
                       <th>Análisis de observación</th>
                       <th>Fecha de modificación</th>
                       <th>Usuario de Modificacion</th>
-                      <th>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -581,6 +581,9 @@ export default function ReporteEstimacionesPage() {
                                   title={`${pendientes} cambio(s) solicitados por liquidaciones`}
                                 />
                               )}
+                            </td>
+                            <td onDoubleClick={(e) => e.stopPropagation()}>
+                              {accionesDe(row)}
                             </td>
                             <td className="text-center tabular-nums">{row.semana}</td>
                             <td className="text-center tabular-nums">{row.anio}</td>
@@ -676,9 +679,6 @@ export default function ReporteEstimacionesPage() {
                               {row.fechaModificacion || '—'}
                             </td>
                             <td className="text-xs">{row.usuarioModificacion || 'N/A'}</td>
-                            <td onDoubleClick={(e) => e.stopPropagation()}>
-                              {accionesDe(row)}
-                            </td>
                           </tr>
 
                           {abierta && (
