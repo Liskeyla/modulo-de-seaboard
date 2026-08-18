@@ -45,7 +45,7 @@ const EXCEL_HEADERS = [
   'Actividad', 'Lugar de Estimación', 'Lugar de Asistencia', 'Fecha GateIn', 'Fecha de Elaboración',
   'Fecha de Reparación', 'Tipo de Estimación', 'Técnico de Estimación', 'Horas Hombre',
   'PVP Horas Hombre', 'PVP Materiales', 'PVP Total', 'Estado PTI', 'Fecha Fin PTI',
-  'Enviar Aprobacion', 'Fecha Envio', 'Fecha Aprobacion', 'EDI Enviado ONE', 'Fecha Envio EDI ONE',
+  'Enviar Aprobacion', 'Fecha Envio', 'Fecha Aprobacion',
   'Niveles', 'Dias Estadia', 'Tipo de Daño', 'Análisis de observación', 'Fecha de modificación',
   'Usuario de Modificación',
 ];
@@ -56,7 +56,7 @@ function rowToExcel(e: Estimacion) {
     e.actividad, e.lugarEstimacion, e.lugarAsistencia, e.fechaGateIn, e.fechaElaboracion,
     e.fechaReparacion, e.tipoEstimacion, e.tecnico, e.horasHombre, e.pvpHorasHombre,
     e.pvpMateriales, e.pvpTotal, e.estadoPti, e.fechaFinPti, e.enviarAprobacion, e.fechaEnvio,
-    e.fechaAprobacion, e.ediEnviadoOne, e.fechaEnvioEdiOne, e.niveles, e.diasEstadia, e.tipoDano,
+    e.fechaAprobacion, e.niveles, e.diasEstadia, e.tipoDano,
     e.analisisObservacion, e.fechaModificacion, e.usuarioModificacion,
   ];
 }
@@ -506,8 +506,6 @@ export default function ReporteEstimacionesPage() {
                       <th>Enviar Aprobacion</th>
                       <th>Fecha Envio</th>
                       <th>Fecha Aprobacion</th>
-                      <th>EDI Enviado ONE</th>
-                      <th>Fecha Envio EDI ONE</th>
                       <th>Niveles</th>
                       <th>Dias Estadia</th>
                       <th>Tipo de Daño</th>
@@ -630,19 +628,6 @@ export default function ReporteEstimacionesPage() {
                             <td className="text-[10px] tabular-nums">
                               {row.fechaAprobacion || '—'}
                             </td>
-                            <td className="text-center">
-                              <span
-                                className={cn(
-                                  'dms-si-no',
-                                  row.ediEnviadoOne === 'SI' ? 'dms-si-no--si' : 'dms-si-no--no'
-                                )}
-                              >
-                                {row.ediEnviadoOne}
-                              </span>
-                            </td>
-                            <td className="text-[10px] tabular-nums text-gray-400">
-                              {row.fechaEnvioEdiOne || '—'}
-                            </td>
                             <td className="dms-cell-wrap max-w-[9rem] text-[10px]">
                               {row.niveles || '—'}
                             </td>
@@ -660,7 +645,7 @@ export default function ReporteEstimacionesPage() {
                           {abierta && (
                             <tr className="dms-row-detalle">
                               <td />
-                              <td colSpan={34}>
+                              <td colSpan={32}>
                                 <div className="dms-detalle-inline">
                                   <div>
                                     <span>Buque / Viaje</span>
@@ -734,7 +719,7 @@ export default function ReporteEstimacionesPage() {
                       <td className="text-right tabular-nums">{formatMoney(totales.pvpHh)}</td>
                       <td className="text-right tabular-nums">{formatMoney(totales.pvpMat)}</td>
                       <td className="text-right tabular-nums">{formatMoney(totales.pvpTotal)}</td>
-                      <td colSpan={14} />
+                      <td colSpan={12} />
                     </tr>
                   </tfoot>
                 </table>
@@ -852,7 +837,6 @@ export default function ReporteEstimacionesPage() {
                 ['Tipo de daño', activa.tipoDano || 'No clasificado'],
                 ['Días de estadía', String(activa.diasEstadia)],
                 ['Estado PTI', activa.estadoPti || 'Sin PTI'],
-                ['EDI ONE', activa.ediEnviadoOne],
               ].map(([k, v]) => (
                 <div key={k} className="dms-mini-dato">
                   <dt>{k}</dt>
