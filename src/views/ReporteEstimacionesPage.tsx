@@ -503,8 +503,8 @@ export default function ReporteEstimacionesPage() {
                   <thead>
                     <tr>
                       <th className="dms-sticky-col dms-sticky-col--1 w-8">···</th>
-                      <th className="dms-sticky-col dms-sticky-col--2">Codigo</th>
                       <th>Acciones</th>
+                      <th>Codigo</th>
                       <th>Semana</th>
                       <th>Año</th>
                       <th>Estado</th>
@@ -565,7 +565,10 @@ export default function ReporteEstimacionesPage() {
                                 )}
                               </button>
                             </td>
-                            <td className="dms-sticky-col dms-sticky-col--2">
+                            <td onDoubleClick={(e) => e.stopPropagation()}>
+                              {accionesDe(row)}
+                            </td>
+                            <td>
                               <button
                                 type="button"
                                 className="dms-cell-container-code dms-cell-link"
@@ -580,9 +583,6 @@ export default function ReporteEstimacionesPage() {
                                   title={`${pendientes} cambio(s) solicitados por liquidaciones`}
                                 />
                               )}
-                            </td>
-                            <td onDoubleClick={(e) => e.stopPropagation()}>
-                              {accionesDe(row)}
                             </td>
                             <td className="text-center tabular-nums">{row.semana}</td>
                             <td className="text-center tabular-nums">{row.anio}</td>
