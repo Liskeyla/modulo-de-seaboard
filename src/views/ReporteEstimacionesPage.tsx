@@ -101,7 +101,6 @@ export default function ReporteEstimacionesPage() {
   const [pageSize, setPageSize] = useState(20);
   const [page, setPage] = useState(1);
   const [filtroActivo, setFiltroActivo] = useState(false);
-  const [soloLiquidaciones, setSoloLiquidaciones] = useState(false);
   const [expandidas, setExpandidas] = useState<Set<string>>(new Set());
   const [dialogo, setDialogo] = useState<Dialogo>({ tipo: 'NINGUNO' });
 
@@ -127,7 +126,6 @@ export default function ReporteEstimacionesPage() {
     return estimaciones.filter((e) => {
       if (patio !== 'Todos' && e.lugarEstimacion !== patio) return false;
       if (estado !== 'Todos' && e.estado !== estado) return false;
-      if (soloLiquidaciones && contarComentariosPendientes(e.danos) === 0) return false;
       if (!hayCriterio) return true;
 
       if (filtroActivo) {
@@ -162,7 +160,7 @@ export default function ReporteEstimacionesPage() {
     });
   }, [
     estimaciones, desde, hasta, naviera, codigoRfs, patio, tipo, estado, actividad, tecnico,
-    aplica, completas, busqueda, parametro, search, filtroActivo, soloLiquidaciones,
+    aplica, completas, busqueda, parametro, search, filtroActivo,
   ]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
@@ -181,23 +179,6 @@ export default function ReporteEstimacionesPage() {
     { hh: 0, pvpHh: 0, pvpMat: 0, pvpTotal: 0 }
   );
 
-  const conteos = useMemo(() => {
-    const base =
-      patio === 'Todos'
-        ? estimaciones
-        : estimaciones.filter((e) => e.lugarEstimacion === patio);
-    const porEstado = (est: string) => base.filter((e) => e.estado === est).length;
-    return {
-      todos: base.length,
-      PENDIENTE: porEstado('PENDIENTE'),
-      ENVIADO: porEstado('ENVIADO'),
-      APROBADO: porEstado('APROBADO'),
-      REPARADO: porEstado('REPARADO'),
-      RECHAZADO: porEstado('RECHAZADO'),
-      liquidaciones: base.filter((e) => contarComentariosPendientes(e.danos) > 0).length,
-    };
-  }, [estimaciones, patio]);
-
   function limpiarFiltros() {
     setDesde('2026-08-17');
     setHasta('2026-08-23');
@@ -213,14 +194,8 @@ export default function ReporteEstimacionesPage() {
     setBusqueda('');
     setSearch('');
     setFiltroActivo(false);
-    setSoloLiquidaciones(false);
     setPage(1);
     toast('Filtros restablecidos.', 'info');
-  }
-
-  function filtrarPorEstado(valor: string) {
-    setEstado(valor);
-    setPage(1);
   }
 
   const seleccionada = (id: string) => estimaciones.find((e) => e.id === id) ?? null;
@@ -362,7 +337,7 @@ export default function ReporteEstimacionesPage() {
             infoMessage={
               <div className="dms-howto">
                 <span>
-                  <strong>1</strong> Pulse un estado arriba o filtre por depósito.
+                  <strong>1</strong> Filtre por depósito o estado en el panel izquierdo.
                 </span>
                 <span>
                   <strong>2</strong> El ojo naranja abre el estimado. También puede pulsar el código
@@ -476,53 +451,29 @@ export default function ReporteEstimacionesPage() {
               </div>
             }
           >
-            <div className="dms-kpi-bar">
+            <div className="dms-table-legend">
               {(
                 [
-                  ['Todos', conteos.todos, 'todos', 'Todos'],
-                  ['Pendiente', conteos.PENDIENTE, 'pendiente', 'PENDIENTE'],
-                  ['Enviado', conteos.ENVIADO, 'enviado', 'ENVIADO'],
-                  ['Aprobado', conteos.APROBADO, 'aprobado', 'APROBADO'],
-                  ['Reparado', conteos.REPARADO, 'reparado', 'REPARADO'],
-                  ['Rechazado', conteos.RECHAZADO, 'rechazado', 'RECHAZADO'],
+                  ['Enviado', 'bg-teal-500'],
+                  ['Pendiente', 'bg-amber-400'],
+                  ['Aprobado', 'bg-blue-500'],
+                  ['Reparado', 'bg-emerald-500'],
+                  ['Rechazado', 'bg-red-500'],
                 ] as const
-              ).map(([label, n, tono, valor]) => (
-                <button
-                  key={label}
-                  type="button"
-                  className={cn(
-                    'dms-kpi-card',
-                    `dms-kpi-card--${tono}`,
-                    estado === valor && 'dms-kpi-card--activo'
-                  )}
-                  onClick={() => filtrarPorEstado(valor)}
-                >
-                  <span>{label}</span>
-                  <strong>{n}</strong>
-                </button>
-              ))}
-              <button
-                type="button"
-                className={cn(
-                  'dms-kpi-card dms-kpi-card--alerta',
-                  soloLiquidaciones && 'dms-kpi-card--activo'
-                )}
-                title="Estimaciones con cambios pedidos por liquidaciones"
-                onClick={() => {
-                  setSoloLiquidaciones((v) => !v);
-                  setPage(1);
-                }}
-              >
-                <span className="inline-flex items-center gap-1">
-                  <MessageSquare className="h-3 w-3" /> Liquidaciones
+              ).map(([label, color]) => (
+                <span key={label} className="dms-table-legend-item">
+                  <span className={cn('dms-table-legend-dot', color)} /> {label}
                 </span>
-                <strong>{conteos.liquidaciones}</strong>
-              </button>
+              ))}
+              <span className="dms-table-legend-item ml-auto text-gray-400">
+                <MessageSquare className="h-3 w-3" /> El punto naranja indica cambios solicitados por
+                liquidaciones
+              </span>
             </div>
 
             <div className="dms-resumen-strip">
               <span>
-                Mostrando <strong>{filtered.length}</strong> de {conteos.todos} estimaciones
+                Mostrando <strong>{filtered.length}</strong> de {estimaciones.length} estimaciones
               </span>
               <span>
                 Total filtrado <strong>${formatMoney(totales.pvpTotal)}</strong>

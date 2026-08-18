@@ -132,54 +132,6 @@
     @apply mr-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#152483] text-[9px] font-extrabold text-white;
   }
 
-  .dms-kpi-bar {
-    @apply grid grid-cols-2 gap-2 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-3 py-3 sm:grid-cols-4 xl:grid-cols-7;
-  }
-
-  .dms-kpi-card {
-    @apply flex flex-col items-start rounded-lg border border-slate-200 bg-white px-3 py-2 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md;
-  }
-
-  .dms-kpi-card span {
-    @apply text-[10px] font-bold uppercase tracking-wide text-slate-500;
-  }
-
-  .dms-kpi-card strong {
-    @apply mt-0.5 text-xl font-extrabold tabular-nums text-slate-800;
-  }
-
-  .dms-kpi-card--activo {
-    @apply border-[#152483] ring-2 ring-[#152483]/20;
-  }
-
-  .dms-kpi-card--todos strong {
-    @apply text-[#152483];
-  }
-
-  .dms-kpi-card--pendiente strong {
-    @apply text-amber-600;
-  }
-
-  .dms-kpi-card--enviado strong {
-    @apply text-teal-600;
-  }
-
-  .dms-kpi-card--aprobado strong {
-    @apply text-blue-600;
-  }
-
-  .dms-kpi-card--reparado strong {
-    @apply text-emerald-600;
-  }
-
-  .dms-kpi-card--rechazado strong {
-    @apply text-red-600;
-  }
-
-  .dms-kpi-card--alerta strong {
-    @apply text-[#e05310];
-  }
-
   .dms-resumen-strip {
     @apply flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-slate-100 bg-white px-4 py-2 text-[11px] text-slate-500;
   }
