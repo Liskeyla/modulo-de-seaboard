@@ -334,21 +334,6 @@ export default function ReporteEstimacionesPage() {
             title="Reporte de Estimaciones"
             subtitle="Consulta operativa DMS · Envío a aprobación Seaboard"
             heroIcon={<FileBarChart className="h-5 w-5" />}
-            infoMessage={
-              <div className="dms-howto">
-                <span>
-                  <strong>1</strong> Filtre por depósito o estado en el panel izquierdo.
-                </span>
-                <span>
-                  <strong>2</strong> El ojo naranja abre el estimado. También puede pulsar el código
-                  o hacer doble clic en la fila.
-                </span>
-                <span>
-                  <strong>3</strong> El punto naranja junto al código significa que liquidaciones
-                  pidió un cambio.
-                </span>
-              </div>
-            }
             filtros={[
               { label: 'Desde', type: 'date', value: desde, onChange: (v) => setDesde(String(v)) },
               { label: 'Hasta', type: 'date', value: hasta, onChange: (v) => setHasta(String(v)) },
