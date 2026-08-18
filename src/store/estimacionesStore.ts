@@ -13,11 +13,12 @@ import type {
   TipoComentario,
 } from '@/types/estimacion';
 
-const STORAGE_KEY = 'dms-estimaciones-prototipo-v4';
+const STORAGE_KEY = 'dms-estimaciones-prototipo-v5';
 const CLAVES_OBSOLETAS = [
   'dms-estimaciones-prototipo',
   'dms-estimaciones-prototipo-v2',
   'dms-estimaciones-prototipo-v3',
+  'dms-estimaciones-prototipo-v4',
 ];
 
 function ahoraFmt() {

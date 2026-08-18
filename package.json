@@ -11,7 +11,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "import-excel": "python scripts/import-excel.py"
+    "import-excel": "python scripts/import-excel.py",
+    "seed": "node scripts/build-seed.cjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

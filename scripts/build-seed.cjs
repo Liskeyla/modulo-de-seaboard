@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /**
- * Genera src/data/estimacionesSeed.json a partir del export real del DMS de producción
- * ("Reporte de Estimaciones | RFS - DMS Ecuador.xlsx").
+ * Genera src/data/estimacionesSeed.json a partir de los export del DMS:
+ * Ecuador ("Reporte de Estimaciones | RFS - DMS Ecuador.xlsx")
+ * y Perú ("Reporte de Estimaciones | DMS - RFS Perú.xlsx").
  *
- * Uso: node scripts/build-seed.cjs "<ruta del .xlsx>"
+ * Uso: node scripts/build-seed.cjs [xlsx-ecuador] [xlsx-peru]
  *
  * El generador es determinista (PRNG sembrado con el código de estimación) para que
  * dos ejecuciones produzcan exactamente el mismo seed.
@@ -15,7 +16,11 @@ const XLSX = require('xlsx');
 const XLSX_PATH =
   process.argv[2] ||
   'C:/Users/lmacias/Downloads/Reporte de Estimaciones  RFS - DMS Ecuador.xlsx';
+const XLSX_PERU =
+  process.argv[3] ||
+  'C:/Users/lmacias/Downloads/Reporte de Estimaciones  DMS - RFS Perú.xlsx';
 const OUT_PATH = path.join(__dirname, '..', 'src', 'data', 'estimacionesSeed.json');
+const TARIFA_HH_PE = 6.8;
 
 const FOTOS_DIR = '/uploads/estimaciones/fotos';
 const FOTOS_DANO = [1, 2, 3, 4, 5, 6, 7];
@@ -104,6 +109,20 @@ const CATALOGO_ESTRUCTURAL = [
   { comp: 'RIL-TBL', part: 'PX', ubic: 'TR3C', dano: 'BE-BENT', medida: 'CM' },
   { comp: 'POC-ZZZ', part: 'PX', ubic: 'POCZZ', dano: 'HO-HOLE', medida: 'CM' },
 ];
+
+/** Componentes IICL tomados de los PDF de Callao. */
+const CATALOGO_BOX_PE = [
+  { comp: 'MSD', part: 'RP', ubic: 'FX2N', dano: 'BR-BROKEN', medida: 'UN' },
+  { comp: 'RLA', part: 'SE', ubic: 'FX14', dano: 'PH-PUNCTURED', medida: 'CM' },
+  { comp: 'DKK', part: 'RP', ubic: 'UL1N', dano: 'MS-MISSING', medida: 'UN' },
+  { comp: 'DKA', part: 'RP', ubic: 'BX1N', dano: 'BR-BROKEN', medida: 'UN' },
+  { comp: 'LBH', part: 'GS', ubic: 'DX23', dano: 'BT-BENT', medida: 'UN' },
+  { comp: 'PIC', part: 'GS', ubic: 'RB3N', dano: 'BT-BENT', medida: 'CM' },
+  { comp: 'PNL', part: 'PX', ubic: 'LX7N', dano: 'HO-HOLE', medida: 'CM' },
+];
+
+const BUQUES_EC = ['SEABOARD OCEAN', 'SEABOARD GEMINI', 'ONE MADRID', 'SEABOARD PACER'];
+const BUQUES_PE = ['SEABOARD VICTORY', 'SEABOARD OCEAN', 'SEABOARD GEMINI'];
 
 const OBS_MAQUINA = [
   'Componente con marcación de error en controladora',
@@ -351,13 +370,234 @@ function danosDestacado() {
   ];
 }
 
+function fotoPe(codigoCorto, n, tipo, desc, fecha) {
+  return {
+    id: `pe-${codigoCorto}-${tipo}-${n}`,
+    url: `${FOTOS_DIR}/pe_${codigoCorto}_${String(n).padStart(2, '0')}.jpg`,
+    tipo,
+    descripcion: desc,
+    fecha,
+  };
+}
+
+function lineaPdf(opts) {
+  const {
+    codigo,
+    linea,
+    comp,
+    ubic,
+    dano,
+    met,
+    desc,
+    cant,
+    largo = 0,
+    ancho = 0,
+    hh,
+    csHH,
+    csMat,
+    estado,
+    fotos,
+  } = opts;
+  const conMedidas = largo > 0 || ancho > 0;
+  return {
+    id: `${codigo}-l${linea}`,
+    linea,
+    comp,
+    partNumber: '-',
+    ubicacion: ubic,
+    dano,
+    obsAnalisis: desc,
+    metRep: '',
+    newMetRep: met,
+    serieAnterior: 'N/A',
+    serieEntregado: '',
+    largo,
+    ancho,
+    area: conMedidas ? round2((largo * ancho) / 10000) : 0,
+    longitud: conMedidas ? round2(largo) : 0,
+    cantidad: cant,
+    horasHombre: hh,
+    csHoraHombre: csHH,
+    csMaterial: csMat,
+    csTotal: round2(csHH + csMat),
+    cargo: 'Línea',
+    aplica: estado === 'REPARADO' ? 'Aprobado Linea' : 'Aprobado Linea',
+    medida: conMedidas ? 'CM' : 'UN',
+    remark: '',
+    contenedorDonante: '',
+    tieneVideo: false,
+    seccion: 'ESTRUCTURAL',
+    fotos,
+    comentarios: opts.comentarios || [],
+  };
+}
+
+function danosPdfPeru(codigo) {
+  if (codigo === 'ERSBM-2026-121881') {
+    return [
+      lineaPdf({
+        codigo,
+        linea: 1,
+        comp: 'MSD',
+        ubic: 'FX2N',
+        dano: 'BR-BROKEN',
+        met: 'RP',
+        desc: 'UNIT.NUMBER,PREFIX-RP',
+        cant: 1,
+        hh: 0.33,
+        csHH: 2.21,
+        csMat: 0.51,
+        estado: 'REPARADO',
+        fotos: [
+          fotoPe('121881', 1, 'DANO', 'Prefijo / número de unidad dañado', '16/08/2026 08:10:53'),
+          fotoPe('121881', 2, 'DANO', 'Detalle del componente MSD en FX2N', '16/08/2026 08:10:53'),
+          fotoPe('121881', 3, 'DANO', 'Evidencia del daño BR en inspección Callao', '16/08/2026 08:10:53'),
+          fotoPe('121881', 8, 'REPARADO', 'Reemplazo RP ejecutado', '16/08/2026 14:20:00'),
+        ],
+      }),
+    ];
+  }
+  if (codigo === 'ERSBM-2026-121880') {
+    return [
+      lineaPdf({
+        codigo,
+        linea: 1,
+        comp: 'RLA',
+        ubic: 'FX14',
+        dano: 'PH-PUNCTURED',
+        met: 'SE',
+        desc: 'TUNNEL RAIL-IT',
+        cant: 1,
+        largo: 15,
+        hh: 0.25,
+        csHH: 1.7,
+        csMat: 6.3,
+        estado: 'REPARADO',
+        fotos: [
+          fotoPe('121880', 1, 'DANO', 'Tunnel rail con perforación', '16/08/2026 08:04:59'),
+          fotoPe('121880', 2, 'DANO', 'Detalle RLA en FX14', '16/08/2026 08:04:59'),
+          fotoPe('121880', 8, 'REPARADO', 'Sección SE ejecutada en riel', '16/08/2026 14:10:00'),
+        ],
+      }),
+      lineaPdf({
+        codigo,
+        linea: 2,
+        comp: 'DKK',
+        ubic: 'UL1N',
+        dano: 'MS-MISSING',
+        met: 'RP',
+        desc: 'DRAIN VALVE(KAZOO)',
+        cant: 1,
+        hh: 0.2,
+        csHH: 1.36,
+        csMat: 6.0,
+        estado: 'REPARADO',
+        fotos: [
+          fotoPe('121880', 4, 'DANO', 'Válvula de drenaje faltante', '16/08/2026 08:04:59'),
+          fotoPe('121880', 5, 'DANO', 'Detalle DKK en UL1N', '16/08/2026 08:04:59'),
+        ],
+      }),
+    ];
+  }
+  if (codigo === 'ERSBM-2026-121883') {
+    return [
+      lineaPdf({
+        codigo,
+        linea: 1,
+        comp: 'DKA',
+        ubic: 'BX1N',
+        dano: 'BR-BROKEN',
+        met: 'RP',
+        desc: 'ASSEMBLE DRAIN VALVE-RP',
+        cant: 2,
+        hh: 0.4,
+        csHH: 2.72,
+        csMat: 17.0,
+        estado: 'APROBADO',
+        fotos: [
+          fotoPe('121883', 1, 'DANO', 'Ensamble de válvula de drenaje roto', '16/08/2026 08:23:10'),
+          fotoPe('121883', 2, 'DANO', 'Detalle DKA en BX1N', '16/08/2026 08:23:10'),
+        ],
+        comentarios: [
+          {
+            id: 'pe-121883-l1-c1',
+            usuario: 'cesarvalencia',
+            rol: 'LIQUIDACIONES',
+            fecha: '16/08/2026 09:12:04',
+            tipo: 'SOLICITA_CAMBIO',
+            mensaje:
+              'Confirmar si el ensamble DKA se factura a línea: el PDF de Callao indica cargo Línea y 2 unidades.',
+            campoAfectado: 'Cargo',
+          },
+          {
+            id: 'pe-121883-l1-c2',
+            usuario: 'jgonzalez',
+            rol: 'TECNICO',
+            fecha: '16/08/2026 09:31:18',
+            tipo: 'INFORMATIVO',
+            mensaje:
+              'Confirmado en patio Callao: dos válvulas de drenaje rotas, método RP. Se mantiene cargo a la línea.',
+          },
+        ],
+      }),
+      lineaPdf({
+        codigo,
+        linea: 2,
+        comp: 'LBH',
+        ubic: 'DX23',
+        dano: 'BT-BENT',
+        met: 'GS',
+        desc: 'HANDLE-RP',
+        cant: 2,
+        hh: 0.66,
+        csHH: 4.42,
+        csMat: 12.06,
+        estado: 'APROBADO',
+        fotos: [
+          fotoPe('121883', 3, 'DANO', 'Manija doblada', '16/08/2026 08:23:10'),
+          fotoPe('121883', 4, 'DANO', 'Detalle LBH en DX23', '16/08/2026 08:23:10'),
+        ],
+      }),
+      lineaPdf({
+        codigo,
+        linea: 3,
+        comp: 'PIC',
+        ubic: 'RB3N',
+        dano: 'BT-BENT',
+        met: 'GS',
+        desc: 'PANEL SS-PT',
+        cant: 1,
+        largo: 100,
+        ancho: 20,
+        hh: 1.17,
+        csHH: 7.96,
+        csMat: 6.59,
+        estado: 'APROBADO',
+        fotos: [
+          fotoPe('121883', 5, 'DANO', 'Panel SS doblado 100 x 20 cm', '16/08/2026 08:23:10'),
+          fotoPe('121883', 6, 'DANO', 'Detalle PIC en RB3N', '16/08/2026 08:23:10'),
+        ],
+      }),
+    ];
+  }
+  return null;
+}
+
 function generarDanos(row, estado) {
   const codigo = clean(row.Codigo);
   if (codigo === CODIGO_DESTACADO) return danosDestacado();
+  const dePdf = danosPdfPeru(codigo);
+  if (dePdf) return dePdf;
 
   const rnd = mulberry32(hashCode(codigo));
   const esMaquina = clean(row['Tipo de Estimación']).toUpperCase().startsWith('M');
-  const catalogo = esMaquina ? CATALOGO_MAQUINA : CATALOGO_ESTRUCTURAL;
+  const catalogo = row._pais === 'PERU'
+    ? esMaquina
+      ? CATALOGO_MAQUINA
+      : CATALOGO_BOX_PE
+    : esMaquina
+      ? CATALOGO_MAQUINA
+      : CATALOGO_ESTRUCTURAL;
   const observaciones = esMaquina ? OBS_MAQUINA : OBS_ESTRUCTURAL;
 
   const pvpHH = num(row['PVP Horas Hombre']);
@@ -599,9 +839,17 @@ function construirEstimacion(row, index) {
     fechaModificacion: modInvalida ? '' : fechaMod.slice(0, 19),
     usuarioModificacion: clean(row['Usuario de Modificación']) === 'N/A' ? '' : clean(row['Usuario de Modificación']),
     sinDanos: danos.length === 0,
-    buque: pick(rnd, ['SEABOARD OCEAN', 'SEABOARD GEMINI', 'ONE MADRID', 'SEABOARD PACER']),
-    viaje: `V-${Math.floor(rnd() * 400 + 100)}${pick(rnd, ['N', 'S'])}`,
-    tipoContenedor: esMaquina ? 'REEFER' : clean(row['Código RFS']).includes('DC') ? 'DRY' : 'REEFER',
+    buque:
+      clean(row.Nave) && clean(row.Nave) !== '-'
+        ? clean(row.Nave)
+        : pick(rnd, row._pais === 'PERU' ? BUQUES_PE : BUQUES_EC),
+    viaje:
+      clean(row.Viaje) && clean(row.Viaje) !== '-'
+        ? clean(row.Viaje)
+        : `V-${Math.floor(rnd() * 400 + 100)}${pick(rnd, ['N', 'S'])}`,
+    tipoContenedor:
+      clean(row.Tipo) ||
+      (esMaquina ? 'REEFER' : clean(row['Código RFS']).includes('DC') ? 'DRY' : 'REEFER'),
     itinerarioSap: '',
     almacenSap: '',
     garantia: {
@@ -626,28 +874,138 @@ function construirEstimacion(row, index) {
     notas,
     auditoria,
     comentariosSeaboard,
+    pais: row._pais === 'PERU' ? 'PERU' : 'ECUADOR',
+  };
+}
+
+function leerFilas(xlsxPath) {
+  const wb = XLSX.readFile(xlsxPath);
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
+  const headers = aoa[1].map((h) => clean(h));
+  return aoa
+    .slice(2)
+    .map((r) => {
+      const o = {};
+      headers.forEach((h, i) => {
+        if (h && h !== 'Acciones') o[h] = clean(r[i]);
+      });
+      return o;
+    })
+    .filter((o) => clean(o.Codigo).startsWith('ERSBM'));
+}
+
+function fmtFechaIso(v) {
+  const s = clean(v);
+  const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?/);
+  if (!iso) return s;
+  const p = (n) => String(n).padStart(2, '0');
+  return `${iso[3]}/${iso[2]}/${iso[1]} ${p(iso[4])}:${iso[5]}:${iso[6] || '00'}`;
+}
+
+function semanaDe(fecha) {
+  const m = clean(fecha).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (!m) return 33;
+  const d = new Date(Date.UTC(Number(m[3]), Number(m[2]) - 1, Number(m[1])));
+  const day = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+}
+
+function diasEntre(a, b) {
+  const pa = clean(a).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  const pb = clean(b).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (!pa || !pb) return 0;
+  const da = new Date(Number(pa[3]), Number(pa[2]) - 1, Number(pa[1]));
+  const db = new Date(Number(pb[3]), Number(pb[2]) - 1, Number(pb[1]));
+  return Math.max(0, Math.round((db - da) / 86400000));
+}
+
+function tipoEstimacionPe(v) {
+  const t = clean(v)
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+  return t.startsWith('M') ? 'MÁQUINA' : 'BOX';
+}
+
+const TOTALES_PDF_PE = {
+  'ERSBM-2026-121880': { hh: 0.45, pvpHH: 3.06, pvpMat: 12.3, total: 15.36, modelo: '', nave: 'SEABOARD VICTORY' },
+  'ERSBM-2026-121881': {
+    hh: 0.33,
+    pvpHH: 2.21,
+    pvpMat: 0.51,
+    total: 2.72,
+    modelo: 'LX10F11B3',
+    nave: 'SEABOARD VICTORY',
+  },
+  'ERSBM-2026-121883': { hh: 2.23, pvpHH: 15.1, pvpMat: 35.65, total: 50.75, modelo: '', nave: 'SEABOARD VICTORY' },
+};
+
+function normalizarPeru(row) {
+  const codigo = clean(row.Codigo);
+  const estadoRaw = clean(row.Estado).toLowerCase();
+  const estado = estadoRaw.includes('ejecutado') ? 'REPARADO' : 'APROBADO';
+  const tipoEst = tipoEstimacionPe(row['Tipo de Estimación']);
+  const total = num(row['Costo Total']);
+  const pdf = TOTALES_PDF_PE[codigo];
+  const pvpHH = pdf ? pdf.pvpHH : tipoEst === 'MÁQUINA' ? round2(total * 0.75) : round2(total * 0.28);
+  const pvpMat = pdf ? pdf.pvpMat : round2(total - pvpHH);
+  const hh = pdf ? pdf.hh : round2(pvpHH / TARIFA_HH_PE);
+  const gate = fmtFechaIso(row['Fecha GateIn']);
+  const elab = fmtFechaIso(row['Fecha de Elaboración']);
+  const envio = clean(row['Fecha Envio Aprobación']) || elab;
+  const danosPdf = danosPdfPeru(codigo);
+  const obs = danosPdf ? danosPdf.map((d) => d.obsAnalisis).join(' · ') : '';
+
+  return {
+    _pais: 'PERU',
+    Codigo: codigo,
+    Semana: semanaDe(elab),
+    Año: 2026,
+    Estado: estado,
+    Contenedor: clean(row.Contenedor),
+    'Modelo Maquina': pdf ? pdf.modelo : '',
+    'Código RFS': clean(row.Tipo),
+    Naviera: clean(row.Naviera),
+    Actividad: tipoEst === 'MÁQUINA' ? 'SVL' : 'DM',
+    'Lugar de Estimación': clean(row.Patio) || 'CALLAO',
+    'Lugar de Asistencia': '',
+    'Fecha GateIn': gate,
+    'Fecha de Elaboración': elab,
+    'Fecha de Reparación': estado === 'REPARADO' ? envio : '',
+    'Tipo de Estimación': tipoEst,
+    'Técnico de Estimación': 'jgonzalez',
+    'Horas Hombre': hh,
+    'PVP Horas Hombre': pvpHH,
+    'PVP Materiales': pvpMat,
+    'PVP Total': pdf ? pdf.total : total,
+    'Estado PTI': tipoEst === 'MÁQUINA' ? 'DM' : '',
+    'Fecha Fin PTI': tipoEst === 'MÁQUINA' ? elab : '',
+    'Enviar Aprobacion': 'SI',
+    'Fecha Envio': envio,
+    'Fecha Aprobacion': envio,
+    'EDI Enviado ONE': 'NO',
+    'Fecha Envio EDI ONE': '',
+    Niveles: '',
+    'Dias Estadia': diasEntre(gate, elab),
+    'Tipo de Daño': tipoEst === 'BOX' ? 'Estructural' : 'Máquina',
+    'Análisis de observación': obs,
+    'Fecha de modificación': envio,
+    'Usuario de Modificación': 'julio.vega',
+    Nave: pdf ? pdf.nave : clean(row.Nave),
+    Viaje: clean(row.Viaje),
+    Tipo: clean(row.Tipo),
   };
 }
 
 // ---------------------------------------------------------------- main
 
-const wb = XLSX.readFile(XLSX_PATH);
-const ws = wb.Sheets[wb.SheetNames[0]];
-const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
-const headers = aoa[1].map((h) => clean(h));
+const filasEc = leerFilas(XLSX_PATH).map((r) => ({ ...r, _pais: 'ECUADOR' }));
+const filasPe = leerFilas(XLSX_PERU).map(normalizarPeru);
 
-const filas = aoa
-  .slice(2)
-  .filter((r) => clean(r[1]))
-  .map((r) => {
-    const o = {};
-    headers.forEach((h, i) => {
-      if (h && h !== 'Acciones') o[h] = clean(r[i]);
-    });
-    return o;
-  });
-
-const estimaciones = filas.map(construirEstimacion);
+const estimaciones = [...filasEc, ...filasPe].map((row, index) => construirEstimacion(row, index));
 
 fs.writeFileSync(OUT_PATH, `${JSON.stringify(estimaciones, null, 2)}\n`, 'utf8');
 
@@ -661,8 +1019,14 @@ const totalComentarios = estimaciones.reduce(
   0
 );
 
+const porPais = estimaciones.reduce((acc, e) => {
+  acc[e.pais] = (acc[e.pais] || 0) + 1;
+  return acc;
+}, {});
+
 console.log(`Seed escrito en ${OUT_PATH}`);
 console.log(`  Estimaciones : ${estimaciones.length}`);
+console.log(`  Por país     : ${JSON.stringify(porPais)}`);
 console.log(`  Por estado   : ${JSON.stringify(porEstado)}`);
 console.log(`  Líneas daño  : ${totalDanos}`);
 console.log(`  Comentarios  : ${totalComentarios}`);

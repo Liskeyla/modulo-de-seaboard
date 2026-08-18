@@ -16,8 +16,7 @@ export function metaPais(id: PaisOperacion) {
 }
 
 /**
- * País de la estimación. Si el seed no lo trae, se asigna de forma estable:
- * códigos que terminan en 0 o 5 quedan en Perú para poder demostrar el filtro.
+ * País de la estimación. El seed trae `pais`; si falta, se infiere del código.
  */
 export function paisDe(e: { pais?: PaisOperacion; codigo: string }): PaisOperacion {
   if (e.pais) return e.pais;
