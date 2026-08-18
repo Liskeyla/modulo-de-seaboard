@@ -537,7 +537,7 @@ export default function ReporteEstimacionesPage() {
                       <th>Análisis de observación</th>
                       <th>Fecha de modificación</th>
                       <th>Usuario de Modificacion</th>
-                      <th className="dms-sticky-col dms-sticky-col--right">Acciones</th>
+                      <th>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -676,10 +676,7 @@ export default function ReporteEstimacionesPage() {
                               {row.fechaModificacion || '—'}
                             </td>
                             <td className="text-xs">{row.usuarioModificacion || 'N/A'}</td>
-                            <td
-                              className="dms-sticky-col dms-sticky-col--right"
-                              onDoubleClick={(e) => e.stopPropagation()}
-                            >
+                            <td onDoubleClick={(e) => e.stopPropagation()}>
                               {accionesDe(row)}
                             </td>
                           </tr>

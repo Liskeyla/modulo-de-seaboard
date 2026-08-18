@@ -189,12 +189,6 @@
     box-shadow: 6px 0 10px -6px rgba(15, 23, 42, 0.2);
   }
 
-  .dms-sticky-col--right {
-    right: 0;
-    min-width: 8rem;
-    box-shadow: -6px 0 10px -6px rgba(15, 23, 42, 0.18);
-  }
-
   .dms-table tbody td.dms-sticky-col {
     @apply bg-white;
   }
