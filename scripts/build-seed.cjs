@@ -380,6 +380,16 @@ function fotoPe(codigoCorto, n, tipo, desc, fecha) {
   };
 }
 
+function fotoEc(codigoCorto, n, tipo, desc, fecha) {
+  return {
+    id: `ec-${codigoCorto}-${tipo}-${n}`,
+    url: `${FOTOS_DIR}/ec_${codigoCorto}_${String(n).padStart(2, '0')}.jpg`,
+    tipo,
+    descripcion: desc,
+    fecha,
+  };
+}
+
 function lineaPdf(opts) {
   const {
     codigo,
@@ -392,18 +402,25 @@ function lineaPdf(opts) {
     cant,
     largo = 0,
     ancho = 0,
+    longitud = 0,
     hh,
     csHH,
     csMat,
     estado,
     fotos,
+    partNumber,
+    seccion,
+    tieneVideo,
+    archivos,
+    medida,
   } = opts;
-  const conMedidas = largo > 0 || ancho > 0;
+  const conMedidas = largo > 0 || ancho > 0 || longitud > 0;
+  const long = longitud || (largo && !ancho ? largo : conMedidas ? round2(largo) : 0);
   return {
     id: `${codigo}-l${linea}`,
     linea,
     comp,
-    partNumber: '-',
+    partNumber: partNumber ?? '-',
     ubicacion: ubic,
     dano,
     obsAnalisis: desc,
@@ -413,22 +430,23 @@ function lineaPdf(opts) {
     serieEntregado: '',
     largo,
     ancho,
-    area: conMedidas ? round2((largo * ancho) / 10000) : 0,
-    longitud: conMedidas ? round2(largo) : 0,
+    area: largo && ancho ? round2((largo * ancho) / 10000) : 0,
+    longitud: long,
     cantidad: cant,
     horasHombre: hh,
     csHoraHombre: csHH,
     csMaterial: csMat,
     csTotal: round2(csHH + csMat),
     cargo: 'Línea',
-    aplica: estado === 'REPARADO' ? 'Aprobado Linea' : 'Aprobado Linea',
-    medida: conMedidas ? 'CM' : 'UN',
+    aplica: estado === 'ENVIADO' ? 'Pendiente Revisión' : 'Aprobado Linea',
+    medida: medida || (conMedidas ? 'CM' : 'UN'),
     remark: '',
     contenedorDonante: '',
-    tieneVideo: false,
-    seccion: 'ESTRUCTURAL',
+    tieneVideo: Boolean(tieneVideo),
+    seccion: seccion || 'ESTRUCTURAL',
     fotos,
     comentarios: opts.comentarios || [],
+    ...(archivos ? { archivos } : {}),
   };
 }
 
@@ -583,9 +601,203 @@ function danosPdfPeru(codigo) {
   return null;
 }
 
+function danosPdfEcuador(codigo) {
+  if (codigo === 'ERSBM-2026-179067') {
+    return [
+      lineaPdf({
+        codigo,
+        linea: 1,
+        comp: 'POC',
+        ubic: 'RB1N',
+        dano: 'IR-IMPROPER REPAIR',
+        met: 'PX',
+        desc: 'PATCH EXTERIOR PANELS- STEEL WITH FOAM',
+        cant: 1,
+        largo: 20,
+        ancho: 20,
+        hh: 0.77,
+        csHH: 6.93,
+        csMat: 7.45,
+        estado: 'APROBADO',
+        fotos: [
+          fotoEc('179067', 1, 'DANO', 'Parche exterior en panel de acero con foam', '17/08/2026 00:53:00'),
+          fotoEc('179067', 2, 'DANO', 'Detalle POC en RB1N', '17/08/2026 00:53:00'),
+          fotoEc('179067', 3, 'DANO', 'Medida 20 x 20 cm del parche', '17/08/2026 00:53:00'),
+          fotoEc('179067', 5, 'DANO', 'Evidencia del daño IR en patio RFS 1', '17/08/2026 00:53:00'),
+        ],
+      }),
+    ];
+  }
+
+  if (codigo === 'ERSBM-2026-179066') {
+    const f = '17/08/2026 00:42:24';
+    return [
+      lineaPdf({
+        codigo, linea: 1, comp: 'TFF-VERTICAL', ubic: 'FX1N', dano: 'LO-LOOSE', met: 'GS',
+        desc: 'MISCELLANEOUS - BAFFLE VERTICAL (LATERAL)', cant: 1, hh: 1, csHH: 9, csMat: 13.35,
+        estado: 'APROBADO', fotos: [fotoEc('179066', 1, 'DANO', 'Baffle vertical suelto', f)],
+      }),
+      lineaPdf({
+        codigo, linea: 2, comp: 'TFF', ubic: 'FB23', dano: 'DT-DENT', met: 'GS',
+        desc: 'MISCELLANEOUS - STRAIGHT BAFFLE PLATE', cant: 1, hh: 1, csHH: 9, csMat: 13.35,
+        estado: 'APROBADO', fotos: [fotoEc('179066', 2, 'DANO', 'Placa baffle abollada', f)],
+      }),
+      lineaPdf({
+        codigo, linea: 3, comp: 'DRP', ubic: 'BX1N', dano: 'MS-MISSING', met: 'RP',
+        desc: 'MISCELLANEOUS - REPLACE TAPON GRANDE DRENAJE', cant: 2, hh: 0.5, csHH: 4.5, csMat: 6.68,
+        estado: 'APROBADO', fotos: [fotoEc('179066', 3, 'DANO', 'Tapón grande de drenaje faltante', f)],
+      }),
+      lineaPdf({
+        codigo, linea: 4, comp: 'PEP', ubic: 'DB3N', dano: 'BR-BROKEN', met: 'SN',
+        desc: 'FRAME SECTION', cant: 1, longitud: 60, hh: 0.5, csHH: 4.5, csMat: 6.68,
+        estado: 'APROBADO', fotos: [fotoEc('179066', 4, 'DANO', 'Sección de marco rota 60 cm', f)],
+      }),
+      lineaPdf({
+        codigo, linea: 5, comp: 'GTA', ubic: 'DB3N', dano: 'CD-CUT/DAMAGED', met: 'SN',
+        desc: 'DOOR PARTS - SECTION DOOR GASKET', cant: 1, longitud: 100, hh: 0.3, csHH: 2.7, csMat: 4.01,
+        estado: 'APROBADO', fotos: [fotoEc('179066', 5, 'DANO', 'Empaque de puerta seccionado 100 cm', f)],
+      }),
+      lineaPdf({
+        codigo, linea: 6, comp: 'PEP', ubic: 'DX23', dano: 'WT-WATERTIGHT', met: 'SE-LINEAL',
+        desc: 'SEAL LINEAL', cant: 2, longitud: 720, hh: 2.88, csHH: 25.92, csMat: 38.45,
+        estado: 'APROBADO', fotos: [fotoEc('179066', 6, 'DANO', 'Sello lineal 720 cm', f)],
+      }),
+      lineaPdf({
+        codigo, linea: 7, comp: 'PIC-A', ubic: 'IXXX', dano: 'WT-WATERTIGHT', met: 'SE-LINEAL',
+        desc: 'SEAL LINEAL', cant: 6, longitud: 1200, hh: 14.4, csHH: 129.6, csMat: 192.28,
+        estado: 'APROBADO',
+        fotos: [fotoEc('179066', 7, 'DANO', 'Sello lineal PIC-A 1200 cm', f), fotoEc('179066', 8, 'DANO', 'Detalle de sello lineal en IXXX', f)],
+        comentarios: [
+          {
+            id: 'ec-179066-l7-c1',
+            usuario: 'cesarvalencia',
+            rol: 'LIQUIDACIONES',
+            fecha: '17/08/2026 09:14:28',
+            tipo: 'SOLICITA_CAMBIO',
+            mensaje:
+              'El sello lineal PIC-A concentra la mayor parte del estimado. Confirmar metros y cantidad (6) contra el anexo fotográfico.',
+            campoAfectado: 'Cant.',
+          },
+          {
+            id: 'ec-179066-l7-c2',
+            usuario: 'rordonez',
+            rol: 'TECNICO',
+            fecha: '17/08/2026 09:28:11',
+            tipo: 'INFORMATIVO',
+            mensaje:
+              'Confirmado en patio RFS 1: 6 tramos SE-LINEAL, 1200 cm. Se mantiene el ítem con cargo a la línea.',
+          },
+        ],
+      }),
+      lineaPdf({
+        codigo, linea: 8, comp: 'GTA', ubic: 'DB3N', dano: 'CU-CUT', met: 'SN',
+        desc: 'DOOR PARTS - SECTION DOOR GASKET', cant: 1, longitud: 50, hh: 0.3, csHH: 2.7, csMat: 4.01,
+        estado: 'APROBADO', fotos: [],
+      }),
+      lineaPdf({
+        codigo, linea: 9, comp: 'GTA', ubic: 'DB3N', dano: 'CD-CUT/DAMAGED', met: 'SE-LINEAL',
+        desc: 'SEAL LINEAL', cant: 1, longitud: 50, hh: 0.12, csHH: 1.08, csMat: 1.6,
+        estado: 'APROBADO', fotos: [],
+      }),
+      lineaPdf({
+        codigo, linea: 10, comp: 'RLA', ubic: 'DG23', dano: 'WT-WATERTIGHT', met: 'SE-LINEAL',
+        desc: 'SEAL LINEAL', cant: 1, longitud: 240, hh: 0.48, csHH: 4.32, csMat: 6.41,
+        estado: 'APROBADO', fotos: [],
+      }),
+    ];
+  }
+
+  if (codigo === 'ERSBM-2026-179151') {
+    const f = '17/08/2026 14:25:35';
+    const seccion = 'MAQUINA';
+    const estado = 'ENVIADO';
+    return [
+      lineaPdf({
+        codigo, linea: 1, comp: 'CON', partNumber: '2233495', ubic: 'MQNN',
+        dano: 'CO-CORRODED/RUSTY', met: 'RP', desc: 'DK - NW - COIL CONDENSER 2233495',
+        cant: 1, hh: 3, csHH: 27, csMat: 520, estado, seccion, tieneVideo: true,
+        fotos: [
+          fotoEc('179151', 1, 'DANO', 'Coil condenser corroído', f),
+          fotoEc('179151', 2, 'DANO', 'Detalle del coil 2233495', f),
+        ],
+        archivos: [
+          {
+            id: 'ec-179151-vid',
+            url: '/uploads/estimaciones/videos/inspeccion-demo.mp4',
+            clase: 'VIDEO',
+            grupo: 'ESTIMACION',
+            nombre: 'VID_20260817_141021.mp4',
+            fecha: '17/08/2026 14:10:21',
+          },
+          {
+            id: 'ec-179151-log',
+            url: '',
+            clase: 'DATALOG',
+            grupo: 'ESTIMACION',
+            nombre: 'BMOU9847955_260817A.V1a',
+            fecha: '17/08/2026 14:10:21',
+            sintetico: true,
+          },
+        ],
+      }),
+      lineaPdf({
+        codigo, linea: 2, comp: 'DRYER', partNumber: '2179111', ubic: 'MQNN',
+        dano: 'CO-CORRODED/RUSTY', met: 'RP',
+        desc: 'DK - NW - DRYER ASSY DAIKIN, INDIA SAME AS 1241385 / 2139029 / 2179111 (FILTRO)',
+        cant: 1, hh: 0.5, csHH: 4.5, csMat: 95, estado, seccion,
+        fotos: [fotoEc('179151', 3, 'DANO', 'Dryer assembly corroído', f)],
+      }),
+      lineaPdf({
+        codigo, linea: 3, comp: 'SYS', partNumber: 'NULL', ubic: 'MQNN',
+        dano: 'RN-REPAIR NECESSARY', met: 'RP', desc: 'VACIO DE SISTEM',
+        cant: 1, hh: 1, csHH: 9, csMat: 0, estado, seccion, fotos: [],
+      }),
+      lineaPdf({
+        codigo, linea: 4, comp: 'PMI', partNumber: 'RP', ubic: 'MQNN',
+        dano: 'RN-REPAIR NECESSARY', met: 'WD', desc: 'PALILLO DE SOLDADURA',
+        cant: 2, hh: 0, csHH: 0, csMat: 8.5, estado, seccion, fotos: [],
+      }),
+      lineaPdf({
+        codigo, linea: 5, comp: 'ECB', partNumber: '818831C', ubic: 'MQNN',
+        dano: 'MS-MISSING/LOST', met: 'RP',
+        desc: 'SC - NW - POWER CABLE 4X4.0MM2 818831A / 818830A / 818831C',
+        cant: 8, hh: 0.4, csHH: 3.6, csMat: 184, estado, seccion,
+        fotos: [fotoEc('179151', 5, 'DANO', 'Cable 460V corto / faltante', f)],
+      }),
+      lineaPdf({
+        codigo, linea: 6, comp: 'RFA', partNumber: 'N/A', ubic: 'MQNN',
+        dano: 'LF-LOW FLUID LEVEL', met: 'RP', desc: 'REFRIGERANTE R134A SML',
+        cant: 1, hh: 0.25, csHH: 2.25, csMat: 110, estado, seccion,
+        fotos: [fotoEc('179151', 6, 'DANO', 'Carga de refrigerante R134A', f)],
+      }),
+      lineaPdf({
+        codigo, linea: 7, comp: 'JEY', partNumber: 'N/A', ubic: 'MQNN',
+        dano: 'RN-REPAIR NECESSARY', met: 'AJ', desc: 'AMARRAS PLASTICAS',
+        cant: 10, hh: 0, csHH: 0, csMat: 2.4, estado, seccion, fotos: [],
+      }),
+      lineaPdf({
+        codigo, linea: 8, comp: 'EMI', partNumber: '22-50397-00', ubic: 'MQNN',
+        dano: 'RN-REPAIR NECESSARY', met: 'RP', desc: 'CA - NW - SPLICE KIT, 22-50397-00',
+        cant: 1, hh: 0.5, csHH: 4.5, csMat: 32, estado, seccion,
+        fotos: [fotoEc('179151', 7, 'DANO', 'Splice kit para aislar cable 460V', f)],
+      }),
+      lineaPdf({
+        codigo, linea: 9, comp: 'EPL', partNumber: '818559A', ubic: 'MQNN',
+        dano: 'RN-REPAIR NECESSARY', met: 'RP', desc: 'SC - NW - POWER PLUG 818559A',
+        cant: 1, hh: 0.5, csHH: 4.5, csMat: 78, estado, seccion,
+        fotos: [fotoEc('179151', 8, 'DANO', 'Power plug de un solo uso', f)],
+      }),
+    ];
+  }
+
+  return null;
+}
+
 function generarDanos(row, estado) {
   const codigo = clean(row.Codigo);
   if (codigo === CODIGO_DESTACADO) return danosDestacado();
+  const dePdfEc = danosPdfEcuador(codigo);
+  if (dePdfEc) return dePdfEc;
   const dePdf = danosPdfPeru(codigo);
   if (dePdf) return dePdf;
 
@@ -1002,7 +1214,49 @@ function normalizarPeru(row) {
 
 // ---------------------------------------------------------------- main
 
-const filasEc = leerFilas(XLSX_PATH).map((r) => ({ ...r, _pais: 'ECUADOR' }));
+const FILA_179151 = {
+  _pais: 'ECUADOR',
+  Codigo: 'ERSBM-2026-179151',
+  Semana: 34,
+  Año: 2026,
+  Estado: 'ENVIADO',
+  Contenedor: 'BMOU9847955',
+  'Modelo Maquina': 'DAIKIN',
+  'Código RFS': '40RC',
+  Naviera: 'SEABOARD MARINE LINE',
+  Actividad: 'DM',
+  'Lugar de Estimación': 'RFS 1',
+  'Lugar de Asistencia': '',
+  'Fecha GateIn': '17/08/2026 14:10:21',
+  'Fecha de Elaboración': '17/08/2026 14:25:35',
+  'Fecha de Reparación': '',
+  'Tipo de Estimación': 'MÁQUINA',
+  'Técnico de Estimación': 'rpontes',
+  'Horas Hombre': 6.15,
+  'PVP Horas Hombre': 55.35,
+  'PVP Materiales': 1030.4,
+  'PVP Total': 1085.75,
+  'Estado PTI': 'DM',
+  'Fecha Fin PTI': '17/08/2026 14:10:21',
+  'Enviar Aprobacion': 'SI',
+  'Fecha Envio': '17/08/2026 14:25:35',
+  'Fecha Aprobacion': '',
+  'EDI Enviado ONE': 'NO',
+  'Fecha Envio EDI ONE': '',
+  Niveles: '',
+  'Dias Estadia': 0,
+  'Tipo de Daño': 'Máquina',
+  'Análisis de observación':
+    'reemplazar coil condenser x corroido , vacío al sistema , reemplazar , x soldar coil condenser x reemplazo , completar carga x reemplazo coil condenser , ajuste, completar cable 460v x corto , insular cable 460v x completar , reemplazar plug x un solo uso',
+  'Fecha de modificación': '',
+  'Usuario de Modificación': 'rpontes',
+  Tipo: '45R1',
+};
+
+const filasEc = [
+  ...leerFilas(XLSX_PATH).map((r) => ({ ...r, _pais: 'ECUADOR' })),
+  FILA_179151,
+];
 const filasPe = leerFilas(XLSX_PERU).map(normalizarPeru);
 
 const estimaciones = [...filasEc, ...filasPe].map((row, index) => construirEstimacion(row, index));

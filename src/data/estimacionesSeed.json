@@ -860,164 +860,13 @@
       {
         "id": "ERSBM-2026-179066-l1",
         "linea": 1,
-        "comp": "PSO-TBL",
-        "partNumber": "RN",
-        "ubicacion": "FL2C",
-        "dano": "BR-BROKEN",
-        "obsAnalisis": "Perforación pasante en panel lateral",
-        "metRep": "RN",
-        "newMetRep": "RN",
-        "serieAnterior": "N/A",
-        "serieEntregado": "",
-        "largo": 91.62,
-        "ancho": 62.72,
-        "area": 0.57,
-        "longitud": 91.62,
-        "cantidad": 2,
-        "horasHombre": 6.09,
-        "csHoraHombre": 62.49,
-        "csMaterial": 44.92,
-        "csTotal": 107.41,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
-        "medida": "CM",
-        "remark": "",
-        "contenedorDonante": "SMLU4877204",
-        "tieneVideo": false,
-        "seccion": "ESTRUCTURAL",
-        "fotos": [
-          {
-            "id": "ERSBM-2026-179066-fd-0-0-2",
-            "url": "/uploads/estimaciones/fotos/foto_2.jpg",
-            "tipo": "DANO",
-            "descripcion": "Evidencia del daño registrado en inspección",
-            "fecha": "17/08/2026 08:48:02"
-          },
-          {
-            "id": "ERSBM-2026-179066-fr-0-11",
-            "url": "/uploads/estimaciones/fotos/foto_11.jpg",
-            "tipo": "REPARADO",
-            "descripcion": "Evidencia del trabajo terminado",
-            "fecha": "17/08/2026 14:20:11"
-          }
-        ],
-        "comentarios": [
-          {
-            "id": "ERSBM-2026-179066-l1-c1",
-            "usuario": "jdefaz",
-            "rol": "LIQUIDACIONES",
-            "fecha": "17/08/2026 13:49:12",
-            "tipo": "SOLICITA_CAMBIO",
-            "mensaje": "Favor validar la tarifa aplicada: el costo de material no coincide con el catálogo vigente 2026.",
-            "campoAfectado": "Cs. Mat."
-          },
-          {
-            "id": "ERSBM-2026-179066-l1-c2",
-            "usuario": "rordonez",
-            "rol": "TECNICO",
-            "fecha": "17/08/2026 13:49:48",
-            "tipo": "INFORMATIVO",
-            "mensaje": "Tarifa corregida según catálogo vigente. Se ajustó el costo de material del ítem."
-          },
-          {
-            "id": "ERSBM-2026-179066-l1-c3",
-            "usuario": "jdefaz",
-            "rol": "LIQUIDACIONES",
-            "fecha": "17/08/2026 13:49:59",
-            "tipo": "ACEPTADO",
-            "mensaje": "Validado contra catálogo. Sin observaciones adicionales."
-          }
-        ]
-      },
-      {
-        "id": "ERSBM-2026-179066-l2",
-        "linea": 2,
-        "comp": "TCH-PNL",
-        "partNumber": "PX",
-        "ubicacion": "TX12",
-        "dano": "DT-DENT",
-        "obsAnalisis": "Requiere parche tipo overlap segun norma IICL",
+        "comp": "TFF-VERTICAL",
+        "partNumber": "-",
+        "ubicacion": "FX1N",
+        "dano": "LO-LOOSE",
+        "obsAnalisis": "MISCELLANEOUS - BAFFLE VERTICAL (LATERAL)",
         "metRep": "",
-        "newMetRep": "PX",
-        "serieAnterior": "N/A",
-        "serieEntregado": "",
-        "largo": 76.16,
-        "ancho": 30.03,
-        "area": 0.23,
-        "longitud": 76.16,
-        "cantidad": 2,
-        "horasHombre": 5.03,
-        "csHoraHombre": 35.48,
-        "csMaterial": 92.47,
-        "csTotal": 127.95,
-        "cargo": "Línea",
-        "aplica": "Aprobado Linea",
-        "medida": "CM",
-        "remark": "REVISAR EN PATIO",
-        "contenedorDonante": "",
-        "tieneVideo": true,
-        "seccion": "ESTRUCTURAL",
-        "fotos": [
-          {
-            "id": "ERSBM-2026-179066-fd-1-0-3",
-            "url": "/uploads/estimaciones/fotos/foto_3.jpg",
-            "tipo": "DANO",
-            "descripcion": "Evidencia del daño registrado en inspección",
-            "fecha": "17/08/2026 08:48:02"
-          },
-          {
-            "id": "ERSBM-2026-179066-fd-1-1-3",
-            "url": "/uploads/estimaciones/fotos/foto_3.jpg",
-            "tipo": "DANO",
-            "descripcion": "Evidencia del daño registrado en inspección",
-            "fecha": "17/08/2026 08:48:02"
-          },
-          {
-            "id": "ERSBM-2026-179066-fr-1-10",
-            "url": "/uploads/estimaciones/fotos/foto_10.jpg",
-            "tipo": "REPARADO",
-            "descripcion": "Evidencia del trabajo terminado",
-            "fecha": "17/08/2026 14:20:11"
-          }
-        ],
-        "comentarios": [
-          {
-            "id": "ERSBM-2026-179066-l2-c1",
-            "usuario": "lmedina",
-            "rol": "LIQUIDACIONES",
-            "fecha": "17/08/2026 14:21:12",
-            "tipo": "SOLICITA_CAMBIO",
-            "mensaje": "Favor validar la tarifa aplicada: el costo de material no coincide con el catálogo vigente 2026.",
-            "campoAfectado": "Cs. Mat."
-          },
-          {
-            "id": "ERSBM-2026-179066-l2-c2",
-            "usuario": "rordonez",
-            "rol": "TECNICO",
-            "fecha": "17/08/2026 14:21:48",
-            "tipo": "INFORMATIVO",
-            "mensaje": "Tarifa corregida según catálogo vigente. Se ajustó el costo de material del ítem."
-          },
-          {
-            "id": "ERSBM-2026-179066-l2-c3",
-            "usuario": "lmedina",
-            "rol": "LIQUIDACIONES",
-            "fecha": "17/08/2026 14:21:59",
-            "tipo": "ACEPTADO",
-            "mensaje": "Validado contra catálogo. Sin observaciones adicionales."
-          }
-        ]
-      },
-      {
-        "id": "ERSBM-2026-179066-l3",
-        "linea": 3,
-        "comp": "ESQ-SUP",
-        "partNumber": "RN",
-        "ubicacion": "CP4L",
-        "dano": "CR-CRACKED",
-        "obsAnalisis": "Golpe con deformación mayor a 30 mm",
-        "metRep": "RN",
-        "newMetRep": "RN",
+        "newMetRep": "GS",
         "serieAnterior": "N/A",
         "serieEntregado": "",
         "largo": 0,
@@ -1025,10 +874,10 @@
         "area": 0,
         "longitud": 0,
         "cantidad": 1,
-        "horasHombre": 4.44,
-        "csHoraHombre": 58.99,
-        "csMaterial": 93.29,
-        "csTotal": 152.28,
+        "horasHombre": 1,
+        "csHoraHombre": 9,
+        "csMaterial": 13.35,
+        "csTotal": 22.35,
         "cargo": "Línea",
         "aplica": "Aprobado Linea",
         "medida": "UN",
@@ -1038,25 +887,89 @@
         "seccion": "ESTRUCTURAL",
         "fotos": [
           {
-            "id": "ERSBM-2026-179066-fd-2-0-5",
-            "url": "/uploads/estimaciones/fotos/foto_5.jpg",
+            "id": "ec-179066-DANO-1",
+            "url": "/uploads/estimaciones/fotos/ec_179066_01.jpg",
             "tipo": "DANO",
-            "descripcion": "Evidencia del daño registrado en inspección",
-            "fecha": "17/08/2026 08:48:02"
-          },
+            "descripcion": "Baffle vertical suelto",
+            "fecha": "17/08/2026 00:42:24"
+          }
+        ],
+        "comentarios": []
+      },
+      {
+        "id": "ERSBM-2026-179066-l2",
+        "linea": 2,
+        "comp": "TFF",
+        "partNumber": "-",
+        "ubicacion": "FB23",
+        "dano": "DT-DENT",
+        "obsAnalisis": "MISCELLANEOUS - STRAIGHT BAFFLE PLATE",
+        "metRep": "",
+        "newMetRep": "GS",
+        "serieAnterior": "N/A",
+        "serieEntregado": "",
+        "largo": 0,
+        "ancho": 0,
+        "area": 0,
+        "longitud": 0,
+        "cantidad": 1,
+        "horasHombre": 1,
+        "csHoraHombre": 9,
+        "csMaterial": 13.35,
+        "csTotal": 22.35,
+        "cargo": "Línea",
+        "aplica": "Aprobado Linea",
+        "medida": "UN",
+        "remark": "",
+        "contenedorDonante": "",
+        "tieneVideo": false,
+        "seccion": "ESTRUCTURAL",
+        "fotos": [
           {
-            "id": "ERSBM-2026-179066-fd-2-1-6",
-            "url": "/uploads/estimaciones/fotos/foto_6.jpg",
+            "id": "ec-179066-DANO-2",
+            "url": "/uploads/estimaciones/fotos/ec_179066_02.jpg",
             "tipo": "DANO",
-            "descripcion": "Evidencia del daño registrado en inspección",
-            "fecha": "17/08/2026 08:48:02"
-          },
+            "descripcion": "Placa baffle abollada",
+            "fecha": "17/08/2026 00:42:24"
+          }
+        ],
+        "comentarios": []
+      },
+      {
+        "id": "ERSBM-2026-179066-l3",
+        "linea": 3,
+        "comp": "DRP",
+        "partNumber": "-",
+        "ubicacion": "BX1N",
+        "dano": "MS-MISSING",
+        "obsAnalisis": "MISCELLANEOUS - REPLACE TAPON GRANDE DRENAJE",
+        "metRep": "",
+        "newMetRep": "RP",
+        "serieAnterior": "N/A",
+        "serieEntregado": "",
+        "largo": 0,
+        "ancho": 0,
+        "area": 0,
+        "longitud": 0,
+        "cantidad": 2,
+        "horasHombre": 0.5,
+        "csHoraHombre": 4.5,
+        "csMaterial": 6.68,
+        "csTotal": 11.18,
+        "cargo": "Línea",
+        "aplica": "Aprobado Linea",
+        "medida": "UN",
+        "remark": "",
+        "contenedorDonante": "",
+        "tieneVideo": false,
+        "seccion": "ESTRUCTURAL",
+        "fotos": [
           {
-            "id": "ERSBM-2026-179066-fr-2-11",
-            "url": "/uploads/estimaciones/fotos/foto_11.jpg",
-            "tipo": "REPARADO",
-            "descripcion": "Evidencia del trabajo terminado",
-            "fecha": "17/08/2026 14:20:11"
+            "id": "ec-179066-DANO-3",
+            "url": "/uploads/estimaciones/fotos/ec_179066_03.jpg",
+            "tipo": "DANO",
+            "descripcion": "Tapón grande de drenaje faltante",
+            "fecha": "17/08/2026 00:42:24"
           }
         ],
         "comentarios": []
@@ -1064,81 +977,276 @@
       {
         "id": "ERSBM-2026-179066-l4",
         "linea": 4,
-        "comp": "POC-ZZZ",
-        "partNumber": "PX",
-        "ubicacion": "POCZZ",
-        "dano": "HO-HOLE",
-        "obsAnalisis": "Tabla de piso astillada en zona de carga",
+        "comp": "PEP",
+        "partNumber": "-",
+        "ubicacion": "DB3N",
+        "dano": "BR-BROKEN",
+        "obsAnalisis": "FRAME SECTION",
         "metRep": "",
-        "newMetRep": "PX",
+        "newMetRep": "SN",
         "serieAnterior": "N/A",
         "serieEntregado": "",
-        "largo": 89.51,
-        "ancho": 54.17,
-        "area": 0.48,
-        "longitud": 89.51,
+        "largo": 0,
+        "ancho": 0,
+        "area": 0,
+        "longitud": 60,
         "cantidad": 1,
-        "horasHombre": 5.92,
-        "csHoraHombre": 36.36,
-        "csMaterial": 56.14,
-        "csTotal": 92.5,
+        "horasHombre": 0.5,
+        "csHoraHombre": 4.5,
+        "csMaterial": 6.68,
+        "csTotal": 11.18,
         "cargo": "Línea",
         "aplica": "Aprobado Linea",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
-        "tieneVideo": true,
+        "tieneVideo": false,
         "seccion": "ESTRUCTURAL",
         "fotos": [
           {
-            "id": "ERSBM-2026-179066-fd-3-0-7",
-            "url": "/uploads/estimaciones/fotos/foto_7.jpg",
+            "id": "ec-179066-DANO-4",
+            "url": "/uploads/estimaciones/fotos/ec_179066_04.jpg",
             "tipo": "DANO",
-            "descripcion": "Evidencia del daño registrado en inspección",
-            "fecha": "17/08/2026 08:48:02"
+            "descripcion": "Sección de marco rota 60 cm",
+            "fecha": "17/08/2026 00:42:24"
+          }
+        ],
+        "comentarios": []
+      },
+      {
+        "id": "ERSBM-2026-179066-l5",
+        "linea": 5,
+        "comp": "GTA",
+        "partNumber": "-",
+        "ubicacion": "DB3N",
+        "dano": "CD-CUT/DAMAGED",
+        "obsAnalisis": "DOOR PARTS - SECTION DOOR GASKET",
+        "metRep": "",
+        "newMetRep": "SN",
+        "serieAnterior": "N/A",
+        "serieEntregado": "",
+        "largo": 0,
+        "ancho": 0,
+        "area": 0,
+        "longitud": 100,
+        "cantidad": 1,
+        "horasHombre": 0.3,
+        "csHoraHombre": 2.7,
+        "csMaterial": 4.01,
+        "csTotal": 6.71,
+        "cargo": "Línea",
+        "aplica": "Aprobado Linea",
+        "medida": "CM",
+        "remark": "",
+        "contenedorDonante": "",
+        "tieneVideo": false,
+        "seccion": "ESTRUCTURAL",
+        "fotos": [
+          {
+            "id": "ec-179066-DANO-5",
+            "url": "/uploads/estimaciones/fotos/ec_179066_05.jpg",
+            "tipo": "DANO",
+            "descripcion": "Empaque de puerta seccionado 100 cm",
+            "fecha": "17/08/2026 00:42:24"
+          }
+        ],
+        "comentarios": []
+      },
+      {
+        "id": "ERSBM-2026-179066-l6",
+        "linea": 6,
+        "comp": "PEP",
+        "partNumber": "-",
+        "ubicacion": "DX23",
+        "dano": "WT-WATERTIGHT",
+        "obsAnalisis": "SEAL LINEAL",
+        "metRep": "",
+        "newMetRep": "SE-LINEAL",
+        "serieAnterior": "N/A",
+        "serieEntregado": "",
+        "largo": 0,
+        "ancho": 0,
+        "area": 0,
+        "longitud": 720,
+        "cantidad": 2,
+        "horasHombre": 2.88,
+        "csHoraHombre": 25.92,
+        "csMaterial": 38.45,
+        "csTotal": 64.37,
+        "cargo": "Línea",
+        "aplica": "Aprobado Linea",
+        "medida": "CM",
+        "remark": "",
+        "contenedorDonante": "",
+        "tieneVideo": false,
+        "seccion": "ESTRUCTURAL",
+        "fotos": [
+          {
+            "id": "ec-179066-DANO-6",
+            "url": "/uploads/estimaciones/fotos/ec_179066_06.jpg",
+            "tipo": "DANO",
+            "descripcion": "Sello lineal 720 cm",
+            "fecha": "17/08/2026 00:42:24"
+          }
+        ],
+        "comentarios": []
+      },
+      {
+        "id": "ERSBM-2026-179066-l7",
+        "linea": 7,
+        "comp": "PIC-A",
+        "partNumber": "-",
+        "ubicacion": "IXXX",
+        "dano": "WT-WATERTIGHT",
+        "obsAnalisis": "SEAL LINEAL",
+        "metRep": "",
+        "newMetRep": "SE-LINEAL",
+        "serieAnterior": "N/A",
+        "serieEntregado": "",
+        "largo": 0,
+        "ancho": 0,
+        "area": 0,
+        "longitud": 1200,
+        "cantidad": 6,
+        "horasHombre": 14.4,
+        "csHoraHombre": 129.6,
+        "csMaterial": 192.28,
+        "csTotal": 321.88,
+        "cargo": "Línea",
+        "aplica": "Aprobado Linea",
+        "medida": "CM",
+        "remark": "",
+        "contenedorDonante": "",
+        "tieneVideo": false,
+        "seccion": "ESTRUCTURAL",
+        "fotos": [
+          {
+            "id": "ec-179066-DANO-7",
+            "url": "/uploads/estimaciones/fotos/ec_179066_07.jpg",
+            "tipo": "DANO",
+            "descripcion": "Sello lineal PIC-A 1200 cm",
+            "fecha": "17/08/2026 00:42:24"
           },
           {
-            "id": "ERSBM-2026-179066-fd-3-1-3",
-            "url": "/uploads/estimaciones/fotos/foto_3.jpg",
+            "id": "ec-179066-DANO-8",
+            "url": "/uploads/estimaciones/fotos/ec_179066_08.jpg",
             "tipo": "DANO",
-            "descripcion": "Evidencia del daño registrado en inspección",
-            "fecha": "17/08/2026 08:48:02"
-          },
-          {
-            "id": "ERSBM-2026-179066-fr-3-12",
-            "url": "/uploads/estimaciones/fotos/foto_12.jpg",
-            "tipo": "REPARADO",
-            "descripcion": "Evidencia del trabajo terminado",
-            "fecha": "17/08/2026 14:20:11"
+            "descripcion": "Detalle de sello lineal en IXXX",
+            "fecha": "17/08/2026 00:42:24"
           }
         ],
         "comentarios": [
           {
-            "id": "ERSBM-2026-179066-l4-c1",
-            "usuario": "jdefaz",
+            "id": "ec-179066-l7-c1",
+            "usuario": "cesarvalencia",
             "rol": "LIQUIDACIONES",
-            "fecha": "17/08/2026 12:56:12",
+            "fecha": "17/08/2026 09:14:28",
             "tipo": "SOLICITA_CAMBIO",
-            "mensaje": "La cantidad registrada no corresponde a la evidencia fotográfica. Confirmar unidades.",
+            "mensaje": "El sello lineal PIC-A concentra la mayor parte del estimado. Confirmar metros y cantidad (6) contra el anexo fotográfico.",
             "campoAfectado": "Cant."
           },
           {
-            "id": "ERSBM-2026-179066-l4-c2",
+            "id": "ec-179066-l7-c2",
             "usuario": "rordonez",
             "rol": "TECNICO",
-            "fecha": "17/08/2026 12:56:48",
+            "fecha": "17/08/2026 09:28:11",
             "tipo": "INFORMATIVO",
-            "mensaje": "Confirmado en patio con el técnico: se actualizó la cantidad del ítem."
-          },
-          {
-            "id": "ERSBM-2026-179066-l4-c3",
-            "usuario": "jdefaz",
-            "rol": "LIQUIDACIONES",
-            "fecha": "17/08/2026 12:56:59",
-            "tipo": "ACEPTADO",
-            "mensaje": "Cambio verificado. Ítem habilitado para facturación."
+            "mensaje": "Confirmado en patio RFS 1: 6 tramos SE-LINEAL, 1200 cm. Se mantiene el ítem con cargo a la línea."
           }
         ]
+      },
+      {
+        "id": "ERSBM-2026-179066-l8",
+        "linea": 8,
+        "comp": "GTA",
+        "partNumber": "-",
+        "ubicacion": "DB3N",
+        "dano": "CU-CUT",
+        "obsAnalisis": "DOOR PARTS - SECTION DOOR GASKET",
+        "metRep": "",
+        "newMetRep": "SN",
+        "serieAnterior": "N/A",
+        "serieEntregado": "",
+        "largo": 0,
+        "ancho": 0,
+        "area": 0,
+        "longitud": 50,
+        "cantidad": 1,
+        "horasHombre": 0.3,
+        "csHoraHombre": 2.7,
+        "csMaterial": 4.01,
+        "csTotal": 6.71,
+        "cargo": "Línea",
+        "aplica": "Aprobado Linea",
+        "medida": "CM",
+        "remark": "",
+        "contenedorDonante": "",
+        "tieneVideo": false,
+        "seccion": "ESTRUCTURAL",
+        "fotos": [],
+        "comentarios": []
+      },
+      {
+        "id": "ERSBM-2026-179066-l9",
+        "linea": 9,
+        "comp": "GTA",
+        "partNumber": "-",
+        "ubicacion": "DB3N",
+        "dano": "CD-CUT/DAMAGED",
+        "obsAnalisis": "SEAL LINEAL",
+        "metRep": "",
+        "newMetRep": "SE-LINEAL",
+        "serieAnterior": "N/A",
+        "serieEntregado": "",
+        "largo": 0,
+        "ancho": 0,
+        "area": 0,
+        "longitud": 50,
+        "cantidad": 1,
+        "horasHombre": 0.12,
+        "csHoraHombre": 1.08,
+        "csMaterial": 1.6,
+        "csTotal": 2.68,
+        "cargo": "Línea",
+        "aplica": "Aprobado Linea",
+        "medida": "CM",
+        "remark": "",
+        "contenedorDonante": "",
+        "tieneVideo": false,
+        "seccion": "ESTRUCTURAL",
+        "fotos": [],
+        "comentarios": []
+      },
+      {
+        "id": "ERSBM-2026-179066-l10",
+        "linea": 10,
+        "comp": "RLA",
+        "partNumber": "-",
+        "ubicacion": "DG23",
+        "dano": "WT-WATERTIGHT",
+        "obsAnalisis": "SEAL LINEAL",
+        "metRep": "",
+        "newMetRep": "SE-LINEAL",
+        "serieAnterior": "N/A",
+        "serieEntregado": "",
+        "largo": 0,
+        "ancho": 0,
+        "area": 0,
+        "longitud": 240,
+        "cantidad": 1,
+        "horasHombre": 0.48,
+        "csHoraHombre": 4.32,
+        "csMaterial": 6.41,
+        "csTotal": 10.73,
+        "cargo": "Línea",
+        "aplica": "Aprobado Linea",
+        "medida": "CM",
+        "remark": "",
+        "contenedorDonante": "",
+        "tieneVideo": false,
+        "seccion": "ESTRUCTURAL",
+        "fotos": [],
+        "comentarios": []
       }
     ],
     "notas": [],
@@ -1155,7 +1263,7 @@
         "fecha": "17/08/2026 00:42:24",
         "usuario": "rordonez",
         "accion": "CREACIÓN DE ESTIMADO",
-        "detalle": "Estimado ERSBM-2026-179066 creado como tipo BOX con 4 línea(s) de daño"
+        "detalle": "Estimado ERSBM-2026-179066 creado como tipo BOX con 10 línea(s) de daño"
       },
       {
         "id": "ERSBM-2026-179066-a4",
@@ -1251,19 +1359,19 @@
       {
         "id": "ERSBM-2026-179067-l1",
         "linea": 1,
-        "comp": "PSO-TBL",
-        "partNumber": "RN",
-        "ubicacion": "FL2C",
-        "dano": "BR-BROKEN",
-        "obsAnalisis": "Perforación pasante en panel lateral",
+        "comp": "POC",
+        "partNumber": "-",
+        "ubicacion": "RB1N",
+        "dano": "IR-IMPROPER REPAIR",
+        "obsAnalisis": "PATCH EXTERIOR PANELS- STEEL WITH FOAM",
         "metRep": "",
-        "newMetRep": "RN",
+        "newMetRep": "PX",
         "serieAnterior": "N/A",
         "serieEntregado": "",
-        "largo": 48.04,
-        "ancho": 55.3,
-        "area": 0.27,
-        "longitud": 48.04,
+        "largo": 20,
+        "ancho": 20,
+        "area": 0.04,
+        "longitud": 20,
         "cantidad": 1,
         "horasHombre": 0.77,
         "csHoraHombre": 6.93,
@@ -1278,54 +1386,35 @@
         "seccion": "ESTRUCTURAL",
         "fotos": [
           {
-            "id": "ERSBM-2026-179067-fd-0-0-5",
-            "url": "/uploads/estimaciones/fotos/foto_5.jpg",
+            "id": "ec-179067-DANO-1",
+            "url": "/uploads/estimaciones/fotos/ec_179067_01.jpg",
             "tipo": "DANO",
-            "descripcion": "Evidencia del daño registrado en inspección",
-            "fecha": "17/08/2026 08:48:02"
+            "descripcion": "Parche exterior en panel de acero con foam",
+            "fecha": "17/08/2026 00:53:00"
           },
           {
-            "id": "ERSBM-2026-179067-fd-0-1-6",
-            "url": "/uploads/estimaciones/fotos/foto_6.jpg",
+            "id": "ec-179067-DANO-2",
+            "url": "/uploads/estimaciones/fotos/ec_179067_02.jpg",
             "tipo": "DANO",
-            "descripcion": "Evidencia del daño registrado en inspección",
-            "fecha": "17/08/2026 08:48:02"
+            "descripcion": "Detalle POC en RB1N",
+            "fecha": "17/08/2026 00:53:00"
           },
           {
-            "id": "ERSBM-2026-179067-fr-0-10",
-            "url": "/uploads/estimaciones/fotos/foto_10.jpg",
-            "tipo": "REPARADO",
-            "descripcion": "Evidencia del trabajo terminado",
-            "fecha": "17/08/2026 14:20:11"
+            "id": "ec-179067-DANO-3",
+            "url": "/uploads/estimaciones/fotos/ec_179067_03.jpg",
+            "tipo": "DANO",
+            "descripcion": "Medida 20 x 20 cm del parche",
+            "fecha": "17/08/2026 00:53:00"
+          },
+          {
+            "id": "ec-179067-DANO-5",
+            "url": "/uploads/estimaciones/fotos/ec_179067_05.jpg",
+            "tipo": "DANO",
+            "descripcion": "Evidencia del daño IR en patio RFS 1",
+            "fecha": "17/08/2026 00:53:00"
           }
         ],
-        "comentarios": [
-          {
-            "id": "ERSBM-2026-179067-l1-c1",
-            "usuario": "jdefaz",
-            "rol": "LIQUIDACIONES",
-            "fecha": "17/08/2026 13:35:12",
-            "tipo": "SOLICITA_CAMBIO",
-            "mensaje": "Falta el número de serie del componente entregado, sin ese dato no se puede liquidar.",
-            "campoAfectado": "Número de Serie Entregado"
-          },
-          {
-            "id": "ERSBM-2026-179067-l1-c2",
-            "usuario": "rordonez",
-            "rol": "TECNICO",
-            "fecha": "17/08/2026 13:35:48",
-            "tipo": "INFORMATIVO",
-            "mensaje": "Número de serie cargado, el componente fue entregado a bodega."
-          },
-          {
-            "id": "ERSBM-2026-179067-l1-c3",
-            "usuario": "jdefaz",
-            "rol": "LIQUIDACIONES",
-            "fecha": "17/08/2026 13:35:59",
-            "tipo": "ACEPTADO",
-            "mensaje": "Validado contra catálogo. Sin observaciones adicionales."
-          }
-        ]
+        "comentarios": []
       }
     ],
     "notas": [],
@@ -16800,6 +16889,467 @@
   },
   {
     "id": "est-071",
+    "codigo": "ERSBM-2026-179151",
+    "semana": 34,
+    "anio": 2026,
+    "estado": "ENVIADO",
+    "contenedor": "BMOU9847955",
+    "modeloMaquina": "DAIKIN",
+    "codigoRfs": "40RC",
+    "naviera": "SEABOARD MARINE LINE",
+    "actividad": "DM",
+    "lugarEstimacion": "RFS 1",
+    "lugarAsistencia": "",
+    "fechaGateIn": "17/08/2026 14:10:21",
+    "fechaElaboracion": "17/08/2026 14:25:35",
+    "fechaReparacion": "",
+    "tipoEstimacion": "MÁQUINA",
+    "tecnico": "rpontes",
+    "horasHombre": 6.15,
+    "pvpHorasHombre": 55.35,
+    "pvpMateriales": 1030.4,
+    "pvpTotal": 1085.75,
+    "estadoPti": "DM",
+    "fechaFinPti": "17/08/2026 14:10:21",
+    "enviarAprobacion": "SI",
+    "fechaEnvio": "17/08/2026 14:25:35",
+    "fechaAprobacion": "",
+    "fechaRevision": "",
+    "ediEnviadoOne": "NO",
+    "fechaEnvioEdiOne": "",
+    "niveles": "",
+    "diasEstadia": 0,
+    "tipoDano": "Máquina",
+    "analisisObservacion": "reemplazar coil condenser x corroido , vacío al sistema , reemplazar , x soldar coil condenser x reemplazo , completar carga x reemplazo coil condenser , ajuste, completar cable 460v x corto , insular cable 460v x completar , reemplazar plug x un solo uso",
+    "fechaModificacion": "",
+    "usuarioModificacion": "rpontes",
+    "sinDanos": false,
+    "buque": "ONE MADRID",
+    "viaje": "V-337S",
+    "tipoContenedor": "45R1",
+    "itinerarioSap": "",
+    "almacenSap": "",
+    "garantia": {
+      "enGarantia": false,
+      "proveedor": "",
+      "fechaInicio": "",
+      "fechaFin": "",
+      "ordenGarantia": "",
+      "observacion": "Este daño no tiene información de garantía asociada."
+    },
+    "inspeccion": {
+      "codigo": "INSP-179151",
+      "fecha": "17/08/2026 14:10:21",
+      "inspector": "rpontes",
+      "resultado": "CON DAÑOS",
+      "observacion": "reemplazar coil condenser x corroido , vacío al sistema , reemplazar , x soldar coil condenser x reemplazo , completar carga x reemplazo coil condenser , ajuste, completar cable 460v x corto , insular cable 460v x completar , reemplazar plug x un solo uso"
+    },
+    "danos": [
+      {
+        "id": "ERSBM-2026-179151-l1",
+        "linea": 1,
+        "comp": "CON",
+        "partNumber": "2233495",
+        "ubicacion": "MQNN",
+        "dano": "CO-CORRODED/RUSTY",
+        "obsAnalisis": "DK - NW - COIL CONDENSER 2233495",
+        "metRep": "",
+        "newMetRep": "RP",
+        "serieAnterior": "N/A",
+        "serieEntregado": "",
+        "largo": 0,
+        "ancho": 0,
+        "area": 0,
+        "longitud": 0,
+        "cantidad": 1,
+        "horasHombre": 3,
+        "csHoraHombre": 27,
+        "csMaterial": 520,
+        "csTotal": 547,
+        "cargo": "Línea",
+        "aplica": "Pendiente Revisión",
+        "medida": "UN",
+        "remark": "",
+        "contenedorDonante": "",
+        "tieneVideo": true,
+        "seccion": "MAQUINA",
+        "fotos": [
+          {
+            "id": "ec-179151-DANO-1",
+            "url": "/uploads/estimaciones/fotos/ec_179151_01.jpg",
+            "tipo": "DANO",
+            "descripcion": "Coil condenser corroído",
+            "fecha": "17/08/2026 14:25:35"
+          },
+          {
+            "id": "ec-179151-DANO-2",
+            "url": "/uploads/estimaciones/fotos/ec_179151_02.jpg",
+            "tipo": "DANO",
+            "descripcion": "Detalle del coil 2233495",
+            "fecha": "17/08/2026 14:25:35"
+          }
+        ],
+        "comentarios": [],
+        "archivos": [
+          {
+            "id": "ec-179151-vid",
+            "url": "/uploads/estimaciones/videos/inspeccion-demo.mp4",
+            "clase": "VIDEO",
+            "grupo": "ESTIMACION",
+            "nombre": "VID_20260817_141021.mp4",
+            "fecha": "17/08/2026 14:10:21"
+          },
+          {
+            "id": "ec-179151-log",
+            "url": "",
+            "clase": "DATALOG",
+            "grupo": "ESTIMACION",
+            "nombre": "BMOU9847955_260817A.V1a",
+            "fecha": "17/08/2026 14:10:21",
+            "sintetico": true
+          }
+        ]
+      },
+      {
+        "id": "ERSBM-2026-179151-l2",
+        "linea": 2,
+        "comp": "DRYER",
+        "partNumber": "2179111",
+        "ubicacion": "MQNN",
+        "dano": "CO-CORRODED/RUSTY",
+        "obsAnalisis": "DK - NW - DRYER ASSY DAIKIN, INDIA SAME AS 1241385 / 2139029 / 2179111 (FILTRO)",
+        "metRep": "",
+        "newMetRep": "RP",
+        "serieAnterior": "N/A",
+        "serieEntregado": "",
+        "largo": 0,
+        "ancho": 0,
+        "area": 0,
+        "longitud": 0,
+        "cantidad": 1,
+        "horasHombre": 0.5,
+        "csHoraHombre": 4.5,
+        "csMaterial": 95,
+        "csTotal": 99.5,
+        "cargo": "Línea",
+        "aplica": "Pendiente Revisión",
+        "medida": "UN",
+        "remark": "",
+        "contenedorDonante": "",
+        "tieneVideo": false,
+        "seccion": "MAQUINA",
+        "fotos": [
+          {
+            "id": "ec-179151-DANO-3",
+            "url": "/uploads/estimaciones/fotos/ec_179151_03.jpg",
+            "tipo": "DANO",
+            "descripcion": "Dryer assembly corroído",
+            "fecha": "17/08/2026 14:25:35"
+          }
+        ],
+        "comentarios": []
+      },
+      {
+        "id": "ERSBM-2026-179151-l3",
+        "linea": 3,
+        "comp": "SYS",
+        "partNumber": "NULL",
+        "ubicacion": "MQNN",
+        "dano": "RN-REPAIR NECESSARY",
+        "obsAnalisis": "VACIO DE SISTEM",
+        "metRep": "",
+        "newMetRep": "RP",
+        "serieAnterior": "N/A",
+        "serieEntregado": "",
+        "largo": 0,
+        "ancho": 0,
+        "area": 0,
+        "longitud": 0,
+        "cantidad": 1,
+        "horasHombre": 1,
+        "csHoraHombre": 9,
+        "csMaterial": 0,
+        "csTotal": 9,
+        "cargo": "Línea",
+        "aplica": "Pendiente Revisión",
+        "medida": "UN",
+        "remark": "",
+        "contenedorDonante": "",
+        "tieneVideo": false,
+        "seccion": "MAQUINA",
+        "fotos": [],
+        "comentarios": []
+      },
+      {
+        "id": "ERSBM-2026-179151-l4",
+        "linea": 4,
+        "comp": "PMI",
+        "partNumber": "RP",
+        "ubicacion": "MQNN",
+        "dano": "RN-REPAIR NECESSARY",
+        "obsAnalisis": "PALILLO DE SOLDADURA",
+        "metRep": "",
+        "newMetRep": "WD",
+        "serieAnterior": "N/A",
+        "serieEntregado": "",
+        "largo": 0,
+        "ancho": 0,
+        "area": 0,
+        "longitud": 0,
+        "cantidad": 2,
+        "horasHombre": 0,
+        "csHoraHombre": 0,
+        "csMaterial": 8.5,
+        "csTotal": 8.5,
+        "cargo": "Línea",
+        "aplica": "Pendiente Revisión",
+        "medida": "UN",
+        "remark": "",
+        "contenedorDonante": "",
+        "tieneVideo": false,
+        "seccion": "MAQUINA",
+        "fotos": [],
+        "comentarios": []
+      },
+      {
+        "id": "ERSBM-2026-179151-l5",
+        "linea": 5,
+        "comp": "ECB",
+        "partNumber": "818831C",
+        "ubicacion": "MQNN",
+        "dano": "MS-MISSING/LOST",
+        "obsAnalisis": "SC - NW - POWER CABLE 4X4.0MM2 818831A / 818830A / 818831C",
+        "metRep": "",
+        "newMetRep": "RP",
+        "serieAnterior": "N/A",
+        "serieEntregado": "",
+        "largo": 0,
+        "ancho": 0,
+        "area": 0,
+        "longitud": 0,
+        "cantidad": 8,
+        "horasHombre": 0.4,
+        "csHoraHombre": 3.6,
+        "csMaterial": 184,
+        "csTotal": 187.6,
+        "cargo": "Línea",
+        "aplica": "Pendiente Revisión",
+        "medida": "UN",
+        "remark": "",
+        "contenedorDonante": "",
+        "tieneVideo": false,
+        "seccion": "MAQUINA",
+        "fotos": [
+          {
+            "id": "ec-179151-DANO-5",
+            "url": "/uploads/estimaciones/fotos/ec_179151_05.jpg",
+            "tipo": "DANO",
+            "descripcion": "Cable 460V corto / faltante",
+            "fecha": "17/08/2026 14:25:35"
+          }
+        ],
+        "comentarios": []
+      },
+      {
+        "id": "ERSBM-2026-179151-l6",
+        "linea": 6,
+        "comp": "RFA",
+        "partNumber": "N/A",
+        "ubicacion": "MQNN",
+        "dano": "LF-LOW FLUID LEVEL",
+        "obsAnalisis": "REFRIGERANTE R134A SML",
+        "metRep": "",
+        "newMetRep": "RP",
+        "serieAnterior": "N/A",
+        "serieEntregado": "",
+        "largo": 0,
+        "ancho": 0,
+        "area": 0,
+        "longitud": 0,
+        "cantidad": 1,
+        "horasHombre": 0.25,
+        "csHoraHombre": 2.25,
+        "csMaterial": 110,
+        "csTotal": 112.25,
+        "cargo": "Línea",
+        "aplica": "Pendiente Revisión",
+        "medida": "UN",
+        "remark": "",
+        "contenedorDonante": "",
+        "tieneVideo": false,
+        "seccion": "MAQUINA",
+        "fotos": [
+          {
+            "id": "ec-179151-DANO-6",
+            "url": "/uploads/estimaciones/fotos/ec_179151_06.jpg",
+            "tipo": "DANO",
+            "descripcion": "Carga de refrigerante R134A",
+            "fecha": "17/08/2026 14:25:35"
+          }
+        ],
+        "comentarios": []
+      },
+      {
+        "id": "ERSBM-2026-179151-l7",
+        "linea": 7,
+        "comp": "JEY",
+        "partNumber": "N/A",
+        "ubicacion": "MQNN",
+        "dano": "RN-REPAIR NECESSARY",
+        "obsAnalisis": "AMARRAS PLASTICAS",
+        "metRep": "",
+        "newMetRep": "AJ",
+        "serieAnterior": "N/A",
+        "serieEntregado": "",
+        "largo": 0,
+        "ancho": 0,
+        "area": 0,
+        "longitud": 0,
+        "cantidad": 10,
+        "horasHombre": 0,
+        "csHoraHombre": 0,
+        "csMaterial": 2.4,
+        "csTotal": 2.4,
+        "cargo": "Línea",
+        "aplica": "Pendiente Revisión",
+        "medida": "UN",
+        "remark": "",
+        "contenedorDonante": "",
+        "tieneVideo": false,
+        "seccion": "MAQUINA",
+        "fotos": [],
+        "comentarios": []
+      },
+      {
+        "id": "ERSBM-2026-179151-l8",
+        "linea": 8,
+        "comp": "EMI",
+        "partNumber": "22-50397-00",
+        "ubicacion": "MQNN",
+        "dano": "RN-REPAIR NECESSARY",
+        "obsAnalisis": "CA - NW - SPLICE KIT, 22-50397-00",
+        "metRep": "",
+        "newMetRep": "RP",
+        "serieAnterior": "N/A",
+        "serieEntregado": "",
+        "largo": 0,
+        "ancho": 0,
+        "area": 0,
+        "longitud": 0,
+        "cantidad": 1,
+        "horasHombre": 0.5,
+        "csHoraHombre": 4.5,
+        "csMaterial": 32,
+        "csTotal": 36.5,
+        "cargo": "Línea",
+        "aplica": "Pendiente Revisión",
+        "medida": "UN",
+        "remark": "",
+        "contenedorDonante": "",
+        "tieneVideo": false,
+        "seccion": "MAQUINA",
+        "fotos": [
+          {
+            "id": "ec-179151-DANO-7",
+            "url": "/uploads/estimaciones/fotos/ec_179151_07.jpg",
+            "tipo": "DANO",
+            "descripcion": "Splice kit para aislar cable 460V",
+            "fecha": "17/08/2026 14:25:35"
+          }
+        ],
+        "comentarios": []
+      },
+      {
+        "id": "ERSBM-2026-179151-l9",
+        "linea": 9,
+        "comp": "EPL",
+        "partNumber": "818559A",
+        "ubicacion": "MQNN",
+        "dano": "RN-REPAIR NECESSARY",
+        "obsAnalisis": "SC - NW - POWER PLUG 818559A",
+        "metRep": "",
+        "newMetRep": "RP",
+        "serieAnterior": "N/A",
+        "serieEntregado": "",
+        "largo": 0,
+        "ancho": 0,
+        "area": 0,
+        "longitud": 0,
+        "cantidad": 1,
+        "horasHombre": 0.5,
+        "csHoraHombre": 4.5,
+        "csMaterial": 78,
+        "csTotal": 82.5,
+        "cargo": "Línea",
+        "aplica": "Pendiente Revisión",
+        "medida": "UN",
+        "remark": "",
+        "contenedorDonante": "",
+        "tieneVideo": false,
+        "seccion": "MAQUINA",
+        "fotos": [
+          {
+            "id": "ec-179151-DANO-8",
+            "url": "/uploads/estimaciones/fotos/ec_179151_08.jpg",
+            "tipo": "DANO",
+            "descripcion": "Power plug de un solo uso",
+            "fecha": "17/08/2026 14:25:35"
+          }
+        ],
+        "comentarios": []
+      }
+    ],
+    "notas": [
+      {
+        "id": "ERSBM-2026-179151-n1",
+        "fecha": "17/08/2026 14:25:35",
+        "usuario": "rpontes",
+        "texto": "reemplazar coil condenser x corroido , vacío al sistema , reemplazar , x soldar coil condenser x reemplazo , completar carga x reemplazo coil condenser , ajuste, completar cable 460v x corto , insular cable 460v x completar , reemplazar plug x un solo uso"
+      }
+    ],
+    "auditoria": [
+      {
+        "id": "ERSBM-2026-179151-a1",
+        "fecha": "17/08/2026 14:10:21",
+        "usuario": "sistema",
+        "accion": "GATE IN",
+        "detalle": "Ingreso del contenedor BMOU9847955 a RFS 1"
+      },
+      {
+        "id": "ERSBM-2026-179151-a2",
+        "fecha": "17/08/2026 14:25:35",
+        "usuario": "rpontes",
+        "accion": "CREACIÓN DE ESTIMADO",
+        "detalle": "Estimado ERSBM-2026-179151 creado como tipo MÁQUINA con 9 línea(s) de daño"
+      },
+      {
+        "id": "ERSBM-2026-179151-a3",
+        "fecha": "17/08/2026 14:10:21",
+        "usuario": "rpontes",
+        "accion": "FIN DE PTI",
+        "detalle": "Prueba PTI finalizada con estado DM"
+      },
+      {
+        "id": "ERSBM-2026-179151-a4",
+        "fecha": "17/08/2026 14:25:35",
+        "usuario": "rpontes",
+        "accion": "ENVÍO A APROBACIÓN",
+        "detalle": "Enviado a SEABOARD MARINE LINE por un total de $1085.75"
+      }
+    ],
+    "comentariosSeaboard": [
+      {
+        "id": "ERSBM-2026-179151-s1",
+        "fecha": "17/08/2026 14:25:35",
+        "usuario": "rpontes",
+        "accion": "ENVIAR",
+        "comentario": "Estimado enviado a aprobación de la naviera."
+      }
+    ],
+    "pais": "ECUADOR"
+  },
+  {
+    "id": "est-072",
     "codigo": "ERSBM-2026-121880",
     "semana": 33,
     "anio": 2026,
@@ -17020,7 +17570,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-072",
+    "id": "est-073",
     "codigo": "ERSBM-2026-121881",
     "semana": 33,
     "anio": 2026,
@@ -17202,7 +17752,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-073",
+    "id": "est-074",
     "codigo": "ERSBM-2026-121883",
     "semana": 33,
     "anio": 2026,
@@ -17473,7 +18023,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-074",
+    "id": "est-075",
     "codigo": "ERSBM-2026-121884",
     "semana": 33,
     "anio": 2026,
@@ -17733,7 +18283,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-075",
+    "id": "est-076",
     "codigo": "ERSBM-2026-121885",
     "semana": 33,
     "anio": 2026,
@@ -17986,7 +18536,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-076",
+    "id": "est-077",
     "codigo": "ERSBM-2026-121886",
     "semana": 33,
     "anio": 2026,
@@ -18193,7 +18743,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-077",
+    "id": "est-078",
     "codigo": "ERSBM-2026-121888",
     "semana": 33,
     "anio": 2026,
@@ -18551,7 +19101,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-078",
+    "id": "est-079",
     "codigo": "ERSBM-2026-121889",
     "semana": 33,
     "anio": 2026,
@@ -18810,7 +19360,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-079",
+    "id": "est-080",
     "codigo": "ERSBM-2026-121890",
     "semana": 33,
     "anio": 2026,
@@ -19069,7 +19619,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-080",
+    "id": "est-081",
     "codigo": "ERSBM-2026-121891",
     "semana": 33,
     "anio": 2026,
@@ -19295,7 +19845,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-081",
+    "id": "est-082",
     "codigo": "ERSBM-2026-121892",
     "semana": 33,
     "anio": 2026,
@@ -19456,7 +20006,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-082",
+    "id": "est-083",
     "codigo": "ERSBM-2026-121893",
     "semana": 33,
     "anio": 2026,
@@ -19742,7 +20292,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-083",
+    "id": "est-084",
     "codigo": "ERSBM-2026-121894",
     "semana": 33,
     "anio": 2026,
@@ -19903,7 +20453,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-084",
+    "id": "est-085",
     "codigo": "ERSBM-2026-121895",
     "semana": 33,
     "anio": 2026,
@@ -20071,7 +20621,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-085",
+    "id": "est-086",
     "codigo": "ERSBM-2026-121896",
     "semana": 33,
     "anio": 2026,
@@ -20304,7 +20854,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-086",
+    "id": "est-087",
     "codigo": "ERSBM-2026-121897",
     "semana": 33,
     "anio": 2026,
@@ -20544,7 +21094,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-087",
+    "id": "est-088",
     "codigo": "ERSBM-2026-121900",
     "semana": 33,
     "anio": 2026,
@@ -20712,7 +21262,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-088",
+    "id": "est-089",
     "codigo": "ERSBM-2026-121901",
     "semana": 33,
     "anio": 2026,
@@ -20899,7 +21449,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-089",
+    "id": "est-090",
     "codigo": "ERSBM-2026-121902",
     "semana": 33,
     "anio": 2026,
@@ -21139,7 +21689,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-090",
+    "id": "est-091",
     "codigo": "ERSBM-2026-121903",
     "semana": 33,
     "anio": 2026,
@@ -21490,7 +22040,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-091",
+    "id": "est-092",
     "codigo": "ERSBM-2026-121904",
     "semana": 33,
     "anio": 2026,
@@ -21684,7 +22234,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-092",
+    "id": "est-093",
     "codigo": "ERSBM-2026-121905",
     "semana": 33,
     "anio": 2026,
@@ -21937,7 +22487,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-093",
+    "id": "est-094",
     "codigo": "ERSBM-2026-121906",
     "semana": 33,
     "anio": 2026,
@@ -22210,7 +22760,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-094",
+    "id": "est-095",
     "codigo": "ERSBM-2026-121907",
     "semana": 33,
     "anio": 2026,
@@ -22371,7 +22921,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-095",
+    "id": "est-096",
     "codigo": "ERSBM-2026-121908",
     "semana": 33,
     "anio": 2026,
@@ -22539,7 +23089,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-096",
+    "id": "est-097",
     "codigo": "ERSBM-2026-121909",
     "semana": 33,
     "anio": 2026,
@@ -22753,7 +23303,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-097",
+    "id": "est-098",
     "codigo": "ERSBM-2026-121910",
     "semana": 33,
     "anio": 2026,
@@ -22993,7 +23543,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-098",
+    "id": "est-099",
     "codigo": "ERSBM-2026-121911",
     "semana": 34,
     "anio": 2026,
@@ -23272,7 +23822,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-099",
+    "id": "est-100",
     "codigo": "ERSBM-2026-121912",
     "semana": 34,
     "anio": 2026,
@@ -23459,7 +24009,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-100",
+    "id": "est-101",
     "codigo": "ERSBM-2026-121913",
     "semana": 34,
     "anio": 2026,
@@ -23613,7 +24163,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-101",
+    "id": "est-102",
     "codigo": "ERSBM-2026-121914",
     "semana": 34,
     "anio": 2026,
@@ -23807,7 +24357,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-102",
+    "id": "est-103",
     "codigo": "ERSBM-2026-121915",
     "semana": 34,
     "anio": 2026,
@@ -24040,7 +24590,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-103",
+    "id": "est-104",
     "codigo": "ERSBM-2026-121916",
     "semana": 34,
     "anio": 2026,
@@ -24194,7 +24744,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-104",
+    "id": "est-105",
     "codigo": "ERSBM-2026-121917",
     "semana": 34,
     "anio": 2026,
@@ -24362,7 +24912,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-105",
+    "id": "est-106",
     "codigo": "ERSBM-2026-121918",
     "semana": 34,
     "anio": 2026,
@@ -24628,7 +25178,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-106",
+    "id": "est-107",
     "codigo": "ERSBM-2026-121919",
     "semana": 34,
     "anio": 2026,
@@ -24796,7 +25346,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-107",
+    "id": "est-108",
     "codigo": "ERSBM-2026-121920",
     "semana": 34,
     "anio": 2026,
@@ -25029,7 +25579,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-108",
+    "id": "est-109",
     "codigo": "ERSBM-2026-121921",
     "semana": 34,
     "anio": 2026,
@@ -25243,7 +25793,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-109",
+    "id": "est-110",
     "codigo": "ERSBM-2026-121922",
     "semana": 34,
     "anio": 2026,
@@ -25430,7 +25980,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-110",
+    "id": "est-111",
     "codigo": "ERSBM-2026-121923",
     "semana": 34,
     "anio": 2026,
@@ -25624,7 +26174,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-111",
+    "id": "est-112",
     "codigo": "ERSBM-2026-121924",
     "semana": 34,
     "anio": 2026,
@@ -25811,7 +26361,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-112",
+    "id": "est-113",
     "codigo": "ERSBM-2026-121925",
     "semana": 34,
     "anio": 2026,
@@ -25972,7 +26522,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-113",
+    "id": "est-114",
     "codigo": "ERSBM-2026-121926",
     "semana": 34,
     "anio": 2026,
@@ -26297,7 +26847,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-114",
+    "id": "est-115",
     "codigo": "ERSBM-2026-121927",
     "semana": 34,
     "anio": 2026,
@@ -26458,7 +27008,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-115",
+    "id": "est-116",
     "codigo": "ERSBM-2026-121928",
     "semana": 34,
     "anio": 2026,
@@ -26652,7 +27202,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-116",
+    "id": "est-117",
     "codigo": "ERSBM-2026-121929",
     "semana": 34,
     "anio": 2026,
@@ -26820,7 +27370,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-117",
+    "id": "est-118",
     "codigo": "ERSBM-2026-121930",
     "semana": 34,
     "anio": 2026,
@@ -27079,7 +27629,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-118",
+    "id": "est-119",
     "codigo": "ERSBM-2026-121931",
     "semana": 34,
     "anio": 2026,
@@ -27240,7 +27790,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-119",
+    "id": "est-120",
     "codigo": "ERSBM-2026-121932",
     "semana": 34,
     "anio": 2026,
@@ -27466,7 +28016,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-120",
+    "id": "est-121",
     "codigo": "ERSBM-2026-121933",
     "semana": 34,
     "anio": 2026,
@@ -27627,7 +28177,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-121",
+    "id": "est-122",
     "codigo": "ERSBM-2026-121934",
     "semana": 34,
     "anio": 2026,
@@ -27788,7 +28338,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-122",
+    "id": "est-123",
     "codigo": "ERSBM-2026-121935",
     "semana": 34,
     "anio": 2026,
@@ -27956,7 +28506,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-123",
+    "id": "est-124",
     "codigo": "ERSBM-2026-121936",
     "semana": 34,
     "anio": 2026,
@@ -28340,7 +28890,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-124",
+    "id": "est-125",
     "codigo": "ERSBM-2026-121937",
     "semana": 34,
     "anio": 2026,
@@ -28566,7 +29116,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-125",
+    "id": "est-126",
     "codigo": "ERSBM-2026-121938",
     "semana": 34,
     "anio": 2026,
@@ -28727,7 +29277,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-126",
+    "id": "est-127",
     "codigo": "ERSBM-2026-121939",
     "semana": 34,
     "anio": 2026,
@@ -28941,7 +29491,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-127",
+    "id": "est-128",
     "codigo": "ERSBM-2026-121940",
     "semana": 34,
     "anio": 2026,
@@ -29227,7 +29777,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-128",
+    "id": "est-129",
     "codigo": "ERSBM-2026-121941",
     "semana": 34,
     "anio": 2026,
@@ -29388,7 +29938,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-129",
+    "id": "est-130",
     "codigo": "ERSBM-2026-121942",
     "semana": 34,
     "anio": 2026,
@@ -29582,7 +30132,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-130",
+    "id": "est-131",
     "codigo": "ERSBM-2026-121943",
     "semana": 34,
     "anio": 2026,
@@ -29808,7 +30358,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-131",
+    "id": "est-132",
     "codigo": "ERSBM-2026-121944",
     "semana": 34,
     "anio": 2026,
@@ -29988,7 +30538,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-132",
+    "id": "est-133",
     "codigo": "ERSBM-2026-121945",
     "semana": 34,
     "anio": 2026,
@@ -30149,7 +30699,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-133",
+    "id": "est-134",
     "codigo": "ERSBM-2026-121946",
     "semana": 34,
     "anio": 2026,
@@ -30356,7 +30906,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-134",
+    "id": "est-135",
     "codigo": "ERSBM-2026-121947",
     "semana": 34,
     "anio": 2026,
@@ -30510,7 +31060,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-135",
+    "id": "est-136",
     "codigo": "ERSBM-2026-121948",
     "semana": 34,
     "anio": 2026,
@@ -30678,7 +31228,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-136",
+    "id": "est-137",
     "codigo": "ERSBM-2026-121949",
     "semana": 34,
     "anio": 2026,
@@ -30872,7 +31422,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-137",
+    "id": "est-138",
     "codigo": "ERSBM-2026-121950",
     "semana": 34,
     "anio": 2026,
@@ -31210,7 +31760,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-138",
+    "id": "est-139",
     "codigo": "ERSBM-2026-121951",
     "semana": 34,
     "anio": 2026,
@@ -31536,7 +32086,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-139",
+    "id": "est-140",
     "codigo": "ERSBM-2026-121952",
     "semana": 34,
     "anio": 2026,
@@ -31716,7 +32266,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-140",
+    "id": "est-141",
     "codigo": "ERSBM-2026-121953",
     "semana": 34,
     "anio": 2026,
@@ -31870,7 +32420,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-141",
+    "id": "est-142",
     "codigo": "ERSBM-2026-121954",
     "semana": 34,
     "anio": 2026,
@@ -32136,7 +32686,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-142",
+    "id": "est-143",
     "codigo": "ERSBM-2026-121955",
     "semana": 34,
     "anio": 2026,
@@ -32316,7 +32866,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-143",
+    "id": "est-144",
     "codigo": "ERSBM-2026-121956",
     "semana": 34,
     "anio": 2026,
@@ -32523,7 +33073,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-144",
+    "id": "est-145",
     "codigo": "ERSBM-2026-121957",
     "semana": 34,
     "anio": 2026,
@@ -32756,7 +33306,7 @@
     "pais": "PERU"
   },
   {
-    "id": "est-145",
+    "id": "est-146",
     "codigo": "ERSBM-2026-121958",
     "semana": 34,
     "anio": 2026,
