@@ -18,7 +18,6 @@ import {
   SearchX,
   Send,
   Ship,
-  Trash2,
 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { DmsReportLayout } from '@/components/dms/DmsReportLayout';
@@ -76,14 +75,13 @@ type Dialogo =
   | { tipo: 'INFORME'; id: string; variante: VarianteInforme }
   | { tipo: 'NOTA'; id: string }
   | { tipo: 'INFO'; id: string }
-  | { tipo: 'ELIMINAR'; id: string }
   | { tipo: 'REVERSAR'; id: string }
   | { tipo: 'ENVIAR'; id: string };
 
 export default function ReporteEstimacionesPage() {
   const router = useRouter();
   const { user } = useAuthStore();
-  const { estimaciones, enviarAprobacion, reversarAprobacion, eliminar, setActividad } =
+  const { estimaciones, enviarAprobacion, reversarAprobacion, setActividad } =
     useEstimacionesStore();
   const { pais } = useUiStore();
 
@@ -322,14 +320,6 @@ export default function ReporteEstimacionesPage() {
             <Download className="h-3.5 w-3.5" />
           </button>
         )}
-        <button
-          type="button"
-          className="dms-icon-action dms-icon-action--borrar"
-          title="Eliminar estimación"
-          onClick={() => setDialogo({ tipo: 'ELIMINAR', id: row.id })}
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>
       </div>
     );
   }
@@ -898,27 +888,6 @@ export default function ReporteEstimacionesPage() {
           </div>
         )}
       </Modal>
-
-      <ConfirmModal
-        open={dialogo.tipo === 'ELIMINAR'}
-        title="Eliminar estimación"
-        subtitle="La estimación se retira del reporte"
-        confirmLabel="Eliminar"
-        onClose={cerrar}
-        onConfirm={() => {
-          if (dialogo.tipo !== 'ELIMINAR' || !activa) return;
-          eliminar(activa.id, usuario);
-          toast(`Estimación ${activa.codigo} eliminada.`, 'success');
-        }}
-      >
-        {activa && (
-          <>
-            Se eliminará <strong>{activa.codigo}</strong> del contenedor{' '}
-            <strong>{activa.contenedor}</strong> con {activa.danos.length} línea(s) de daño por{' '}
-            <strong>${formatMoney(activa.pvpTotal)}</strong>.
-          </>
-        )}
-      </ConfirmModal>
 
       <ConfirmModal
         open={dialogo.tipo === 'ENVIAR'}
