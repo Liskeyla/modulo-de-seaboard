@@ -690,19 +690,35 @@
   }
 
   .dms-toast {
-    @apply pointer-events-auto flex w-[min(100%,22rem)] items-start gap-3 rounded-xl border px-3.5 py-3 shadow-lg animate-fade-up;
+    @apply pointer-events-auto flex w-[min(100%,22rem)] items-start gap-3 rounded-xl border-0 px-3.5 py-3 animate-fade-up;
+    background-color: #ffffff;
+    color: #0f172a;
+    isolation: isolate;
+    box-shadow:
+      0 14px 40px rgba(15, 23, 42, 0.22),
+      0 2px 8px rgba(15, 23, 42, 0.08),
+      0 0 0 1px rgba(15, 23, 42, 0.08);
   }
 
   .dms-toast--success {
-    @apply border-emerald-200/80 bg-white text-emerald-950;
+    box-shadow:
+      0 14px 40px rgba(15, 23, 42, 0.22),
+      0 2px 8px rgba(15, 23, 42, 0.08),
+      inset 4px 0 0 #059669;
   }
 
   .dms-toast--error {
-    @apply border-red-200/80 bg-white text-red-950;
+    box-shadow:
+      0 14px 40px rgba(15, 23, 42, 0.22),
+      0 2px 8px rgba(15, 23, 42, 0.08),
+      inset 4px 0 0 #dc2626;
   }
 
   .dms-toast--info {
-    @apply border-sky-200/80 bg-white text-sky-950;
+    box-shadow:
+      0 14px 40px rgba(15, 23, 42, 0.22),
+      0 2px 8px rgba(15, 23, 42, 0.08),
+      inset 4px 0 0 #152483;
   }
 
   .dms-toast-icon {

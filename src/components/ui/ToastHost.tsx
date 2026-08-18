@@ -53,15 +53,17 @@ export function ToastHost() {
         return (
           <div
             key={t.id}
-            className={cn('dms-toast', `dms-toast--${t.type ?? 'info'}`)}
+            className={cn('dms-toast bg-[#ffffff]', `dms-toast--${t.type ?? 'info'}`)}
             role="status"
           >
             <span className={cn('dms-toast-icon', `dms-toast-icon--${t.type ?? 'info'}`)}>
               <Icon className="h-4 w-4" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold leading-5">{titulo}</p>
-              {cuerpo ? <p className="mt-0.5 text-xs leading-5 opacity-80">{cuerpo}</p> : null}
+              <p className="text-sm font-semibold leading-5 text-slate-900">{titulo}</p>
+              {cuerpo ? (
+                <p className="mt-0.5 text-xs leading-5 text-slate-600">{cuerpo}</p>
+              ) : null}
             </div>
             <button
               type="button"
