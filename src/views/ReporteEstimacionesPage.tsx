@@ -43,7 +43,7 @@ import { cn, formatMoney, toast } from '@/lib/utils';
 const EXCEL_HEADERS = [
   'Codigo', 'Semana', 'Año', 'Estado', 'Contenedor', 'Modelo Maquina', 'Código RFS', 'Naviera',
   'Actividad', 'Lugar de Estimación', 'Lugar de Asistencia', 'Fecha GateIn', 'Fecha de Elaboración',
-  'Fecha de Reparación', 'Tipo de Estimación', 'Técnico de Estimación', 'Horas Hombre',
+  'Fecha de Reparación', 'Tipo de Estimación', 'Horas Hombre',
   'PVP Horas Hombre', 'PVP Materiales', 'PVP Total', 'Estado PTI', 'Fecha Fin PTI',
   'Enviar Aprobacion', 'Fecha Envio', 'Fecha Aprobacion',
   'Niveles', 'Dias Estadia', 'Tipo de Daño', 'Análisis de observación', 'Fecha de modificación',
@@ -54,7 +54,7 @@ function rowToExcel(e: Estimacion) {
   return [
     e.codigo, e.semana, e.anio, e.estado, e.contenedor, e.modeloMaquina, e.codigoRfs, e.naviera,
     e.actividad, e.lugarEstimacion, e.lugarAsistencia, e.fechaGateIn, e.fechaElaboracion,
-    e.fechaReparacion, e.tipoEstimacion, e.tecnico, e.horasHombre, e.pvpHorasHombre,
+    e.fechaReparacion, e.tipoEstimacion, e.horasHombre, e.pvpHorasHombre,
     e.pvpMateriales, e.pvpTotal, e.estadoPti, e.fechaFinPti, e.enviarAprobacion, e.fechaEnvio,
     e.fechaAprobacion, e.niveles, e.diasEstadia, e.tipoDano,
     e.analisisObservacion, e.fechaModificacion, e.usuarioModificacion,
@@ -496,7 +496,6 @@ export default function ReporteEstimacionesPage() {
                       <th>Fecha de Elaboración</th>
                       <th>Fecha de Reparación</th>
                       <th>Tipo de Estimación</th>
-                      <th>Técnico de Estimación</th>
                       <th>Horas Hombre</th>
                       <th>PVP Horas Hombre</th>
                       <th>PVP Materiales</th>
@@ -599,7 +598,6 @@ export default function ReporteEstimacionesPage() {
                               {row.fechaReparacion || '—'}
                             </td>
                             <td className="text-center">{row.tipoEstimacion}</td>
-                            <td className="text-xs">{row.tecnico}</td>
                             <td className="text-right tabular-nums">
                               {row.horasHombre.toFixed(2)}
                             </td>
@@ -645,7 +643,7 @@ export default function ReporteEstimacionesPage() {
                           {abierta && (
                             <tr className="dms-row-detalle">
                               <td />
-                              <td colSpan={32}>
+                              <td colSpan={31}>
                                 <div className="dms-detalle-inline">
                                   <div>
                                     <span>Buque / Viaje</span>
@@ -719,7 +717,7 @@ export default function ReporteEstimacionesPage() {
                       <td className="text-right tabular-nums">{formatMoney(totales.pvpHh)}</td>
                       <td className="text-right tabular-nums">{formatMoney(totales.pvpMat)}</td>
                       <td className="text-right tabular-nums">{formatMoney(totales.pvpTotal)}</td>
-                      <td colSpan={12} />
+                      <td colSpan={11} />
                     </tr>
                   </tfoot>
                 </table>
