@@ -13,7 +13,6 @@ interface DmsTableToolbarProps {
   excelFilename?: string;
   excelHeaders?: string[];
   excelRows?: (string | number)[][];
-  totalCount?: number;
 }
 
 export function DmsTableToolbar({
@@ -24,7 +23,6 @@ export function DmsTableToolbar({
   excelFilename = 'reporte.xlsx',
   excelHeaders = [],
   excelRows = [],
-  totalCount,
 }: DmsTableToolbarProps) {
   return (
     <div className="dms-table-toolbar">
@@ -68,12 +66,6 @@ export function DmsTableToolbar({
             ))}
           </select>
         </div>
-
-        {totalCount !== undefined && (
-          <span className="rounded-lg bg-[#152483]/5 px-2.5 py-1.5 text-xs font-semibold text-[#152483]">
-            {totalCount.toLocaleString('es-EC')} en pantalla
-          </span>
-        )}
       </div>
 
       <div className="flex min-w-[200px] flex-1 items-center gap-2 sm:max-w-xs sm:justify-end lg:ml-auto">

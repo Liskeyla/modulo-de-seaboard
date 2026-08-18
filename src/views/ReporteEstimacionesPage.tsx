@@ -482,7 +482,6 @@ export default function ReporteEstimacionesPage() {
               excelFilename="Reporte de Estimaciones RFS - DMS Ecuador.xlsx"
               excelHeaders={EXCEL_HEADERS}
               excelRows={filtered.map(rowToExcel)}
-              totalCount={filtered.length}
             />
 
             {paginated.length === 0 ? (

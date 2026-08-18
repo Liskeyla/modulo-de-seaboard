@@ -410,7 +410,6 @@ export default function AprobacionesSeaboardPage() {
             excelFilename="Aprobaciones Estimados Seaboard.xlsx"
             excelHeaders={EXCEL_HEADERS}
             excelRows={excelRows}
-            totalCount={filtered.length}
           />
 
           {paginated.length === 0 ? (
