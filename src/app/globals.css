@@ -690,19 +690,35 @@
   }
 
   .dms-toast {
-    @apply pointer-events-auto flex min-w-[280px] max-w-sm items-start gap-3 rounded-xl border px-4 py-3 shadow-xl;
+    @apply pointer-events-auto flex w-[min(100%,22rem)] items-start gap-3 rounded-xl border px-3.5 py-3 shadow-lg animate-fade-up;
   }
 
   .dms-toast--success {
-    @apply border-emerald-200 bg-emerald-50 text-emerald-900;
+    @apply border-emerald-200/80 bg-white text-emerald-950;
   }
 
   .dms-toast--error {
-    @apply border-red-200 bg-red-50 text-red-900;
+    @apply border-red-200/80 bg-white text-red-950;
   }
 
   .dms-toast--info {
-    @apply border-sky-200 bg-sky-50 text-sky-900;
+    @apply border-sky-200/80 bg-white text-sky-950;
+  }
+
+  .dms-toast-icon {
+    @apply mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full;
+  }
+
+  .dms-toast-icon--success {
+    @apply bg-emerald-100 text-emerald-700;
+  }
+
+  .dms-toast-icon--error {
+    @apply bg-red-100 text-red-700;
+  }
+
+  .dms-toast-icon--info {
+    @apply bg-sky-100 text-sky-700;
   }
 
   /* ── Reporte: columnas de producción ─────────────────────────────── */

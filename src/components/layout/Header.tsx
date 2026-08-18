@@ -163,7 +163,10 @@ export function Header({ title, subtitle }: HeaderProps) {
                     onClick={() => {
                       setPais(opcion.id);
                       setMenuActivo(null);
-                      toast(`Operación ${opcion.label}: se muestran los estimados de ese país.`, 'success');
+                      toast(
+                        `Operación ${opcion.label}\nSe muestran los estimados de ese país.`,
+                        'success'
+                      );
                     }}
                     className={cn(
                       'flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-sm transition hover:bg-rfs-50',
