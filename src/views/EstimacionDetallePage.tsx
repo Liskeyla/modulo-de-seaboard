@@ -13,7 +13,6 @@ import {
   ListChecks,
   MessageSquare,
   RefreshCw,
-  RotateCcw,
   Save,
   Search,
   Send,
@@ -59,7 +58,6 @@ type Dialogo =
   | { tipo: 'APORTAR' }
   | { tipo: 'ENVIAR' }
   | { tipo: 'RECHAZAR' }
-  | { tipo: 'REVERSAR' }
   | { tipo: 'REPARADO' }
   | { tipo: 'ELIMINAR_DANO'; dano: DanoEstimacion }
   | { tipo: 'EDITAR_DANO'; dano: DanoEstimacion }
@@ -80,7 +78,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     enviarAprobacion,
     aprobar,
     rechazar,
-    reversarAprobacion,
     marcarReparado,
     agregarDano,
     actualizarDano,
@@ -286,13 +283,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                     onClick={() => setDialogo({ tipo: 'REPARADO' })}
                   >
                     <Wrench className="h-4 w-4" /> Marcar Reparado
-                  </button>
-                  <button
-                    type="button"
-                    className="dms-btn-reversar px-3 py-2 text-sm"
-                    onClick={() => setDialogo({ tipo: 'REVERSAR' })}
-                  >
-                    <RotateCcw className="h-4 w-4" /> Reversar Aprobación
                   </button>
                 </>
               )}
@@ -725,21 +715,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
         onConfirm={(comentario) => {
           rechazar([estimacion.id], usuario, comentario);
           toast(`Estimación ${estimacion.codigo} rechazada.`, 'success');
-          cerrar();
-        }}
-      />
-
-      <ComentarioModal
-        open={dialogo.tipo === 'REVERSAR'}
-        title="Reversar Aprobación"
-        subtitle="La estimación volverá a estado PENDIENTE"
-        label="Motivo del reverso"
-        confirmLabel="Reversar"
-        confirmClass="dms-btn-reversar"
-        onClose={cerrar}
-        onConfirm={(comentario) => {
-          reversarAprobacion(estimacion.id, usuario, comentario);
-          toast('Aprobación reversada. El estimado volvió a PENDIENTE.', 'success');
           cerrar();
         }}
       />

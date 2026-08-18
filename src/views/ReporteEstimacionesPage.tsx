@@ -14,7 +14,6 @@ import {
   Info,
   MessageSquare,
   RefreshCw,
-  RotateCcw,
   SearchX,
   Send,
   Ship,
@@ -23,7 +22,6 @@ import { Header } from '@/components/layout/Header';
 import { DmsReportLayout } from '@/components/dms/DmsReportLayout';
 import { DmsTableToolbar } from '@/components/dms/DmsTableToolbar';
 import { EstadoEstimacionBadge } from '@/components/dms/EstadoEstimacionBadge';
-import { ComentarioModal } from '@/components/aprobaciones/ComentarioModal';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Modal } from '@/components/ui/Modal';
 import { InformePreviewModal } from '@/components/estimacion/InformePreviewModal';
@@ -75,13 +73,12 @@ type Dialogo =
   | { tipo: 'INFORME'; id: string; variante: VarianteInforme }
   | { tipo: 'NOTA'; id: string }
   | { tipo: 'INFO'; id: string }
-  | { tipo: 'REVERSAR'; id: string }
   | { tipo: 'ENVIAR'; id: string };
 
 export default function ReporteEstimacionesPage() {
   const router = useRouter();
   const { user } = useAuthStore();
-  const { estimaciones, enviarAprobacion, reversarAprobacion, setActividad } =
+  const { estimaciones, enviarAprobacion, setActividad } =
     useEstimacionesStore();
   const { pais } = useUiStore();
 
@@ -295,16 +292,6 @@ export default function ReporteEstimacionesPage() {
             onClick={() => setDialogo({ tipo: 'ENVIAR', id: row.id })}
           >
             <Send className="h-3.5 w-3.5" />
-          </button>
-        )}
-        {['APROBADO', 'REPARADO'].includes(row.estado) && (
-          <button
-            type="button"
-            className="dms-icon-action dms-icon-action--reversar"
-            title="Reversar aprobación"
-            onClick={() => setDialogo({ tipo: 'REVERSAR', id: row.id })}
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
           </button>
         )}
         {row.estadoPti && (
@@ -915,23 +902,6 @@ export default function ReporteEstimacionesPage() {
           </>
         )}
       </ConfirmModal>
-
-      <ComentarioModal
-        open={dialogo.tipo === 'REVERSAR'}
-        title="Reversar Aprobación"
-        subtitle="La estimación volverá a estado PENDIENTE"
-        label="Motivo del reverso"
-        confirmLabel="Reversar"
-        confirmClass="dms-btn-reversar"
-        onClose={cerrar}
-        onConfirm={(comentario) => {
-          if (activa) {
-            reversarAprobacion(activa.id, usuario, comentario);
-            toast('Aprobación reversada. Estado actualizado a PENDIENTE.', 'success');
-          }
-          cerrar();
-        }}
-      />
     </>
   );
 }
