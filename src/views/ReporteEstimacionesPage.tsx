@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -30,6 +30,8 @@ import { Modal } from '@/components/ui/Modal';
 import { InformePreviewModal } from '@/components/estimacion/InformePreviewModal';
 import { useAuthStore } from '@/store';
 import { useEstimacionesStore } from '@/store/estimacionesStore';
+import { useUiStore } from '@/store/uiStore';
+import { paisDe } from '@/lib/pais';
 import {
   ACTIVIDADES,
   ESTADOS_ESTIMACION,
@@ -83,6 +85,11 @@ export default function ReporteEstimacionesPage() {
   const { user } = useAuthStore();
   const { estimaciones, enviarAprobacion, reversarAprobacion, eliminar, setActividad } =
     useEstimacionesStore();
+  const { pais } = useUiStore();
+
+  useEffect(() => {
+    setPage(1);
+  }, [pais]);
 
   const [desde, setDesde] = useState('2026-08-17');
   const [hasta, setHasta] = useState('2026-08-23');
@@ -107,10 +114,15 @@ export default function ReporteEstimacionesPage() {
   const usuario = user?.username ?? 'apptelink';
   const cerrar = () => setDialogo({ tipo: 'NINGUNO' });
 
+  const porPais = useMemo(
+    () => estimaciones.filter((e) => paisDe(e) === pais),
+    [estimaciones, pais]
+  );
+
   // Las opciones de los filtros salen de los datos reales cargados en el store.
   const opciones = useMemo(() => {
     const unicos = (fn: (e: Estimacion) => string) =>
-      Array.from(new Set(estimaciones.map(fn).filter(Boolean))).sort();
+      Array.from(new Set(porPais.map(fn).filter(Boolean))).sort();
     return {
       navieras: ['Todas', ...unicos((e) => e.naviera)],
       codigosRfs: ['Todos', ...unicos((e) => e.codigoRfs)],
@@ -118,12 +130,12 @@ export default function ReporteEstimacionesPage() {
       tipos: ['Todos', ...unicos((e) => e.tipoEstimacion)],
       tecnicos: ['Todos', ...unicos((e) => e.tecnico)],
     };
-  }, [estimaciones]);
+  }, [porPais]);
 
   const filtered = useMemo(() => {
     const hayCriterio = filtroActivo || Boolean(busqueda) || Boolean(search);
 
-    return estimaciones.filter((e) => {
+    return porPais.filter((e) => {
       if (patio !== 'Todos' && e.lugarEstimacion !== patio) return false;
       if (estado !== 'Todos' && e.estado !== estado) return false;
       if (!hayCriterio) return true;
@@ -159,7 +171,7 @@ export default function ReporteEstimacionesPage() {
       return true;
     });
   }, [
-    estimaciones, desde, hasta, naviera, codigoRfs, patio, tipo, estado, actividad, tecnico,
+    porPais, desde, hasta, naviera, codigoRfs, patio, tipo, estado, actividad, tecnico,
     aplica, completas, busqueda, parametro, search, filtroActivo,
   ]);
 
@@ -458,7 +470,7 @@ export default function ReporteEstimacionesPage() {
 
             <div className="dms-resumen-strip">
               <span>
-                Mostrando <strong>{filtered.length}</strong> de {estimaciones.length} estimaciones
+                Mostrando <strong>{filtered.length}</strong> de {porPais.length} estimaciones
               </span>
               <span>
                 Total filtrado <strong>${formatMoney(totales.pvpTotal)}</strong>

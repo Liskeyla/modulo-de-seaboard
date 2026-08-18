@@ -19,6 +19,7 @@ import { MENU_GRUPOS, grupoDeRuta, type MenuItem } from '@/data/menu';
 import { Flag } from '@/components/ui/Flag';
 import { useAuthStore } from '@/store';
 import { useUiStore } from '@/store/uiStore';
+import { metaPais } from '@/lib/pais';
 import { cn } from '@/lib/utils';
 
 const iconos: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -29,7 +30,7 @@ const iconos: Record<string, React.ComponentType<{ className?: string }>> = {
 export function MenuLateral() {
   const pathname = usePathname();
   const router = useRouter();
-  const { menuAbierto, menuFijado, cerrarMenu, alternarFijado } = useUiStore();
+  const { menuAbierto, menuFijado, cerrarMenu, alternarFijado, pais } = useUiStore();
   const { user, logout } = useAuthStore();
 
   const [abiertos, setAbiertos] = useState<string[]>(['estimaciones']);
@@ -113,8 +114,8 @@ export function MenuLateral() {
               Road Feeder Services
             </p>
             <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-rfsorange-600">
-              <Flag className="h-2.5 w-4" />
-              Ecuador
+              <Flag pais={pais} className="h-2.5 w-4" />
+              {metaPais(pais).label}
             </p>
           </div>
 

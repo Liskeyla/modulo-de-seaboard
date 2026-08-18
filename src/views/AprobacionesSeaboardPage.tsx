@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Check,
   Eye,
@@ -18,7 +18,9 @@ import { ComentarioModal } from '@/components/aprobaciones/ComentarioModal';
 import { Input } from '@/components/ui/input';
 import { useAuthStore } from '@/store';
 import { useEstimacionesStore } from '@/store/estimacionesStore';
+import { useUiStore } from '@/store/uiStore';
 import type { Estimacion } from '@/types/estimacion';
+import { paisDe } from '@/lib/pais';
 import { cn, formatMoney, toast } from '@/lib/utils';
 
 const PATIOS = ['Todos los Patios', 'RFS 1', 'RFS 3'];
@@ -78,6 +80,12 @@ type ModalAction = 'rechazar' | 'reversar' | null;
 export default function AprobacionesSeaboardPage() {
   const { user } = useAuthStore();
   const { estimaciones, aprobar, rechazar, reversar } = useEstimacionesStore();
+  const { pais } = useUiStore();
+
+  useEffect(() => {
+    setPage(1);
+    setSelected(new Set());
+  }, [pais]);
 
   const [desde, setDesde] = useState('2026-07-06');
   const [hasta, setHasta] = useState('2026-07-12');
@@ -100,10 +108,11 @@ export default function AprobacionesSeaboardPage() {
     () =>
       estimaciones.filter(
         (e) =>
+          paisDe(e) === pais &&
           e.naviera.toUpperCase().includes('SEABOARD') &&
           (modoRevision ? e.estado === 'PENDIENTE' : e.estado === 'ENVIADO')
       ),
-    [estimaciones, modoRevision]
+    [estimaciones, modoRevision, pais]
   );
 
   const filtered = useMemo(() => {

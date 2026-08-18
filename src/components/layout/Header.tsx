@@ -14,6 +14,7 @@ import {
 import { Flag } from '@/components/ui/Flag';
 import { useAuthStore } from '@/store';
 import { useUiStore } from '@/store/uiStore';
+import { metaPais, PAISES_UI } from '@/lib/pais';
 import { cn, toast } from '@/lib/utils';
 
 interface HeaderProps {
@@ -47,21 +48,28 @@ const tonos = { amber: 'bg-amber-500', emerald: 'bg-emerald-500', red: 'bg-red-5
 /** Cabecera blanca RFS (misma estructura que layout-dms). */
 export function Header({ title, subtitle }: HeaderProps) {
   const router = useRouter();
-  const { menuAbierto, alternarMenu } = useUiStore();
+  const { menuAbierto, alternarMenu, pais, setPais } = useUiStore();
   const { user, logout } = useAuthStore();
 
-  const [menuActivo, setMenuActivo] = useState<'notificaciones' | 'usuario' | null>(null);
+  const [menuActivo, setMenuActivo] = useState<'notificaciones' | 'usuario' | 'pais' | null>(null);
   const [pendientes, setPendientes] = useState(NOTIFICACIONES);
   const [hora, setHora] = useState<string | null>(null);
   const contenedorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const { zona, locale } = metaPais(pais);
     const actualizar = () =>
-      setHora(new Date().toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit' }));
+      setHora(
+        new Date().toLocaleTimeString(locale, {
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: zona,
+        })
+      );
     actualizar();
     const id = setInterval(actualizar, 30_000);
     return () => clearInterval(id);
-  }, []);
+  }, [pais]);
 
   useEffect(() => {
     function alClickFuera(e: MouseEvent) {
@@ -116,13 +124,64 @@ export function Header({ title, subtitle }: HeaderProps) {
           <span className="hidden items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1.5 text-xs font-medium text-slate-600 2xl:inline-flex">
             <Clock className="h-3.5 w-3.5 text-rfsorange-500" />
             {hora ?? '--:--'}
-            <span className="text-slate-400">America/Guayaquil</span>
+            <span className="text-slate-400">{metaPais(pais).zona}</span>
           </span>
 
-          <span className="hidden items-center gap-1.5 rounded-full bg-rfs-50 px-2.5 py-1.5 text-xs font-semibold text-rfs-700 ring-1 ring-rfs-100 lg:inline-flex">
-            <Flag className="h-3 w-[18px]" />
-            Ecuador
-          </span>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setMenuActivo((m) => (m === 'pais' ? null : 'pais'))}
+              className="inline-flex items-center gap-1.5 rounded-full bg-rfs-50 px-2.5 py-1.5 text-xs font-semibold text-rfs-700 ring-1 ring-rfs-100 transition hover:bg-rfs-100"
+              aria-expanded={menuActivo === 'pais'}
+              aria-haspopup="listbox"
+              title="Filtrar por país de operación"
+            >
+              <Flag pais={pais} className="h-3 w-[18px]" />
+              {metaPais(pais).label}
+              <ChevronDown
+                className={cn(
+                  'h-3.5 w-3.5 text-rfs-700 transition-transform',
+                  menuActivo === 'pais' && 'rotate-180'
+                )}
+              />
+            </button>
+
+            {menuActivo === 'pais' && (
+              <div
+                role="listbox"
+                className="absolute right-0 z-40 mt-2 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white text-slate-800 shadow-xl animate-fade-up"
+              >
+                <p className="border-b border-slate-100 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  País de operación
+                </p>
+                {PAISES_UI.map((opcion) => (
+                  <button
+                    key={opcion.id}
+                    type="button"
+                    role="option"
+                    aria-selected={pais === opcion.id}
+                    onClick={() => {
+                      setPais(opcion.id);
+                      setMenuActivo(null);
+                      toast(`Operación ${opcion.label}: se muestran los estimados de ese país.`, 'success');
+                    }}
+                    className={cn(
+                      'flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-sm transition hover:bg-rfs-50',
+                      pais === opcion.id && 'bg-rfs-50 font-semibold text-rfs-700'
+                    )}
+                  >
+                    <Flag pais={opcion.id} className="h-3.5 w-5" />
+                    {opcion.label}
+                    {pais === opcion.id && (
+                      <span className="ml-auto text-[10px] font-bold uppercase text-rfsorange-600">
+                        Activo
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           <div className="relative">
             <button
@@ -233,8 +292,8 @@ export function Header({ title, subtitle }: HeaderProps) {
                   <p className="text-sm font-bold text-rfs-700">{user?.nombre}</p>
                   <p className="text-xs text-slate-500">{user?.username}</p>
                   <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white px-2 py-1 text-[11px] font-semibold text-slate-600 ring-1 ring-slate-200">
-                    <Flag className="h-2.5 w-4" />
-                    Operación Ecuador
+                    <Flag pais={pais} className="h-2.5 w-4" />
+                    Operación {metaPais(pais).label}
                   </p>
                 </div>
                 <div className="p-1.5">

@@ -200,6 +200,8 @@ export interface Estimacion {
   notas: NotaEstimacion[];
   auditoria: EventoAuditoria[];
   comentariosSeaboard: ComentarioSeaboard[];
+  /** Operación del estimado. Si falta, se infiere del código. */
+  pais?: 'ECUADOR' | 'PERU';
 }
 
 export function totalesDanos(danos: DanoEstimacion[]) {
