@@ -468,18 +468,6 @@ export default function ReporteEstimacionesPage() {
               </span>
             </div>
 
-            <div className="dms-resumen-strip">
-              <span>
-                Mostrando <strong>{filtered.length}</strong> de {porPais.length} estimaciones
-              </span>
-              <span>
-                Total filtrado <strong>${formatMoney(totales.pvpTotal)}</strong>
-              </span>
-              <span className="hidden sm:inline">
-                Pase el cursor sobre cada icono de la columna Acciones para ver qué hace.
-              </span>
-            </div>
-
             <DmsTableToolbar
               search={search}
               onSearchChange={(v) => {

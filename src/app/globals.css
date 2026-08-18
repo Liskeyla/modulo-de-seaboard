@@ -124,14 +124,6 @@
     @apply flex h-9 w-full items-center justify-center gap-1 rounded-md border border-slate-300 bg-white px-2 text-[10px] font-bold uppercase tracking-wide text-slate-600 transition-all hover:bg-slate-50 active:scale-[0.99];
   }
 
-  .dms-resumen-strip {
-    @apply flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-slate-100 bg-white px-4 py-2 text-[11px] text-slate-500;
-  }
-
-  .dms-resumen-strip strong {
-    @apply font-bold text-slate-800;
-  }
-
   .dms-icon-actions {
     @apply flex min-w-[7.5rem] flex-wrap items-center gap-1;
   }
