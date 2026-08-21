@@ -433,9 +433,9 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   i
                 </span>
                 <div className="min-w-0">
-                  Seleccione un daño para ver a la derecha la garantía, las fotos de inspección y
-                  la Información del Daño. La columna <strong>Comentarios</strong> muestra la
-                  conversación con liquidaciones.
+                  Seleccione un daño para filtrar a la derecha la garantía y las fotos de
+                  inspección. Sin selección, <strong>Fotos de daños</strong> muestra todas las
+                  evidencias del estimado.
                 </div>
               </div>
 
@@ -444,7 +444,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 seleccionadoId={danoSelId}
                 editable={editable}
                 onSeleccionar={(d) => {
-                  setDanoSelId(d.id);
+                  setDanoSelId((prev) => (prev === d.id ? null : d.id));
                   if (typeof window !== 'undefined' && window.matchMedia('(max-width: 1279px)').matches) {
                     window.setTimeout(() => {
                       document

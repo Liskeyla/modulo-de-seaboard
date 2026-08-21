@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Briefcase, ImageIcon, Save } from 'lucide-react';
 import type { ArchivoDano, DanoEstimacion, Estimacion, FotoDano } from '@/types/estimacion';
 import { toast } from '@/lib/utils';
@@ -19,6 +19,8 @@ function deIso(iso: string) {
   return `${m[3]}/${m[2]}/${m[1]}`;
 }
 
+type FotoInspeccion = FotoDano & { linea: number; comp: string };
+
 export function InfoLateralCards({
   estimacion,
   danoSeleccionado,
@@ -36,6 +38,7 @@ export function InfoLateralCards({
   const [fechaAceptacion, setFechaAceptacion] = useState('');
   const [ncGenerada, setNcGenerada] = useState('');
   const [montoNc, setMontoNc] = useState('');
+  const [fotoAmpliada, setFotoAmpliada] = useState<FotoInspeccion | null>(null);
 
   useEffect(() => {
     if (!dano) {
@@ -53,9 +56,23 @@ export function InfoLateralCards({
     setMontoNc(dano.montoNc != null ? String(dano.montoNc) : '');
   }, [dano, estimacion.inspeccion.fecha]);
 
-  const [fotoAmpliada, setFotoAmpliada] = useState<FotoDano | null>(null);
-  const reversados: ArchivoDano[] = dano?.archivosReversados ?? [];
-  const fotos: FotoDano[] = dano?.fotos ?? [];
+  const todasLasFotos = useMemo<FotoInspeccion[]>(
+    () =>
+      estimacion.danos.flatMap((d) =>
+        d.fotos.map((f) => ({ ...f, linea: d.linea, comp: d.comp }))
+      ),
+    [estimacion.danos]
+  );
+
+  const fotos = useMemo(
+    () => (dano ? todasLasFotos.filter((f) => f.linea === dano.linea) : todasLasFotos),
+    [dano, todasLasFotos]
+  );
+
+  const reversados: ArchivoDano[] = useMemo(() => {
+    if (dano) return dano.archivosReversados ?? [];
+    return estimacion.danos.flatMap((d) => d.archivosReversados ?? []);
+  }, [dano, estimacion.danos]);
 
   function guardar() {
     if (!dano) {
@@ -172,33 +189,47 @@ export function InfoLateralCards({
           </div>
 
           <div>
-            <p className="dms-field-label mb-1.5">Fotos de daños</p>
-            {!dano ? (
-              <p className="text-[11px] leading-relaxed text-slate-400">
-                Seleccione una línea del listado para ver las fotos de la inspección.
+            <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-1">
+              <p className="dms-field-label mb-0">Fotos de daños</p>
+              <p className="text-[10px] font-semibold text-slate-400">
+                {dano
+                  ? `Línea ${String(dano.linea).padStart(2, '0')} · ${dano.comp} · ${fotos.length}`
+                  : `Todas las líneas · ${fotos.length}`}
               </p>
-            ) : fotos.length === 0 ? (
+            </div>
+            {fotos.length === 0 ? (
               <p className="text-[11px] leading-relaxed text-slate-400">
-                Esta línea no tiene fotografías de inspección.
+                {dano
+                  ? 'Esta línea no tiene fotografías de daño declaradas.'
+                  : 'El estimado no tiene fotografías de daños declarados.'}
               </p>
             ) : (
               <div className="dms-insp-grid">
                 {fotos.map((foto) => (
                   <button
-                    key={foto.id}
+                    key={`${foto.linea}-${foto.id}`}
                     type="button"
                     className="dms-insp-foto"
                     onClick={() => setFotoAmpliada(foto)}
-                    title="Ver foto"
+                    title={`Línea ${foto.linea} · ${foto.comp} · ${foto.descripcion}`}
                   >
                     <span className="dms-insp-foto-img">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={foto.url} alt={foto.descripcion} />
-                      <span className="dms-insp-foto-fecha">{foto.fecha.split(' ')[0]}</span>
+                      <span className="dms-insp-foto-fecha">
+                        {!dano ? `L${String(foto.linea).padStart(2, '0')} · ` : ''}
+                        {foto.fecha.split(' ')[0]}
+                      </span>
                     </span>
                   </button>
                 ))}
               </div>
+            )}
+            {dano && todasLasFotos.length > fotos.length && (
+              <p className="mt-1.5 text-[10px] text-slate-400">
+                Mostrando {fotos.length} de {todasLasFotos.length} fotos del estimado. Quite la
+                selección del listado para ver todas.
+              </p>
             )}
           </div>
         </div>
@@ -214,6 +245,7 @@ export function InfoLateralCards({
               className="max-h-[78vh] w-auto rounded-lg object-contain shadow-2xl"
             />
             <figcaption className="dms-lightbox-caption">
+              Línea {String(fotoAmpliada.linea).padStart(2, '0')} · {fotoAmpliada.comp} ·{' '}
               {fotoAmpliada.descripcion} · {fotoAmpliada.fecha}
             </figcaption>
           </figure>
