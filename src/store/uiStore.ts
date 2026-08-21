@@ -12,18 +12,31 @@ export type GuardiaSesion = {
   descartarYLiberar: () => void;
 };
 
+/**
+ * Estimado visualizado pendiente de decisión: al cambiar país o salir,
+ * se pide confirmar solo-visualización o continuar la revisión.
+ */
+export type AvisoVisualizacion = {
+  codigo: string;
+  itemsPendientes: number;
+  /** Confirma salida sin decisión (p. ej. cambiar país / ir al reporte). */
+  confirmarSoloVisualizacion: () => void;
+};
+
 interface UiState {
   menuAbierto: boolean;
   menuFijado: boolean;
   hidratadoUi: boolean;
   pais: PaisOperacion;
   guardiaSesion: GuardiaSesion | null;
+  avisoVisualizacion: AvisoVisualizacion | null;
   abrirMenu: () => void;
   cerrarMenu: () => void;
   alternarMenu: () => void;
   alternarFijado: () => void;
   setPais: (pais: PaisOperacion) => void;
   setGuardiaSesion: (guardia: GuardiaSesion | null) => void;
+  setAvisoVisualizacion: (aviso: AvisoVisualizacion | null) => void;
   hidratarUi: () => void;
 }
 
@@ -33,6 +46,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   hidratadoUi: false,
   pais: 'ECUADOR',
   guardiaSesion: null,
+  avisoVisualizacion: null,
 
   abrirMenu: () => set({ menuAbierto: true }),
   cerrarMenu: () => set((s) => (s.menuFijado ? s : { menuAbierto: false })),
@@ -54,6 +68,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   },
 
   setGuardiaSesion: (guardiaSesion) => set({ guardiaSesion }),
+  setAvisoVisualizacion: (avisoVisualizacion) => set({ avisoVisualizacion }),
 
   hidratarUi: () => {
     if (typeof window === 'undefined') return;

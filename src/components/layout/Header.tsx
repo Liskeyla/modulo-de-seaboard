@@ -51,7 +51,7 @@ const tonos = { amber: 'bg-amber-500', emerald: 'bg-emerald-500', red: 'bg-red-5
 
 type CambioPaisPendiente = {
   pais: PaisOperacion;
-  paso: 'confirmar' | 'guardar';
+  paso: 'confirmar' | 'guardar' | 'visualizacion';
   resumen: string[];
   codigo: string;
 };
@@ -59,7 +59,8 @@ type CambioPaisPendiente = {
 /** Cabecera blanca RFS (misma estructura que layout-dms). */
 export function Header({ title, subtitle }: HeaderProps) {
   const router = useRouter();
-  const { menuAbierto, alternarMenu, pais, setPais, guardiaSesion } = useUiStore();
+  const { menuAbierto, alternarMenu, pais, setPais, guardiaSesion, avisoVisualizacion } =
+    useUiStore();
   const { user, logout } = useAuthStore();
 
   const [menuActivo, setMenuActivo] = useState<'notificaciones' | 'usuario' | 'pais' | null>(null);
@@ -131,11 +132,28 @@ export function Header({ title, subtitle }: HeaderProps) {
       });
       return;
     }
+    const aviso = useUiStore.getState().avisoVisualizacion;
+    if (aviso) {
+      setCambioPais({
+        pais: nuevo,
+        paso: 'visualizacion',
+        resumen: [],
+        codigo: aviso.codigo,
+      });
+      return;
+    }
     setPais(nuevo);
     toast(
       `Operación ${metaPais(nuevo).label}\nSe muestran los estimados de ese país.`,
       'success'
     );
+  }
+
+  function soloVisualizacionYCambiarPais() {
+    if (!cambioPais) return;
+    useUiStore.getState().avisoVisualizacion?.confirmarSoloVisualizacion();
+    toast('Salida registrada como solo visualización.', 'info');
+    aplicarCambioPais(cambioPais.pais);
   }
 
   function confirmarCambioPais() {
@@ -508,6 +526,65 @@ export function Header({ title, subtitle }: HeaderProps) {
           </ul>
         </div>
       )}
+    </Modal>
+    <Modal
+      open={cambioPais?.paso === 'visualizacion'}
+      onClose={() => setCambioPais(null)}
+      size="md"
+      icon={<AlertTriangle className="h-4 w-4" />}
+      title="¿Cambiar país de operación?"
+      subtitle={
+        cambioPais
+          ? `${cambioPais.codigo} · De ${metaPais(pais).label} a ${metaPais(cambioPais.pais).label}`
+          : undefined
+      }
+      footer={
+        <>
+          <button
+            type="button"
+            className="dms-btn-action border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
+            onClick={() => setCambioPais(null)}
+          >
+            Quedarme
+          </button>
+          <button
+            type="button"
+            className="dms-btn-action border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-700"
+            onClick={soloVisualizacionYCambiarPais}
+          >
+            Solo visualicé · Cambiar país
+          </button>
+          <button
+            type="button"
+            className="dms-btn-enviar px-4 py-2 text-sm"
+            onClick={() => {
+              setCambioPais(null);
+              toast(
+                'Continúe la revisión: apruebe o rechace los ítems y luego el estimado.',
+                'info'
+              );
+            }}
+          >
+            Continuar revisión / decisión
+          </button>
+        </>
+      }
+    >
+      <div className="space-y-3 text-sm leading-relaxed text-gray-600">
+        <p>
+          Está visualizando el estimado <strong>{cambioPais?.codigo ?? avisoVisualizacion?.codigo}</strong>.
+          Se espera que <strong>apruebe o rechace los ítems de daño</strong> y luego{' '}
+          <strong>apruebe o rechace el estimado</strong>.
+        </p>
+        {(avisoVisualizacion?.itemsPendientes ?? 0) > 0 && (
+          <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+            Aún hay <strong>{avisoVisualizacion?.itemsPendientes}</strong> ítem(s) sin revisar.
+          </p>
+        )}
+        <p className="text-xs text-slate-500">
+          Si solo ingresó a consultar, pulse <strong>Solo visualicé · Cambiar país</strong>.
+        </p>
+      </div>
     </Modal>
     </>
   );

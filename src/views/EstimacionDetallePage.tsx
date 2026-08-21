@@ -155,6 +155,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     registrarActividad,
   } = useEstimacionesStore();
   const setGuardiaSesion = useUiStore((s) => s.setGuardiaSesion);
+  const setAvisoVisualizacion = useUiStore((s) => s.setAvisoVisualizacion);
 
   const estimacion = useMemo(() => getByCodigo(codigo), [codigo, estimaciones, getByCodigo]);
 
@@ -209,6 +210,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     }
     const idEst = estimacion.id;
     const codigoEst = estimacion.codigo;
+    setAvisoVisualizacion(null);
     setGuardiaSesion({
       codigo: codigoEst,
       getResumen: () => {
@@ -235,7 +237,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       },
     });
     return () => setGuardiaSesion(null);
-  }, [aperturada, estimacion?.id, estimacion?.codigo, setGuardiaSesion]);
+  }, [aperturada, estimacion?.id, estimacion?.codigo, setGuardiaSesion, setAvisoVisualizacion]);
 
   const usuario = user?.username ?? 'apptelink';
   const rolComentario = rolDeUsuario(user?.rol, user?.username);
@@ -285,6 +287,43 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   const danoSeleccionado = estimacion.danos.find((d) => d.id === danoSelId) ?? null;
   const pendientes = contarComentariosPendientes(estimacion.danos);
   const itemsPendientesRevision = itemsSinRevisionSbm(estimacion.danos);
+
+  // Mientras visualiza un estimado accionable (sin aperturar), avisar al cambiar país.
+  useEffect(() => {
+    if (aperturada) return;
+    const seaboardPendiente = esSeaboard && estimacion.estado === 'ENVIADO';
+    const dmsPendiente =
+      esOperadorDms && ESTADOS_EDITABLES.includes(estimacion.estado);
+    if (!seaboardPendiente && !dmsPendiente) {
+      setAvisoVisualizacion(null);
+      return;
+    }
+    const codigoEst = estimacion.codigo;
+    const idEst = estimacion.id;
+    setAvisoVisualizacion({
+      codigo: codigoEst,
+      itemsPendientes: itemsPendientesRevision.length,
+      confirmarSoloVisualizacion: () => {
+        useEstimacionesStore.getState().registrarActividad(
+          idEst,
+          useAuthStore.getState().user?.username ?? 'apptelink',
+          'Salió sin decisión (solo visualización)',
+          `Usuario confirmó salida del estimado ${codigoEst} sin aprobar/rechazar`
+        );
+        setAvisoVisualizacion(null);
+      },
+    });
+    return () => setAvisoVisualizacion(null);
+  }, [
+    aperturada,
+    esSeaboard,
+    esOperadorDms,
+    estimacion.estado,
+    estimacion.codigo,
+    estimacion.id,
+    itemsPendientesRevision.length,
+    setAvisoVisualizacion,
+  ]);
 
   const fotosDialogo =
     dialogo.tipo === 'FOTOS'
@@ -393,12 +432,8 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   }
 
   function salirSoloVisualizacion() {
-    registrarActividad(
-      estimacion!.id,
-      usuario,
-      'Salió sin decisión (solo visualización)',
-      `Usuario confirmó salida del estimado ${estimacion!.codigo} sin aprobar/rechazar`
-    );
+    useUiStore.getState().avisoVisualizacion?.confirmarSoloVisualizacion();
+    setAvisoVisualizacion(null);
     cerrar();
     router.push('/reportes/estimaciones');
   }
