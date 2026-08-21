@@ -1,60 +1,20 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { Briefcase, ImageIcon, Save } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { ImageIcon } from 'lucide-react';
 import type { ArchivoDano, DanoEstimacion, Estimacion, FotoDano } from '@/types/estimacion';
-import { toast } from '@/lib/utils';
-
-function aIso(fecha: string | undefined) {
-  if (!fecha) return '';
-  const dmy = fecha.match(/(\d{2})\/(\d{2})\/(\d{4})/);
-  if (dmy) return `${dmy[3]}-${dmy[2]}-${dmy[1]}`;
-  if (/^\d{4}-\d{2}-\d{2}/.test(fecha)) return fecha.slice(0, 10);
-  return '';
-}
-
-function deIso(iso: string) {
-  const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (!m) return iso;
-  return `${m[3]}/${m[2]}/${m[1]}`;
-}
 
 type FotoInspeccion = FotoDano & { linea: number; comp: string };
 
 export function InfoLateralCards({
   estimacion,
   danoSeleccionado,
-  editable,
-  onGuardarGarantia,
 }: {
   estimacion: Estimacion;
   danoSeleccionado: DanoEstimacion | null;
-  editable: boolean;
-  onGuardarGarantia: (cambios: Partial<DanoEstimacion>, resumen: string) => void;
 }) {
   const dano = danoSeleccionado;
-  const [serieAnterior, setSerieAnterior] = useState('');
-  const [serieEntrega, setSerieEntrega] = useState('');
-  const [fechaAceptacion, setFechaAceptacion] = useState('');
-  const [ncGenerada, setNcGenerada] = useState('');
-  const [montoNc, setMontoNc] = useState('');
   const [fotoAmpliada, setFotoAmpliada] = useState<FotoInspeccion | null>(null);
-
-  useEffect(() => {
-    if (!dano) {
-      setSerieAnterior('');
-      setSerieEntrega('');
-      setFechaAceptacion(aIso(estimacion.inspeccion.fecha));
-      setNcGenerada('');
-      setMontoNc('');
-      return;
-    }
-    setSerieAnterior(dano.serieAnterior === 'N/A' ? '' : dano.serieAnterior);
-    setSerieEntrega(dano.serieEntregado);
-    setFechaAceptacion(aIso(dano.fechaAceptacion) || aIso(estimacion.inspeccion.fecha));
-    setNcGenerada(dano.ncGenerada ?? '');
-    setMontoNc(dano.montoNc != null ? String(dano.montoNc) : '');
-  }, [dano, estimacion.inspeccion.fecha]);
 
   const fotosDanos = useMemo<FotoInspeccion[]>(
     () =>
@@ -71,94 +31,8 @@ export function InfoLateralCards({
     return estimacion.danos.flatMap((d) => d.archivosReversados ?? []);
   }, [dano, estimacion.danos]);
 
-  function guardar() {
-    if (!dano) {
-      toast('Seleccione una línea de daño para guardar la garantía.', 'error');
-      return;
-    }
-    const monto = montoNc.trim() === '' ? undefined : Number(montoNc.replace(',', '.'));
-    if (montoNc.trim() && Number.isNaN(monto)) {
-      toast('El monto NC debe ser numérico.', 'error');
-      return;
-    }
-    onGuardarGarantia(
-      {
-        serieAnterior: serieAnterior.trim() || 'N/A',
-        serieEntregado: serieEntrega.trim(),
-        fechaAceptacion: fechaAceptacion ? deIso(fechaAceptacion) : '',
-        ncGenerada: ncGenerada.trim(),
-        montoNc: monto,
-      },
-      `Línea ${dano.linea} · garantía actualizada (serie ${serieEntrega.trim() || 's/n'})`
-    );
-    toast('Información de garantía guardada.', 'success');
-  }
-
   return (
     <div className="space-y-3">
-      <section className="dms-card">
-        <header className="dms-card-header">
-          <Briefcase className="h-3.5 w-3.5" /> Información de Garantía
-        </header>
-        <div className="dms-card-body space-y-2.5">
-          <div>
-            <label className="dms-field-label">Serie Anterior</label>
-            <input
-              className="dms-input-sm"
-              value={serieAnterior}
-              disabled={!editable || !dano}
-              onChange={(e) => setSerieAnterior(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="dms-field-label">Serie Entrega</label>
-            <input
-              className="dms-input-sm"
-              value={serieEntrega}
-              disabled={!editable || !dano}
-              onChange={(e) => setSerieEntrega(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="dms-field-label">Fecha Aceptación</label>
-            <input
-              type="date"
-              className="dms-input-sm"
-              value={fechaAceptacion}
-              disabled={!editable || !dano}
-              onChange={(e) => setFechaAceptacion(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="dms-field-label">No. NC Generada</label>
-            <input
-              className="dms-input-sm"
-              value={ncGenerada}
-              disabled={!editable || !dano}
-              onChange={(e) => setNcGenerada(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="dms-field-label">Monto NC</label>
-            <input
-              className="dms-input-sm"
-              inputMode="decimal"
-              value={montoNc}
-              disabled={!editable || !dano}
-              onChange={(e) => setMontoNc(e.target.value)}
-            />
-          </div>
-          <button
-            type="button"
-            className="dms-btn-azul px-4 py-2 text-sm"
-            disabled={!editable || !dano}
-            onClick={guardar}
-          >
-            <Save className="h-4 w-4" /> Guardar
-          </button>
-        </div>
-      </section>
-
       <section className="dms-card">
         <header className="dms-card-header">
           <ImageIcon className="h-3.5 w-3.5" /> Información de la Inspección

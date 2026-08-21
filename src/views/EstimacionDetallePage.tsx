@@ -651,8 +651,8 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 </span>
                 <div className="min-w-0 truncate">
                   {puedeAperturar && !aperturada
-                    ? 'Seleccione un daño para ver garantía; para editar, pulse Aperturar estimación.'
-                    : 'Seleccione un daño para editar la información de garantía.'}
+                    ? 'Seleccione un daño para ver detalle; para editar, pulse Aperturar estimación.'
+                    : 'Seleccione un daño para ver su detalle a la derecha.'}
                 </div>
               </div>
 
@@ -801,11 +801,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
             <InfoLateralCards
               estimacion={estimacion}
               danoSeleccionado={danoSeleccionado}
-              editable={editable}
-              onGuardarGarantia={(cambios, resumen) => {
-                if (!danoSeleccionado) return;
-                cambiarDano(danoSeleccionado, cambios, resumen);
-              }}
             />
             <InfoDanoPanel
               estimacion={estimacion}
