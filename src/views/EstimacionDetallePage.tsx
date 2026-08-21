@@ -9,7 +9,6 @@ import {
   ClipboardList,
   Container,
   FileStack,
-  Handshake,
   ListChecks,
   Lock,
   MessageSquare,
@@ -140,7 +139,6 @@ function resumirCambiosApertura(
 type Dialogo =
   | { tipo: 'NINGUNO' }
   | { tipo: 'CONTENEDOR' }
-  | { tipo: 'APORTAR' }
   | { tipo: 'ENVIAR' }
   | { tipo: 'RECHAZAR' }
   | { tipo: 'RECHAZAR_ITEMS' }
@@ -433,16 +431,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                     }}
                   >
                     <Container className="h-4 w-4" /> Actualizar Información Contenedor
-                  </button>
-                  <button
-                    type="button"
-                    className="dms-btn-teal"
-                    onClick={() => {
-                      if (exigirApertura()) return;
-                      setDialogo({ tipo: 'APORTAR' });
-                    }}
-                  >
-                    <Handshake className="h-4 w-4" /> Aportar Estimación
                   </button>
                 </>
               )}
@@ -925,28 +913,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
           ))}
         </dl>
       </Modal>
-
-      <ConfirmModal
-        open={dialogo.tipo === 'APORTAR'}
-        title="Aportar Estimación"
-        subtitle="El estimado se vincula al itinerario y almacén SAP indicados"
-        confirmLabel="Aportar"
-        confirmClass="dms-btn-teal"
-        onClose={cerrar}
-        onConfirm={() => {
-          setSap(estimacion.id, { itinerarioSap: itinerario, almacenSap: almacen }, usuario);
-          toast(`Estimación ${estimacion.codigo} aportada a SAP.`, 'success');
-        }}
-      >
-        Se aportará la estimación <strong>{estimacion.codigo}</strong> con{' '}
-        <strong>{estimacion.danos.length}</strong> línea(s) por un total de{' '}
-        <strong>${formatMoney(estimacion.pvpTotal)}</strong>.
-        {!itinerario && (
-          <p className="mt-2 text-xs text-rfsorange-600">
-            Sugerencia: seleccione un Itinerario SAP antes de aportar.
-          </p>
-        )}
-      </ConfirmModal>
 
       <ConfirmModal
         open={dialogo.tipo === 'ENVIAR'}
