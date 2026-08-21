@@ -316,13 +316,13 @@ export default function ReporteEstimacionesPage() {
   return (
     <>
       <Header
-        title="Reporte de Estimaciones"
+        title="Reporte de Estimaciones Seaboard Marine"
         subtitle="Consulta operativa DMS · Envío a aprobación Seaboard"
       />
       <main className="px-3 py-4 md:px-5 md:py-6">
         <div className="dms-shell">
           <DmsReportLayout
-            title="Reporte de Estimaciones"
+            title="Reporte de Estimaciones Seaboard Marine"
             subtitle="Consulta operativa DMS · Envío a aprobación Seaboard"
             heroIcon={<FileBarChart className="h-5 w-5" />}
             filtros={[
@@ -458,7 +458,7 @@ export default function ReporteEstimacionesPage() {
                 setPageSize(n);
                 setPage(1);
               }}
-              excelFilename="Reporte de Estimaciones RFS - DMS Ecuador.xlsx"
+              excelFilename="Reporte de Estimaciones Seaboard Marine.xlsx"
               excelHeaders={EXCEL_HEADERS}
               excelRows={filtered.map(rowToExcel)}
             />

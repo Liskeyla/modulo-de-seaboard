@@ -16,7 +16,7 @@ interface SidebarProps {
 const LINKS_BASE = [
   {
     href: '/reportes/estimaciones',
-    label: 'Reporte de Estimaciones',
+    label: 'Reporte de Estimaciones Seaboard Marine',
     icon: FileBarChart,
     hint: 'Consulta y detalle de estimados',
     roles: ['dms', 'seaboard', 'liquidaciones'] as const,

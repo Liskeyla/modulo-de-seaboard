@@ -22,7 +22,7 @@ export const MENU_GRUPOS: MenuGrupo[] = [
     items: [
       {
         href: '/reportes/estimaciones',
-        label: 'Reporte de Estimaciones',
+        label: 'Reporte de Estimaciones Seaboard Marine',
         icon: 'FileBarChart',
         descripcion: 'Consulta y detalle de estimados',
       },
