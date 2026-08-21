@@ -732,6 +732,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 danos={estimacion.danos}
                 seleccionadoId={danoSelId}
                 editable={editable}
+                cargoAplicaEditable={aperturada && puedeAperturar}
                 mostrarDimensiones={estimacion.tipoEstimacion.toUpperCase().includes('BOX')}
                 mostrarMarcacion={puedeAperturar}
                 marcacionHabilitada={aperturada}
@@ -772,6 +773,22 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                     d,
                     { contenedorDonante },
                     `Línea ${d.linea} · Contenedor donante: "${contenedorDonante}"`
+                  );
+                }}
+                onCargoChange={(d, cargo) => {
+                  if (exigirApertura()) return;
+                  cambiarDano(d, { cargo }, `Línea ${d.linea} · Cargo: ${cargo}`);
+                }}
+                onAplicaChange={(d, aplica) => {
+                  if (exigirApertura()) return;
+                  const extra =
+                    aplica === 'Rechazado SBM' || aplica === 'Rechazado'
+                      ? { cargo: 'Rechazado' as const }
+                      : {};
+                  cambiarDano(
+                    d,
+                    { aplica, ...extra },
+                    `Línea ${d.linea} · Aplica: ${aplica}`
                   );
                 }}
                 onEditar={(d) => {

@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from 'react';
 import { ChevronDown, Plus, Search, Upload, X } from 'lucide-react';
 import {
   APLICA_DANO,
+  CARGOS_DANO,
   type AplicaDano,
   type CargoDano,
   type DanoEstimacion,
@@ -11,13 +12,6 @@ import {
 } from '@/types/estimacion';
 import { TARIFAS, type Tarifa } from '@/data/tarifas';
 import { cn, formatMoney, toast } from '@/lib/utils';
-
-/** Las etiquetas replican los combos del DMS de producción. */
-const CARGO_OPCIONES: { label: string; cargo: CargoDano }[] = [
-  { label: 'Aprobado Linea', cargo: 'Línea' },
-  { label: 'Aprobado Dueño', cargo: 'Dueño' },
-  { label: 'Aprobado Garantía', cargo: 'Garantía' },
-];
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
@@ -33,8 +27,8 @@ export function AgregarDanoCard({ editable, seccionSugerida, onAgregar }: Agrega
   const [tarifa, setTarifa] = useState<Tarifa | null>(null);
   const [danio, setDanio] = useState('');
   const [cantidad, setCantidad] = useState('1');
-  const [cargoLabel, setCargoLabel] = useState(CARGO_OPCIONES[0].label);
-  const [garantia, setGarantia] = useState<AplicaDano>('Aprobado Linea');
+  const [cargo, setCargo] = useState<CargoDano>('Línea');
+  const [aplica, setAplica] = useState<AplicaDano>('Pendiente Revisión');
   const [archivos, setArchivos] = useState<File[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -65,8 +59,8 @@ export function AgregarDanoCard({ editable, seccionSugerida, onAgregar }: Agrega
     setBusqueda('');
     setDanio('');
     setCantidad('1');
-    setCargoLabel(CARGO_OPCIONES[0].label);
-    setGarantia('Aprobado Linea');
+    setCargo('Línea');
+    setAplica('Pendiente Revisión');
     setArchivos([]);
     if (fileRef.current) fileRef.current.value = '';
   }
@@ -76,7 +70,6 @@ export function AgregarDanoCard({ editable, seccionSugerida, onAgregar }: Agrega
       toast('Seleccione una tarifa del catálogo para continuar.', 'error');
       return;
     }
-    const cargo = CARGO_OPCIONES.find((c) => c.label === cargoLabel)?.cargo ?? 'Línea';
     const fotos: FotoDano[] = archivos.map((file, i) => ({
       id: `up-${Date.now()}-${i}`,
       // En el prototipo la evidencia cargada vive en memoria durante la sesión.
@@ -106,7 +99,7 @@ export function AgregarDanoCard({ editable, seccionSugerida, onAgregar }: Agrega
       csMaterial: csMat,
       csTotal: round2(csHH + csMat),
       cargo,
-      aplica: garantia,
+      aplica,
       medida: tarifa.medida,
       remark: '',
       contenedorDonante: '',
@@ -246,25 +239,25 @@ export function AgregarDanoCard({ editable, seccionSugerida, onAgregar }: Agrega
             <label className="dms-field-label">Cargo</label>
             <select
               className="dms-select"
-              value={cargoLabel}
+              value={cargo}
               disabled={!editable}
-              onChange={(e) => setCargoLabel(e.target.value)}
+              onChange={(e) => setCargo(e.target.value as CargoDano)}
             >
-              {CARGO_OPCIONES.map((c) => (
-                <option key={c.label} value={c.label}>
-                  {c.label}
+              {CARGOS_DANO.map((c) => (
+                <option key={c} value={c}>
+                  {c}
                 </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="dms-field-label">Garantía</label>
+            <label className="dms-field-label">Aplica</label>
             <select
               className="dms-select"
-              value={garantia}
+              value={aplica}
               disabled={!editable}
-              onChange={(e) => setGarantia(e.target.value as AplicaDano)}
+              onChange={(e) => setAplica(e.target.value as AplicaDano)}
             >
               {APLICA_DANO.map((a) => (
                 <option key={a} value={a}>

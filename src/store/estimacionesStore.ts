@@ -16,7 +16,7 @@ import type {
 } from '@/types/estimacion';
 import { aLineaHistorial, APLICA_APROBADO_SBM, APLICA_RECHAZADO_SBM, CARGO_RECHAZADO } from '@/types/estimacion';
 
-const STORAGE_KEY = 'dms-estimaciones-prototipo-v9';
+const STORAGE_KEY = 'dms-estimaciones-prototipo-v10';
 const CLAVES_OBSOLETAS = [
   'dms-estimaciones-prototipo',
   'dms-estimaciones-prototipo-v2',
@@ -26,6 +26,7 @@ const CLAVES_OBSOLETAS = [
   'dms-estimaciones-prototipo-v6',
   'dms-estimaciones-prototipo-v7',
   'dms-estimaciones-prototipo-v8',
+  'dms-estimaciones-prototipo-v9',
 ];
 
 function ahoraFmt() {
@@ -420,7 +421,13 @@ export const useEstimacionesStore = create<EstimacionesState>()(
         agregarDano: (id, dano, usuario) => {
           mutar(id, (e) => {
             const linea = e.danos.reduce((max, d) => Math.max(max, d.linea), 0) + 1;
-            const nuevo: DanoEstimacion = { ...dano, id: uid('dano'), linea };
+            const nuevo: DanoEstimacion = {
+              ...dano,
+              id: uid('dano'),
+              linea,
+              cargo: dano.cargo || 'Línea',
+              aplica: dano.aplica || 'Pendiente Revisión',
+            };
             return recalcular({
               ...e,
               danos: [...e.danos, nuevo],

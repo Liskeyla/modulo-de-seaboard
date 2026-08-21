@@ -3,8 +3,12 @@
 import { Fragment } from 'react';
 import { CheckCircle2, ClipboardList, Images, MessageSquare, PencilLine, Video } from 'lucide-react';
 import {
+  APLICA_DANO,
+  CARGOS_DANO,
   totalesDanos,
+  type AplicaDano,
   type CampoSnapshotLinea,
+  type CargoDano,
   type DanoEstimacion,
   type EdicionRecienteDano,
 } from '@/types/estimacion';
@@ -14,6 +18,8 @@ interface ListadoDanosTableProps {
   danos: DanoEstimacion[];
   seleccionadoId: string | null;
   editable: boolean;
+  /** Permite cambiar Cargo / Aplica (estimado aperturado). */
+  cargoAplicaEditable?: boolean;
   mostrarDimensiones?: boolean;
   mostrarMarcacion?: boolean;
   marcacionHabilitada?: boolean;
@@ -23,6 +29,8 @@ interface ListadoDanosTableProps {
   onSeleccionar: (dano: DanoEstimacion) => void;
   onRemarkChange: (dano: DanoEstimacion, remark: string) => void;
   onDonanteChange: (dano: DanoEstimacion, donante: string) => void;
+  onCargoChange?: (dano: DanoEstimacion, cargo: CargoDano) => void;
+  onAplicaChange?: (dano: DanoEstimacion, aplica: AplicaDano) => void;
   onEditar: (dano: DanoEstimacion) => void;
   onFotos: (dano: DanoEstimacion) => void;
   onVideo: (dano: DanoEstimacion) => void;
@@ -147,6 +155,7 @@ export function ListadoDanosTable({
   danos,
   seleccionadoId,
   editable,
+  cargoAplicaEditable = false,
   mostrarDimensiones = false,
   mostrarMarcacion = false,
   marcacionHabilitada = false,
@@ -156,6 +165,8 @@ export function ListadoDanosTable({
   onSeleccionar,
   onRemarkChange,
   onDonanteChange: _onDonanteChange,
+  onCargoChange,
+  onAplicaChange,
   onEditar,
   onFotos,
   onVideo,
@@ -335,9 +346,51 @@ export function ListadoDanosTable({
                   <td className="text-right font-semibold tabular-nums text-rfs-navy">
                     ${formatMoney(d.csTotal)}
                   </td>
-                  <td className="text-center whitespace-nowrap">{d.cargo}</td>
-                  <td className="text-center whitespace-nowrap text-[11px] font-semibold text-black">
-                    {d.aplica}
+                  <td
+                    className="text-center whitespace-nowrap"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {cargoAplicaEditable && onCargoChange ? (
+                      <select
+                        className="dms-select dms-select-actividad max-w-[6.5rem] text-[11px]"
+                        value={d.cargo || 'Línea'}
+                        title="Cargo (editable con estimado aperturado)"
+                        onChange={(e) =>
+                          onCargoChange(d, e.target.value as CargoDano)
+                        }
+                      >
+                        {CARGOS_DANO.map((c) => (
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      d.cargo || 'Línea'
+                    )}
+                  </td>
+                  <td
+                    className="text-center whitespace-nowrap text-[11px] font-semibold text-black"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {cargoAplicaEditable && onAplicaChange ? (
+                      <select
+                        className="dms-select dms-select-actividad max-w-[11rem] text-[11px]"
+                        value={d.aplica || 'Pendiente Revisión'}
+                        title="Aplica (editable con estimado aperturado)"
+                        onChange={(e) =>
+                          onAplicaChange(d, e.target.value as AplicaDano)
+                        }
+                      >
+                        {APLICA_DANO.map((a) => (
+                          <option key={a} value={a}>
+                            {a}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      d.aplica || 'Pendiente Revisión'
+                    )}
                   </td>
                   <td className="text-center">{d.medida || '—'}</td>
                   <td onClick={(e) => e.stopPropagation()}>
