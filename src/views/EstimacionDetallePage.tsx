@@ -139,7 +139,6 @@ type Dialogo =
   | { tipo: 'RECHAZAR' }
   | { tipo: 'RECHAZAR_ITEMS' }
   | { tipo: 'RECHAZAR_ITEM'; dano: DanoEstimacion }
-  | { tipo: 'ELIMINAR_DANO'; dano: DanoEstimacion }
   | { tipo: 'EDITAR_DANO'; dano: DanoEstimacion }
   | { tipo: 'COMENTARIOS'; danoId: string }
   | { tipo: 'FOTOS'; danoId: string | 'TODAS' }
@@ -162,7 +161,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     rechazar,
     actualizarDano,
     resolverItemsMasivo,
-    eliminarDano,
     agregarComentarioDano,
     agregarNota,
   } = useEstimacionesStore();
@@ -745,10 +743,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   if (exigirApertura()) return;
                   setDialogo({ tipo: 'EDITAR_DANO', dano: d });
                 }}
-                onEliminar={(d) => {
-                  if (exigirApertura()) return;
-                  setDialogo({ tipo: 'ELIMINAR_DANO', dano: d });
-                }}
                 onFotos={(d) => setDialogo({ tipo: 'FOTOS', danoId: d.id })}
                 onVideo={(d) => setDialogo({ tipo: 'VIDEO', dano: d })}
                 onComentarios={(d) => setDialogo({ tipo: 'COMENTARIOS', danoId: d.id })}
@@ -910,27 +904,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
           <p className="mt-2 text-xs text-rfsorange-600">
             Atención: hay {pendientes} comentario(s) de liquidaciones sin resolver.
           </p>
-        )}
-      </ConfirmModal>
-
-      <ConfirmModal
-        open={dialogo.tipo === 'ELIMINAR_DANO'}
-        title="Eliminar línea de daño"
-        subtitle="Esta acción recalcula los valores del estimado"
-        confirmLabel="Eliminar"
-        onClose={cerrar}
-        onConfirm={() => {
-          if (dialogo.tipo !== 'ELIMINAR_DANO') return;
-          eliminarDano(estimacion.id, dialogo.dano.id, usuario);
-          toast(`Línea ${dialogo.dano.linea} eliminada del estimado.`, 'success');
-        }}
-      >
-        {dialogo.tipo === 'ELIMINAR_DANO' && (
-          <>
-            Se eliminará la línea <strong>{String(dialogo.dano.linea).padStart(2, '0')}</strong> (
-            {dialogo.dano.comp} · {dialogo.dano.dano}) por{' '}
-            <strong>${formatMoney(dialogo.dano.csTotal)}</strong>.
-          </>
         )}
       </ConfirmModal>
 

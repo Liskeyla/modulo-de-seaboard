@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, ClipboardList, Images, MessageSquare, PencilLine, Trash2, Video } from 'lucide-react';
+import { CheckCircle2, ClipboardList, Images, MessageSquare, PencilLine, Video } from 'lucide-react';
 import {
   APLICA_DANO,
   totalesDanos,
@@ -33,7 +33,6 @@ interface ListadoDanosTableProps {
   onRemarkChange: (dano: DanoEstimacion, remark: string) => void;
   onDonanteChange: (dano: DanoEstimacion, donante: string) => void;
   onEditar: (dano: DanoEstimacion) => void;
-  onEliminar: (dano: DanoEstimacion) => void;
   onFotos: (dano: DanoEstimacion) => void;
   onVideo: (dano: DanoEstimacion) => void;
   onComentarios: (dano: DanoEstimacion) => void;
@@ -53,7 +52,6 @@ export function ListadoDanosTable({
   onRemarkChange,
   onDonanteChange,
   onEditar,
-  onEliminar,
   onFotos,
   onVideo,
   onComentarios,
@@ -277,15 +275,6 @@ export function ListadoDanosTable({
                 </td>
                 <td onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      className="dms-icon-btn dms-icon-btn--rojo"
-                      title="Eliminar daño"
-                      disabled={!editable}
-                      onClick={() => onEliminar(d)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
                     <button
                       type="button"
                       className="dms-icon-btn dms-icon-btn--azul"
