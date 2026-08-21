@@ -663,8 +663,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
-                      className="dms-btn-aprobar px-3 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
-                      disabled={!aperturada || marcadosIds.length === 0}
+                      className="dms-btn-aprobar px-3 py-1.5 text-xs"
                       title={
                         !aperturada
                           ? 'Aperture la estimación para aprobar ítems'
@@ -679,8 +678,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                     </button>
                     <button
                       type="button"
-                      className="dms-btn-rechazar px-3 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
-                      disabled={!aperturada || marcadosIds.length === 0}
+                      className="dms-btn-rechazar px-3 py-1.5 text-xs"
                       title={
                         !aperturada
                           ? 'Aperture la estimación para rechazar ítems'
@@ -713,14 +711,22 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 mostrarMarcacion={puedeAperturar}
                 marcacionHabilitada={aperturada}
                 marcadosIds={marcadosIds}
-                onToggleMarcado={(id) =>
+                onToggleMarcado={(id) => {
+                  if (!aperturada) {
+                    toast('Aperture la estimación para modificar ítems.', 'info');
+                    return;
+                  }
                   setMarcadosIds((prev) =>
                     prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-                  )
-                }
-                onToggleTodos={(marcar) =>
-                  setMarcadosIds(marcar ? estimacion.danos.map((d) => d.id) : [])
-                }
+                  );
+                }}
+                onToggleTodos={(marcar) => {
+                  if (!aperturada) {
+                    toast('Aperture la estimación para modificar ítems.', 'info');
+                    return;
+                  }
+                  setMarcadosIds(marcar ? estimacion.danos.map((d) => d.id) : []);
+                }}
                 onSeleccionar={(d) => {
                   setDanoSelId((prev) => (prev === d.id ? null : d.id));
                   if (typeof window !== 'undefined' && window.matchMedia('(max-width: 1279px)').matches) {

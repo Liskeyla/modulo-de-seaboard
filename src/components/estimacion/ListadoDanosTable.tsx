@@ -94,12 +94,10 @@ export function ListadoDanosTable({
                   type="checkbox"
                   className="dms-check-dano"
                   checked={todosMarcados}
-                  disabled={!marcacionHabilitada}
                   ref={(el) => {
                     if (el) el.indeterminate = algunosMarcados;
                   }}
                   onChange={(e) => {
-                    if (!marcacionHabilitada) return;
                     onToggleTodos?.(e.target.checked);
                   }}
                   aria-label="Marcar todos los ítems"
@@ -172,10 +170,8 @@ export function ListadoDanosTable({
                       <input
                         type="checkbox"
                         className="dms-check-dano"
-                        checked={marcacionHabilitada && marcado}
-                        disabled={!marcacionHabilitada}
+                        checked={marcado}
                         onChange={() => {
-                          if (!marcacionHabilitada) return;
                           onToggleMarcado?.(d.id);
                         }}
                         aria-label={`Marcar línea ${d.linea}`}
