@@ -349,8 +349,8 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   return (
     <>
       <Header
-        title={`Estimación ${estimacion.codigo}`}
-        subtitle={`${estimacion.contenedor} · ${estimacion.tipoEstimacion} · ${estimacion.naviera}`}
+        title="Detalle de estimado"
+        subtitle="Reportes · Estimaciones"
       />
 
       <main className="px-3 py-4 md:px-5 md:py-6">
