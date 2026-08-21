@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   AlertTriangle,
@@ -174,6 +176,30 @@ export function Header({ title, subtitle }: HeaderProps) {
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 text-slate-800 shadow-sm backdrop-blur-md">
       <div className="flex h-16 items-center justify-between gap-3 px-3 sm:px-5">
         <div className="flex min-w-0 items-center gap-3">
+          <Link
+            href="/reportes/estimaciones"
+            className="flex shrink-0 items-center gap-2.5 transition hover:opacity-90"
+            aria-label="Road Feeder Services · Inicio"
+          >
+            <Image
+              src="/brand/logo-rfs.jpg"
+              alt="RFS · Road Feeder Services"
+              width={1385}
+              height={1080}
+              className="h-9 w-12 object-contain"
+              priority
+            />
+            <span className="hidden min-w-0 sm:block">
+              <span className="block text-[13px] font-extrabold leading-tight text-rfs-700">
+                Road Feeder Services
+              </span>
+              <span className="mt-0.5 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-rfsorange-600">
+                <Flag pais={pais} className="h-2.5 w-4" />
+                {metaPais(pais).label}
+              </span>
+            </span>
+          </Link>
+
           <button
             type="button"
             onClick={alternarMenu}
