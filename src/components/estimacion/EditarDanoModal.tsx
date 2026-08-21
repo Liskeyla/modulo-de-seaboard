@@ -18,6 +18,8 @@ const CAMPOS_BLOQUEADOS: (keyof Formulario)[] = [
   'ubicacion',
   'obsAnalisis',
   'contenedorDonante',
+  'serieAnterior',
+  'serieEntregado',
 ];
 
 interface Formulario {
@@ -145,8 +147,8 @@ export function EditarDanoModal({
       dano: form.dano.trim(),
       obsAnalisis: dano.obsAnalisis,
       newMetRep: form.newMetRep.trim(),
-      serieAnterior: form.serieAnterior.trim(),
-      serieEntregado: form.serieEntregado.trim(),
+      serieAnterior: dano.serieAnterior,
+      serieEntregado: dano.serieEntregado,
       largo: largoFinal,
       ancho: anchoFinal,
       area: mostrarDimensiones ? round2((largoFinal * anchoFinal) / 10000) : dano.area,
@@ -211,9 +213,6 @@ export function EditarDanoModal({
             set(key, e.target.value as Formulario[typeof key]);
           }}
         />
-        {bloqueado && (
-          <p className="mt-0.5 text-[10px] text-slate-400">Solo lectura (dato RFS)</p>
-        )}
       </div>
     );
   };
@@ -303,7 +302,6 @@ export function EditarDanoModal({
             disabled
             readOnly
           />
-          <p className="mt-0.5 text-[10px] text-slate-400">Solo lectura (dato RFS)</p>
         </div>
         <div>
           <label className="dms-field-label">Remark</label>
