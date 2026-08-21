@@ -15,7 +15,7 @@ import {
   Search,
   X,
 } from 'lucide-react';
-import { MENU_GRUPOS, grupoDeRuta, type MenuItem } from '@/data/menu';
+import { grupoDeRuta, menuParaRol, type MenuItem } from '@/data/menu';
 import { Flag } from '@/components/ui/Flag';
 import { useAuthStore } from '@/store';
 import { useUiStore } from '@/store/uiStore';
@@ -50,17 +50,20 @@ export function MenuLateral() {
   }, [menuFijado, cerrarMenu]);
 
   const termino = busqueda.trim().toLowerCase();
+  const menuBase = useMemo(() => menuParaRol(user?.rol), [user?.rol]);
   const grupos = useMemo(() => {
-    if (!termino) return MENU_GRUPOS;
-    return MENU_GRUPOS.map((g) => ({
-      ...g,
-      items: g.items.filter(
-        (i) =>
-          i.label.toLowerCase().includes(termino) ||
-          i.descripcion.toLowerCase().includes(termino)
-      ),
-    })).filter((g) => g.items.length > 0);
-  }, [termino]);
+    if (!termino) return menuBase;
+    return menuBase
+      .map((g) => ({
+        ...g,
+        items: g.items.filter(
+          (i) =>
+            i.label.toLowerCase().includes(termino) ||
+            i.descripcion.toLowerCase().includes(termino)
+        ),
+      }))
+      .filter((g) => g.items.length > 0);
+  }, [termino, menuBase]);
 
   function alternarGrupo(id: string) {
     setAbiertos((prev) => (prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]));

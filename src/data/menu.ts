@@ -3,6 +3,8 @@ export interface MenuItem {
   label: string;
   icon: string;
   descripcion: string;
+  /** Si se omite, visible para todos los roles. */
+  roles?: Array<'dms' | 'seaboard' | 'liquidaciones'>;
 }
 
 export interface MenuGrupo {
@@ -29,10 +31,19 @@ export const MENU_GRUPOS: MenuGrupo[] = [
         label: 'Aprobaciones Seaboard',
         icon: 'ClipboardCheck',
         descripcion: 'Solo DMS · Seaboard decide en el detalle',
+        roles: ['dms'],
       },
     ],
   },
 ];
+
+export function menuParaRol(rol: string | undefined): MenuGrupo[] {
+  const r = rol ?? 'dms';
+  return MENU_GRUPOS.map((g) => ({
+    ...g,
+    items: g.items.filter((i) => !i.roles || i.roles.includes(r as 'dms')),
+  })).filter((g) => g.items.length > 0);
+}
 
 export function grupoDeRuta(pathname: string): string | undefined {
   for (const g of MENU_GRUPOS) {
