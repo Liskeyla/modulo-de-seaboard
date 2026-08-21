@@ -50,7 +50,26 @@ function celdaCambiada(edicion: EdicionRecienteDano, campo: CampoSnapshotLinea) 
   return Boolean(edicion.camposCambiados?.includes(campo));
 }
 
-function SubfilaEdicion({
+function claseCampoModificado(
+  edicion: EdicionRecienteDano | undefined,
+  campo: CampoSnapshotLinea
+) {
+  return edicion && celdaCambiada(edicion, campo) ? 'dms-celda-modificada' : undefined;
+}
+
+function fmtCelda(valor: string | number | undefined | null, money = false) {
+  if (valor === undefined || valor === null || valor === '') return '—';
+  if (typeof valor === 'number') {
+    return money ? `$${formatMoney(valor)}` : valor.toFixed(2);
+  }
+  return String(valor);
+}
+
+/**
+ * Fila histórica: valores ANTES del cambio.
+ * La fila principal muestra el valor actual (en verde si cambió).
+ */
+function SubfilaHistorico({
   edicion,
   mostrarMarcacion,
   mostrarDimensiones,
@@ -59,33 +78,34 @@ function SubfilaEdicion({
   mostrarMarcacion: boolean;
   mostrarDimensiones: boolean;
 }) {
-  const s = edicion.snapshot;
-  if (!s) return null;
+  const s = edicion.snapshotAnterior;
+  if (!s || !edicion.camposCambiados?.length) return null;
+
   const ch = (campo: CampoSnapshotLinea) =>
-    cn(celdaCambiada(edicion, campo) && 'dms-celda-cambiada');
-  const colspanNotas = (mostrarMarcacion ? 1 : 0) + 22 + (mostrarDimensiones ? 4 : 0);
+    cn(celdaCambiada(edicion, campo) && 'dms-celda-historico');
+  const colspan = (mostrarMarcacion ? 1 : 0) + 22 + (mostrarDimensiones ? 4 : 0);
 
   return (
     <>
-      <tr className="dms-dano-subfila-row">
-        {mostrarMarcacion && <td className="bg-amber-50/80" />}
-        <td className="bg-amber-50/80 text-center text-[9px] font-bold uppercase tracking-wide text-amber-700">
-          Δ
+      <tr className="dms-dano-subfila-row" title="Registro anterior al cambio">
+        {mostrarMarcacion && <td />}
+        <td className="text-center">
+          <span className="dms-badge-antes">Antes</span>
         </td>
-        <td className={cn('whitespace-nowrap font-semibold', ch('comp'))}>{s.comp}</td>
-        <td className={cn('text-center', ch('partNumber'))}>{s.partNumber || '—'}</td>
-        <td className={cn('text-center', ch('ubicacion'))}>{s.ubicacion || '—'}</td>
-        <td className={cn('dms-cell-wrap text-[10px] font-semibold', ch('dano'))}>{s.dano}</td>
+        <td className={cn('whitespace-nowrap', ch('comp'))}>{fmtCelda(s.comp)}</td>
+        <td className={cn('text-center', ch('partNumber'))}>{fmtCelda(s.partNumber)}</td>
+        <td className={cn('text-center', ch('ubicacion'))}>{fmtCelda(s.ubicacion)}</td>
+        <td className={cn('dms-cell-wrap text-[10px]', ch('dano'))}>{fmtCelda(s.dano)}</td>
         <td className={cn('dms-cell-wrap max-w-[10rem] text-[10px]', ch('obsAnalisis'))}>
-          {s.obsAnalisis || '—'}
+          {fmtCelda(s.obsAnalisis)}
         </td>
-        <td className={cn('text-center text-gray-500', ch('metRep'))}>{s.metRep || '—'}</td>
-        <td className={cn('text-center font-semibold', ch('newMetRep'))}>{s.newMetRep || '—'}</td>
+        <td className={cn('text-center', ch('metRep'))}>{fmtCelda(s.metRep)}</td>
+        <td className={cn('text-center', ch('newMetRep'))}>{fmtCelda(s.newMetRep)}</td>
         <td className={cn('text-center text-[10px] tabular-nums', ch('serieAnterior'))}>
-          {s.serieAnterior || '—'}
+          {fmtCelda(s.serieAnterior)}
         </td>
         <td className={cn('text-center text-[10px] tabular-nums', ch('serieEntregado'))}>
-          {s.serieEntregado || '—'}
+          {fmtCelda(s.serieEntregado)}
         </td>
         {mostrarDimensiones && (
           <>
@@ -103,59 +123,46 @@ function SubfilaEdicion({
             </td>
           </>
         )}
-        <td className={cn('text-right tabular-nums', ch('cantidad'))}>{s.cantidad.toFixed(2)}</td>
+        <td className={cn('text-right tabular-nums', ch('cantidad'))}>
+          {s.cantidad.toFixed(2)}
+        </td>
         <td className={cn('text-right tabular-nums', ch('horasHombre'))}>
           {s.horasHombre.toFixed(2)}
         </td>
         <td className={cn('text-right tabular-nums', ch('csHoraHombre'))}>
-          ${formatMoney(s.csHoraHombre)}
+          {fmtCelda(s.csHoraHombre, true)}
         </td>
         <td className={cn('text-right tabular-nums', ch('csMaterial'))}>
-          ${formatMoney(s.csMaterial)}
+          {fmtCelda(s.csMaterial, true)}
         </td>
-        <td className={cn('text-right font-semibold tabular-nums', ch('csTotal'))}>
-          ${formatMoney(s.csTotal)}
+        <td className={cn('text-right tabular-nums', ch('csTotal'))}>
+          {fmtCelda(s.csTotal, true)}
         </td>
-        <td className={cn('text-center whitespace-nowrap', ch('cargo'))}>{s.cargo}</td>
-        <td className={cn('text-center whitespace-nowrap text-[11px] font-semibold', ch('aplica'))}>
-          {s.aplica}
+        <td className={cn('text-center whitespace-nowrap', ch('cargo'))}>{fmtCelda(s.cargo)}</td>
+        <td className={cn('text-center whitespace-nowrap text-[11px]', ch('aplica'))}>
+          {fmtCelda(s.aplica)}
         </td>
-        <td className={cn('text-center', ch('medida'))}>{s.medida || '—'}</td>
+        <td className={cn('text-center', ch('medida'))}>{fmtCelda(s.medida)}</td>
         <td className={cn('dms-cell-wrap max-w-[8rem] text-[10px]', ch('remark'))}>
-          {s.remark || '—'}
+          {fmtCelda(s.remark)}
         </td>
         <td className={cn('text-center text-[10px] uppercase', ch('contenedorDonante'))}>
-          {s.contenedorDonante || '—'}
+          {fmtCelda(s.contenedorDonante)}
         </td>
-        <td className="bg-amber-50/50 text-[10px] text-amber-900">
-          {edicion.comentarioSbm ? <span title={edicion.comentarioSbm}>SBM ✓</span> : '—'}
-        </td>
-        <td className="bg-amber-50/50 text-[9px] text-amber-800">
-          {edicion.usuario}
-          <br />
-          <span className="tabular-nums opacity-80">{edicion.fecha}</span>
+        <td colSpan={2} className="text-[10px] text-slate-500">
+          {edicion.usuario} · {edicion.fecha}
         </td>
       </tr>
-      {(edicion.comentarioSbm || edicion.comentarioRfs) && (
+      {edicion.comentarioSbm ? (
         <tr className="dms-dano-subfila-notas">
-          <td colSpan={colspanNotas}>
-            <div className="flex flex-wrap gap-2 px-2 py-1.5">
-              {edicion.comentarioSbm && (
-                <div className="dms-dano-cmt-sbm max-w-xl">
-                  <span className="dms-dano-cmt-label text-sky-700">SBM:</span>
-                  {edicion.comentarioSbm}
-                </div>
-              )}
-              {edicion.comentarioRfs && (
-                <div className="dms-dano-cmt-rfs max-w-xl">
-                  <span className="dms-dano-cmt-label text-emerald-700">RFS:</span>
-                  {edicion.comentarioRfs}
-                </div>
-              )}
+          <td colSpan={colspan}>
+            <div className="dms-dano-motivo">
+              <span className="dms-dano-motivo-label">Motivo del cambio</span>
+              <p className="dms-dano-motivo-texto">{edicion.comentarioSbm}</p>
             </div>
           </td>
         </tr>
-      )}
+      ) : null}
     </>
   );
 }
@@ -169,6 +176,7 @@ function CeldaComentarios({
   rol,
   soloLectura,
   onEnviar,
+  destacado,
 }: {
   dano: DanoEstimacion;
   abierto: boolean;
@@ -178,6 +186,7 @@ function CeldaComentarios({
   rol: RolComentario;
   soloLectura: boolean;
   onEnviar?: (entrada: EntradaComentario) => void;
+  destacado?: boolean;
 }) {
   const btnRef = useRef<HTMLButtonElement>(null);
   const pendientes = dano.comentarios.filter((c) => c.tipo === 'SOLICITA_CAMBIO').length;
@@ -194,17 +203,22 @@ function CeldaComentarios({
         className={cn(
           'dms-btn-comentarios',
           pendientes > 0 && 'dms-btn-comentarios--pendiente',
-          resuelto && 'dms-btn-comentarios--ok'
+          resuelto && 'dms-btn-comentarios--ok',
+          destacado && !pendientes && 'dms-btn-comentarios--modificado'
         )}
         onClick={onToggle}
         title={
-          dano.comentarios.length
-            ? `${dano.comentarios.length} comentario(s) · ${pendientes} pendiente(s)`
-            : 'Sin comentarios'
+          destacado
+            ? 'Hay comentarios SBM de la última modificación'
+            : dano.comentarios.length
+              ? `${dano.comentarios.length} comentario(s) · ${pendientes} pendiente(s)`
+              : 'Sin comentarios'
         }
       >
         <MessageSquare className="h-3.5 w-3.5" />
-        <span className="tabular-nums">{dano.comentarios.length}</span>
+        <span className="tabular-nums">
+          {dano.comentarios.length > 0 ? dano.comentarios.length : 'Notas'}
+        </span>
         {pendientes > 0 && <span className="dms-btn-comentarios-dot" />}
       </button>
       <ComentariosDanoPopover
@@ -347,15 +361,16 @@ export function ListadoDanosTable({
             const pendientes = d.comentarios.filter((c) => c.tipo === 'SOLICITA_CAMBIO').length;
             const ultimo = d.comentarios[d.comentarios.length - 1];
             const resuelto = d.comentarios.length > 0 && ultimo?.tipo === 'ACEPTADO';
-            const edicion =
-              d.edicionReciente && d.edicionReciente.snapshot ? d.edicionReciente : undefined;
+            const edicion = d.edicionReciente;
+            const mod = (campo: CampoSnapshotLinea) => claseCampoModificado(edicion, campo);
             return (
               <Fragment key={d.id}>
                 <tr
                   className={cn(
                     'cursor-pointer',
                     activo && 'dms-row-selected',
-                    marcado && 'dms-row-marcado'
+                    marcado && 'dms-row-marcado',
+                    edicion && 'dms-row-modificada'
                   )}
                   onClick={() => onSeleccionar(d)}
                 >
@@ -386,42 +401,72 @@ export function ListadoDanosTable({
                       <CheckCircle2 className="h-4 w-4" />
                     </span>
                   </td>
-                  <td className="whitespace-nowrap font-semibold text-rfs-navy">{d.comp}</td>
-                  <td className="text-center">{d.partNumber || '—'}</td>
-                  <td className="text-center">{d.ubicacion || '—'}</td>
-                  <td className="dms-cell-wrap text-[10px] font-semibold">{d.dano}</td>
-                  <td className="dms-cell-wrap max-w-[10rem] text-[10px] text-gray-600">
+                  <td className={cn('whitespace-nowrap font-semibold text-rfs-navy', mod('comp'))}>
+                    {d.comp}
+                  </td>
+                  <td className={cn('text-center', mod('partNumber'))}>{d.partNumber || '—'}</td>
+                  <td className={cn('text-center', mod('ubicacion'))}>{d.ubicacion || '—'}</td>
+                  <td className={cn('dms-cell-wrap text-[10px] font-semibold', mod('dano'))}>
+                    {d.dano}
+                  </td>
+                  <td
+                    className={cn(
+                      'dms-cell-wrap max-w-[10rem] text-[10px] text-gray-600',
+                      mod('obsAnalisis')
+                    )}
+                  >
                     {d.obsAnalisis || '—'}
                   </td>
-                  <td className="text-center text-gray-500">{d.metRep || '—'}</td>
-                  <td className="text-center font-semibold">{d.newMetRep || '—'}</td>
-                  <td className="text-center text-[10px] tabular-nums">{d.serieAnterior || '—'}</td>
-                  <td className="text-center text-[10px] tabular-nums">{d.serieEntregado || '—'}</td>
+                  <td className={cn('text-center text-gray-500', mod('metRep'))}>
+                    {d.metRep || '—'}
+                  </td>
+                  <td className={cn('text-center font-semibold', mod('newMetRep'))}>
+                    {d.newMetRep || '—'}
+                  </td>
+                  <td className={cn('text-center text-[10px] tabular-nums', mod('serieAnterior'))}>
+                    {d.serieAnterior || '—'}
+                  </td>
+                  <td className={cn('text-center text-[10px] tabular-nums', mod('serieEntregado'))}>
+                    {d.serieEntregado || '—'}
+                  </td>
                   {mostrarDimensiones && (
                     <>
-                      <td className="text-right tabular-nums">
+                      <td className={cn('text-right tabular-nums', mod('largo'))}>
                         {d.largo ? d.largo.toFixed(2) : ''}
                       </td>
-                      <td className="text-right tabular-nums">
+                      <td className={cn('text-right tabular-nums', mod('ancho'))}>
                         {d.ancho ? d.ancho.toFixed(2) : ''}
                       </td>
-                      <td className="text-right tabular-nums">
+                      <td className={cn('text-right tabular-nums', mod('area'))}>
                         {d.area ? d.area.toFixed(2) : ''}
                       </td>
-                      <td className="text-right tabular-nums">
+                      <td className={cn('text-right tabular-nums', mod('longitud'))}>
                         {d.longitud ? d.longitud.toFixed(2) : ''}
                       </td>
                     </>
                   )}
-                  <td className="text-right tabular-nums">{d.cantidad.toFixed(2)}</td>
-                  <td className="text-right tabular-nums">{d.horasHombre.toFixed(2)}</td>
-                  <td className="text-right tabular-nums">${formatMoney(d.csHoraHombre)}</td>
-                  <td className="text-right tabular-nums">${formatMoney(d.csMaterial)}</td>
-                  <td className="text-right font-semibold tabular-nums text-rfs-navy">
+                  <td className={cn('text-right tabular-nums', mod('cantidad'))}>
+                    {d.cantidad.toFixed(2)}
+                  </td>
+                  <td className={cn('text-right tabular-nums', mod('horasHombre'))}>
+                    {d.horasHombre.toFixed(2)}
+                  </td>
+                  <td className={cn('text-right tabular-nums', mod('csHoraHombre'))}>
+                    ${formatMoney(d.csHoraHombre)}
+                  </td>
+                  <td className={cn('text-right tabular-nums', mod('csMaterial'))}>
+                    ${formatMoney(d.csMaterial)}
+                  </td>
+                  <td
+                    className={cn(
+                      'text-right font-semibold tabular-nums text-rfs-navy',
+                      mod('csTotal')
+                    )}
+                  >
                     ${formatMoney(d.csTotal)}
                   </td>
                   <td
-                    className="text-center whitespace-nowrap"
+                    className={cn('text-center whitespace-nowrap', mod('cargo'))}
                     onClick={(e) => e.stopPropagation()}
                   >
                     {cargoAplicaEditable && onCargoChange ? (
@@ -444,7 +489,10 @@ export function ListadoDanosTable({
                     )}
                   </td>
                   <td
-                    className="text-center whitespace-nowrap text-[11px] font-semibold text-black"
+                    className={cn(
+                      'text-center whitespace-nowrap text-[11px] font-semibold text-black',
+                      mod('aplica')
+                    )}
                     onClick={(e) => e.stopPropagation()}
                   >
                     {cargoAplicaEditable && onAplicaChange ? (
@@ -466,8 +514,11 @@ export function ListadoDanosTable({
                       d.aplica || 'Pendiente Revisión'
                     )}
                   </td>
-                  <td className="text-center">{d.medida || '—'}</td>
-                  <td onClick={(e) => e.stopPropagation()}>
+                  <td className={cn('text-center', mod('medida'))}>{d.medida || '—'}</td>
+                  <td
+                    className={cn(mod('remark'))}
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <input
                       className="dms-input-inline"
                       defaultValue={d.remark}
@@ -479,7 +530,12 @@ export function ListadoDanosTable({
                       }}
                     />
                   </td>
-                  <td className="text-center text-[10px] uppercase text-slate-600">
+                  <td
+                    className={cn(
+                      'text-center text-[10px] uppercase text-slate-600',
+                      mod('contenedorDonante')
+                    )}
+                  >
                     {d.contenedorDonante || '—'}
                   </td>
                   <CeldaComentarios
@@ -493,6 +549,7 @@ export function ListadoDanosTable({
                     rol={comentarioRol}
                     soloLectura={comentariosSoloLectura}
                     onEnviar={(entrada) => onEnviarComentario?.(d, entrada)}
+                    destacado={Boolean(edicion?.comentarioSbm)}
                   />
                   <td onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center gap-1">
@@ -531,13 +588,13 @@ export function ListadoDanosTable({
                     </div>
                   </td>
                 </tr>
-                {edicion && (
-                  <SubfilaEdicion
+                {edicion?.snapshotAnterior && edicion.camposCambiados?.length ? (
+                  <SubfilaHistorico
                     edicion={edicion}
                     mostrarMarcacion={mostrarMarcacion}
                     mostrarDimensiones={mostrarDimensiones}
                   />
-                )}
+                ) : null}
               </Fragment>
             );
           })}

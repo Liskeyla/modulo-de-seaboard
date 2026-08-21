@@ -22,8 +22,8 @@ import { useAuthStore } from '@/store';
 import { cn, toast } from '@/lib/utils';
 
 const DEMO = [
-  { usuario: 'apptelink', clave: 'admin123', rol: 'Operador DMS' },
-  { usuario: 'seaboard', clave: 'admin123', rol: 'Aprobador Seaboard' },
+  { usuario: 'apptelink', clave: 'admin123', rol: 'Usuario Seaboard' },
+  { usuario: 'seaboard', clave: 'admin123', rol: 'Usuario Seaboard' },
 ];
 
 /** Login con la misma estructura visual que layout-dms (formulario + panel). */
@@ -48,7 +48,9 @@ export default function LoginPage() {
   useEffect(() => {
     if (isAuthenticated && user) {
       const dest =
-        user.rol === 'seaboard' ? '/aprobaciones/seaboard' : '/reportes/estimaciones';
+        user.rol === 'seaboard' || user.rol === 'liquidaciones'
+          ? '/reportes/estimaciones'
+          : '/reportes/estimaciones';
       router.replace(dest);
     }
   }, [isAuthenticated, user, router]);
@@ -67,8 +69,7 @@ export default function LoginPage() {
     try {
       await login(usuario.trim(), clave);
       setExito(true);
-      const key = usuario.trim().toLowerCase();
-      router.replace(key === 'seaboard' ? '/aprobaciones/seaboard' : '/reportes/estimaciones');
+      router.replace('/reportes/estimaciones');
     } catch {
       setError('Credenciales inválidas. Use apptelink o seaboard / admin123');
     } finally {
@@ -268,7 +269,7 @@ export default function LoginPage() {
                 Plataforma integral RFS
               </p>
               <h2 className="mt-2 text-2xl font-extrabold leading-tight">
-                Estimaciones &amp; Aprobaciones Seaboard
+                Usuario Seaboard · Ver, modificar y aprobar / rechazar
               </h2>
             </div>
 

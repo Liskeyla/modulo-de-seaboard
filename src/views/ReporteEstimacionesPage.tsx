@@ -23,8 +23,13 @@ import { DmsReportLayout } from '@/components/dms/DmsReportLayout';
 import { DmsTableToolbar } from '@/components/dms/DmsTableToolbar';
 import { EstadoEstimacionBadge } from '@/components/dms/EstadoEstimacionBadge';
 import { Modal } from '@/components/ui/Modal';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { InformePreviewModal } from '@/components/estimacion/InformePreviewModal';
-import { ConfirmacionEstimacionModal } from '@/components/estimacion/ConfirmacionEstimacionModal';
+import {
+  ConfirmacionEstimacionModal,
+  notificarAprobacionALiquidaciones,
+  notificarRechazoALiquidaciones,
+} from '@/components/estimacion/ConfirmacionEstimacionModal';
 import { useAuthStore } from '@/store';
 import { useEstimacionesStore } from '@/store/estimacionesStore';
 import { useUiStore } from '@/store/uiStore';
@@ -110,7 +115,7 @@ export default function ReporteEstimacionesPage() {
   const [dialogo, setDialogo] = useState<Dialogo>({ tipo: 'NINGUNO' });
 
   const usuario = user?.username ?? 'apptelink';
-  const puedeEditarActividad = user?.rol === 'dms';
+  const puedeEditarActividad = user?.rol === 'seaboard' || user?.rol === 'dms';
   const cerrar = () => setDialogo({ tipo: 'NINGUNO' });
 
   const porPais = useMemo(
@@ -272,7 +277,7 @@ export default function ReporteEstimacionesPage() {
           <button
             type="button"
             className="dms-icon-action dms-icon-action--nota"
-            title="Ver nota de la naviera"
+            title="Ver nota Seaboard"
             onClick={() => setDialogo({ tipo: 'NOTA', id: row.id })}
           >
             <Ship className="h-3.5 w-3.5" />
@@ -293,7 +298,20 @@ export default function ReporteEstimacionesPage() {
           <button
             type="button"
             className="dms-icon-action dms-icon-action--enviar"
-            title="Enviar a aprobación"
+            title="Enviar a Seaboard Marine"
+            onClick={() => {
+              setDialogo({ tipo: 'ENVIAR', id: row.id });
+            }}
+          >
+            <Send className="h-3.5 w-3.5" />
+          </button>
+        )}
+        {['ENVIADO', 'PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) &&
+          user?.rol === 'seaboard' && (
+          <button
+            type="button"
+            className="dms-icon-action dms-icon-action--enviar"
+            title="Aprobar / rechazar estimado"
             onClick={() => {
               if (itemsSinRevisionSbm(row.danos).length > 0) {
                 toast(MSG_ITEMS_SIN_APROBAR, 'info');
@@ -326,13 +344,13 @@ export default function ReporteEstimacionesPage() {
     <>
       <Header
         title="Reporte de Estimaciones Seaboard Marine"
-        subtitle="Consulta operativa DMS · Envío a aprobación Seaboard"
+        subtitle="Usuario Seaboard · Ver, modificar y aprobar / rechazar estimados"
       />
       <main className="px-3 py-4 md:px-5 md:py-6">
         <div className="dms-shell">
           <DmsReportLayout
             title="Reporte de Estimaciones Seaboard Marine"
-            subtitle="Consulta operativa DMS · Envío a aprobación Seaboard"
+            subtitle="Usuario Seaboard · Ver, modificar y aprobar / rechazar estimados"
             heroIcon={<FileBarChart className="h-5 w-5" />}
             filtros={[
               { label: 'Desde', type: 'date', value: desde, onChange: (v) => setDesde(String(v)) },
@@ -794,7 +812,7 @@ export default function ReporteEstimacionesPage() {
         onClose={cerrar}
         size="md"
         icon={<Ship className="h-4 w-4" />}
-        title={`Nota Naviera · ${activa?.codigo ?? ''}`}
+        title={`Nota Seaboard · ${activa?.codigo ?? ''}`}
         subtitle={activa ? `${activa.naviera} · ${activa.contenedor}` : undefined}
         footer={
           <button
@@ -821,7 +839,7 @@ export default function ReporteEstimacionesPage() {
           </ul>
         ) : (
           <p className="text-xs text-gray-400">
-            La naviera no ha registrado notas para esta estimación.
+            Seaboard Marine no ha registrado notas para esta estimación.
           </p>
         )}
       </Modal>
@@ -876,8 +894,8 @@ export default function ReporteEstimacionesPage() {
       </Modal>
 
       <ConfirmacionEstimacionModal
-        open={dialogo.tipo === 'ENVIAR'}
-        modo="ENVIAR"
+        open={dialogo.tipo === 'ENVIAR' && user?.rol === 'seaboard'}
+        modo="DECISION"
         estimacion={activa}
         onClose={cerrar}
         onAprobar={() => {
@@ -886,24 +904,16 @@ export default function ReporteEstimacionesPage() {
             toast(MSG_ITEMS_SIN_APROBAR, 'info');
             return;
           }
-          const pendientes = contarComentariosPendientes(activa.danos);
-          if (pendientes > 0) {
-            aprobar(
-              [activa.id],
-              usuario,
-              'Aprobado por RFS (comentarios de liquidaciones pendientes).'
-            );
-            toast(
-              `Estimación ${activa.codigo} aprobada · Destino RFS (estado APROBADO).`,
-              'success'
-            );
-          } else {
-            enviarAprobacion([activa.id], usuario);
-            toast(
-              `Estimación ${activa.codigo} aprobada · Destino ${activa.naviera} (estado ENVIADO).`,
-              'success'
-            );
-          }
+          aprobar(
+            [activa.id],
+            usuario,
+            'Aprobado por Seaboard Marine. Enviado a liquidaciones RFS.'
+          );
+          notificarAprobacionALiquidaciones(activa, usuario);
+          toast(
+            `Estimación ${activa.codigo} aprobada y enviada a liquidaciones RFS (APROBADO).`,
+            'success'
+          );
           cerrar();
         }}
         onRechazar={(comentario) => {
@@ -913,10 +923,37 @@ export default function ReporteEstimacionesPage() {
             return;
           }
           rechazar([activa.id], usuario, comentario);
-          toast(`Estimación ${activa.codigo} rechazada (estado RECHAZADO).`, 'success');
+          notificarRechazoALiquidaciones(activa, comentario, usuario);
+          toast(
+            `Estimación ${activa.codigo} rechazada y notificada a liquidaciones RFS.`,
+            'success'
+          );
           cerrar();
         }}
       />
+
+      <ConfirmModal
+        open={dialogo.tipo === 'ENVIAR' && user?.rol === 'dms'}
+        title="Enviar a Seaboard Marine"
+        subtitle={activa ? `${activa.codigo} · ${activa.contenedor}` : undefined}
+        confirmLabel="Confirmar envío"
+        confirmClass="dms-btn-enviar"
+        onClose={cerrar}
+        onConfirm={() => {
+          if (!activa) return;
+          enviarAprobacion([activa.id], usuario);
+          toast(
+            `Estimación ${activa.codigo} enviada a Seaboard Marine (estado ENVIADO).`,
+            'success'
+          );
+          cerrar();
+        }}
+      >
+        <p className="text-sm leading-relaxed text-gray-600">
+          El estimado pasará a estado <strong>ENVIADO</strong> para que el gestor Seaboard lo
+          revise y envíe su decisión a <strong>liquidaciones RFS</strong>.
+        </p>
+      </ConfirmModal>
     </>
   );
 }

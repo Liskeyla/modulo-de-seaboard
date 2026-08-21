@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useMemo, useRef } from 'react';
 import { FileText, Printer } from 'lucide-react';
@@ -8,7 +8,7 @@ import { construirInformeHtml, type VarianteInforme } from '@/lib/descargas';
 import { toast } from '@/lib/utils';
 
 const TITULOS: Record<VarianteInforme, string> = {
-  ESTIMADO: 'Estimado de Reparación',
+  ESTIMADO: 'Estimado de ReparaciÃ³n',
   PRELIMINAR: 'Informe Preliminar',
   FINAL: 'Informe Final',
 };
@@ -46,8 +46,8 @@ export function InformePreviewModal({
       title={`${TITULOS[variante]} ${estimacion.codigo}`}
       subtitle={
         conValores
-          ? `${estimacion.contenedor} · ${estimacion.danos.length} línea(s) · Total $${estimacion.pvpTotal.toFixed(2)}`
-          : `${estimacion.contenedor} · versión sin valores para la naviera`
+          ? `${estimacion.contenedor} Â· ${estimacion.danos.length} lÃ­nea(s) Â· Total $${estimacion.pvpTotal.toFixed(2)}`
+          : `${estimacion.contenedor} Â· versiÃ³n sin valores para la naviera`
       }
       bodyClassName="!p-0"
       footer={
@@ -65,7 +65,7 @@ export function InformePreviewModal({
             onClick={() => {
               iframeRef.current?.contentWindow?.focus();
               iframeRef.current?.contentWindow?.print();
-              toast('Elija "Guardar como PDF" en el diálogo de impresión.', 'info');
+              toast('Elija "Guardar como PDF" en el diÃ¡logo de impresiÃ³n.', 'info');
             }}
           >
             <Printer className="h-4 w-4" /> Imprimir / Guardar PDF

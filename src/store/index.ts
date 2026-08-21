@@ -16,8 +16,11 @@ interface AuthState {
 }
 
 const DEMO_USERS: Record<string, { password: string; rol: User['rol']; nombre: string }> = {
-  apptelink: { password: 'admin123', rol: 'dms', nombre: 'apptelink' },
+  /** Usuario principal del prototipo: gestor Seaboard (misma experiencia que se mejoró en apptelink). */
+  apptelink: { password: 'admin123', rol: 'seaboard', nombre: 'Usuario Seaboard' },
   seaboard: { password: 'admin123', rol: 'seaboard', nombre: 'Usuario Seaboard' },
+  /** Operativo RFS (solo envía estimados a la bandeja Seaboard). */
+  rfs: { password: 'admin123', rol: 'dms', nombre: 'Operador RFS' },
   cesarvalencia: { password: 'admin123', rol: 'liquidaciones', nombre: 'César Valencia' },
 };
 
@@ -49,8 +52,14 @@ export const useAuthStore = create<AuthState>()(
         if (token && stored) {
           try {
             const parsed = JSON.parse(stored);
-            if (parsed?.state?.user) {
-              set({ user: parsed.state.user, isAuthenticated: true });
+            const u = parsed?.state?.user as User | undefined;
+            if (u) {
+              // Asegura que apptelink / seaboard queden siempre como gestor Seaboard.
+              const demo = DEMO_USERS[u.username.toLowerCase()];
+              const user = demo
+                ? { username: u.username.toLowerCase(), nombre: demo.nombre, rol: demo.rol }
+                : u;
+              set({ user, isAuthenticated: true });
             }
           } catch {
             /* ignore */

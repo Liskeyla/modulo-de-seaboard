@@ -16,7 +16,7 @@ import type {
 } from '@/types/estimacion';
 import { aLineaHistorial, APLICA_APROBADO_SBM, APLICA_RECHAZADO_SBM, CARGO_RECHAZADO } from '@/types/estimacion';
 
-const STORAGE_KEY = 'dms-estimaciones-prototipo-v10';
+const STORAGE_KEY = 'dms-estimaciones-prototipo-v12';
 const CLAVES_OBSOLETAS = [
   'dms-estimaciones-prototipo',
   'dms-estimaciones-prototipo-v2',
@@ -27,6 +27,8 @@ const CLAVES_OBSOLETAS = [
   'dms-estimaciones-prototipo-v7',
   'dms-estimaciones-prototipo-v8',
   'dms-estimaciones-prototipo-v9',
+  'dms-estimaciones-prototipo-v10',
+  'dms-estimaciones-prototipo-v11',
 ];
 
 function ahoraFmt() {
@@ -200,8 +202,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                   acc + d.comentarios.filter((c) => c.tipo === 'SOLICITA_CAMBIO').length,
                 0
               );
-              const destino =
-                pendientesLiq > 0 ? 'RFS (Liquidaciones)' : e.naviera;
+              const destino = 'Seaboard Marine';
               return {
                 ...e,
                 estado: 'ENVIADO' as EstadoEstimacion,
@@ -214,8 +215,8 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                   comentarioSeaboard(
                     'ENVIAR',
                     pendientesLiq > 0
-                      ? `Enviado a RFS por ${pendientesLiq} comentario(s) de liquidaciones sin resolver.`
-                      : 'Enviado a aprobación de la naviera.',
+                      ? `Enviado a Seaboard Marine · ${pendientesLiq} comentario(s) de liquidaciones pendientes.`
+                      : 'Enviado a Seaboard Marine para revisión y decisión.',
                     usuario
                   ),
                 ],
@@ -223,7 +224,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                   ...e.auditoria,
                   evento(
                     usuario,
-                    'ENVÍO A APROBACIÓN',
+                    'ENVÍO A SEABOARD',
                     `Enviado a ${destino} por un total de $${e.pvpTotal.toFixed(2)}` +
                       (pendientesLiq > 0
                         ? ` · ${pendientesLiq} comentario(s) liquidaciones pendientes`
@@ -235,13 +236,14 @@ export const useEstimacionesStore = create<EstimacionesState>()(
           }));
         },
 
-        aprobar: (ids, usuario, comentario = 'Aprobado sin novedades por la naviera.') => {
+        aprobar: (ids, usuario, comentario = 'Aprobado por Seaboard Marine. Enviado a liquidaciones RFS.') => {
           set((s) => ({
             estimaciones: s.estimaciones.map((e) => {
               if (!ids.includes(e.id)) return e;
-              const desdeEnviado = e.estado === 'ENVIADO';
-              const desdeRfs = ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(e.estado);
-              if (!desdeEnviado && !desdeRfs) return e;
+              const desdeSeaboard = ['ENVIADO', 'PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(
+                e.estado
+              );
+              if (!desdeSeaboard) return e;
               return {
                 ...e,
                 estado: 'APROBADO' as EstadoEstimacion,
@@ -258,10 +260,8 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                   ...e.auditoria,
                   evento(
                     usuario,
-                    'APROBACIÓN',
-                    desdeEnviado
-                      ? 'La naviera aprobó el estimado. Habilitado para reparación.'
-                      : 'Aprobado por RFS (Liquidaciones). Habilitado para reparación.'
+                    'APROBACIÓN SEABOARD',
+                    'Seaboard Marine aprobó el estimado y lo envió a liquidaciones RFS. Habilitado para reparación.'
                   ),
                 ],
               };
@@ -287,7 +287,14 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                   ...e.comentariosSeaboard,
                   comentarioSeaboard('RECHAZAR', comentario, usuario),
                 ],
-                auditoria: [...e.auditoria, evento(usuario, 'RECHAZO', comentario)],
+                auditoria: [
+                  ...e.auditoria,
+                  evento(
+                    usuario,
+                    'RECHAZO SEABOARD',
+                    `Seaboard Marine rechazó el estimado y notificó a liquidaciones RFS: ${comentario}`
+                  ),
+                ],
               };
             }),
           }));

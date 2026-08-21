@@ -251,7 +251,11 @@ export function MenuLateral() {
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-xs font-bold text-slate-700">{user.nombre}</span>
                 <span className="block truncate text-[10px] text-slate-500">
-                  {user.rol === 'seaboard' ? 'Aprobador Seaboard' : 'Operador DMS'}
+                  {user.rol === 'seaboard'
+                    ? 'Usuario Seaboard'
+                    : user.rol === 'liquidaciones'
+                      ? 'Liquidaciones'
+                      : 'Operador RFS'}
                 </span>
               </span>
               <button

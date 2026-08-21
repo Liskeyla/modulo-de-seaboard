@@ -32,6 +32,7 @@ import { InfoLateralCards } from '@/components/estimacion/InfoLateralCards';
 import { InformePreviewModal } from '@/components/estimacion/InformePreviewModal';
 import {
   ConfirmacionEstimacionModal,
+  notificarAprobacionALiquidaciones,
   notificarRechazoALiquidaciones,
 } from '@/components/estimacion/ConfirmacionEstimacionModal';
 import { ListadoDanosTable } from '@/components/estimacion/ListadoDanosTable';
@@ -52,8 +53,10 @@ import { textoComentariosRfs } from '@/components/estimacion/EditarDanoModal';
 import { cn, formatMoney, toast } from '@/lib/utils';
 import { fotosRealesDano } from '@/lib/fotosDano';
 
-/** Los estimados en curso admiten edición; una vez aprobados quedan en solo lectura. */
-const ESTADOS_EDITABLES = ['PENDIENTE', 'RECHAZADO', 'REVERSADO'];
+/** Estados en los que el gestor Seaboard puede revisar, modificar y decidir. */
+const ESTADOS_SEABOARD = ['ENVIADO', 'PENDIENTE', 'RECHAZADO', 'REVERSADO'];
+/** Operador RFS: solo envía estimados a la bandeja Seaboard. */
+const ESTADOS_DMS_ENVIO = ['PENDIENTE', 'RECHAZADO', 'REVERSADO'];
 
 type SnapshotApertura = {
   notasCount: number;
@@ -125,8 +128,8 @@ function resumirCambiosApertura(snap: SnapshotApertura, est: Estimacion): string
 
 type Dialogo =
   | { tipo: 'NINGUNO' }
-  | { tipo: 'ENVIAR' }
-  | { tipo: 'DECISION_NAVIERA' }
+  | { tipo: 'ENVIAR_SEABOARD' }
+  | { tipo: 'ENVIAR_LIQUIDACIONES' }
   | { tipo: 'RECHAZAR_ITEMS' }
   | { tipo: 'RECHAZAR_ITEM'; dano: DanoEstimacion }
   | { tipo: 'EDITAR_DANO'; dano: DanoEstimacion }
@@ -275,15 +278,22 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
 
   const esOperadorDms = user?.rol === 'dms';
   const esSeaboard = user?.rol === 'seaboard';
-  /** DMS edita; Seaboard solo revisa ítems en estimados ENVIADO. */
+  /**
+   * Gestor Seaboard (usuario principal):
+   * ver estimado · aperturar · modificar con histórico · aprobar/rechazar ítems ·
+   * aprobar/rechazar estimado (envío a liquidaciones).
+   */
   const puedeRevisarItems =
-    esOperadorDms || (esSeaboard && estimacion.estado === 'ENVIADO');
+    esSeaboard && ESTADOS_SEABOARD.includes(estimacion.estado);
   const puedeAperturar = puedeRevisarItems;
-  /** Solo DMS con estimado aperturado puede mutar campos de daño. */
-  const editable = esOperadorDms && aperturada;
-  const puedeEnviar =
-    esOperadorDms && ESTADOS_EDITABLES.includes(estimacion.estado);
-  const puedeComentar = user?.rol === 'dms' || user?.rol === 'liquidaciones';
+  const editable = aperturada && esSeaboard;
+  const puedeEnviarLiquidaciones =
+    esSeaboard && ESTADOS_SEABOARD.includes(estimacion.estado);
+  const puedeEnviarASeaboard =
+    esOperadorDms && ESTADOS_DMS_ENVIO.includes(estimacion.estado);
+  const puedeComentar = esSeaboard || user?.rol === 'liquidaciones';
+  const puedeEditarNotas = editable;
+  const puedeRevalidar = editable;
   const danoSeleccionado = estimacion.danos.find((d) => d.id === danoSelId) ?? null;
   const pendientes = contarComentariosPendientes(estimacion.danos);
   const itemsPendientesRevision = itemsSinRevisionSbm(estimacion.danos);
@@ -291,10 +301,9 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   // Mientras visualiza un estimado accionable (sin aperturar), avisar al cambiar país.
   useEffect(() => {
     if (aperturada) return;
-    const seaboardPendiente = esSeaboard && estimacion.estado === 'ENVIADO';
-    const dmsPendiente =
-      esOperadorDms && ESTADOS_EDITABLES.includes(estimacion.estado);
-    if (!seaboardPendiente && !dmsPendiente) {
+    const seaboardPendiente =
+      esSeaboard && ESTADOS_SEABOARD.includes(estimacion.estado);
+    if (!seaboardPendiente) {
       setAvisoVisualizacion(null);
       return;
     }
@@ -306,9 +315,9 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       confirmarSoloVisualizacion: () => {
         useEstimacionesStore.getState().registrarActividad(
           idEst,
-          useAuthStore.getState().user?.username ?? 'apptelink',
+          useAuthStore.getState().user?.username ?? 'seaboard',
           'Salió sin decisión (solo visualización)',
-          `Usuario confirmó salida del estimado ${codigoEst} sin aprobar/rechazar`
+          `Gestor Seaboard confirmó salida del estimado ${codigoEst} sin enviar a liquidaciones`
         );
         setAvisoVisualizacion(null);
       },
@@ -317,7 +326,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   }, [
     aperturada,
     esSeaboard,
-    esOperadorDms,
     estimacion.estado,
     estimacion.codigo,
     estimacion.id,
@@ -420,11 +428,8 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       setDialogo({ tipo: 'SALIR_BLOQUEADO' });
       return;
     }
-    // Si el estimado está pendiente de decisión/envío, recordar que debe actuar o confirmar solo visualización.
-    const seaboardPendiente = esSeaboard && estimacion!.estado === 'ENVIADO';
-    const dmsPendiente =
-      esOperadorDms && ESTADOS_EDITABLES.includes(estimacion!.estado);
-    if (seaboardPendiente || dmsPendiente) {
+    // Gestor Seaboard: recordar que debe decidir o confirmar solo visualización.
+    if (puedeEnviarLiquidaciones) {
       setDialogo({ tipo: 'SALIR_SIN_ACCION' });
       return;
     }
@@ -442,30 +447,21 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     cerrar();
     if (itemsPendientesRevision.length > 0) {
       toast(
-        'Aperture la estimación, apruebe o rechace los ítems de daño y luego apruebe o rechace el estimado.',
+        'Aperture la estimación, apruebe o rechace los ítems y luego envíe a liquidaciones RFS.',
         'info'
       );
       return;
     }
-    if (esSeaboard && estimacion!.estado === 'ENVIADO') {
-      setDialogo({ tipo: 'DECISION_NAVIERA' });
-      return;
-    }
-    if (esOperadorDms && ESTADOS_EDITABLES.includes(estimacion!.estado)) {
-      setDialogo({ tipo: 'ENVIAR' });
+    if (puedeEnviarLiquidaciones) {
+      setDialogo({ tipo: 'ENVIAR_LIQUIDACIONES' });
     }
   }
 
-  function cambiarDano(dano: DanoEstimacion, cambios: Partial<DanoEstimacion>, resumen: string) {
-    if (exigirApertura()) return;
-    actualizarDano(estimacion!.id, dano.id, cambios, usuario, resumen);
-  }
-
-  function guardarEdicionDano(
+  function marcarEdicionDano(
     dano: DanoEstimacion,
     cambios: Partial<DanoEstimacion>,
     resumen: string,
-    comentarios: { sbm: string; rfs: string }
+    comentarioSbm?: string
   ) {
     if (exigirApertura()) return;
     const ahora = new Date().toLocaleString('es-EC', {
@@ -477,7 +473,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       second: '2-digit',
       hour12: false,
     });
-
     const mezclado: DanoEstimacion = {
       ...dano,
       ...cambios,
@@ -491,6 +486,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       (k) => String(antes[k] ?? '') !== String(snapshot[k] ?? '')
     );
     const rfsExistente = textoComentariosRfs(dano);
+    const sbm = comentarioSbm?.trim();
 
     actualizarDano(
       estimacion!.id,
@@ -502,8 +498,9 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
           usuario,
           resumenCambios: resumen,
           snapshot,
+          snapshotAnterior: antes,
           camposCambiados,
-          ...(comentarios.sbm ? { comentarioSbm: comentarios.sbm } : {}),
+          ...(sbm ? { comentarioSbm: sbm } : {}),
           comentarioRfs: rfsExistente.startsWith('Sin comentarios')
             ? undefined
             : rfsExistente,
@@ -512,15 +509,29 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       usuario,
       `Línea ${dano.linea} · ${resumen}`
     );
-    if (comentarios.sbm) {
+
+    if (sbm) {
       agregarComentarioDano(estimacion!.id, dano.id, {
         usuario,
         rol: 'SEABOARD',
         tipo: 'INFORMATIVO',
-        mensaje: comentarios.sbm,
-        campoAfectado: 'Comentarios línea SBM',
+        mensaje: sbm,
+        campoAfectado: 'Motivo del cambio',
       });
     }
+  }
+
+  function cambiarDano(dano: DanoEstimacion, cambios: Partial<DanoEstimacion>, resumen: string) {
+    marcarEdicionDano(dano, cambios, resumen);
+  }
+
+  function guardarEdicionDano(
+    dano: DanoEstimacion,
+    cambios: Partial<DanoEstimacion>,
+    resumen: string,
+    comentarios: { sbm: string; rfs: string }
+  ) {
+    marcarEdicionDano(dano, cambios, resumen, comentarios.sbm);
   }
 
   return (
@@ -588,23 +599,21 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   <Unlock className="h-3 w-3" /> Estimación aperturada
                 </span>
               )}
-              {esOperadorDms && (
-                <>
-                  <button
-                    type="button"
-                    className="dms-btn-azul"
-                    onClick={() => {
-                      if (exigirApertura()) return;
-                      revalidarTarifas(estimacion.id, usuario);
-                      toast(
-                        `Tarifas revalidadas sobre ${estimacion.danos.length} línea(s).`,
-                        'success'
-                      );
-                    }}
-                  >
-                    <RefreshCw className="h-4 w-4" /> Revalidar Tarifas
-                  </button>
-                </>
+              {puedeRevalidar && (
+                <button
+                  type="button"
+                  className="dms-btn-azul"
+                  onClick={() => {
+                    if (exigirApertura()) return;
+                    revalidarTarifas(estimacion.id, usuario);
+                    toast(
+                      `Tarifas revalidadas sobre ${estimacion.danos.length} línea(s).`,
+                      'success'
+                    );
+                  }}
+                >
+                  <RefreshCw className="h-4 w-4" /> Revalidar Tarifas
+                </button>
               )}
               <button
                 type="button"
@@ -616,54 +625,71 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
             </div>
 
             <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
-              {puedeEnviar && (
+              {puedeEnviarLiquidaciones && (
                 <button
                   type="button"
                   className="dms-btn-enviar"
                   disabled={estimacion.danos.length === 0 || aperturada}
                   title={
                     aperturada
-                      ? 'Cierre la estimación antes de enviarla a aprobación'
+                      ? 'Cierre la estimación antes de aprobar o rechazar'
+                      : 'Aprobar o rechazar el estimado hacia liquidaciones RFS'
+                  }
+                  onClick={() => {
+                    if (aperturada) {
+                      toast(
+                        'Cierre la estimación antes de aprobar o rechazar el estimado.',
+                        'info'
+                      );
+                      return;
+                    }
+                    if (itemsPendientesRevision.length > 0) {
+                      toast(
+                        'Primero apruebe o rechace cada ítem de daño.\nAperture la estimación y use «Aprobar ítems» / «Rechazar ítems».',
+                        'info'
+                      );
+                      return;
+                    }
+                    setDialogo({ tipo: 'ENVIAR_LIQUIDACIONES' });
+                  }}
+                >
+                  <Send className="h-4 w-4" /> Aprobar / Rechazar
+                </button>
+              )}
+              {puedeEnviarASeaboard && (
+                <button
+                  type="button"
+                  className="dms-btn-enviar"
+                  disabled={estimacion.danos.length === 0 || aperturada}
+                  title={
+                    aperturada
+                      ? 'Cierre la estimación antes de enviarla a Seaboard'
                       : undefined
                   }
                   onClick={() => {
                     if (aperturada) {
-                      toast('Cierre la estimación antes de enviarla a aprobación.', 'info');
+                      toast('Cierre la estimación antes de enviarla a Seaboard Marine.', 'info');
                       return;
                     }
-                    if (itemsPendientesRevision.length > 0) {
-                      toast(
-                        'Debe aprobar los ítems de daño antes de enviar a aprobación.\nAperture la estimación y apruebe (o rechace) los ítems del listado de daños.',
-                        'info'
-                      );
-                      return;
-                    }
-                    setDialogo({ tipo: 'ENVIAR' });
+                    setDialogo({ tipo: 'ENVIAR_SEABOARD' });
                   }}
                 >
-                  <Send className="h-4 w-4" /> Enviar a Aprobación
+                  <Send className="h-4 w-4" /> Enviar a Seaboard
                 </button>
               )}
-              {esSeaboard && estimacion.estado === 'ENVIADO' && (
-                <button
-                  type="button"
-                  className="dms-btn-enviar"
-                  onClick={() => {
-                    if (itemsPendientesRevision.length > 0) {
-                      toast(
-                        'Debe aprobar los ítems de daño antes de enviar a aprobación.\nAperture la estimación y apruebe (o rechace) los ítems del listado de daños.',
-                        'info'
-                      );
-                    }
-                    setDialogo({ tipo: 'DECISION_NAVIERA' });
-                  }}
-                >
-                  <Send className="h-4 w-4" /> Enviar a Aprobación
-                </button>
-              )}
-              {estimacion.estado === 'ENVIADO' && !esSeaboard && !puedeEnviar && (
+              {estimacion.estado === 'ENVIADO' && esOperadorDms && (
                 <span className="dms-aviso-espera">
-                  <Send className="h-3.5 w-3.5" /> En espera de {estimacion.naviera}
+                  <Send className="h-3.5 w-3.5" /> En revisión Seaboard Marine
+                </span>
+              )}
+              {estimacion.estado === 'APROBADO' && esSeaboard && (
+                <span className="dms-aviso-espera">
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Aprobado · enviado a liquidaciones
+                </span>
+              )}
+              {estimacion.estado === 'RECHAZADO' && esSeaboard && (
+                <span className="dms-aviso-espera">
+                  <XCircle className="h-3.5 w-3.5" /> Rechazado · puede volver a revisar
                 </span>
               )}
               <DescargasMenu
@@ -681,7 +707,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   <StickyNote className="h-3.5 w-3.5" /> Notas de Estimación
                 </header>
                 <div className="dms-card-body">
-                  {esOperadorDms ? (
+                  {puedeEditarNotas ? (
                     <>
                       <textarea
                         rows={3}
@@ -717,7 +743,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   ) : null}
 
                   {estimacion.notas.length > 0 && (
-                    <ul className={cn('space-y-2', esOperadorDms && 'mt-3')}>
+                    <ul className={cn('space-y-2', puedeEditarNotas && 'mt-3')}>
                       {estimacion.notas.map((n) => (
                         <li key={n.id} className="dms-nota-item">
                           <div className="flex items-center gap-2">
@@ -743,9 +769,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 </span>
                 <div className="min-w-0 truncate">
                   {puedeAperturar && !aperturada
-                    ? esSeaboard
-                      ? 'Aperture la estimación para marcar y aprobar/rechazar ítems antes de decidir.'
-                      : 'Para modificar ítems, pulse Aperturar estimación.'
+                    ? 'Aperture para modificar ítems (queda histórico), aprobar/rechazar cada línea y luego el estimado.'
                     : 'Seleccione un daño para ver su detalle a la derecha.'}
                 </div>
               </div>
@@ -917,58 +941,58 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
 
       {/* ── Diálogos ─────────────────────────────────────────────── */}
 
-      {/* DMS: Aprobar → ENVIADO (naviera) o APROBADO (RFS); Rechazar → RECHAZADO */}
+      {/* Gestor Seaboard: Aprobar/Rechazar → Liquidaciones RFS */}
       <ConfirmacionEstimacionModal
-        open={dialogo.tipo === 'ENVIAR'}
-        modo="ENVIAR"
-        estimacion={estimacion}
-        onClose={cerrar}
-        onAprobar={() => {
-          if (pendientes > 0) {
-            aprobar(
-              [estimacion.id],
-              usuario,
-              'Aprobado por RFS (comentarios de liquidaciones pendientes).'
-            );
-            toast(
-              `Estimación ${estimacion.codigo} aprobada · Destino RFS (estado APROBADO).`,
-              'success'
-            );
-          } else {
-            enviarAprobacion([estimacion.id], usuario);
-            toast(
-              `Estimación ${estimacion.codigo} aprobada · Destino ${estimacion.naviera} (estado ENVIADO).`,
-              'success'
-            );
-          }
-          cerrar();
-        }}
-        onRechazar={(comentario) => {
-          rechazar([estimacion.id], usuario, comentario);
-          notificarRechazoALiquidaciones(estimacion, comentario, usuario);
-          toast(`Estimación ${estimacion.codigo} rechazada (estado RECHAZADO).`, 'success');
-          cerrar();
-        }}
-      />
-
-      {/* Seaboard Marine: informe + Aprobar / Rechazar (exige ítems revisados) */}
-      <ConfirmacionEstimacionModal
-        open={dialogo.tipo === 'DECISION_NAVIERA'}
+        open={dialogo.tipo === 'ENVIAR_LIQUIDACIONES'}
         modo="DECISION"
         estimacion={estimacion}
         onClose={cerrar}
         onAprobar={() => {
-          aprobar([estimacion.id], usuario);
-          toast(`Estimación ${estimacion.codigo} aprobada (estado APROBADO).`, 'success');
+          aprobar(
+            [estimacion.id],
+            usuario,
+            'Aprobado por Seaboard Marine. Enviado a liquidaciones RFS.'
+          );
+          notificarAprobacionALiquidaciones(estimacion, usuario);
+          toast(
+            `Estimación ${estimacion.codigo} aprobada y enviada a liquidaciones RFS (APROBADO).`,
+            'success'
+          );
           cerrar();
         }}
         onRechazar={(comentario) => {
           rechazar([estimacion.id], usuario, comentario);
           notificarRechazoALiquidaciones(estimacion, comentario, usuario);
-          toast(`Estimación ${estimacion.codigo} rechazada.`, 'success');
+          toast(
+            `Estimación ${estimacion.codigo} rechazada y notificada a liquidaciones RFS.`,
+            'success'
+          );
           cerrar();
         }}
       />
+
+      {/* DMS operativo: envía el estimado a la bandeja Seaboard */}
+      <ConfirmModal
+        open={dialogo.tipo === 'ENVIAR_SEABOARD'}
+        title="Enviar a Seaboard Marine"
+        subtitle={`${estimacion.codigo} · ${estimacion.contenedor}`}
+        confirmLabel="Confirmar envío"
+        confirmClass="dms-btn-enviar"
+        onClose={cerrar}
+        onConfirm={() => {
+          enviarAprobacion([estimacion.id], usuario);
+          toast(
+            `Estimación ${estimacion.codigo} enviada a Seaboard Marine (estado ENVIADO).`,
+            'success'
+          );
+          cerrar();
+        }}
+      >
+        <p className="text-sm leading-relaxed text-gray-600">
+          El estimado pasará a estado <strong>ENVIADO</strong> para que el gestor Seaboard lo
+          revise, comente, modifique y envíe su decisión a <strong>liquidaciones RFS</strong>.
+        </p>
+      </ConfirmModal>
 
       <ConfirmModal
         open={dialogo.tipo === 'CERRAR_APERTURA'}
@@ -1061,9 +1085,9 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       >
         <div className="space-y-3 text-sm leading-relaxed text-gray-600">
           <p>
-            Al visualizar este estimado se espera que <strong>apruebe o rechace los ítems de
-            daño</strong> y luego <strong>apruebe o rechace el estimado</strong>
-            {esSeaboard ? ' (Enviar a Aprobación).' : ' (Enviar a Aprobación).'}
+            Al visualizar este estimado se espera que <strong>apruebe o rechace cada ítem</strong> y
+            luego use <strong>Aprobar / Rechazar</strong> sobre el estimado completo (notifica a
+            liquidaciones RFS).
           </p>
           {itemsPendientesRevision.length > 0 && (
             <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">

@@ -18,7 +18,16 @@ export const CORREOS_LIQUIDACIONES_RFS = [
   'gestor.liquidaciones@rfs.com.ec',
 ];
 
-/** Abre mailto y confirma en UI el aviso a liquidaciones (prototipo). */
+function mailtoLiquidaciones(asunto: string, cuerpo: string) {
+  const mailto = `mailto:${CORREOS_LIQUIDACIONES_RFS.join(',')}?subject=${encodeURIComponent(
+    asunto
+  )}&body=${encodeURIComponent(cuerpo)}`;
+  if (typeof window !== 'undefined') {
+    window.location.href = mailto;
+  }
+}
+
+/** Notifica a liquidaciones RFS el rechazo del estimado (prototipo mailto). */
 export function notificarRechazoALiquidaciones(
   estimacion: Estimacion,
   comentario: string,
@@ -28,30 +37,48 @@ export function notificarRechazoALiquidaciones(
   const cuerpo = [
     `Estimados gestores de liquidaciones RFS,`,
     ``,
-    `La estimación ${estimacion.codigo} (${estimacion.contenedor}) fue rechazada.`,
+    `La estimación ${estimacion.codigo} (${estimacion.contenedor}) fue rechazada por Seaboard Marine.`,
     ``,
     `Naviera: ${estimacion.naviera}`,
-    `Estado previo: ${estimacion.estado}`,
     `Total PVP: $${estimacion.pvpTotal.toFixed(2)}`,
     `Líneas de daño: ${estimacion.danos.length}`,
-    `Usuario: ${usuario}`,
+    `Usuario Seaboard: ${usuario}`,
     ``,
     `Motivo del rechazo:`,
     comentario.trim(),
     ``,
-    `— Notificación automática DMS Estimaciones (prototipo)`,
+    `— Notificación automática · Gestor Seaboard Marine (prototipo)`,
   ].join('\n');
 
-  const mailto = `mailto:${CORREOS_LIQUIDACIONES_RFS.join(',')}?subject=${encodeURIComponent(
-    asunto
-  )}&body=${encodeURIComponent(cuerpo)}`;
-
-  if (typeof window !== 'undefined') {
-    window.location.href = mailto;
-  }
-
+  mailtoLiquidaciones(asunto, cuerpo);
   toast(
     `Correo de rechazo preparado para liquidaciones RFS\n${CORREOS_LIQUIDACIONES_RFS.join(', ')}`,
+    'success'
+  );
+}
+
+/** Notifica a liquidaciones RFS la aprobación del estimado (prototipo mailto). */
+export function notificarAprobacionALiquidaciones(
+  estimacion: Estimacion,
+  usuario: string
+) {
+  const asunto = `Estimación ${estimacion.codigo} APROBADA · ${estimacion.contenedor}`;
+  const cuerpo = [
+    `Estimados gestores de liquidaciones RFS,`,
+    ``,
+    `La estimación ${estimacion.codigo} (${estimacion.contenedor}) fue aprobada por Seaboard Marine.`,
+    ``,
+    `Naviera: ${estimacion.naviera}`,
+    `Total PVP: $${estimacion.pvpTotal.toFixed(2)}`,
+    `Líneas de daño: ${estimacion.danos.length}`,
+    `Usuario Seaboard: ${usuario}`,
+    ``,
+    `— Notificación automática · Gestor Seaboard Marine (prototipo)`,
+  ].join('\n');
+
+  mailtoLiquidaciones(asunto, cuerpo);
+  toast(
+    `Correo de aprobación preparado para liquidaciones RFS\n${CORREOS_LIQUIDACIONES_RFS.join(', ')}`,
     'success'
   );
 }
@@ -70,9 +97,7 @@ function resumenCambiosEstimacion(est: Estimacion): string[] {
   });
   const recientes = [...est.auditoria].slice(-8).reverse();
   recientes.forEach((ev) => {
-    if (
-      /DAÑO|ÍTEM|APROB|RECHAZ|NOTA|CIERR|APERTUR|ENVÍO|ENVIO/i.test(ev.accion)
-    ) {
+    if (/DAÑO|ÍTEM|APROB|RECHAZ|NOTA|CIERR|APERTUR|ENVÍO|ENVIO|LIQUID/i.test(ev.accion)) {
       items.push(`${ev.fecha} · ${ev.accion}: ${ev.detalle}`);
     }
   });
@@ -90,7 +115,10 @@ interface ConfirmacionEstimacionModalProps {
   onRechazar: (comentario: string) => void;
 }
 
-/** Confirmación con informe/resumen: Aprobar o Rechazar (sin botón Enviar). */
+/**
+ * Confirmación del gestor Seaboard: informe + Aprobar/Rechazar
+ * con destino Liquidaciones RFS (no al revés).
+ */
 export function ConfirmacionEstimacionModal({
   open,
   modo,
@@ -125,19 +153,17 @@ export function ConfirmacionEstimacionModal({
     () => (estimacion ? itemsSinRevisionSbm(estimacion.danos) : []),
     [estimacion]
   );
-  const destinoRfs = modo === 'ENVIAR' && pendientesLiq > 0;
-  /** En ambos modos hay que tener los ítems de daño aprobados/rechazados antes de decidir. */
   const faltanItems = sinRevision.length > 0;
 
   if (!estimacion) return null;
 
   const titulo =
-    modo === 'ENVIAR' ? 'Enviar a Aprobación' : 'Aprobación Seaboard Marine';
-  const destinoLabel = destinoRfs ? 'RFS (Liquidaciones)' : estimacion.naviera;
-  const subtitle =
-    modo === 'ENVIAR'
-      ? `Destino: ${destinoLabel}`
-      : `${estimacion.codigo} · ${estimacion.contenedor} · Total $${formatMoney(estimacion.pvpTotal)}`;
+    modo === 'ENVIAR' || modo === 'DECISION'
+      ? 'Aprobar o rechazar estimado'
+      : 'Decisión Seaboard';
+  const subtitle = `${estimacion.codigo} · Seaboard → Liquidaciones RFS · Total $${formatMoney(
+    estimacion.pvpTotal
+  )}`;
 
   function confirmarRechazo() {
     if (faltanItems) {
@@ -184,11 +210,7 @@ export function ConfirmacionEstimacionModal({
                 type="button"
                 className="dms-btn-rechazar px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={faltanItems}
-                title={
-                  faltanItems
-                    ? 'Revise todos los ítems antes de rechazar'
-                    : undefined
-                }
+                title={faltanItems ? 'Revise todos los ítems antes de rechazar' : undefined}
                 onClick={() => {
                   if (faltanItems) {
                     toast(MSG_ITEMS_SIN_APROBAR, 'info');
@@ -197,20 +219,16 @@ export function ConfirmacionEstimacionModal({
                   setRechazando(true);
                 }}
               >
-                <XCircle className="h-4 w-4" /> Rechazar
+                <XCircle className="h-4 w-4" /> Rechazar y notificar
               </button>
               <button
                 type="button"
                 className="dms-btn-aprobar px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={faltanItems}
-                title={
-                  faltanItems
-                    ? 'Revise todos los ítems antes de aprobar'
-                    : undefined
-                }
+                title={faltanItems ? 'Revise todos los ítems antes de aprobar' : undefined}
                 onClick={confirmarAprobar}
               >
-                <CheckCircle2 className="h-4 w-4" /> Aprobar
+                <CheckCircle2 className="h-4 w-4" /> Aprobar y enviar
               </button>
             </>
           )}
@@ -231,7 +249,7 @@ export function ConfirmacionEstimacionModal({
                 className="dms-btn-rechazar px-4 py-2 text-sm"
                 onClick={confirmarRechazo}
               >
-                <XCircle className="h-4 w-4" /> Confirmar rechazo y notificar
+                <XCircle className="h-4 w-4" /> Confirmar rechazo a liquidaciones
               </button>
             </>
           )}
@@ -240,36 +258,17 @@ export function ConfirmacionEstimacionModal({
     >
       <div className="space-y-3 border-b border-slate-200 bg-slate-50 px-4 py-3">
         <p className="text-xs leading-relaxed text-slate-600">
-          {modo === 'ENVIAR' ? (
-            destinoRfs ? (
-              <>
-                Atención: hay comentarios de liquidaciones sin resolver. Destino:{' '}
-                <strong>RFS</strong>. Pulse <strong>Aprobar</strong> para pasar a estado{' '}
-                <strong>APROBADO</strong>, o <strong>Rechazar</strong> para{' '}
-                <strong>RECHAZADO</strong>.
-              </>
-            ) : (
-              <>
-                Destino: <strong>{estimacion.naviera}</strong>. Pulse <strong>Aprobar</strong> para
-                pasar a estado <strong>ENVIADO</strong> (en espera de la naviera), o{' '}
-                <strong>Rechazar</strong> para <strong>RECHAZADO</strong>.
-              </>
-            )
-          ) : (
-            <>
-              Revise el informe. Pulse <strong>Aprobar</strong> (
-              <strong>APROBADO</strong>) o <strong>Rechazar</strong> (
-              <strong>RECHAZADO</strong>). Si rechaza, se notificará a liquidaciones RFS.
-            </>
-          )}
+          Revise el informe. <strong>Aprobar</strong> deja el estimado en{' '}
+          <strong>APROBADO</strong>; <strong>Rechazar</strong> en <strong>RECHAZADO</strong>. En
+          ambos casos se notifica a liquidaciones RFS.
         </p>
 
-        {destinoRfs && (
+        {pendientesLiq > 0 && (
           <div className="flex gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-[11px] leading-snug text-amber-950">
             <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
             <span>
               Atención: hay <strong>{pendientesLiq}</strong> comentario(s) de liquidaciones sin
-              resolver. Destino: <strong>RFS</strong>.
+              resolver. Revíselos antes de decidir.
             </span>
           </div>
         )}
@@ -278,12 +277,11 @@ export function ConfirmacionEstimacionModal({
           <div className="flex gap-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-[11px] leading-snug text-red-950">
             <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-600" />
             <span>
-              Debe aprobar los ítems de daño antes de enviar a aprobación (
+              Debe aprobar o rechazar los ítems de daño antes de enviar a liquidaciones (
               <strong>{sinRevision.length}</strong> pendiente
               {sinRevision.length === 1 ? '' : 's'}: líneas{' '}
-              {sinRevision.map((d) => String(d.linea).padStart(2, '0')).join(', ')}).{' '}
-              <strong>Ingrese al estimado</strong>, <strong>aperture</strong> la estimación y{' '}
-              <strong>apruebe (o rechace) los ítems</strong> del listado de daños.
+              {sinRevision.map((d) => String(d.linea).padStart(2, '0')).join(', ')}). Aperture el
+              estimado y use «Aprobar ítems» / «Rechazar ítems».
             </span>
           </div>
         )}
@@ -309,11 +307,11 @@ export function ConfirmacionEstimacionModal({
               rows={3}
               className="dms-input-sm h-auto w-full border-red-200 bg-white"
               value={comentario}
-              placeholder="Indique el motivo por el cual se rechaza el estimado…"
+              placeholder="Indique el motivo por el cual Seaboard rechaza el estimado…"
               onChange={(e) => setComentario(e.target.value)}
             />
             <p className="mt-1 text-[10px] text-slate-500">
-              Se enviará notificación a: {CORREOS_LIQUIDACIONES_RFS.join(', ')}
+              Se notificará a: {CORREOS_LIQUIDACIONES_RFS.join(', ')}
             </p>
           </div>
         )}

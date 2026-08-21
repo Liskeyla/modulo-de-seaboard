@@ -29,19 +29,19 @@ interface HeaderProps {
 const NOTIFICACIONES = [
   {
     id: 1,
-    texto: '3 estimaciones Seaboard esperan aprobación.',
+    texto: '3 estimaciones pendientes de revisión Seaboard.',
     tiempo: 'hace 8 min',
     tono: 'amber' as const,
   },
   {
     id: 2,
-    texto: 'Estimación EST-2481 enviada a Seaboard.',
+    texto: 'EST-2481 aprobada y enviada a liquidaciones RFS.',
     tiempo: 'hace 26 min',
     tono: 'emerald' as const,
   },
   {
     id: 3,
-    texto: 'PTI pendiente en 2 reefers del patio RFS 1.',
+    texto: 'Liquidaciones solicitó cambio en 2 líneas de EST-2470.',
     tiempo: 'hace 1 h',
     tono: 'red' as const,
   },
@@ -437,8 +437,8 @@ export function Header({ title, subtitle }: HeaderProps) {
           <strong>aperturado</strong>.
         </p>
         <p>
-          Primero debe <strong>cerrar la estimación</strong>, aprobar o rechazar los ítems y
-          dejar todo listo con el estimado. Luego podrá cambiar de país.
+          Primero debe <strong>cerrar la estimación</strong>, revisar ítems y
+          enviar a liquidaciones RFS si corresponde. Luego podrá cambiar de país.
         </p>
       </div>
     </Modal>
@@ -476,7 +476,7 @@ export function Header({ title, subtitle }: HeaderProps) {
             onClick={() => {
               setCambioPais(null);
               toast(
-                'Continúe la revisión: apruebe o rechace los ítems y luego el estimado.',
+                'Continúe la revisión: apruebe o rechace los ítems y luego envíe a liquidaciones RFS.',
                 'info'
               );
             }}
@@ -491,7 +491,7 @@ export function Header({ title, subtitle }: HeaderProps) {
           Está visualizando el estimado{' '}
           <strong>{cambioPais?.codigo ?? avisoVisualizacion?.codigo}</strong>. Se espera que{' '}
           <strong>apruebe o rechace los ítems de daño</strong> y luego{' '}
-          <strong>apruebe o rechace el estimado</strong>.
+          <strong>envíe la decisión a liquidaciones RFS</strong>.
         </p>
         {(avisoVisualizacion?.itemsPendientes ?? 0) > 0 && (
           <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">

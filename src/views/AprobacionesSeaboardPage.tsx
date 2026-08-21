@@ -15,7 +15,10 @@ import { Header } from '@/components/layout/Header';
 import { DmsTableToolbar } from '@/components/dms/DmsTableToolbar';
 import { EstadoEstimacionBadge } from '@/components/dms/EstadoEstimacionBadge';
 import { ComentarioModal } from '@/components/aprobaciones/ComentarioModal';
-import { notificarRechazoALiquidaciones } from '@/components/estimacion/ConfirmacionEstimacionModal';
+import {
+  notificarAprobacionALiquidaciones,
+  notificarRechazoALiquidaciones,
+} from '@/components/estimacion/ConfirmacionEstimacionModal';
 import { Input } from '@/components/ui/input';
 import { useAuthStore } from '@/store';
 import { useEstimacionesStore } from '@/store/estimacionesStore';
@@ -185,10 +188,16 @@ export default function AprobacionesSeaboardPage() {
       toast('Seleccione al menos una estimación.', 'error');
       return;
     }
-    aprobar(selectedIds, usuario);
+    const afectadas = estimaciones.filter((e) => selectedIds.includes(e.id));
+    aprobar(
+      selectedIds,
+      usuario,
+      'Aprobado por Seaboard Marine. Enviado a liquidaciones RFS.'
+    );
+    afectadas.forEach((e) => notificarAprobacionALiquidaciones(e, usuario));
     setSelected(new Set());
     toast(
-      `${selectedIds.length} estimación(es) aprobada(s). Estado actualizado en Reporte de Estimaciones.`,
+      `${selectedIds.length} estimación(es) aprobada(s) y notificada(s) a liquidaciones RFS.`,
       'success'
     );
   };
@@ -207,7 +216,10 @@ export default function AprobacionesSeaboardPage() {
           usuario
         );
       }
-      toast(`${selectedIds.length} estimación(es) rechazada(s).`, 'success');
+      toast(
+        `${selectedIds.length} estimación(es) rechazada(s) y notificada(s) a liquidaciones RFS.`,
+        'success'
+      );
     } else if (modalAction === 'reversar') {
       reversar(selectedIds, usuario, comentario);
       toast(`${selectedIds.length} estimación(es) reversada(s) a estado REVERSADO.`, 'success');
@@ -223,7 +235,7 @@ export default function AprobacionesSeaboardPage() {
         subtitle={
           modoRevision
             ? 'Modo revisión · Estimaciones incompletas / pendientes'
-            : 'Solo estimaciones ENVIADAS listas para decidir'
+            : 'Bandeja Seaboard · Abrir detalle y enviar a liquidaciones RFS'
         }
       />
       <main className="px-3 py-4 md:px-5 md:py-6">
@@ -236,9 +248,9 @@ export default function AprobacionesSeaboardPage() {
           <div>
             <p className="font-bold">Cómo usar esta pantalla</p>
             <ul className="mt-1 text-sm">
-              <li>Solo se listan estimaciones Seaboard completas y enviadas a aprobación.</li>
+              <li>Lista estimados Seaboard en estado ENVIADO listos para revisar.</li>
+              <li>Abra el detalle para comentar, modificar ítems y enviar a liquidaciones RFS.</li>
               <li>Para incompletas, active Modo Revisión.</li>
-              <li>Seleccione filas y use Aprobar / Rechazar / Reversar.</li>
             </ul>
           </div>
         </div>
@@ -432,7 +444,7 @@ export default function AprobacionesSeaboardPage() {
               <p className="mt-1 max-w-md text-xs text-gray-500">
                 {modoRevision
                   ? 'No hay pendientes incompletos en modo revisión.'
-                  : 'Envíe estimaciones Seaboard desde el Reporte de Estimaciones para que aparezcan aquí.'}
+                  : 'Abra un estimado ENVIADO desde el reporte, revise ítems y envíe a liquidaciones RFS.'}
               </p>
             </div>
           ) : (

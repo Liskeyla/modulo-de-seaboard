@@ -10,10 +10,10 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: 'RFS - DMS Ecuador | Estimaciones Seaboard',
+  title: 'RFS - DMS Ecuador | Gestor Seaboard Marine',
   description:
-    'Prototipo operativo: Reporte de Estimaciones y Aprobaciones Seaboard para RFS DMS Ecuador.',
-  applicationName: 'RFS DMS Estimaciones',
+    'Plataforma del gestor Seaboard: ver, comentar, modificar estimados y enviar a liquidaciones RFS.',
+  applicationName: 'Gestor Seaboard · RFS DMS',
   robots: { index: false, follow: false },
 };
 

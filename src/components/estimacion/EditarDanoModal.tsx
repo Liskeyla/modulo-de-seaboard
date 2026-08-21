@@ -319,17 +319,20 @@ export function EditarDanoModal({
           />
         </div>
         <div>
-          <label className="dms-field-label">Comentarios línea SBM</label>
+          <label className="dms-field-label">Motivo del cambio (Seaboard)</label>
           <textarea
             rows={3}
             className="dms-input-sm h-auto border-sky-200 bg-sky-50/50"
             value={form.comentarioSbm}
-            placeholder="Explique los cambios realizados (usuario SBM)…"
+            placeholder="Ej.: Se ajustó la cantidad según inspección en patio…"
             onChange={(e) => set('comentarioSbm', e.target.value)}
           />
+          <p className="mt-0.5 text-[10px] text-slate-400">
+            Este texto queda visible en el listado y en el historial.
+          </p>
         </div>
         <div>
-          <label className="dms-field-label">Comentarios RFS</label>
+          <label className="dms-field-label">Notas de RFS / liquidaciones</label>
           <textarea
             rows={3}
             className="dms-input-sm h-auto border-emerald-200 bg-emerald-50/80 text-emerald-950"
@@ -337,14 +340,12 @@ export function EditarDanoModal({
             disabled
             readOnly
           />
-          <p className="mt-0.5 text-[10px] text-slate-400">
-            Solo lectura · Comentarios del liquidador / RFS
-          </p>
+          <p className="mt-0.5 text-[10px] text-slate-400">Solo lectura</p>
         </div>
       </div>
-      <p className="mt-2 text-[11px] text-slate-500">
-        Si modifica campos del ítem, indique el motivo en Comentarios línea SBM. Los cambios se
-        mostrarán como subfila del listado, resaltando las columnas modificadas.
+      <p className="mt-2 text-[11px] leading-relaxed text-slate-500">
+        Al guardar, los campos que cambió se marcan en{' '}
+        <strong className="text-emerald-600">verde</strong> en el listado.
       </p>
     </Modal>
   );

@@ -18,16 +18,15 @@ const LINKS_BASE = [
     href: '/reportes/estimaciones',
     label: 'Reporte de Estimaciones Seaboard Marine',
     icon: FileBarChart,
-    hint: 'Consulta y detalle de estimados',
+    hint: 'Ver, modificar con histórico y aprobar / rechazar',
     roles: ['dms', 'seaboard', 'liquidaciones'] as const,
   },
   {
     href: '/aprobaciones/seaboard',
     label: 'Aprobaciones Seaboard',
     icon: ClipboardCheck,
-    hint: 'Solo referencia DMS · Seaboard decide en el detalle',
-    /** Seaboard decide desde el detalle del estimado, no desde esta lista. */
-    roles: ['dms'] as const,
+    hint: 'Bandeja ENVIADO · decisión a liquidaciones RFS',
+    roles: ['dms', 'seaboard'] as const,
   },
 ];
 
@@ -64,7 +63,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         <div className="flex items-center justify-between border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white p-4">
           <div>
             <p className="text-sm font-bold text-rfs-navy">Navegación</p>
-            <p className="text-[11px] text-gray-500">Módulos operativos DMS</p>
+            <p className="text-[11px] text-gray-500">Gestor Seaboard Marine</p>
           </div>
           <button
             type="button"

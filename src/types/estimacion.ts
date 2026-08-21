@@ -100,9 +100,11 @@ export interface EdicionRecienteDano {
   resumenCambios: string;
   comentarioSbm?: string;
   comentarioRfs?: string;
-  /** Valores de la línea tras la edición (misma estructura del listado). */
+  /** Valores actuales tras la edición (opcional). */
   snapshot?: SnapshotLineaDano;
-  /** Campos que cambiaron respecto al valor anterior (se resaltan en la subfila). */
+  /** Valores previos al cambio · se muestran en la fila «Antes» del listado. */
+  snapshotAnterior?: SnapshotLineaDano;
+  /** Campos que cambiaron (verde en la fila actual; resaltados en «Antes»). */
   camposCambiados?: CampoSnapshotLinea[];
 }
 
@@ -357,7 +359,7 @@ export function itemsSinRevisionSbm(danos: DanoEstimacion[]) {
 
 /** Mensaje cuando intentan aprobar/enviar sin haber revisado los ítems de daño. */
 export const MSG_ITEMS_SIN_APROBAR =
-  'Debe aprobar los ítems de daño antes de enviar a aprobación.\nIngrese al estimado, aperture la estimación y apruebe (o rechace) los ítems del listado de daños.';
+  'Debe aprobar los ítems de daño antes de enviar a liquidaciones RFS.\nIngrese al estimado, aperture la estimación y apruebe (o rechace) los ítems del listado de daños.';
 
 export function hayItemsSinAprobar(danos: DanoEstimacion[]) {
   return itemsSinRevisionSbm(danos).length > 0;
