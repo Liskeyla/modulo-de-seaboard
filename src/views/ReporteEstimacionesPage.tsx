@@ -22,9 +22,9 @@ import { Header } from '@/components/layout/Header';
 import { DmsReportLayout } from '@/components/dms/DmsReportLayout';
 import { DmsTableToolbar } from '@/components/dms/DmsTableToolbar';
 import { EstadoEstimacionBadge } from '@/components/dms/EstadoEstimacionBadge';
-import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Modal } from '@/components/ui/Modal';
 import { InformePreviewModal } from '@/components/estimacion/InformePreviewModal';
+import { ConfirmacionEstimacionModal } from '@/components/estimacion/ConfirmacionEstimacionModal';
 import { useAuthStore } from '@/store';
 import { useEstimacionesStore } from '@/store/estimacionesStore';
 import { useUiStore } from '@/store/uiStore';
@@ -866,32 +866,26 @@ export default function ReporteEstimacionesPage() {
         )}
       </Modal>
 
-      <ConfirmModal
+      <ConfirmacionEstimacionModal
         open={dialogo.tipo === 'ENVIAR'}
-        title="Enviar a Aprobación"
-        subtitle={activa ? `Destino: ${activa.naviera}` : undefined}
-        confirmLabel="Enviar"
-        confirmClass="dms-btn-enviar"
+        modo="ENVIAR"
+        estimacion={activa}
         onClose={cerrar}
-        onConfirm={() => {
+        onEnviar={() => {
           if (!activa) return;
+          const pendientes = contarComentariosPendientes(activa.danos);
           enviarAprobacion([activa.id], usuario);
-          toast(`Estimación ${activa.codigo} enviada a aprobación.`, 'success');
+          toast(
+            `Estimación ${activa.codigo} enviada a ${
+              pendientes > 0 ? 'RFS (Liquidaciones)' : activa.naviera
+            } (estado ENVIADO).`,
+            'success'
+          );
+          cerrar();
         }}
-      >
-        {activa && (
-          <>
-            <strong>{activa.codigo}</strong> pasará a estado <strong>ENVIADO</strong> por un total de{' '}
-            <strong>${formatMoney(activa.pvpTotal)}</strong>.
-            {contarComentariosPendientes(activa.danos) > 0 && (
-              <p className="mt-2 text-xs text-rfsorange-600">
-                Atención: hay {contarComentariosPendientes(activa.danos)} comentario(s) de
-                liquidaciones sin resolver.
-              </p>
-            )}
-          </>
-        )}
-      </ConfirmModal>
+        onAprobar={() => undefined}
+        onRechazar={() => undefined}
+      />
     </>
   );
 }

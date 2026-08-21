@@ -35,6 +35,11 @@ export function esAplicaRechazado(aplica: string) {
   return aplica === 'Rechazado SBM' || aplica === 'Rechazado';
 }
 
+/** Ítem ya revisado por Seaboard (aprobado o rechazado por línea SBM). */
+export function esItemRevisadoSbm(aplica: string) {
+  return aplica === APLICA_APROBADO_SBM || aplica === APLICA_RECHAZADO_SBM;
+}
+
 export const CARGOS_DANO = ['Línea', 'Dueño', 'Garantía', 'Rechazado'] as const;
 export type CargoDano = (typeof CARGOS_DANO)[number];
 
@@ -343,4 +348,9 @@ export function contarComentariosPendientes(danos: DanoEstimacion[]) {
     (acc, d) => acc + d.comentarios.filter((c) => c.tipo === 'SOLICITA_CAMBIO').length,
     0
   );
+}
+
+/** Líneas que aún no tienen decisión SBM (Aprobar/Rechazar ítems). */
+export function itemsSinRevisionSbm(danos: DanoEstimacion[]) {
+  return danos.filter((d) => !esItemRevisadoSbm(d.aplica));
 }

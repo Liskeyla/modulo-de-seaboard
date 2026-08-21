@@ -1,9 +1,13 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, FileText, Send, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, FileText, Send, XCircle } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
-import type { Estimacion } from '@/types/estimacion';
+import {
+  contarComentariosPendientes,
+  itemsSinRevisionSbm,
+  type Estimacion,
+} from '@/types/estimacion';
 import { construirInformeHtml } from '@/lib/descargas';
 import { formatMoney, toast } from '@/lib/utils';
 
@@ -114,6 +118,16 @@ export function ConfirmacionEstimacionModal({
     () => (estimacion ? resumenCambiosEstimacion(estimacion) : []),
     [estimacion]
   );
+  const pendientesLiq = useMemo(
+    () => (estimacion ? contarComentariosPendientes(estimacion.danos) : 0),
+    [estimacion]
+  );
+  const sinRevision = useMemo(
+    () => (estimacion ? itemsSinRevisionSbm(estimacion.danos) : []),
+    [estimacion]
+  );
+  const destinoRfs = modo === 'ENVIAR' && pendientesLiq > 0;
+  const faltanItems = modo === 'DECISION' && sinRevision.length > 0;
 
   if (!estimacion) return null;
 
@@ -121,18 +135,41 @@ export function ConfirmacionEstimacionModal({
     modo === 'ENVIAR'
       ? 'Confirmar envío a aprobación'
       : 'Aprobación Seaboard Marine';
+  const destinoLabel = destinoRfs ? 'RFS (Liquidaciones)' : estimacion.naviera;
   const subtitle =
     modo === 'ENVIAR'
-      ? `${estimacion.codigo} · Destino: ${estimacion.naviera}`
+      ? `${estimacion.codigo} · Destino: ${destinoLabel}`
       : `${estimacion.codigo} · ${estimacion.contenedor} · Total $${formatMoney(estimacion.pvpTotal)}`;
 
   function confirmarRechazo() {
+    if (faltanItems) {
+      toast(
+        `Debe revisar y aprobar/rechazar todos los ítems antes de rechazar el estimado (${sinRevision.length} pendiente(s)).`,
+        'info'
+      );
+      return;
+    }
     const motivo = comentario.trim();
     if (motivo.length < 5) {
       toast('Indique un comentario general del rechazo (mín. 5 caracteres).', 'info');
       return;
     }
     onRechazar(motivo);
+  }
+
+  function confirmarAprobar() {
+    if (faltanItems) {
+      toast(
+        `Debe revisar y aprobar/rechazar todos los ítems antes de aprobar el estimado (${sinRevision.length} pendiente(s)).`,
+        'info'
+      );
+      return;
+    }
+    onAprobar();
+  }
+
+  function confirmarEnviar() {
+    onEnviar();
   }
 
   return (
@@ -157,24 +194,46 @@ export function ConfirmacionEstimacionModal({
             <button
               type="button"
               className="dms-btn-enviar px-4 py-2 text-sm"
-              onClick={onEnviar}
+              onClick={confirmarEnviar}
             >
-              <Send className="h-4 w-4" /> Enviar a Aprobación
+              <Send className="h-4 w-4" />{' '}
+              {destinoRfs ? 'Enviar a RFS' : 'Enviar a Aprobación'}
             </button>
           )}
           {modo === 'DECISION' && !rechazando && (
             <>
               <button
                 type="button"
-                className="dms-btn-rechazar px-4 py-2 text-sm"
-                onClick={() => setRechazando(true)}
+                className="dms-btn-rechazar px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={faltanItems}
+                title={
+                  faltanItems
+                    ? 'Revise todos los ítems antes de rechazar'
+                    : undefined
+                }
+                onClick={() => {
+                  if (faltanItems) {
+                    toast(
+                      `Debe revisar y aprobar/rechazar todos los ítems antes de enviar el rechazo (${sinRevision.length} pendiente(s)).`,
+                      'info'
+                    );
+                    return;
+                  }
+                  setRechazando(true);
+                }}
               >
                 <XCircle className="h-4 w-4" /> Rechazar
               </button>
               <button
                 type="button"
-                className="dms-btn-aprobar px-4 py-2 text-sm"
-                onClick={onAprobar}
+                className="dms-btn-aprobar px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={faltanItems}
+                title={
+                  faltanItems
+                    ? 'Revise todos los ítems antes de aprobar'
+                    : undefined
+                }
+                onClick={confirmarAprobar}
               >
                 <CheckCircle2 className="h-4 w-4" /> Aprobar
               </button>
@@ -207,18 +266,51 @@ export function ConfirmacionEstimacionModal({
       <div className="space-y-3 border-b border-slate-200 bg-slate-50 px-4 py-3">
         <p className="text-xs leading-relaxed text-slate-600">
           {modo === 'ENVIAR' ? (
-            <>
-              Revise el informe resumen del estimado antes de enviarlo a{' '}
-              <strong>{estimacion.naviera}</strong>. Pasará a estado <strong>ENVIADO</strong>.
-            </>
+            destinoRfs ? (
+              <>
+                Hay comentarios de liquidaciones sin resolver. El destino es{' '}
+                <strong>RFS (Liquidaciones)</strong>. Al confirmar, el estimado pasará a estado{' '}
+                <strong>ENVIADO</strong> hacia RFS (no a la naviera) hasta resolver las
+                observaciones.
+              </>
+            ) : (
+              <>
+                Revise el informe resumen del estimado antes de enviarlo a{' '}
+                <strong>{estimacion.naviera}</strong>. Pasará a estado <strong>ENVIADO</strong> y
+                quedará en espera de la naviera.
+              </>
+            )
           ) : (
             <>
-              Revise el informe del estimado. Pulse <strong>Aprobar</strong> o{' '}
-              <strong>Rechazar</strong> directamente aquí (no es necesario ir a otra pantalla). Si
-              rechaza, indique un comentario general y se notificará a liquidaciones RFS.
+              Revise el informe del estimado. Tras decidir, el estimado pasará a estado{' '}
+              <strong>APROBADO</strong> o <strong>RECHAZADO</strong>. Si rechaza, indique un
+              comentario general y se notificará a liquidaciones RFS.
             </>
           )}
         </p>
+
+        {destinoRfs && (
+          <div className="flex gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-[11px] leading-snug text-amber-950">
+            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
+            <span>
+              Atención: hay <strong>{pendientesLiq}</strong> comentario(s) de liquidaciones sin
+              resolver. Destino: <strong>RFS</strong>.
+            </span>
+          </div>
+        )}
+
+        {faltanItems && (
+          <div className="flex gap-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-[11px] leading-snug text-red-950">
+            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-600" />
+            <span>
+              Debe aprobar o rechazar todos los ítems antes de enviar la aprobación o el rechazo.
+              Pendientes de revisión: <strong>{sinRevision.length}</strong> (líneas{' '}
+              {sinRevision.map((d) => String(d.linea).padStart(2, '0')).join(', ')}). Aperture el
+              estimado y use «Aprobar ítems» / «Rechazar ítems».
+            </span>
+          </div>
+        )}
+
         {cambios.length > 0 && (
           <div className="max-h-28 overflow-y-auto rounded-lg border border-slate-200 bg-white">
             <p className="border-b border-slate-100 bg-slate-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">

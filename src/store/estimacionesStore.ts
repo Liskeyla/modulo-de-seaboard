@@ -194,6 +194,13 @@ export const useEstimacionesStore = create<EstimacionesState>()(
               if (!ids.includes(e.id) || !['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(e.estado)) {
                 return e;
               }
+              const pendientesLiq = e.danos.reduce(
+                (acc, d) =>
+                  acc + d.comentarios.filter((c) => c.tipo === 'SOLICITA_CAMBIO').length,
+                0
+              );
+              const destino =
+                pendientesLiq > 0 ? 'RFS (Liquidaciones)' : e.naviera;
               return {
                 ...e,
                 estado: 'ENVIADO' as EstadoEstimacion,
@@ -203,14 +210,23 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                 usuarioModificacion: usuario,
                 comentariosSeaboard: [
                   ...e.comentariosSeaboard,
-                  comentarioSeaboard('ENVIAR', 'Enviado a aprobación de la naviera.', usuario),
+                  comentarioSeaboard(
+                    'ENVIAR',
+                    pendientesLiq > 0
+                      ? `Enviado a RFS por ${pendientesLiq} comentario(s) de liquidaciones sin resolver.`
+                      : 'Enviado a aprobación de la naviera.',
+                    usuario
+                  ),
                 ],
                 auditoria: [
                   ...e.auditoria,
                   evento(
                     usuario,
                     'ENVÍO A APROBACIÓN',
-                    `Enviado a ${e.naviera} por un total de $${e.pvpTotal.toFixed(2)}`
+                    `Enviado a ${destino} por un total de $${e.pvpTotal.toFixed(2)}` +
+                      (pendientesLiq > 0
+                        ? ` · ${pendientesLiq} comentario(s) liquidaciones pendientes`
+                        : '')
                   ),
                 ],
               };
