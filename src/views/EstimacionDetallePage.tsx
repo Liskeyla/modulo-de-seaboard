@@ -1235,17 +1235,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 comentarioUsuario={actor}
                 comentarioRol={rolComentario}
                 comentariosSoloLectura={!puedeComentar}
-                onEnviarComentario={(d, entrada) => {
-                  if (!puedeComentar) return;
-                  if (!entrada.mensaje.trim()) return;
-                  agregarComentarioDano(estimacion.id, d.id, {
-                    usuario: actor,
-                    rol: rolComentario,
-                    ...entrada,
-                  });
-                  toast('Comentario publicado con trazabilidad.', 'success');
-                }}
-                onVerHistorial={() => setDialogo({ tipo: 'HISTORIAL' })}
               />
               </div>
             </div>

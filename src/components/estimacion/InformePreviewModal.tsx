@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useMemo, useRef } from 'react';
 import { FileText, Printer } from 'lucide-react';

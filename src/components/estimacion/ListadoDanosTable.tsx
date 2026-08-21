@@ -1,14 +1,11 @@
 'use client';
 
-import { Fragment, useMemo, useState } from 'react';
+import { Fragment } from 'react';
 import {
   CheckCircle2,
   ClipboardList,
-  History,
   Images,
-  MessageSquare,
   PencilLine,
-  Send,
   Trash2,
   Video,
 } from 'lucide-react';
@@ -28,32 +25,6 @@ import {
   type RolComentario,
 } from '@/types/estimacion';
 import { cn, formatMoney } from '@/lib/utils';
-
-const ETIQUETA_CAMPO: Partial<Record<CampoSnapshotLinea, string>> = {
-  comp: 'Comp.',
-  partNumber: 'Part Number',
-  ubicacion: 'Ubicación',
-  dano: 'Daño',
-  obsAnalisis: 'Obs. Análisis',
-  metRep: 'Met. Rep.',
-  newMetRep: 'New Met. Rep.',
-  serieAnterior: 'Nº Serie Anterior',
-  serieEntregado: 'Nº Serie Entregado',
-  cantidad: 'Cant.',
-  horasHombre: 'H.H.',
-  csHoraHombre: 'Cs. H.H.',
-  csMaterial: 'Cs. Mat.',
-  csTotal: 'Cs. Total',
-  cargo: 'Cargo',
-  aplica: 'Aplica',
-  medida: 'Medida',
-  remark: 'Remark',
-  contenedorDonante: 'Contenedor Donante',
-  largo: 'Largo',
-  ancho: 'Ancho',
-  area: 'Área',
-  longitud: 'Longitud',
-};
 
 function ultimoComentarioDe(dano: DanoEstimacion): ComentarioDano | null {
   if (!dano.comentarios.length) return null;
@@ -102,8 +73,6 @@ interface ListadoDanosTableProps {
   comentarioRol?: RolComentario;
   comentariosSoloLectura?: boolean;
   onEnviarComentario?: (dano: DanoEstimacion, entrada: EntradaComentario) => void;
-  /** Abre el Historial de Actividad (comentarios anteriores). */
-  onVerHistorial?: () => void;
 }
 
 function celdaCambiada(edicion: EdicionRecienteDano, campo: CampoSnapshotLinea) {
@@ -143,7 +112,6 @@ function SubfilaHistorico({
 
   const ch = (campo: CampoSnapshotLinea) =>
     cn(celdaCambiada(edicion, campo) && 'dms-celda-historico');
-  const colspan = (mostrarMarcacion ? 1 : 0) + 22 + (mostrarDimensiones ? 4 : 0);
 
   return (
     <>
@@ -213,176 +181,7 @@ function SubfilaHistorico({
           {edicion.usuario} · {edicion.fecha}
         </td>
       </tr>
-      {edicion.comentarioSbm ? (
-        <tr className="dms-dano-subfila-notas">
-          <td colSpan={colspan}>
-            <div className="dms-dano-motivo">
-              <span className="dms-dano-motivo-label">Motivo del cambio (Seaboard)</span>
-              <p className="dms-dano-motivo-texto">{edicion.comentarioSbm}</p>
-            </div>
-          </td>
-        </tr>
-      ) : null}
     </>
-  );
-}
-
-/** Último comentario en texto + cambios de Seaboard; el resto va al Historial. */
-function SubfilaComentarioYCambios({
-  dano,
-  edicion,
-  mostrarMarcacion,
-  mostrarDimensiones,
-  puedeComentar,
-  onEnviar,
-  onVerHistorial,
-}: {
-  dano: DanoEstimacion;
-  edicion?: EdicionRecienteDano;
-  mostrarMarcacion: boolean;
-  mostrarDimensiones: boolean;
-  puedeComentar: boolean;
-  onEnviar?: (entrada: EntradaComentario) => void;
-  onVerHistorial?: () => void;
-}) {
-  const [borrador, setBorrador] = useState('');
-  const [mostrarForm, setMostrarForm] = useState(false);
-  const ultimo = useMemo(() => ultimoComentarioDe(dano), [dano]);
-  const anteriores = Math.max(0, dano.comentarios.length - (ultimo ? 1 : 0));
-  const campos =
-    edicion?.camposCambiados?.map((c) => ETIQUETA_CAMPO[c] ?? c).filter(Boolean) ?? [];
-  const colspan = (mostrarMarcacion ? 1 : 0) + 22 + (mostrarDimensiones ? 4 : 0);
-
-  const hayCambios = campos.length > 0;
-  const hayComentario = Boolean(ultimo);
-  /** Solo bajo ítems con cambios o comentarios (el resto se ve en Historial). */
-  if (!hayCambios && !hayComentario) return null;
-
-  function publicar() {
-    const texto = borrador.trim();
-    if (texto.length < 3 || !onEnviar) return;
-    onEnviar({ tipo: 'INFORMATIVO', mensaje: texto });
-    setBorrador('');
-    setMostrarForm(false);
-  }
-
-  return (
-    <tr className="dms-dano-subfila-comentario">
-      <td colSpan={colspan}>
-        <div className="dms-dano-cmt-bloque">
-          {hayCambios && (
-            <div className="dms-dano-cambios-sbm">
-              <span className="dms-dano-cambios-sbm__label">Cambios Seaboard</span>
-              <p className="dms-dano-cambios-sbm__texto">
-                {edicion?.usuario} modificó:{' '}
-                <strong>{campos.join(', ')}</strong>
-                {edicion?.fecha ? ` · ${edicion.fecha}` : ''}
-              </p>
-              {edicion?.resumenCambios && (
-                <p className="dms-dano-cambios-sbm__resumen">{edicion.resumenCambios}</p>
-              )}
-            </div>
-          )}
-
-          {ultimo ? (
-            <div
-              className={cn(
-                'dms-dano-ultimo-cmt',
-                ultimo.tipo === 'SOLICITA_CAMBIO' && 'dms-dano-ultimo-cmt--pendiente',
-                ultimo.rol === 'SEABOARD' && 'dms-dano-ultimo-cmt--sbm'
-              )}
-            >
-              <div className="dms-dano-ultimo-cmt__meta">
-                <MessageSquare className="h-3.5 w-3.5 shrink-0" />
-                <span className="font-bold">{ultimo.usuario}</span>
-                <span className="dms-dano-ultimo-cmt__rol">
-                  {etiquetaRolCorto(ultimo.rol)}
-                </span>
-                <span className="tabular-nums text-slate-400">{ultimo.fecha}</span>
-                <span className="ml-auto text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-                  Último comentario
-                </span>
-              </div>
-              <p className="dms-dano-ultimo-cmt__texto">{ultimo.mensaje}</p>
-              {ultimo.campoAfectado &&
-                ultimo.campoAfectado !== 'Motivo del cambio' &&
-                ultimo.campoAfectado !== 'Comentarios línea SBM' && (
-                  <p className="mt-1 text-[11px] font-medium text-amber-800">
-                    Campo: {ultimo.campoAfectado}
-                  </p>
-                )}
-            </div>
-          ) : null}
-
-          <div className="dms-dano-cmt-acciones">
-            {anteriores > 0 && (
-              <button
-                type="button"
-                className="dms-dano-cmt-link"
-                onClick={onVerHistorial}
-                title="Ver todos los comentarios y cambios en el Historial"
-              >
-                <History className="h-3.5 w-3.5" />
-                {anteriores} comentario{anteriores === 1 ? '' : 's'} anterior
-                {anteriores === 1 ? '' : 'es'} · ver Historial
-              </button>
-            )}
-            {anteriores === 0 && onVerHistorial && (hayCambios || hayComentario) && (
-              <button type="button" className="dms-dano-cmt-link" onClick={onVerHistorial}>
-                <History className="h-3.5 w-3.5" /> Ver Historial de actividad
-              </button>
-            )}
-            {puedeComentar && !mostrarForm && (
-              <button
-                type="button"
-                className="dms-dano-cmt-link"
-                onClick={() => setMostrarForm(true)}
-              >
-                <MessageSquare className="h-3.5 w-3.5" /> Agregar comentario
-              </button>
-            )}
-          </div>
-
-          {puedeComentar && mostrarForm && (
-            <div className="dms-dano-cmt-form">
-              <textarea
-                rows={2}
-                className="dms-cmt-input"
-                value={borrador}
-                placeholder="Escriba un comentario sobre este ítem…"
-                onChange={(e) => setBorrador(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    publicar();
-                  }
-                }}
-              />
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  className="dms-btn-primary px-3 py-1.5 text-xs disabled:opacity-40"
-                  disabled={borrador.trim().length < 3}
-                  onClick={publicar}
-                >
-                  <Send className="h-3.5 w-3.5" /> Publicar
-                </button>
-                <button
-                  type="button"
-                  className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-                  onClick={() => {
-                    setMostrarForm(false);
-                    setBorrador('');
-                  }}
-                >
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </td>
-    </tr>
   );
 }
 
@@ -409,12 +208,13 @@ export function ListadoDanosTable({
   comentarioUsuario = 'usuario',
   comentarioRol = 'TECNICO',
   comentariosSoloLectura = true,
-  onEnviarComentario,
-  onVerHistorial,
+  onEnviarComentario: _onEnviarComentario,
 }: ListadoDanosTableProps) {
   const totales = totalesDanos(danos);
   void comentarioUsuario;
   void comentarioRol;
+  void comentariosSoloLectura;
+  void _onEnviarComentario;
   const colspanAntesHh =
     (mostrarMarcacion ? 1 : 0) + 10 + (mostrarDimensiones ? 4 : 0) + 1;
   const todosMarcados =
@@ -793,15 +593,6 @@ export function ListadoDanosTable({
                     mostrarDimensiones={mostrarDimensiones}
                   />
                 ) : null}
-                <SubfilaComentarioYCambios
-                  dano={d}
-                  edicion={edicion}
-                  mostrarMarcacion={mostrarMarcacion}
-                  mostrarDimensiones={mostrarDimensiones}
-                  puedeComentar={!comentariosSoloLectura}
-                  onEnviar={(entrada) => onEnviarComentario?.(d, entrada)}
-                  onVerHistorial={onVerHistorial}
-                />
               </Fragment>
             );
           })}
