@@ -354,3 +354,11 @@ export function contarComentariosPendientes(danos: DanoEstimacion[]) {
 export function itemsSinRevisionSbm(danos: DanoEstimacion[]) {
   return danos.filter((d) => !esItemRevisadoSbm(d.aplica));
 }
+
+/** Mensaje cuando intentan aprobar/enviar sin haber revisado los ítems de daño. */
+export const MSG_ITEMS_SIN_APROBAR =
+  'Debe aprobar los ítems de daño antes de enviar a aprobación.\nIngrese al estimado, aperture la estimación y apruebe (o rechace) los ítems del listado de daños.';
+
+export function hayItemsSinAprobar(danos: DanoEstimacion[]) {
+  return itemsSinRevisionSbm(danos).length > 0;
+}

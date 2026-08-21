@@ -564,6 +564,14 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                       toast('Cierre la estimación antes de enviarla a aprobación.', 'info');
                       return;
                     }
+                    if (itemsPendientesRevision.length > 0) {
+                      toast(
+                        'Debe aprobar los ítems de daño antes de enviar a aprobación.\nAperture la estimación y apruebe (o rechace) los ítems del listado de daños.',
+                        'info'
+                      );
+                      setDialogo({ tipo: 'ENVIAR' });
+                      return;
+                    }
                     setDialogo({ tipo: 'ENVIAR' });
                   }}
                 >
@@ -577,7 +585,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   onClick={() => {
                     if (itemsPendientesRevision.length > 0) {
                       toast(
-                        `Debe revisar y aprobar/rechazar todos los ítems antes de enviar la aprobación o el rechazo (${itemsPendientesRevision.length} pendiente(s)).`,
+                        'Debe aprobar los ítems de daño antes de enviar a aprobación.\nAperture la estimación y apruebe (o rechace) los ítems del listado de daños.',
                         'info'
                       );
                     }

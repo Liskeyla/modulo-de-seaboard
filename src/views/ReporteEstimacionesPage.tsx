@@ -33,6 +33,8 @@ import {
   ACTIVIDADES,
   ESTADOS_ESTIMACION,
   contarComentariosPendientes,
+  itemsSinRevisionSbm,
+  MSG_ITEMS_SIN_APROBAR,
   type Actividad,
   type Estimacion,
 } from '@/types/estimacion';
@@ -292,7 +294,12 @@ export default function ReporteEstimacionesPage() {
             type="button"
             className="dms-icon-action dms-icon-action--enviar"
             title="Enviar a aprobación"
-            onClick={() => setDialogo({ tipo: 'ENVIAR', id: row.id })}
+            onClick={() => {
+              if (itemsSinRevisionSbm(row.danos).length > 0) {
+                toast(MSG_ITEMS_SIN_APROBAR, 'info');
+              }
+              setDialogo({ tipo: 'ENVIAR', id: row.id });
+            }}
           >
             <Send className="h-3.5 w-3.5" />
           </button>

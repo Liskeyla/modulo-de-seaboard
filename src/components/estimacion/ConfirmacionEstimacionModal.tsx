@@ -6,6 +6,7 @@ import { Modal } from '@/components/ui/Modal';
 import {
   contarComentariosPendientes,
   itemsSinRevisionSbm,
+  MSG_ITEMS_SIN_APROBAR,
   type Estimacion,
 } from '@/types/estimacion';
 import { construirInformeHtml } from '@/lib/descargas';
@@ -125,7 +126,8 @@ export function ConfirmacionEstimacionModal({
     [estimacion]
   );
   const destinoRfs = modo === 'ENVIAR' && pendientesLiq > 0;
-  const faltanItems = modo === 'DECISION' && sinRevision.length > 0;
+  /** En ambos modos hay que tener los ítems de daño aprobados/rechazados antes de decidir. */
+  const faltanItems = sinRevision.length > 0;
 
   if (!estimacion) return null;
 
@@ -139,10 +141,7 @@ export function ConfirmacionEstimacionModal({
 
   function confirmarRechazo() {
     if (faltanItems) {
-      toast(
-        `Debe revisar y aprobar/rechazar todos los ítems antes de rechazar el estimado (${sinRevision.length} pendiente(s)).`,
-        'info'
-      );
+      toast(MSG_ITEMS_SIN_APROBAR, 'info');
       return;
     }
     const motivo = comentario.trim();
@@ -155,10 +154,7 @@ export function ConfirmacionEstimacionModal({
 
   function confirmarAprobar() {
     if (faltanItems) {
-      toast(
-        `Debe revisar y aprobar/rechazar todos los ítems antes de aprobar el estimado (${sinRevision.length} pendiente(s)).`,
-        'info'
-      );
+      toast(MSG_ITEMS_SIN_APROBAR, 'info');
       return;
     }
     onAprobar();
@@ -195,10 +191,7 @@ export function ConfirmacionEstimacionModal({
                 }
                 onClick={() => {
                   if (faltanItems) {
-                    toast(
-                      `Debe revisar y aprobar/rechazar todos los ítems antes de enviar el rechazo (${sinRevision.length} pendiente(s)).`,
-                      'info'
-                    );
+                    toast(MSG_ITEMS_SIN_APROBAR, 'info');
                     return;
                   }
                   setRechazando(true);
@@ -285,10 +278,12 @@ export function ConfirmacionEstimacionModal({
           <div className="flex gap-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-[11px] leading-snug text-red-950">
             <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-600" />
             <span>
-              Debe aprobar o rechazar todos los ítems antes de enviar la aprobación o el rechazo.
-              Pendientes de revisión: <strong>{sinRevision.length}</strong> (líneas{' '}
-              {sinRevision.map((d) => String(d.linea).padStart(2, '0')).join(', ')}). Aperture el
-              estimado y use «Aprobar ítems» / «Rechazar ítems».
+              Debe aprobar los ítems de daño antes de enviar a aprobación (
+              <strong>{sinRevision.length}</strong> pendiente
+              {sinRevision.length === 1 ? '' : 's'}: líneas{' '}
+              {sinRevision.map((d) => String(d.linea).padStart(2, '0')).join(', ')}).{' '}
+              <strong>Ingrese al estimado</strong>, <strong>aperture</strong> la estimación y{' '}
+              <strong>apruebe (o rechace) los ítems</strong> del listado de daños.
             </span>
           </div>
         )}
