@@ -285,7 +285,8 @@ export default function ReporteEstimacionesPage() {
             <Info className="h-3.5 w-3.5" />
           </button>
         )}
-        {['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) && (
+        {['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) &&
+          user?.rol === 'dms' && (
           <button
             type="button"
             className="dms-icon-action dms-icon-action--enviar"

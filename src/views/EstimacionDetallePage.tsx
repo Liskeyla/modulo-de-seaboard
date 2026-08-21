@@ -46,7 +46,7 @@ import {
   type AplicaDano,
   type DanoEstimacion,
 } from '@/types/estimacion';
-import { formatMoney, toast } from '@/lib/utils';
+import { cn, formatMoney, toast } from '@/lib/utils';
 
 /** Los estimados en curso admiten edición; una vez aprobados quedan en solo lectura. */
 const ESTADOS_EDITABLES = ['PENDIENTE', 'RECHAZADO', 'REVERSADO'];
@@ -134,11 +134,15 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     );
   }
 
-  const editable = ESTADOS_EDITABLES.includes(estimacion.estado);
+  const editable =
+    user?.rol === 'dms' && ESTADOS_EDITABLES.includes(estimacion.estado);
+  const esOperadorDms = user?.rol === 'dms';
+  const puedeComentar = user?.rol === 'dms' || user?.rol === 'liquidaciones';
   const danoSeleccionado = estimacion.danos.find((d) => d.id === danoSelId) ?? null;
   const pendientes = contarComentariosPendientes(estimacion.danos);
   const sapPendiente =
-    itinerario !== estimacion.itinerarioSap || almacen !== estimacion.almacenSap;
+    esOperadorDms &&
+    (itinerario !== estimacion.itinerarioSap || almacen !== estimacion.almacenSap);
   const esSeaboard = user?.rol === 'seaboard';
 
   const fotosDialogo =
@@ -199,33 +203,37 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
               >
                 <ArrowLeft className="h-4 w-4" /> Regresar
               </button>
-              <button
-                type="button"
-                className="dms-btn-azul"
-                onClick={() => {
-                  revalidarTarifas(estimacion.id, usuario);
-                  toast(
-                    `Tarifas revalidadas sobre ${estimacion.danos.length} línea(s).`,
-                    'success'
-                  );
-                }}
-              >
-                <RefreshCw className="h-4 w-4" /> Revalidar Tarifas
-              </button>
-              <button
-                type="button"
-                className="dms-btn-azul"
-                onClick={() => setDialogo({ tipo: 'CONTENEDOR' })}
-              >
-                <Container className="h-4 w-4" /> Actualizar Información Contenedor
-              </button>
-              <button
-                type="button"
-                className="dms-btn-teal"
-                onClick={() => setDialogo({ tipo: 'APORTAR' })}
-              >
-                <Handshake className="h-4 w-4" /> Aportar Estimación
-              </button>
+              {esOperadorDms && (
+                <>
+                  <button
+                    type="button"
+                    className="dms-btn-azul"
+                    onClick={() => {
+                      revalidarTarifas(estimacion.id, usuario);
+                      toast(
+                        `Tarifas revalidadas sobre ${estimacion.danos.length} línea(s).`,
+                        'success'
+                      );
+                    }}
+                  >
+                    <RefreshCw className="h-4 w-4" /> Revalidar Tarifas
+                  </button>
+                  <button
+                    type="button"
+                    className="dms-btn-azul"
+                    onClick={() => setDialogo({ tipo: 'CONTENEDOR' })}
+                  >
+                    <Container className="h-4 w-4" /> Actualizar Información Contenedor
+                  </button>
+                  <button
+                    type="button"
+                    className="dms-btn-teal"
+                    onClick={() => setDialogo({ tipo: 'APORTAR' })}
+                  >
+                    <Handshake className="h-4 w-4" /> Aportar Estimación
+                  </button>
+                </>
+              )}
               <button
                 type="button"
                 className="dms-btn-azul"
@@ -293,6 +301,8 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                           list="itinerarios-sap"
                           value={itinerario}
                           placeholder="digitar descripcion"
+                          disabled={!esOperadorDms}
+                          readOnly={!esOperadorDms}
                           onChange={(e) => setItinerario(e.target.value)}
                         />
                         <Search className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
@@ -308,6 +318,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                       <select
                         className="dms-select"
                         value={almacen}
+                        disabled={!esOperadorDms}
                         onChange={(e) => setAlmacen(e.target.value)}
                       >
                         <option value="">Seleccione un Almacen Sap</option>
@@ -350,44 +361,54 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 </div>
               </section>
 
-              <AgregarDanoCard
-                editable={editable}
-                seccionSugerida={
-                  estimacion.tipoEstimacion.toUpperCase().startsWith('M') ? 'MAQUINA' : 'ESTRUCTURAL'
-                }
-                onAgregar={(dano) => {
-                  agregarDano(estimacion.id, dano, usuario);
-                  toast(`Daño ${dano.comp} agregado al estimado.`, 'success');
-                }}
-              />
+              {editable && (
+                <AgregarDanoCard
+                  editable={editable}
+                  seccionSugerida={
+                    estimacion.tipoEstimacion.toUpperCase().startsWith('M')
+                      ? 'MAQUINA'
+                      : 'ESTRUCTURAL'
+                  }
+                  onAgregar={(dano) => {
+                    agregarDano(estimacion.id, dano, usuario);
+                    toast(`Daño ${dano.comp} agregado al estimado.`, 'success');
+                  }}
+                />
+              )}
 
               <section className="dms-card">
                 <header className="dms-card-header">
                   <StickyNote className="h-3.5 w-3.5" /> Notas de Estimación
                 </header>
                 <div className="dms-card-body">
-                  <textarea
-                    rows={3}
-                    className="w-full rounded-lg border border-gray-300 p-2.5 text-xs shadow-sm transition-colors focus:border-rfsorange-500 focus:outline-none focus:ring-2 focus:ring-rfsorange-500/20"
-                    value={nota}
-                    placeholder="Escriba una nota para el estimado…"
-                    onChange={(e) => setNota(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    className="dms-btn-primary mt-2 px-4 py-2 text-sm disabled:opacity-50"
-                    disabled={nota.trim().length < 3}
-                    onClick={() => {
-                      agregarNota(estimacion.id, nota.trim(), usuario);
-                      setNota('');
-                      toast('Nota agregada al estimado.', 'success');
-                    }}
-                  >
-                    <Save className="h-4 w-4" /> Agregar
-                  </button>
+                  {esOperadorDms ? (
+                    <>
+                      <textarea
+                        rows={3}
+                        className="w-full rounded-lg border border-gray-300 p-2.5 text-xs shadow-sm transition-colors focus:border-rfsorange-500 focus:outline-none focus:ring-2 focus:ring-rfsorange-500/20"
+                        value={nota}
+                        placeholder="Escriba una nota para el estimado…"
+                        onChange={(e) => setNota(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className="dms-btn-primary mt-2 px-4 py-2 text-sm disabled:opacity-50"
+                        disabled={nota.trim().length < 3}
+                        onClick={() => {
+                          agregarNota(estimacion.id, nota.trim(), usuario);
+                          setNota('');
+                          toast('Nota agregada al estimado.', 'success');
+                        }}
+                      >
+                        <Save className="h-4 w-4" /> Agregar
+                      </button>
+                    </>
+                  ) : estimacion.notas.length === 0 ? (
+                    <p className="text-[11px] text-slate-400">Sin notas registradas.</p>
+                  ) : null}
 
                   {estimacion.notas.length > 0 && (
-                    <ul className="mt-3 space-y-2">
+                    <ul className={cn('space-y-2', esOperadorDms && 'mt-3')}>
                       {estimacion.notas.map((n) => (
                         <li key={n.id} className="dms-nota-item">
                           <div className="flex items-center gap-2">
@@ -413,8 +434,8 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 </span>
                 <div className="min-w-0">
                   Seleccione un daño para ver a la derecha la garantía, las fotos de inspección y
-                  la Información del Daño (carga de imágenes, videos, data logs y PDF). La columna{' '}
-                  <strong>Comentarios</strong> guarda la conversación con liquidaciones.
+                  la Información del Daño. La columna <strong>Comentarios</strong> muestra la
+                  conversación con liquidaciones.
                 </div>
               </div>
 
@@ -690,9 +711,10 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
         dano={danoComentarios}
         usuario={usuario}
         rol={rolComentario}
+        soloLectura={!puedeComentar}
         onClose={cerrar}
         onEnviar={(entrada) => {
-          if (dialogo.tipo !== 'COMENTARIOS') return;
+          if (dialogo.tipo !== 'COMENTARIOS' || !puedeComentar) return;
           agregarComentarioDano(estimacion.id, dialogo.danoId, {
             usuario,
             rol: rolComentario,

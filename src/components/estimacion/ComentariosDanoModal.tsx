@@ -69,6 +69,7 @@ interface ComentariosDanoModalProps {
   dano: DanoEstimacion | null;
   usuario: string;
   rol: RolComentario;
+  soloLectura?: boolean;
   onClose: () => void;
   onEnviar: (entrada: {
     tipo: TipoComentario;
@@ -83,6 +84,7 @@ export function ComentariosDanoModal({
   dano,
   usuario,
   rol,
+  soloLectura = false,
   onClose,
   onEnviar,
 }: ComentariosDanoModalProps) {
@@ -129,22 +131,24 @@ export function ComentariosDanoModal({
           >
             Cerrar
           </button>
-          <button
-            type="button"
-            className="dms-btn-primary px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={!puedeEnviar}
-            onClick={() => {
-              onEnviar({
-                tipo,
-                mensaje: mensaje.trim(),
-                campoAfectado: tipo === 'SOLICITA_CAMBIO' && campo ? campo : undefined,
-              });
-              setMensaje('');
-              setCampo('');
-            }}
-          >
-            <Send className="h-4 w-4" /> Publicar comentario
-          </button>
+          {!soloLectura && (
+            <button
+              type="button"
+              className="dms-btn-primary px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={!puedeEnviar}
+              onClick={() => {
+                onEnviar({
+                  tipo,
+                  mensaje: mensaje.trim(),
+                  campoAfectado: tipo === 'SOLICITA_CAMBIO' && campo ? campo : undefined,
+                });
+                setMensaje('');
+                setCampo('');
+              }}
+            >
+              <Send className="h-4 w-4" /> Publicar comentario
+            </button>
+          )}
         </>
       }
     >
@@ -216,6 +220,7 @@ export function ComentariosDanoModal({
         <div ref={finRef} />
       </div>
 
+      {!soloLectura && (
       <div className="dms-cmt-nuevo">
         <div className="flex flex-wrap items-end gap-2">
           <div className="min-w-[9rem] flex-1">
@@ -268,6 +273,7 @@ export function ComentariosDanoModal({
           actividad de la estimación.
         </p>
       </div>
+      )}
     </Modal>
   );
 }
