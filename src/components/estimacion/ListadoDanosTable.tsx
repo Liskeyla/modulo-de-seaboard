@@ -72,9 +72,7 @@ export function ListadoDanosTable({
         </div>
         <p className="text-sm font-semibold text-gray-700">Este estimado no tiene daños</p>
         <p className="mt-1 max-w-sm text-xs text-gray-500">
-          {editable
-            ? 'Use el bloque Agregar Daño para registrar la primera línea del estimado.'
-            : 'Este estimado no tiene líneas de daño para visualizar.'}
+          Este estimado no tiene líneas de daño para visualizar.
         </p>
       </div>
     );

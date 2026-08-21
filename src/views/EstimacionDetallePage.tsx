@@ -25,11 +25,7 @@ import { EstadoEstimacionBadge } from '@/components/dms/EstadoEstimacionBadge';
 import { ComentarioModal } from '@/components/aprobaciones/ComentarioModal';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Modal } from '@/components/ui/Modal';
-import { AgregarDanoCard } from '@/components/estimacion/AgregarDanoCard';
-import {
-  ComentariosDanoModal,
-  rolDeUsuario,
-} from '@/components/estimacion/ComentariosDanoModal';
+import { ComentariosDanoModal, rolDeUsuario } from '@/components/estimacion/ComentariosDanoModal';
 import { DescargasMenu } from '@/components/estimacion/DescargasMenu';
 import { EditarDanoModal } from '@/components/estimacion/EditarDanoModal';
 import { GaleriaFotosModal } from '@/components/estimacion/GaleriaFotosModal';
@@ -164,7 +160,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     enviarAprobacion,
     aprobar,
     rechazar,
-    agregarDano,
     actualizarDano,
     resolverItemsMasivo,
     eliminarDano,
@@ -588,22 +583,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   )}
                 </div>
               </section>
-
-              {puedeAperturar && (
-                <AgregarDanoCard
-                  editable={puedeAperturar}
-                  seccionSugerida={
-                    estimacion.tipoEstimacion.toUpperCase().startsWith('M')
-                      ? 'MAQUINA'
-                      : 'ESTRUCTURAL'
-                  }
-                  onAgregar={(dano) => {
-                    if (exigirApertura()) return;
-                    agregarDano(estimacion.id, dano, usuario);
-                    toast(`Daño ${dano.comp} agregado al estimado.`, 'success');
-                  }}
-                />
-              )}
 
               <section className="dms-card">
                 <header className="dms-card-header">
