@@ -566,25 +566,16 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   <Send className="h-4 w-4" /> Enviar a Aprobación
                 </button>
               )}
-              {estimacion.estado === 'ENVIADO' && esSeaboard && (
-                <>
-                  <button
-                    type="button"
-                    className="dms-btn-aprobar px-3 py-2 text-sm"
-                    onClick={() => setDialogo({ tipo: 'DECISION_NAVIERA' })}
-                  >
-                    <CheckCircle2 className="h-4 w-4" /> Aprobar
-                  </button>
-                  <button
-                    type="button"
-                    className="dms-btn-rechazar px-3 py-2 text-sm"
-                    onClick={() => setDialogo({ tipo: 'DECISION_NAVIERA' })}
-                  >
-                    <XCircle className="h-4 w-4" /> Rechazar
-                  </button>
-                </>
+              {esSeaboard && estimacion.estado === 'ENVIADO' && (
+                <button
+                  type="button"
+                  className="dms-btn-enviar"
+                  onClick={() => setDialogo({ tipo: 'DECISION_NAVIERA' })}
+                >
+                  <Send className="h-4 w-4" /> Enviar a Aprobación
+                </button>
               )}
-              {estimacion.estado === 'ENVIADO' && !esSeaboard && (
+              {estimacion.estado === 'ENVIADO' && !esSeaboard && !puedeEnviar && (
                 <span className="dms-aviso-espera">
                   <Send className="h-3.5 w-3.5" /> En espera de {estimacion.naviera}
                 </span>
@@ -810,16 +801,35 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
 
       {/* ── Diálogos ─────────────────────────────────────────────── */}
 
-      <ConfirmacionEstimacionModal
-        open={dialogo.tipo === 'ENVIAR' || dialogo.tipo === 'DECISION_NAVIERA'}
-        modo={dialogo.tipo === 'DECISION_NAVIERA' ? 'DECISION' : 'ENVIAR'}
-        estimacion={estimacion}
+      {/* DMS: envío simple a la naviera */}
+      <ConfirmModal
+        open={dialogo.tipo === 'ENVIAR'}
+        title="Enviar a Aprobación"
+        subtitle={`Destino: ${estimacion.naviera}`}
+        confirmLabel="Enviar"
+        confirmClass="dms-btn-enviar"
         onClose={cerrar}
-        onEnviar={() => {
+        onConfirm={() => {
           enviarAprobacion([estimacion.id], usuario);
           toast(`Estimación ${estimacion.codigo} enviada a aprobación.`, 'success');
-          cerrar();
         }}
+      >
+        El estimado pasará a estado <strong>ENVIADO</strong> y quedará en espera de la naviera
+        Seaboard Marine.
+        {pendientes > 0 && (
+          <p className="mt-2 text-xs text-rfsorange-600">
+            Atención: hay {pendientes} comentario(s) de liquidaciones sin resolver.
+          </p>
+        )}
+      </ConfirmModal>
+
+      {/* Seaboard Marine: informe + Aprobar / Rechazar en el detalle (sin ir a otra pantalla) */}
+      <ConfirmacionEstimacionModal
+        open={dialogo.tipo === 'DECISION_NAVIERA'}
+        modo="DECISION"
+        estimacion={estimacion}
+        onClose={cerrar}
+        onEnviar={() => undefined}
         onAprobar={() => {
           aprobar([estimacion.id], usuario);
           toast(`Estimación ${estimacion.codigo} aprobada.`, 'success');

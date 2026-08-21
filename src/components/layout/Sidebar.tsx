@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ClipboardCheck, FileBarChart, Search, X } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Input } from '@/components/ui/input';
+import { useAuthStore } from '@/store';
 import { cn } from '@/lib/utils';
 
 interface SidebarProps {
@@ -12,26 +13,35 @@ interface SidebarProps {
   onClose: () => void;
 }
 
-const LINKS = [
+const LINKS_BASE = [
   {
     href: '/reportes/estimaciones',
     label: 'Reporte de Estimaciones',
     icon: FileBarChart,
-    hint: 'Consulta y envío a aprobación',
+    hint: 'Consulta y detalle de estimados',
+    roles: ['dms', 'seaboard', 'liquidaciones'] as const,
   },
   {
     href: '/aprobaciones/seaboard',
     label: 'Aprobaciones Seaboard',
     icon: ClipboardCheck,
-    hint: 'Aprobar, rechazar o reversar',
+    hint: 'Solo referencia DMS · Seaboard decide en el detalle',
+    /** Seaboard decide desde el detalle del estimado, no desde esta lista. */
+    roles: ['dms'] as const,
   },
 ];
 
 export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const { user } = useAuthStore();
   const [search, setSearch] = useState('');
 
-  const filtered = LINKS.filter((l) =>
+  const links = useMemo(() => {
+    const rol = user?.rol ?? 'dms';
+    return LINKS_BASE.filter((l) => (l.roles as readonly string[]).includes(rol));
+  }, [user?.rol]);
+
+  const filtered = links.filter((l) =>
     l.label.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -78,50 +88,30 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           </div>
         </div>
 
-        <nav className="flex-1 overflow-y-auto p-4">
-          <p className="mb-2 px-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">
-            Estimaciones
-          </p>
-          <ul className="space-y-1.5">
-            {filtered.map((l) => {
-              const Icon = l.icon;
-              const active = pathname === l.href;
-              return (
-                <li key={l.href}>
-                  <Link
-                    href={l.href}
-                    onClick={onClose}
-                    className={cn(
-                      'flex items-start gap-3 rounded-xl px-3 py-3 transition-all',
-                      active
-                        ? 'bg-rfs-navy text-white shadow-md'
-                        : 'text-gray-700 hover:bg-gray-50'
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
-                        active ? 'bg-white/15' : 'bg-gray-100 text-gray-500'
-                      )}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-sm font-semibold leading-snug">{l.label}</span>
-                      <span
-                        className={cn(
-                          'mt-0.5 block text-[11px] leading-snug',
-                          active ? 'text-white/70' : 'text-gray-400'
-                        )}
-                      >
-                        {l.hint}
-                      </span>
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+        <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+          {filtered.map((item) => {
+            const Icon = item.icon;
+            const activo = pathname === item.href || pathname.startsWith(item.href + '/');
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={onClose}
+                className={cn(
+                  'flex items-start gap-3 rounded-xl px-3 py-3 transition-colors',
+                  activo
+                    ? 'bg-rfs-50 text-rfs-800 ring-1 ring-rfs-100'
+                    : 'text-slate-700 hover:bg-slate-50'
+                )}
+              >
+                <Icon className={cn('mt-0.5 h-5 w-5 shrink-0', activo ? 'text-rfs-700' : 'text-slate-400')} />
+                <span>
+                  <span className="block text-sm font-semibold">{item.label}</span>
+                  <span className="mt-0.5 block text-[11px] text-slate-500">{item.hint}</span>
+                </span>
+              </Link>
+            );
+          })}
         </nav>
       </aside>
     </>

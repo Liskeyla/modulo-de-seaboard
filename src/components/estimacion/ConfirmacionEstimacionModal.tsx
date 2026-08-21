@@ -120,7 +120,7 @@ export function ConfirmacionEstimacionModal({
   const titulo =
     modo === 'ENVIAR'
       ? 'Confirmar envío a aprobación'
-      : 'Confirmar decisión sobre el estimado';
+      : 'Aprobación Seaboard Marine';
   const subtitle =
     modo === 'ENVIAR'
       ? `${estimacion.codigo} · Destino: ${estimacion.naviera}`
@@ -213,9 +213,9 @@ export function ConfirmacionEstimacionModal({
             </>
           ) : (
             <>
-              Revise el informe y el resumen de cambios. Puede <strong>aprobar</strong> o{' '}
-              <strong>rechazar</strong> el estimado. Si rechaza, se solicitará un comentario
-              general y se notificará por correo a los gestores de liquidaciones RFS.
+              Revise el informe del estimado. Pulse <strong>Aprobar</strong> o{' '}
+              <strong>Rechazar</strong> directamente aquí (no es necesario ir a otra pantalla). Si
+              rechaza, indique un comentario general y se notificará a liquidaciones RFS.
             </>
           )}
         </p>
