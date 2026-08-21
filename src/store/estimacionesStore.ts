@@ -14,7 +14,7 @@ import type {
   RolComentario,
   TipoComentario,
 } from '@/types/estimacion';
-import { aLineaHistorial, APLICA_APROBADO_SBM, APLICA_RECHAZADO_SBM } from '@/types/estimacion';
+import { aLineaHistorial, APLICA_APROBADO_SBM, APLICA_RECHAZADO_SBM, CARGO_RECHAZADO } from '@/types/estimacion';
 
 const STORAGE_KEY = 'dms-estimaciones-prototipo-v9';
 const CLAVES_OBSOLETAS = [
@@ -455,13 +455,14 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                   fecha: ahoraFmt(),
                   tipo: 'RECHAZADO',
                   mensaje: motivo,
-                  campoAfectado: 'Aplica',
-                  valorAnterior: d.aplica,
-                  valorNuevo: APLICA_RECHAZADO_SBM,
+                  campoAfectado: 'Aplica / Cargo',
+                  valorAnterior: `${d.aplica} · ${d.cargo}`,
+                  valorNuevo: `${APLICA_RECHAZADO_SBM} · ${CARGO_RECHAZADO}`,
                 };
                 return {
                   ...d,
                   aplica: APLICA_RECHAZADO_SBM,
+                  cargo: CARGO_RECHAZADO,
                   comentarios: [...d.comentarios, cmt],
                 };
               }

@@ -35,8 +35,11 @@ export function esAplicaRechazado(aplica: string) {
   return aplica === 'Rechazado SBM' || aplica === 'Rechazado';
 }
 
-export const CARGOS_DANO = ['Línea', 'Dueño', 'Garantía'] as const;
+export const CARGOS_DANO = ['Línea', 'Dueño', 'Garantía', 'Rechazado'] as const;
 export type CargoDano = (typeof CARGOS_DANO)[number];
+
+/** Cargo que se asigna al rechazar un ítem por línea SBM. */
+export const CARGO_RECHAZADO: CargoDano = 'Rechazado';
 
 /** Área funcional del autor del comentario, para la trazabilidad con liquidaciones. */
 export type RolComentario = 'LIQUIDACIONES' | 'TECNICO' | 'SEABOARD' | 'SUPERVISOR' | 'RFS';
