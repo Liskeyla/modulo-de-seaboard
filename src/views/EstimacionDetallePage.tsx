@@ -532,23 +532,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 if (!danoSeleccionado) return;
                 cambiarDano(danoSeleccionado, cambios, resumen);
               }}
-              onImportarFoto={(foto) => {
-                if (!danoSeleccionado) return;
-                if (foto.importada) {
-                  toast('Esta foto ya fue importada a la línea.', 'info');
-                  return;
-                }
-                cambiarDano(
-                  danoSeleccionado,
-                  {
-                    fotos: danoSeleccionado.fotos.map((f) =>
-                      f.id === foto.id ? { ...f, importada: true } : f
-                    ),
-                  },
-                  `Línea ${danoSeleccionado.linea} · foto importada desde inspección`
-                );
-                toast('Foto importada a la línea de daño.', 'success');
-              }}
             />
             <InfoDanoPanel
               estimacion={estimacion}

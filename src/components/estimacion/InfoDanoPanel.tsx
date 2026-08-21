@@ -1,8 +1,7 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
-  CloudUpload,
   Download,
   Eye,
   FileText,
@@ -28,18 +27,7 @@ import type {
   DanoEstimacion,
   Estimacion,
   FotoDano,
-  GrupoArchivo,
 } from '@/types/estimacion';
-
-type TipoArchivoUi = 'NINGUNA' | 'ESTIMACION' | 'REPARADO';
-
-function esDelTipo(file: File, clase: ClaseArchivo) {
-  const n = file.name.toLowerCase();
-  if (clase === 'IMAGEN') return file.type.startsWith('image/') || /\.(jpe?g|png|gif|webp|bmp)$/.test(n);
-  if (clase === 'VIDEO') return file.type.startsWith('video/') || /\.(mp4|webm|mov|avi)$/.test(n);
-  if (clase === 'PDF') return file.type === 'application/pdf' || n.endsWith('.pdf');
-  return /\.(csv|txt|log|v1a)$/.test(n) || file.type.startsWith('text/');
-}
 
 function dataLogDemo(dano: DanoEstimacion, estimacion: Estimacion): ArchivoDano {
   return {
@@ -73,9 +61,6 @@ export function InfoDanoPanel({
   onVerFotos: (dano: DanoEstimacion) => void;
   onVerVideo: (dano: DanoEstimacion) => void;
 }) {
-  const fileRef = useRef<HTMLInputElement>(null);
-  const [tipoArchivo, setTipoArchivo] = useState<TipoArchivoUi>('NINGUNA');
-  const [pendientes, setPendientes] = useState<File[]>([]);
   const [bajando, setBajando] = useState<'fotos' | 'logs' | null>(null);
   const [eliminar, setEliminar] = useState<ArchivoDano | FotoDano | null>(null);
   const [papelera, setPapelera] = useState<ArchivoDano | null>(null);
@@ -95,63 +80,6 @@ export function InfoDanoPanel({
   function persistirArchivos(lista: ArchivoDano[], resumen: string, extra: Partial<DanoEstimacion> = {}) {
     if (!dano) return;
     onActualizar({ archivos: lista, ...extra }, resumen);
-  }
-
-  function grupoDeTipo(): GrupoArchivo {
-    return tipoArchivo === 'REPARADO' ? 'REPARADO' : 'ESTIMACION';
-  }
-
-  function elegirYSubir(clase: ClaseArchivo) {
-    if (!dano) return;
-    if (tipoArchivo === 'NINGUNA') {
-      toast('Seleccione el tipo de archivo: Estimación o Reparado.', 'error');
-      return;
-    }
-    const lista = pendientes.length ? pendientes : null;
-    if (!lista) {
-      toast('Elija uno o más archivos primero.', 'error');
-      return;
-    }
-    const validos = lista.filter((f) => esDelTipo(f, clase));
-    if (validos.length === 0) {
-      toast(`Ningún archivo coincide con ${etiquetaClase(clase)}.`, 'error');
-      return;
-    }
-
-    const grupo = grupoDeTipo();
-    const fecha = new Date().toLocaleString('es-EC');
-
-    if (clase === 'IMAGEN') {
-      const nuevas: FotoDano[] = validos.map((file, i) => ({
-        id: `up-img-${Date.now()}-${i}`,
-        url: URL.createObjectURL(file),
-        tipo: grupo === 'REPARADO' ? 'REPARADO' : 'DANO',
-        descripcion: file.name,
-        fecha,
-      }));
-      onActualizar(
-        { fotos: [...dano.fotos, ...nuevas] },
-        `Línea ${dano.linea} · ${nuevas.length} imagen(es) de ${grupo === 'REPARADO' ? 'reparado' : 'estimación'}`
-      );
-    } else {
-      const nuevos: ArchivoDano[] = validos.map((file, i) => ({
-        id: `up-${clase}-${Date.now()}-${i}`,
-        url: URL.createObjectURL(file),
-        clase,
-        grupo,
-        nombre: file.name,
-        fecha,
-      }));
-      persistirArchivos(
-        [...archivos, ...nuevos],
-        `Línea ${dano.linea} · ${nuevos.length} ${etiquetaClase(clase).toLowerCase()} cargado(s)`,
-        clase === 'VIDEO' ? { tieneVideo: true } : {}
-      );
-    }
-
-    setPendientes([]);
-    if (fileRef.current) fileRef.current.value = '';
-    toast(`${validos.length} archivo(s) cargado(s) en ${tipoArchivo === 'REPARADO' ? 'Reparado' : 'Estimación'}.`, 'success');
   }
 
   async function bajarFotos() {
@@ -208,16 +136,18 @@ export function InfoDanoPanel({
 
   function reversar(archivo: ArchivoDano) {
     if (!dano) return;
-    if (archivos.some((a) => a.id === archivo.id) && !papelera) {
+    const reversados = dano.archivosReversados ?? [];
+    const restaurar = papelera?.id === archivo.id ? papelera : reversados.find((a) => a.id === archivo.id);
+    if (!restaurar) {
       toast('El archivo está vigente; no hay nada que reversar.', 'info');
       return;
     }
-    const restaurar = papelera ?? dataLogDemo(dano, estimacion);
     persistirArchivos(
-      [...archivos.filter((a) => a.id !== restaurar.id), restaurar],
-      `Línea ${dano.linea} · data log restaurado: ${restaurar.nombre}`,
+      [...archivos, restaurar],
+      `Línea ${dano.linea} · archivo restaurado: ${restaurar.nombre}`,
       {
-        archivosReversados: (dano.archivosReversados ?? []).filter((a) => a.id !== restaurar.id),
+        archivosReversados: reversados.filter((a) => a.id !== restaurar.id),
+        ...(restaurar.clase === 'VIDEO' ? { tieneVideo: true } : {}),
       }
     );
     setPapelera(null);
@@ -225,23 +155,20 @@ export function InfoDanoPanel({
   }
 
   function verArchivo(archivo: ArchivoDano) {
-    if (archivo.clase === 'DATALOG') {
-      if (archivo.sintetico || !archivo.url) {
-        setPreviewLog(true);
-        return;
-      }
-      window.open(archivo.url, '_blank', 'noopener');
-      return;
-    }
+    if (!dano) return;
     if (archivo.clase === 'VIDEO') {
-      onVerVideo(dano!);
+      onVerVideo(dano);
       return;
     }
-    if (archivo.url) window.open(archivo.url, '_blank', 'noopener');
+    if (archivo.clase === 'DATALOG') {
+      setPreviewLog(true);
+      return;
+    }
+    if (archivo.url) window.open(archivo.url, '_blank', 'noopener,noreferrer');
   }
 
   function bajarArchivo(archivo: ArchivoDano) {
-    if (archivo.sintetico || !archivo.url) {
+    if (archivo.sintetico || archivo.clase === 'DATALOG') {
       descargarDataLog(estimacion, `${archivo.nombre}.csv`);
       return;
     }
@@ -256,8 +183,8 @@ export function InfoDanoPanel({
         </header>
         <div className="dms-card-body">
           <p className="text-[11px] leading-relaxed text-gray-400">
-            Seleccione una línea del <strong>Listado de Daños</strong> para ver sus evidencias y
-            cargar imágenes, videos, data logs o PDF.
+            Seleccione una línea del <strong>Listado de Daños</strong> para visualizar el anexo
+            fotográfico, videos, data logs o PDF asociados.
           </p>
         </div>
       </section>
@@ -279,75 +206,6 @@ export function InfoDanoPanel({
           <span className="dms-mini-badge">Línea {String(dano.linea).padStart(2, '0')}</span>
           <span className="text-xs font-bold text-rfs-navy">{dano.comp}</span>
           <span className="truncate text-[11px] text-slate-500">{dano.dano}</span>
-        </div>
-
-        <div>
-          <p className="dms-field-label mb-1.5">Cargar Archivo</p>
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-            Tipo Archivo
-          </p>
-          <div className="mb-2 flex flex-wrap gap-3 text-[11px] font-semibold text-slate-600">
-            {(['NINGUNA', 'ESTIMACION', 'REPARADO'] as const).map((t) => (
-              <label key={t} className="inline-flex cursor-pointer items-center gap-1.5">
-                <input
-                  type="radio"
-                  name={`tipo-archivo-${dano.id}`}
-                  checked={tipoArchivo === t}
-                  onChange={() => setTipoArchivo(t)}
-                  disabled={!editable}
-                />
-                {t === 'NINGUNA' ? 'Ninguna' : t === 'ESTIMACION' ? 'Estimación' : 'Reparado'}
-              </label>
-            ))}
-          </div>
-          <input
-            ref={fileRef}
-            type="file"
-            multiple
-            disabled={!editable}
-            accept="image/*,video/*,.csv,.txt,.log,.v1a,.V1a,.pdf,application/pdf"
-            className="dms-file-native"
-            onChange={(e) => setPendientes(Array.from(e.target.files ?? []))}
-          />
-          {pendientes.length > 0 && (
-            <p className="mt-1 text-[10px] text-slate-500">
-              {pendientes.length} archivo(s) seleccionado(s)
-            </p>
-          )}
-          <div className="mt-2 grid grid-cols-2 gap-1.5">
-            <button
-              type="button"
-              className="dms-upload-btn dms-upload-btn--img"
-              disabled={!editable}
-              onClick={() => elegirYSubir('IMAGEN')}
-            >
-              <CloudUpload className="h-3.5 w-3.5" /> Subir Imágenes
-            </button>
-            <button
-              type="button"
-              className="dms-upload-btn dms-upload-btn--video"
-              disabled={!editable}
-              onClick={() => elegirYSubir('VIDEO')}
-            >
-              <Video className="h-3.5 w-3.5" /> Subir Videos
-            </button>
-            <button
-              type="button"
-              className="dms-upload-btn dms-upload-btn--log"
-              disabled={!editable}
-              onClick={() => elegirYSubir('DATALOG')}
-            >
-              <FileText className="h-3.5 w-3.5" /> Subir Archivos Data Log
-            </button>
-            <button
-              type="button"
-              className="dms-upload-btn dms-upload-btn--pdf"
-              disabled={!editable}
-              onClick={() => elegirYSubir('PDF')}
-            >
-              <FileText className="h-3.5 w-3.5" /> Subir Archivos PDF
-            </button>
-          </div>
         </div>
 
         <div>

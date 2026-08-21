@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Briefcase, ImageIcon, Plus, Save } from 'lucide-react';
+import { Briefcase, ImageIcon, Save } from 'lucide-react';
 import type { ArchivoDano, DanoEstimacion, Estimacion, FotoDano } from '@/types/estimacion';
-import { cn, toast } from '@/lib/utils';
+import { toast } from '@/lib/utils';
 
 function aIso(fecha: string | undefined) {
   if (!fecha) return '';
@@ -24,13 +24,11 @@ export function InfoLateralCards({
   danoSeleccionado,
   editable,
   onGuardarGarantia,
-  onImportarFoto,
 }: {
   estimacion: Estimacion;
   danoSeleccionado: DanoEstimacion | null;
   editable: boolean;
   onGuardarGarantia: (cambios: Partial<DanoEstimacion>, resumen: string) => void;
-  onImportarFoto: (foto: FotoDano) => void;
 }) {
   const dano = danoSeleccionado;
   const [serieAnterior, setSerieAnterior] = useState('');
@@ -186,29 +184,19 @@ export function InfoLateralCards({
             ) : (
               <div className="dms-insp-grid">
                 {fotos.map((foto) => (
-                  <article key={foto.id} className="dms-insp-foto">
-                    <button
-                      type="button"
-                      className="dms-insp-foto-img"
-                      onClick={() => setFotoAmpliada(foto)}
-                    >
+                  <button
+                    key={foto.id}
+                    type="button"
+                    className="dms-insp-foto"
+                    onClick={() => setFotoAmpliada(foto)}
+                    title="Ver foto"
+                  >
+                    <span className="dms-insp-foto-img">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={foto.url} alt={foto.descripcion} />
                       <span className="dms-insp-foto-fecha">{foto.fecha.split(' ')[0]}</span>
-                    </button>
-                    <button
-                      type="button"
-                      className={cn(
-                        'dms-insp-importar',
-                        foto.importada && 'dms-insp-importar--ok'
-                      )}
-                      disabled={!editable || foto.importada}
-                      onClick={() => onImportarFoto(foto)}
-                    >
-                      <Plus className="h-3 w-3" />
-                      {foto.importada ? 'Importada' : 'Importar'}
-                    </button>
-                  </article>
+                    </span>
+                  </button>
                 ))}
               </div>
             )}
