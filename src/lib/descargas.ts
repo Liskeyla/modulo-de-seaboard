@@ -1,5 +1,5 @@
 import type { ArchivoDano, DanoEstimacion, Estimacion, FotoDano } from '@/types/estimacion';
-import { esFotoEsquema } from '@/lib/fotosDano';
+import { esFotoEsquema, fotosRealesDano } from '@/lib/fotosDano';
 
 const MONEDA = (n: number) => `$${n.toFixed(2)}`;
 
@@ -328,7 +328,7 @@ function codigoTipoDano(dano: string) {
 function anexoFotograficoHtml(est: Estimacion) {
   const bloquesDano = est.danos
     .map((d) => {
-      const fotos = d.fotos.filter((f) => f.tipo === 'DANO');
+      const fotos = fotosRealesDano(d.fotos.filter((f) => f.tipo === 'DANO'));
       if (fotos.length === 0) return '';
       const codigo = codigoTipoDano(d.dano);
       return `<article class="anexo-card anexo-card--dano">
