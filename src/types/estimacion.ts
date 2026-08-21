@@ -93,9 +93,9 @@ export interface EdicionRecienteDano {
   comentarioSbm?: string;
   comentarioRfs?: string;
   /** Valores de la línea tras la edición (misma estructura del listado). */
-  snapshot: SnapshotLineaDano;
+  snapshot?: SnapshotLineaDano;
   /** Campos que cambiaron respecto al valor anterior (se resaltan en la subfila). */
-  camposCambiados: CampoSnapshotLinea[];
+  camposCambiados?: CampoSnapshotLinea[];
 }
 
 export function snapshotDesdeDano(d: DanoEstimacion): SnapshotLineaDano {

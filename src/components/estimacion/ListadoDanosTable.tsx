@@ -4,7 +4,9 @@ import { Fragment } from 'react';
 import { CheckCircle2, ClipboardList, Images, MessageSquare, PencilLine, Video } from 'lucide-react';
 import {
   totalesDanos,
+  type CampoSnapshotLinea,
   type DanoEstimacion,
+  type EdicionRecienteDano,
 } from '@/types/estimacion';
 import { cn, formatMoney } from '@/lib/utils';
 
@@ -12,11 +14,8 @@ interface ListadoDanosTableProps {
   danos: DanoEstimacion[];
   seleccionadoId: string | null;
   editable: boolean;
-  /** Solo estimados BOX muestran Largo / Ancho / Área / Longitud. */
   mostrarDimensiones?: boolean;
-  /** Mostrar columna de check (visible aunque esté deshabilitada). */
   mostrarMarcacion?: boolean;
-  /** Permite marcar/desmarcar checks (solo con estimado aperturado). */
   marcacionHabilitada?: boolean;
   marcadosIds?: string[];
   onToggleMarcado?: (danoId: string) => void;
@@ -28,6 +27,120 @@ interface ListadoDanosTableProps {
   onFotos: (dano: DanoEstimacion) => void;
   onVideo: (dano: DanoEstimacion) => void;
   onComentarios: (dano: DanoEstimacion) => void;
+}
+
+function celdaCambiada(edicion: EdicionRecienteDano, campo: CampoSnapshotLinea) {
+  return Boolean(edicion.camposCambiados?.includes(campo));
+}
+
+function SubfilaEdicion({
+  edicion,
+  mostrarMarcacion,
+  mostrarDimensiones,
+}: {
+  edicion: EdicionRecienteDano;
+  mostrarMarcacion: boolean;
+  mostrarDimensiones: boolean;
+}) {
+  const s = edicion.snapshot;
+  if (!s) return null;
+  const ch = (campo: CampoSnapshotLinea) =>
+    cn(celdaCambiada(edicion, campo) && 'dms-celda-cambiada');
+  const colspanNotas = (mostrarMarcacion ? 1 : 0) + 22 + (mostrarDimensiones ? 4 : 0);
+
+  return (
+    <>
+      <tr className="dms-dano-subfila-row">
+        {mostrarMarcacion && <td className="bg-amber-50/80" />}
+        <td className="bg-amber-50/80 text-center text-[9px] font-bold uppercase tracking-wide text-amber-700">
+          Δ
+        </td>
+        <td className={cn('whitespace-nowrap font-semibold', ch('comp'))}>{s.comp}</td>
+        <td className={cn('text-center', ch('partNumber'))}>{s.partNumber || '—'}</td>
+        <td className={cn('text-center', ch('ubicacion'))}>{s.ubicacion || '—'}</td>
+        <td className={cn('dms-cell-wrap text-[10px] font-semibold', ch('dano'))}>{s.dano}</td>
+        <td className={cn('dms-cell-wrap max-w-[10rem] text-[10px]', ch('obsAnalisis'))}>
+          {s.obsAnalisis || '—'}
+        </td>
+        <td className={cn('text-center text-gray-500', ch('metRep'))}>{s.metRep || '—'}</td>
+        <td className={cn('text-center font-semibold', ch('newMetRep'))}>{s.newMetRep || '—'}</td>
+        <td className={cn('text-center text-[10px] tabular-nums', ch('serieAnterior'))}>
+          {s.serieAnterior || '—'}
+        </td>
+        <td className={cn('text-center text-[10px] tabular-nums', ch('serieEntregado'))}>
+          {s.serieEntregado || '—'}
+        </td>
+        {mostrarDimensiones && (
+          <>
+            <td className={cn('text-right tabular-nums', ch('largo'))}>
+              {s.largo ? s.largo.toFixed(2) : ''}
+            </td>
+            <td className={cn('text-right tabular-nums', ch('ancho'))}>
+              {s.ancho ? s.ancho.toFixed(2) : ''}
+            </td>
+            <td className={cn('text-right tabular-nums', ch('area'))}>
+              {s.area ? s.area.toFixed(2) : ''}
+            </td>
+            <td className={cn('text-right tabular-nums', ch('longitud'))}>
+              {s.longitud ? s.longitud.toFixed(2) : ''}
+            </td>
+          </>
+        )}
+        <td className={cn('text-right tabular-nums', ch('cantidad'))}>{s.cantidad.toFixed(2)}</td>
+        <td className={cn('text-right tabular-nums', ch('horasHombre'))}>
+          {s.horasHombre.toFixed(2)}
+        </td>
+        <td className={cn('text-right tabular-nums', ch('csHoraHombre'))}>
+          ${formatMoney(s.csHoraHombre)}
+        </td>
+        <td className={cn('text-right tabular-nums', ch('csMaterial'))}>
+          ${formatMoney(s.csMaterial)}
+        </td>
+        <td className={cn('text-right font-semibold tabular-nums', ch('csTotal'))}>
+          ${formatMoney(s.csTotal)}
+        </td>
+        <td className={cn('text-center whitespace-nowrap', ch('cargo'))}>{s.cargo}</td>
+        <td className={cn('text-center whitespace-nowrap text-[11px] font-semibold', ch('aplica'))}>
+          {s.aplica}
+        </td>
+        <td className={cn('text-center', ch('medida'))}>{s.medida || '—'}</td>
+        <td className={cn('dms-cell-wrap max-w-[8rem] text-[10px]', ch('remark'))}>
+          {s.remark || '—'}
+        </td>
+        <td className={cn('text-center text-[10px] uppercase', ch('contenedorDonante'))}>
+          {s.contenedorDonante || '—'}
+        </td>
+        <td className="bg-amber-50/50 text-[10px] text-amber-900">
+          {edicion.comentarioSbm ? <span title={edicion.comentarioSbm}>SBM ✓</span> : '—'}
+        </td>
+        <td className="bg-amber-50/50 text-[9px] text-amber-800">
+          {edicion.usuario}
+          <br />
+          <span className="tabular-nums opacity-80">{edicion.fecha}</span>
+        </td>
+      </tr>
+      {(edicion.comentarioSbm || edicion.comentarioRfs) && (
+        <tr className="dms-dano-subfila-notas">
+          <td colSpan={colspanNotas}>
+            <div className="flex flex-wrap gap-2 px-2 py-1.5">
+              {edicion.comentarioSbm && (
+                <div className="dms-dano-cmt-sbm max-w-xl">
+                  <span className="dms-dano-cmt-label text-sky-700">SBM:</span>
+                  {edicion.comentarioSbm}
+                </div>
+              )}
+              {edicion.comentarioRfs && (
+                <div className="dms-dano-cmt-rfs max-w-xl">
+                  <span className="dms-dano-cmt-label text-emerald-700">RFS:</span>
+                  {edicion.comentarioRfs}
+                </div>
+              )}
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
+  );
 }
 
 export function ListadoDanosTable({
@@ -42,7 +155,7 @@ export function ListadoDanosTable({
   onToggleTodos,
   onSeleccionar,
   onRemarkChange,
-  onDonanteChange,
+  onDonanteChange: _onDonanteChange,
   onEditar,
   onFotos,
   onVideo,
@@ -50,9 +163,7 @@ export function ListadoDanosTable({
 }: ListadoDanosTableProps) {
   const totales = totalesDanos(danos);
   const colspanAntesHh =
-    (mostrarMarcacion ? 1 : 0) + 10 + (mostrarDimensiones ? 4 : 0) + 1; // hasta Cant. inclusive
-  const totalColumnas =
-    (mostrarMarcacion ? 1 : 0) + 22 + (mostrarDimensiones ? 4 : 0);
+    (mostrarMarcacion ? 1 : 0) + 10 + (mostrarDimensiones ? 4 : 0) + 1;
   const todosMarcados =
     marcacionHabilitada &&
     danos.length > 0 &&
@@ -97,9 +208,7 @@ export function ListadoDanosTable({
                   ref={(el) => {
                     if (el) el.indeterminate = algunosMarcados;
                   }}
-                  onChange={(e) => {
-                    onToggleTodos?.(e.target.checked);
-                  }}
+                  onChange={(e) => onToggleTodos?.(e.target.checked)}
                   aria-label="Marcar todos los ítems"
                 />
               </th>
@@ -152,9 +261,9 @@ export function ListadoDanosTable({
             const marcado = marcadosIds.includes(d.id);
             const pendientes = d.comentarios.filter((c) => c.tipo === 'SOLICITA_CAMBIO').length;
             const ultimo = d.comentarios[d.comentarios.length - 1];
-            const resuelto =
-              d.comentarios.length > 0 && ultimo?.tipo === 'ACEPTADO';
-            const edicion = d.edicionReciente;
+            const resuelto = d.comentarios.length > 0 && ultimo?.tipo === 'ACEPTADO';
+            const edicion =
+              d.edicionReciente && d.edicionReciente.snapshot ? d.edicionReciente : undefined;
             return (
               <Fragment key={d.id}>
                 <tr
@@ -171,9 +280,7 @@ export function ListadoDanosTable({
                         type="checkbox"
                         className="dms-check-dano"
                         checked={marcado}
-                        onChange={() => {
-                          onToggleMarcado?.(d.id);
-                        }}
+                        onChange={() => onToggleMarcado?.(d.id)}
                         aria-label={`Marcar línea ${d.linea}`}
                         title={
                           marcacionHabilitada
@@ -245,19 +352,8 @@ export function ListadoDanosTable({
                       }}
                     />
                   </td>
-                  <td onClick={(e) => e.stopPropagation()}>
-                    <input
-                      className="dms-input-inline w-32 text-center uppercase"
-                      defaultValue={d.contenedorDonante}
-                      key={`${d.id}-${d.contenedorDonante}`}
-                      placeholder="Sin donante"
-                      disabled={!editable}
-                      onBlur={(e) => {
-                        if (e.target.value !== d.contenedorDonante) {
-                          onDonanteChange(d, e.target.value.toUpperCase());
-                        }
-                      }}
-                    />
+                  <td className="text-center text-[10px] uppercase text-slate-600">
+                    {d.contenedorDonante || '—'}
                   </td>
                   <td onClick={(e) => e.stopPropagation()}>
                     <button
@@ -271,7 +367,7 @@ export function ListadoDanosTable({
                       title={
                         d.comentarios.length
                           ? `${d.comentarios.length} comentario(s) · ${pendientes} pendiente(s)`
-                          : 'Sin comentarios · abrir para escribir a liquidaciones'
+                          : 'Sin comentarios'
                       }
                     >
                       <MessageSquare className="h-3.5 w-3.5" />
@@ -307,7 +403,7 @@ export function ListadoDanosTable({
                       <button
                         type="button"
                         className="dms-icon-btn dms-icon-btn--verde"
-                        title={d.tieneVideo ? 'Ver video de inspección' : 'Sin video registrado'}
+                        title={d.tieneVideo ? 'Ver video' : 'Sin video'}
                         onClick={() => onVideo(d)}
                       >
                         <Video className="h-3.5 w-3.5" />
@@ -317,35 +413,11 @@ export function ListadoDanosTable({
                   </td>
                 </tr>
                 {edicion && (
-                  <tr className="dms-dano-subfila">
-                    <td colSpan={totalColumnas}>
-                      <div className="dms-dano-cambio">
-                        <div className="dms-dano-cambio-meta">
-                          <span>Cambios de la línea</span>
-                          <span className="normal-case tracking-normal text-amber-800/70">
-                            {edicion.usuario} · {edicion.fecha}
-                          </span>
-                        </div>
-                        <p className="dms-dano-cambio-resumen">{edicion.resumenCambios}</p>
-                        {edicion.comentarioSbm && (
-                          <div className="dms-dano-cmt-sbm">
-                            <span className="dms-dano-cmt-label text-sky-700">
-                              Comentarios línea SBM:
-                            </span>
-                            {edicion.comentarioSbm}
-                          </div>
-                        )}
-                        {edicion.comentarioRfs && (
-                          <div className="dms-dano-cmt-rfs">
-                            <span className="dms-dano-cmt-label text-emerald-700">
-                              Comentarios RFS:
-                            </span>
-                            {edicion.comentarioRfs}
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
+                  <SubfilaEdicion
+                    edicion={edicion}
+                    mostrarMarcacion={mostrarMarcacion}
+                    mostrarDimensiones={mostrarDimensiones}
+                  />
                 )}
               </Fragment>
             );
