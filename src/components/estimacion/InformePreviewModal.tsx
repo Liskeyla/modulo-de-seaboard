@@ -8,7 +8,7 @@ import { construirInformeHtml, type VarianteInforme } from '@/lib/descargas';
 import { toast } from '@/lib/utils';
 
 const TITULOS: Record<VarianteInforme, string> = {
-  ESTIMADO: 'Informe de Estimado',
+  ESTIMADO: 'Estimado de Reparación',
   PRELIMINAR: 'Informe Preliminar',
   FINAL: 'Informe Final',
 };

@@ -21,6 +21,8 @@ interface ListadoDanosTableProps {
   danos: DanoEstimacion[];
   seleccionadoId: string | null;
   editable: boolean;
+  /** Solo estimados BOX muestran Largo / Ancho / Área / Longitud. */
+  mostrarDimensiones?: boolean;
   onSeleccionar: (dano: DanoEstimacion) => void;
   onAplicaChange: (dano: DanoEstimacion, aplica: AplicaDano) => void;
   onRemarkChange: (dano: DanoEstimacion, remark: string) => void;
@@ -36,6 +38,7 @@ export function ListadoDanosTable({
   danos,
   seleccionadoId,
   editable,
+  mostrarDimensiones = false,
   onSeleccionar,
   onAplicaChange,
   onRemarkChange,
@@ -47,6 +50,7 @@ export function ListadoDanosTable({
   onComentarios,
 }: ListadoDanosTableProps) {
   const totales = totalesDanos(danos);
+  const colspanAntesHh = 10 + (mostrarDimensiones ? 4 : 0) + 1; // hasta Cant. inclusive
 
   if (danos.length === 0) {
     return (
@@ -89,10 +93,14 @@ export function ListadoDanosTable({
               <br />
               Serie Entregado
             </th>
-            <th>Largo</th>
-            <th>Ancho</th>
-            <th>Área</th>
-            <th>Longitud</th>
+            {mostrarDimensiones && (
+              <>
+                <th>Largo</th>
+                <th>Ancho</th>
+                <th>Área</th>
+                <th>Longitud</th>
+              </>
+            )}
             <th className="underline decoration-dotted">Cant.</th>
             <th className="underline decoration-dotted">H.H.</th>
             <th className="underline decoration-dotted">Cs. H.H.</th>
@@ -142,12 +150,22 @@ export function ListadoDanosTable({
                 <td className="text-center font-semibold">{d.newMetRep || '—'}</td>
                 <td className="text-center text-[10px] tabular-nums">{d.serieAnterior || '—'}</td>
                 <td className="text-center text-[10px] tabular-nums">{d.serieEntregado || '—'}</td>
-                <td className="text-right tabular-nums">{d.largo ? d.largo.toFixed(2) : '0.00'}</td>
-                <td className="text-right tabular-nums">{d.ancho ? d.ancho.toFixed(2) : '0.00'}</td>
-                <td className="text-right tabular-nums">{d.area ? d.area.toFixed(2) : '0.00'}</td>
-                <td className="text-right tabular-nums">
-                  {d.longitud ? d.longitud.toFixed(2) : '0.00'}
-                </td>
+                {mostrarDimensiones && (
+                  <>
+                    <td className="text-right tabular-nums">
+                      {d.largo ? d.largo.toFixed(2) : ''}
+                    </td>
+                    <td className="text-right tabular-nums">
+                      {d.ancho ? d.ancho.toFixed(2) : ''}
+                    </td>
+                    <td className="text-right tabular-nums">
+                      {d.area ? d.area.toFixed(2) : ''}
+                    </td>
+                    <td className="text-right tabular-nums">
+                      {d.longitud ? d.longitud.toFixed(2) : ''}
+                    </td>
+                  </>
+                )}
                 <td className="text-right tabular-nums">{d.cantidad.toFixed(2)}</td>
                 <td className="text-right tabular-nums">{d.horasHombre.toFixed(2)}</td>
                 <td className="text-right tabular-nums">${formatMoney(d.csHoraHombre)}</td>
@@ -265,7 +283,7 @@ export function ListadoDanosTable({
         </tbody>
         <tfoot>
           <tr className="dms-danos-total">
-            <td colSpan={15} className="text-right">
+            <td colSpan={colspanAntesHh} className="text-right">
               TOTALES
             </td>
             <td className="text-right tabular-nums">{totales.horasHombre.toFixed(2)}</td>

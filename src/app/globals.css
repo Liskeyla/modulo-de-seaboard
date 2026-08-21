@@ -830,6 +830,14 @@
     @apply inline-flex items-center gap-1.5 rounded-lg border border-slate-800 bg-gradient-to-r from-slate-800 to-slate-900 px-3 py-2 text-xs font-bold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98];
   }
 
+  .dms-btn-aperturar {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-[#c2410c] bg-gradient-to-r from-[#f16e26] to-[#c2410c] px-3 py-2 text-xs font-bold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98];
+  }
+
+  .dms-btn-cerrar-est {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-[#9a3412] bg-gradient-to-r from-[#ea580c] to-[#9a3412] px-3 py-2 text-xs font-bold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98];
+  }
+
   .dms-btn-azul {
     @apply inline-flex items-center gap-1.5 rounded-lg border border-[#3f4bb8] bg-gradient-to-r from-[#4a57c7] to-[#3f4bb8] px-3 py-2 text-xs font-bold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98];
   }
@@ -957,12 +965,40 @@
   }
 
   /* ── Listado de daños ───────────────────────────────────────────── */
-  .dms-table--danos td {
-    @apply px-2 py-2 text-[11px];
+  .dms-danos-table-wrap {
+    @apply overflow-hidden rounded-lg border border-slate-300 bg-white shadow-sm;
+  }
+
+  .dms-danos-table-wrap .dms-table-scroll {
+    @apply bg-white;
+  }
+
+  .dms-table--danos {
+    @apply w-max min-w-full border-collapse bg-white;
   }
 
   .dms-table--danos th {
-    @apply px-2 py-2 text-center text-[10px];
+    @apply border border-slate-300 bg-slate-100 px-2 py-2 text-center text-[10px] font-bold uppercase tracking-wide text-slate-700;
+  }
+
+  .dms-table--danos td {
+    @apply border border-slate-200 bg-white px-2 py-2 text-[11px] text-slate-800;
+  }
+
+  .dms-table--danos tbody tr:nth-child(even) td {
+    @apply bg-slate-50;
+  }
+
+  .dms-table--danos tbody tr:hover td {
+    @apply bg-[#eef1fb];
+  }
+
+  .dms-table--danos tbody tr.dms-row-selected td {
+    @apply bg-[#dde3f8];
+  }
+
+  .dms-table--danos tfoot tr.dms-danos-total td {
+    @apply border border-slate-300 bg-[#eef1fb] font-bold text-rfs-navy;
   }
 
   .dms-dano-check {

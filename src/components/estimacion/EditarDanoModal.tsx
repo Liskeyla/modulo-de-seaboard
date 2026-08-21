@@ -64,11 +64,14 @@ export function EditarDanoModal({
   dano,
   onClose,
   onGuardar,
+  mostrarDimensiones = false,
 }: {
   open: boolean;
   dano: DanoEstimacion | null;
   onClose: () => void;
   onGuardar: (cambios: Partial<DanoEstimacion>, resumen: string) => void;
+  /** Solo estimados BOX editan Largo / Ancho (Área y Longitud se recalculan). */
+  mostrarDimensiones?: boolean;
 }) {
   const [form, setForm] = useState<Formulario | null>(null);
 
@@ -92,6 +95,8 @@ export function EditarDanoModal({
   const ancho = round2(numero(form.ancho));
 
   const guardar = () => {
+    const largoFinal = mostrarDimensiones ? largo : dano.largo;
+    const anchoFinal = mostrarDimensiones ? ancho : dano.ancho;
     const cambios: Partial<DanoEstimacion> = {
       comp: form.comp.trim(),
       partNumber: form.partNumber.trim(),
@@ -101,10 +106,10 @@ export function EditarDanoModal({
       newMetRep: form.newMetRep.trim(),
       serieAnterior: form.serieAnterior.trim(),
       serieEntregado: form.serieEntregado.trim(),
-      largo,
-      ancho,
-      area: round2((largo * ancho) / 10000),
-      longitud: largo,
+      largo: largoFinal,
+      ancho: anchoFinal,
+      area: mostrarDimensiones ? round2((largoFinal * anchoFinal) / 10000) : dano.area,
+      longitud: mostrarDimensiones ? largoFinal : dano.longitud,
       cantidad: round2(numero(form.cantidad)) || 1,
       horasHombre: round2(numero(form.horasHombre)),
       csHoraHombre: csHH,
@@ -183,8 +188,12 @@ export function EditarDanoModal({
         {campoTexto('N° Serie Anterior', 'serieAnterior')}
         {campoTexto('N° Serie Entregado', 'serieEntregado')}
         {campoTexto('Contenedor Donante', 'contenedorDonante', { placeholder: 'SMLU…' })}
-        {campoTexto('Largo (cm)', 'largo', { type: 'number', step: '0.01' })}
-        {campoTexto('Ancho (cm)', 'ancho', { type: 'number', step: '0.01' })}
+        {mostrarDimensiones && (
+          <>
+            {campoTexto('Largo (cm)', 'largo', { type: 'number', step: '0.01' })}
+            {campoTexto('Ancho (cm)', 'ancho', { type: 'number', step: '0.01' })}
+          </>
+        )}
         {campoTexto('Cantidad', 'cantidad', { type: 'number', step: '0.01' })}
         {campoTexto('H.H.', 'horasHombre', { type: 'number', step: '0.01' })}
         {campoTexto('Cs. H.H. ($)', 'csHoraHombre', { type: 'number', step: '0.01' })}
