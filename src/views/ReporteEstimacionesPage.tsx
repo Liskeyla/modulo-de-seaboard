@@ -39,23 +39,24 @@ import {
 import { descargarDataLog, type VarianteInforme } from '@/lib/descargas';
 import { cn, formatMoney, toast } from '@/lib/utils';
 
-/** Encabezados del export, en el mismo orden que el reporte de producción. */
+/** Encabezados del export (incluye columnas del módulo Aprobaciones Seaboard). */
 const EXCEL_HEADERS = [
-  'Codigo', 'Semana', 'Año', 'Estado', 'Contenedor', 'Modelo Maquina', 'Código RFS', 'Naviera',
-  'Actividad', 'Lugar de Estimación', 'Lugar de Asistencia', 'Fecha GateIn', 'Fecha de Elaboración',
-  'Fecha de Reparación', 'Tipo de Estimación', 'Horas Hombre',
-  'PVP Horas Hombre', 'PVP Materiales', 'PVP Total', 'Estado PTI', 'Fecha Fin PTI',
-  'Enviar Aprobacion', 'Fecha Envio', 'Fecha Aprobacion',
-  'Niveles', 'Dias Estadia', 'Tipo de Daño', 'Análisis de observación', 'Fecha de modificación',
-  'Usuario de Modificación',
+  'Codigo', 'Semana', 'Año', 'Estado', 'Contenedor', 'Tipo contenedor', 'Modelo Maquina',
+  'Código RFS', 'Naviera', 'Buque', 'Viaje', 'Actividad', 'Lugar de Estimación',
+  'Lugar de Asistencia', 'Fecha GateIn', 'Fecha de Elaboración', 'Fecha de Reparación',
+  'Tipo de Estimación', 'Horas Hombre', 'PVP Horas Hombre', 'PVP Materiales', 'PVP Total',
+  'Estado PTI', 'Fecha Fin PTI', 'Enviar Aprobacion', 'Fecha Envio', 'Fecha revisión',
+  'Fecha Aprobacion', 'Niveles', 'Dias Estadia', 'Tipo de Daño', 'Análisis de observación',
+  'Fecha de modificación', 'Usuario de Modificación',
 ];
 
 function rowToExcel(e: Estimacion) {
   return [
-    e.codigo, e.semana, e.anio, e.estado, e.contenedor, e.modeloMaquina, e.codigoRfs, e.naviera,
-    e.actividad, e.lugarEstimacion, e.lugarAsistencia, e.fechaGateIn, e.fechaElaboracion,
-    e.fechaReparacion, e.tipoEstimacion, e.horasHombre, e.pvpHorasHombre,
-    e.pvpMateriales, e.pvpTotal, e.estadoPti, e.fechaFinPti, e.enviarAprobacion, e.fechaEnvio,
+    e.codigo, e.semana, e.anio, e.estado, e.contenedor, e.tipoContenedor, e.modeloMaquina,
+    e.codigoRfs, e.naviera, e.buque, e.viaje, e.actividad, e.lugarEstimacion,
+    e.lugarAsistencia, e.fechaGateIn, e.fechaElaboracion, e.fechaReparacion,
+    e.tipoEstimacion, e.horasHombre, e.pvpHorasHombre, e.pvpMateriales, e.pvpTotal,
+    e.estadoPti, e.fechaFinPti, e.enviarAprobacion, e.fechaEnvio, e.fechaRevision || '',
     e.fechaAprobacion, e.niveles, e.diasEstadia, e.tipoDano,
     e.analisisObservacion, e.fechaModificacion, e.usuarioModificacion,
   ];
@@ -488,9 +489,12 @@ export default function ReporteEstimacionesPage() {
                       <th>Año</th>
                       <th>Estado</th>
                       <th>Contenedor</th>
+                      <th>Tipo contenedor</th>
                       <th>Modelo Maquina</th>
                       <th>Código RFS</th>
                       <th>Naviera</th>
+                      <th>Buque</th>
+                      <th>Viaje</th>
                       <th>Actividad</th>
                       <th>Lugar de Estimación</th>
                       <th>Lugar de Asistencia</th>
@@ -506,6 +510,7 @@ export default function ReporteEstimacionesPage() {
                       <th>Fecha Fin PTI</th>
                       <th>Enviar Aprobacion</th>
                       <th>Fecha Envio</th>
+                      <th>Fecha revisión</th>
                       <th>Fecha Aprobacion</th>
                       <th>Niveles</th>
                       <th>Dias Estadia</th>
@@ -566,9 +571,12 @@ export default function ReporteEstimacionesPage() {
                               <EstadoEstimacionBadge estado={row.estado} />
                             </td>
                             <td className="font-semibold text-rfs-navy">{row.contenedor}</td>
+                            <td className="text-[11px]">{row.tipoContenedor || '—'}</td>
                             <td className="text-xs">{row.modeloMaquina || '—'}</td>
                             <td className="text-center">{row.codigoRfs || '—'}</td>
                             <td className="dms-cell-wrap text-[10px]">{row.naviera}</td>
+                            <td className="text-[11px]">{row.buque || '—'}</td>
+                            <td className="text-center tabular-nums">{row.viaje || '—'}</td>
                             <td onDoubleClick={(e) => e.stopPropagation()}>
                               {puedeEditarActividad ? (
                                 <select
@@ -631,6 +639,9 @@ export default function ReporteEstimacionesPage() {
                               </span>
                             </td>
                             <td className="text-[10px] tabular-nums">{row.fechaEnvio || '—'}</td>
+                            <td className="text-[10px] tabular-nums text-gray-500">
+                              {row.fechaRevision || '—'}
+                            </td>
                             <td className="text-[10px] tabular-nums">
                               {row.fechaAprobacion || '—'}
                             </td>
@@ -651,18 +662,8 @@ export default function ReporteEstimacionesPage() {
                           {abierta && (
                             <tr className="dms-row-detalle">
                               <td />
-                              <td colSpan={31}>
+                              <td colSpan={35}>
                                 <div className="dms-detalle-inline">
-                                  <div>
-                                    <span>Buque / Viaje</span>
-                                    <strong>
-                                      {row.buque} · {row.viaje}
-                                    </strong>
-                                  </div>
-                                  <div>
-                                    <span>Tipo contenedor</span>
-                                    <strong>{row.tipoContenedor}</strong>
-                                  </div>
                                   <div>
                                     <span>Líneas de daño</span>
                                     <strong>{row.danos.length}</strong>
@@ -718,14 +719,14 @@ export default function ReporteEstimacionesPage() {
                   </tbody>
                   <tfoot>
                     <tr className="dms-danos-total">
-                      <td colSpan={17} className="text-right">
+                      <td colSpan={20} className="text-right">
                         TOTALES DE {filtered.length} REGISTRO(S) FILTRADO(S)
                       </td>
                       <td className="text-right tabular-nums">{totales.hh.toFixed(2)}</td>
                       <td className="text-right tabular-nums">{formatMoney(totales.pvpHh)}</td>
                       <td className="text-right tabular-nums">{formatMoney(totales.pvpMat)}</td>
                       <td className="text-right tabular-nums">{formatMoney(totales.pvpTotal)}</td>
-                      <td colSpan={11} />
+                      <td colSpan={12} />
                     </tr>
                   </tfoot>
                 </table>
