@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { ImageIcon } from 'lucide-react';
 import type { ArchivoDano, DanoEstimacion, Estimacion, FotoDano } from '@/types/estimacion';
+import { fotosRealesDano } from '@/lib/fotosDano';
 
 type FotoInspeccion = FotoDano & { linea: number; comp: string };
 
@@ -19,9 +20,7 @@ export function InfoLateralCards({
   const fotosDanos = useMemo<FotoInspeccion[]>(
     () =>
       estimacion.danos.flatMap((d) =>
-        d.fotos
-          .filter((f) => f.tipo === 'DANO')
-          .map((f) => ({ ...f, linea: d.linea, comp: d.comp }))
+        fotosRealesDano(d.fotos).map((f) => ({ ...f, linea: d.linea, comp: d.comp }))
       ),
     [estimacion.danos]
   );

@@ -1,4 +1,5 @@
 import type { ArchivoDano, DanoEstimacion, Estimacion, FotoDano } from '@/types/estimacion';
+import { esFotoEsquema } from '@/lib/fotosDano';
 
 const MONEDA = (n: number) => `$${n.toFixed(2)}`;
 
@@ -19,7 +20,7 @@ function descargarBlob(blob: Blob, nombre: string) {
 export type GrupoFotos = 'TODAS' | 'DANO' | 'REPARADO';
 
 export function fotosDe(est: Estimacion, grupo: GrupoFotos): FotoDano[] {
-  const todas = est.danos.flatMap((d) => d.fotos);
+  const todas = est.danos.flatMap((d) => d.fotos).filter((f) => !esFotoEsquema(f.url));
   if (grupo === 'TODAS') return todas;
   return todas.filter((f) => f.tipo === grupo);
 }

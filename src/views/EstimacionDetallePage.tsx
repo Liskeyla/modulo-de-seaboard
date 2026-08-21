@@ -42,6 +42,7 @@ import {
   type Estimacion,
 } from '@/types/estimacion';
 import { cn, formatMoney, toast } from '@/lib/utils';
+import { fotosRealesDano } from '@/lib/fotosDano';
 
 /** Los estimados en curso admiten edición; una vez aprobados quedan en solo lectura. */
 const ESTADOS_EDITABLES = ['PENDIENTE', 'RECHAZADO', 'REVERSADO'];
@@ -220,8 +221,10 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   const fotosDialogo =
     dialogo.tipo === 'FOTOS'
       ? dialogo.danoId === 'TODAS'
-        ? estimacion.danos.flatMap((d) => d.fotos)
-        : (estimacion.danos.find((d) => d.id === dialogo.danoId)?.fotos ?? [])
+        ? estimacion.danos.flatMap((d) => fotosRealesDano(d.fotos))
+        : fotosRealesDano(
+            estimacion.danos.find((d) => d.id === dialogo.danoId)?.fotos ?? []
+          )
       : [];
 
   const danoComentarios =

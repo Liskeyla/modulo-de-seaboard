@@ -21,6 +21,7 @@ import {
   nombreDataLog,
 } from '@/lib/descargas';
 import { cn, toast } from '@/lib/utils';
+import { fotosRealesDano } from '@/lib/fotosDano';
 import type {
   ArchivoDano,
   ClaseArchivo,
@@ -71,6 +72,10 @@ export function InfoDanoPanel({
     () => (dano ? archivosDe(dano, estimacion) : []),
     [dano, estimacion]
   );
+  const fotosVisibles = useMemo(
+    () => (dano ? fotosRealesDano(dano.fotos) : []),
+    [dano]
+  );
   const logs = archivos.filter((a) => a.clase === 'DATALOG');
   const porGrupo = {
     ESTIMACION: archivos.filter((a) => a.grupo === 'ESTIMACION'),
@@ -83,13 +88,13 @@ export function InfoDanoPanel({
   }
 
   async function bajarFotos() {
-    if (!dano || dano.fotos.length === 0) {
+    if (!dano || fotosVisibles.length === 0) {
       toast('Esta línea no tiene imágenes para descargar.', 'error');
       return;
     }
     setBajando('fotos');
     try {
-      const n = await descargarFotosListaZip(dano.fotos, estimacion.codigo, estimacion.contenedor);
+      const n = await descargarFotosListaZip(fotosVisibles, estimacion.codigo, estimacion.contenedor);
       toast(`${n} imagen(es) empaquetadas en el .zip.`, 'success');
     } catch {
       toast('No se pudo generar el zip de imágenes.', 'error');
@@ -213,17 +218,17 @@ export function InfoDanoPanel({
           <button
             type="button"
             className="dms-zip-btn"
-            disabled={bajando === 'fotos' || dano.fotos.length === 0}
+            disabled={bajando === 'fotos' || fotosVisibles.length === 0}
             onClick={() => void bajarFotos()}
           >
             <Download className="h-3.5 w-3.5" />
             {bajando === 'fotos' ? 'Preparando zip…' : 'Descargar todas las imágenes (.zip)'}
           </button>
-          {dano.fotos.length === 0 ? (
+          {fotosVisibles.length === 0 ? (
             <p className="mt-2 text-[11px] text-slate-400">Esta línea aún no tiene fotografías.</p>
           ) : (
             <div className="dms-anexo-grid">
-              {dano.fotos.map((foto) => (
+              {fotosVisibles.map((foto) => (
                 <button
                   key={foto.id}
                   type="button"
@@ -245,13 +250,13 @@ export function InfoDanoPanel({
               ))}
             </div>
           )}
-          {dano.fotos.length > 0 && (
+          {fotosVisibles.length > 0 && (
             <button
               type="button"
               className="mt-2 text-[11px] font-semibold text-[#31b0d5] hover:underline"
               onClick={() => onVerFotos(dano)}
             >
-              Ver galería completa ({dano.fotos.length})
+              Ver galería completa ({fotosVisibles.length})
             </button>
           )}
         </div>

@@ -885,15 +885,7 @@
         "contenedorDonante": "",
         "tieneVideo": false,
         "seccion": "ESTRUCTURAL",
-        "fotos": [
-          {
-            "id": "ec-179066-DANO-1",
-            "url": "/uploads/estimaciones/fotos/ec_179066_01.jpg",
-            "tipo": "DANO",
-            "descripcion": "Baffle vertical suelto",
-            "fecha": "17/08/2026 00:42:24"
-          }
-        ],
+        "fotos": [],
         "comentarios": []
       },
       {
@@ -924,15 +916,7 @@
         "contenedorDonante": "",
         "tieneVideo": false,
         "seccion": "ESTRUCTURAL",
-        "fotos": [
-          {
-            "id": "ec-179066-DANO-2",
-            "url": "/uploads/estimaciones/fotos/ec_179066_02.jpg",
-            "tipo": "DANO",
-            "descripcion": "Placa baffle abollada",
-            "fecha": "17/08/2026 00:42:24"
-          }
-        ],
+        "fotos": [],
         "comentarios": []
       },
       {
@@ -963,15 +947,7 @@
         "contenedorDonante": "",
         "tieneVideo": false,
         "seccion": "ESTRUCTURAL",
-        "fotos": [
-          {
-            "id": "ec-179066-DANO-3",
-            "url": "/uploads/estimaciones/fotos/ec_179066_03.jpg",
-            "tipo": "DANO",
-            "descripcion": "Tapón grande de drenaje faltante",
-            "fecha": "17/08/2026 00:42:24"
-          }
-        ],
+        "fotos": [],
         "comentarios": []
       },
       {
@@ -1002,15 +978,7 @@
         "contenedorDonante": "",
         "tieneVideo": false,
         "seccion": "ESTRUCTURAL",
-        "fotos": [
-          {
-            "id": "ec-179066-DANO-4",
-            "url": "/uploads/estimaciones/fotos/ec_179066_04.jpg",
-            "tipo": "DANO",
-            "descripcion": "Sección de marco rota 60 cm",
-            "fecha": "17/08/2026 00:42:24"
-          }
-        ],
+        "fotos": [],
         "comentarios": []
       },
       {
@@ -1385,27 +1353,6 @@
         "tieneVideo": false,
         "seccion": "ESTRUCTURAL",
         "fotos": [
-          {
-            "id": "ec-179067-DANO-1",
-            "url": "/uploads/estimaciones/fotos/ec_179067_01.jpg",
-            "tipo": "DANO",
-            "descripcion": "Parche exterior en panel de acero con foam",
-            "fecha": "17/08/2026 00:53:00"
-          },
-          {
-            "id": "ec-179067-DANO-2",
-            "url": "/uploads/estimaciones/fotos/ec_179067_02.jpg",
-            "tipo": "DANO",
-            "descripcion": "Detalle POC en RB1N",
-            "fecha": "17/08/2026 00:53:00"
-          },
-          {
-            "id": "ec-179067-DANO-3",
-            "url": "/uploads/estimaciones/fotos/ec_179067_03.jpg",
-            "tipo": "DANO",
-            "descripcion": "Medida 20 x 20 cm del parche",
-            "fecha": "17/08/2026 00:53:00"
-          },
           {
             "id": "ec-179067-DANO-5",
             "url": "/uploads/estimaciones/fotos/ec_179067_05.jpg",
