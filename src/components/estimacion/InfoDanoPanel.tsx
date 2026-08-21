@@ -8,7 +8,6 @@ import {
   FileWarning,
   RotateCcw,
   Trash2,
-  Video,
 } from 'lucide-react';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Modal } from '@/components/ui/Modal';
