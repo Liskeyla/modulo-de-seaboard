@@ -569,7 +569,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                         'Debe aprobar los ítems de daño antes de enviar a aprobación.\nAperture la estimación y apruebe (o rechace) los ítems del listado de daños.',
                         'info'
                       );
-                      setDialogo({ tipo: 'ENVIAR' });
                       return;
                     }
                     setDialogo({ tipo: 'ENVIAR' });

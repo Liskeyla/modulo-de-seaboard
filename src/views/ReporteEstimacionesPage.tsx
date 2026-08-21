@@ -297,6 +297,7 @@ export default function ReporteEstimacionesPage() {
             onClick={() => {
               if (itemsSinRevisionSbm(row.danos).length > 0) {
                 toast(MSG_ITEMS_SIN_APROBAR, 'info');
+                return;
               }
               setDialogo({ tipo: 'ENVIAR', id: row.id });
             }}
@@ -881,6 +882,10 @@ export default function ReporteEstimacionesPage() {
         onClose={cerrar}
         onAprobar={() => {
           if (!activa) return;
+          if (itemsSinRevisionSbm(activa.danos).length > 0) {
+            toast(MSG_ITEMS_SIN_APROBAR, 'info');
+            return;
+          }
           const pendientes = contarComentariosPendientes(activa.danos);
           if (pendientes > 0) {
             aprobar(
@@ -903,6 +908,10 @@ export default function ReporteEstimacionesPage() {
         }}
         onRechazar={(comentario) => {
           if (!activa) return;
+          if (itemsSinRevisionSbm(activa.danos).length > 0) {
+            toast(MSG_ITEMS_SIN_APROBAR, 'info');
+            return;
+          }
           rechazar([activa.id], usuario, comentario);
           toast(`Estimación ${activa.codigo} rechazada (estado RECHAZADO).`, 'success');
           cerrar();
