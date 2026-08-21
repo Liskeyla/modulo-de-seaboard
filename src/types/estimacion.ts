@@ -134,6 +134,45 @@ export interface EventoAuditoria {
   usuario: string;
   accion: string;
   detalle: string;
+  /** Snapshot del listado de daños asociado al evento (detalle expandible). */
+  lineas?: LineaHistorialDano[];
+}
+
+/** Columnas clave del cuadro de daños para el historial. */
+export interface LineaHistorialDano {
+  linea: number;
+  comp: string;
+  partNumber: string;
+  ubicacion: string;
+  dano: string;
+  newMetRep: string;
+  cantidad: number;
+  horasHombre: number;
+  csHoraHombre: number;
+  csMaterial: number;
+  csTotal: number;
+  cargo: string;
+  aplica: string;
+  remark: string;
+}
+
+export function aLineaHistorial(d: DanoEstimacion): LineaHistorialDano {
+  return {
+    linea: d.linea,
+    comp: d.comp,
+    partNumber: d.partNumber,
+    ubicacion: d.ubicacion,
+    dano: d.dano,
+    newMetRep: d.newMetRep,
+    cantidad: d.cantidad,
+    horasHombre: d.horasHombre,
+    csHoraHombre: d.csHoraHombre,
+    csMaterial: d.csMaterial,
+    csTotal: d.csTotal,
+    cargo: d.cargo,
+    aplica: d.aplica,
+    remark: d.remark,
+  };
 }
 
 export interface InfoGarantia {

@@ -10,10 +10,11 @@ import type {
   Estimacion,
   EstadoEstimacion,
   EventoAuditoria,
+  LineaHistorialDano,
   RolComentario,
   TipoComentario,
 } from '@/types/estimacion';
-import { APLICA_APROBADO_SBM, APLICA_RECHAZADO_SBM } from '@/types/estimacion';
+import { aLineaHistorial, APLICA_APROBADO_SBM, APLICA_RECHAZADO_SBM } from '@/types/estimacion';
 
 const STORAGE_KEY = 'dms-estimaciones-prototipo-v9';
 const CLAVES_OBSOLETAS = [
@@ -41,8 +42,20 @@ function uid(prefijo: string) {
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
-function evento(usuario: string, accion: string, detalle: string): EventoAuditoria {
-  return { id: uid('ev'), fecha: ahoraFmt(), usuario, accion, detalle };
+function evento(
+  usuario: string,
+  accion: string,
+  detalle: string,
+  lineas?: LineaHistorialDano[]
+): EventoAuditoria {
+  return {
+    id: uid('ev'),
+    fecha: ahoraFmt(),
+    usuario,
+    accion,
+    detalle,
+    ...(lineas && lineas.length > 0 ? { lineas } : {}),
+  };
 }
 
 function comentarioSeaboard(
@@ -128,6 +141,14 @@ interface EstimacionesState {
   ) => void;
 
   agregarNota: (id: string, texto: string, usuario: string) => void;
+  /** Registra un evento en el historial de actividad (con detalle opcional del listado de daños). */
+  registrarActividad: (
+    id: string,
+    usuario: string,
+    accion: string,
+    detalle: string,
+    lineas?: LineaHistorialDano[]
+  ) => void;
 }
 
 export const useEstimacionesStore = create<EstimacionesState>()(
@@ -397,6 +418,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                 csTotal: round2(mezclado.csHoraHombre + mezclado.csMaterial),
               };
             });
+            const actualizado = danos.find((d) => d.id === danoId)!;
             return recalcular({
               ...e,
               danos,
@@ -407,7 +429,8 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                 evento(
                   usuario,
                   'DAÑO MODIFICADO',
-                  etiqueta ?? `Línea ${anterior.linea} · ${anterior.comp} actualizado`
+                  etiqueta ?? `Línea ${anterior.linea} · ${anterior.comp} actualizado`,
+                  [aLineaHistorial(actualizado)]
                 ),
               ],
             });
@@ -444,7 +467,8 @@ export const useEstimacionesStore = create<EstimacionesState>()(
               }
               return { ...d, aplica: APLICA_APROBADO_SBM };
             });
-            const lineas = afectados.map((d) => String(d.linea).padStart(2, '0')).join(', ');
+            const lineasTxt = afectados.map((d) => String(d.linea).padStart(2, '0')).join(', ');
+            const lineasSnap = danos.filter((d) => ids.has(d.id)).map(aLineaHistorial);
             return recalcular({
               ...e,
               danos,
@@ -456,8 +480,9 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                   usuario,
                   accion === 'RECHAZAR' ? 'ÍTEMS RECHAZADOS' : 'ÍTEMS APROBADOS',
                   accion === 'RECHAZAR'
-                    ? `${afectados.length} línea(s): ${lineas}. Motivo: ${motivo}`
-                    : `${afectados.length} línea(s): ${lineas}`
+                    ? `${afectados.length} línea(s): ${lineasTxt}. Motivo: ${motivo}`
+                    : `${afectados.length} línea(s): ${lineasTxt}`,
+                  lineasSnap
                 ),
               ],
             });
@@ -526,6 +551,13 @@ export const useEstimacionesStore = create<EstimacionesState>()(
             fechaModificacion: ahoraFmt(),
             usuarioModificacion: usuario,
             auditoria: [...e.auditoria, evento(usuario, 'NOTA AGREGADA', texto)],
+          }));
+        },
+
+        registrarActividad: (id, usuario, accion, detalle, lineas) => {
+          mutar(id, (e) => ({
+            ...e,
+            auditoria: [...e.auditoria, evento(usuario, accion, detalle, lineas)],
           }));
         },
 

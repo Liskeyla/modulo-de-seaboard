@@ -38,6 +38,7 @@ import { useEstimacionesStore } from '@/store/estimacionesStore';
 import { useUiStore } from '@/store/uiStore';
 import {
   contarComentariosPendientes,
+  aLineaHistorial,
   type DanoEstimacion,
   type Estimacion,
 } from '@/types/estimacion';
@@ -144,6 +145,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     resolverItemsMasivo,
     agregarComentarioDano,
     agregarNota,
+    registrarActividad,
   } = useEstimacionesStore();
   const setGuardiaSesion = useUiStore((s) => s.setGuardiaSesion);
 
@@ -156,10 +158,25 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   const [snapshotApertura, setSnapshotApertura] = useState<SnapshotApertura | null>(null);
   const [marcadosIds, setMarcadosIds] = useState<string[]>([]);
   const snapshotRef = useRef<SnapshotApertura | null>(null);
+  const vistaRegistradaRef = useRef<string | null>(null);
 
   useEffect(() => {
     snapshotRef.current = snapshotApertura;
   }, [snapshotApertura]);
+
+  useEffect(() => {
+    if (!estimacion) return;
+    if (vistaRegistradaRef.current === estimacion.id) return;
+    vistaRegistradaRef.current = estimacion.id;
+    const usuarioVista = useAuthStore.getState().user?.username ?? 'apptelink';
+    registrarActividad(
+      estimacion.id,
+      usuarioVista,
+      'Visualización Estimación',
+      'VISUALIZACIÓN ESTIMACIÓN',
+      estimacion.danos.map(aLineaHistorial)
+    );
+  }, [estimacion, registrarActividad]);
 
   useEffect(() => {
     if (!estimacion) return;
@@ -283,6 +300,13 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     setSnapshotApertura(capturarSnapshot(estimacion!));
     setAperturada(true);
     setMarcadosIds([]);
+    registrarActividad(
+      estimacion!.id,
+      usuario,
+      'Aperturó estimado en el aplicativo',
+      `Apertura de ${estimacion!.codigo} para modificación de ítems`,
+      estimacion!.danos.map(aLineaHistorial)
+    );
     toast('Estimación aperturada. Ya puede modificar ítems.', 'success');
   }
 
@@ -294,6 +318,20 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   }
 
   function confirmarCerrarApertura() {
+    const resumen = snapshotApertura
+      ? resumirCambiosApertura(snapshotApertura, estimacion!)
+      : [];
+    const detalle =
+      resumen.length > 0
+        ? resumen.join(' | ')
+        : 'Cierre sin cambios detectados respecto a la apertura';
+    registrarActividad(
+      estimacion!.id,
+      usuario,
+      'Cerró estimado en el aplicativo',
+      detalle,
+      estimacion!.danos.map(aLineaHistorial)
+    );
     setAperturada(false);
     setSnapshotApertura(null);
     setMarcadosIds([]);

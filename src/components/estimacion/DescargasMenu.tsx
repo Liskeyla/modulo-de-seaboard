@@ -14,7 +14,6 @@ import type { Estimacion } from '@/types/estimacion';
 import {
   construirInformeHtml,
   descargarFotosZip,
-  descargarHistorialCsv,
   fotosDe,
   imprimirInforme,
   type GrupoFotos,
@@ -158,7 +157,6 @@ export function DescargasMenu({
     }
 
     onVerHistorial();
-    descargarHistorialCsv(estimacion);
     setAbierto(false);
   }
 
