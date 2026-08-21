@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useState } from 'react';
-import { ChevronDown, Plus, Search, Upload, X } from 'lucide-react';
+import { ChevronDown, Lock, Plus, Search, Upload, X } from 'lucide-react';
 import {
   APLICA_DANO,
   CARGOS_DANO,
@@ -295,13 +295,24 @@ export function AgregarDanoCard({ editable, seccionSugerida, onAgregar }: Agrega
             type="button"
             className={cn('dms-btn-primary px-4 py-2 text-sm', !editable && 'opacity-50')}
             disabled={!editable}
-            onClick={agregar}
+            title={
+              editable
+                ? 'Agregar línea de daño'
+                : 'Aperture la estimación para agregar daños'
+            }
+            onClick={() => {
+              if (!editable) {
+                toast('Aperture la estimación para agregar daños.', 'info');
+                return;
+              }
+              agregar();
+            }}
           >
-            <Plus className="h-4 w-4" /> Agregar
+            {editable ? <Plus className="h-4 w-4" /> : <Lock className="h-4 w-4" />} Agregar
           </button>
           {!editable && (
             <p className="text-[11px] text-gray-400">
-              El estimado no admite cambios en su estado actual.
+              Aperture la estimación para habilitar Agregar Daño y las demás cargas.
             </p>
           )}
           {archivos.length > 0 && (

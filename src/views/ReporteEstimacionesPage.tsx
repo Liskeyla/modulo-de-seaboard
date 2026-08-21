@@ -30,6 +30,7 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { ComentarioModal } from '@/components/aprobaciones/ComentarioModal';
 import { InformePreviewModal } from '@/components/estimacion/InformePreviewModal';
 import { ChipsRetornoSeaboard } from '@/components/estimacion/RespuestaSeaboardBanner';
+import { AlertasLiquidacionesCell } from '@/components/estimacion/AlertasLiquidacionesCell';
 import {
   ConfirmacionEstimacionModal,
   notificarAprobacionALiquidaciones,
@@ -443,7 +444,7 @@ export default function ReporteEstimacionesPage() {
             className="dms-icon-action dms-icon-action--enviar"
             title={
               esLiquidaciones
-                ? 'Push a SBM · queda pendiente en reporte Seaboard'
+                ? 'Enviar a SBM · queda pendiente en reporte Seaboard'
                 : 'Enviar a Seaboard Marine'
             }
             onClick={() => {
@@ -470,7 +471,7 @@ export default function ReporteEstimacionesPage() {
             <CheckCircle2 className="h-3.5 w-3.5" />
           </button>
         )}
-        {esLiquidaciones && ['APROBADO', 'REPARADO'].includes(row.estado) && (
+        {esLiquidaciones && row.estado === 'APROBADO' && (
           <button
             type="button"
             className="dms-icon-action dms-icon-action--info"
@@ -532,8 +533,8 @@ export default function ReporteEstimacionesPage() {
 
   const subtituloReporte = esLiquidaciones
     ? user?.pais === 'PERU'
-      ? 'Aprobaciones de Estimados · Perú · Validar, push a SBM, reversar y eliminar'
-      : 'Aprobaciones de Estimados · Ecuador · Validar, push a SBM, reversar y eliminar'
+      ? 'Aprobaciones de Estimados · Perú · Validar, enviar a SBM, reversar y eliminar'
+      : 'Aprobaciones de Estimados · Ecuador · Validar, enviar a SBM, reversar y eliminar'
     : 'Usuario Seaboard · Ver, modificar y aprobar / rechazar estimados';
 
   return (
@@ -699,6 +700,11 @@ export default function ReporteEstimacionesPage() {
                   <thead>
                     <tr>
                       <th className="dms-sticky-col dms-sticky-col--1 w-8">···</th>
+                      {esLiquidaciones && (
+                        <th className="text-center" title="Alertas del estimado">
+                          Alertas
+                        </th>
+                      )}
                       <th>Acciones</th>
                       <th>Codigo</th>
                       <th>Semana</th>
@@ -764,6 +770,11 @@ export default function ReporteEstimacionesPage() {
                                 )}
                               </button>
                             </td>
+                            {esLiquidaciones && (
+                              <td className="align-middle">
+                                <AlertasLiquidacionesCell estimacion={row} />
+                              </td>
+                            )}
                             <td onDoubleClick={(e) => e.stopPropagation()}>
                               {accionesDe(row)}
                             </td>
@@ -1163,9 +1174,9 @@ export default function ReporteEstimacionesPage() {
           (dialogo.tipo === 'ENVIAR' && user?.rol === 'dms') ||
           dialogo.tipo === 'PUSH_SBM'
         }
-        title="Push a Seaboard Marine"
+        title="Enviar a Seaboard Marine"
         subtitle={activa ? `${activa.codigo} · ${activa.contenedor}` : undefined}
-        confirmLabel="Confirmar push a SBM"
+        confirmLabel="Confirmar envío a SBM"
         confirmClass="dms-btn-enviar"
         onClose={cerrar}
         onConfirm={() => {

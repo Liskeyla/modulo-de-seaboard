@@ -7,6 +7,7 @@ import {
   type EntradaComentario,
 } from '@/components/estimacion/ComentariosDanoModal';
 import {
+  APLICA_APROBADO_SBM,
   APLICA_DANO,
   CARGOS_DANO,
   esAplicaRechazado,
@@ -398,7 +399,9 @@ export function ListadoDanosTable({
                     <span
                       className={cn(
                         'dms-dano-check',
-                        activo ? 'dms-dano-check--on' : 'dms-dano-check--off'
+                        activo || d.aplica === APLICA_APROBADO_SBM
+                          ? 'dms-dano-check--on'
+                          : 'dms-dano-check--off'
                       )}
                       aria-hidden
                     >

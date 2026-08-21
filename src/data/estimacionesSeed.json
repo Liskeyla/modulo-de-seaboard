@@ -75,9 +75,9 @@
         "longitud": 0,
         "cantidad": 2,
         "horasHombre": 0.75,
-        "csHoraHombre": 6.75,
+        "csHoraHombre": 0,
         "csMaterial": 0,
-        "csTotal": 6.75,
+        "csTotal": 0,
         "cargo": "Garantía",
         "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
@@ -187,7 +187,8 @@
             "csTotal",
             "aplica"
           ]
-        }
+        },
+        "sinTarifa": true
       }
     ],
     "notas": [
@@ -337,9 +338,9 @@
         "longitud": 0,
         "cantidad": 1,
         "horasHombre": 0.52,
-        "csHoraHombre": 4.16,
-        "csMaterial": 61.32,
-        "csTotal": 65.48,
+        "csHoraHombre": 0,
+        "csMaterial": 0,
+        "csTotal": 0,
         "cargo": "Línea",
         "aplica": "Pendiente Revisión",
         "medida": "MT",
@@ -370,7 +371,8 @@
             "fecha": "17/08/2026 14:20:11"
           }
         ],
-        "comentarios": []
+        "comentarios": [],
+        "sinTarifa": true
       },
       {
         "id": "ERSBM-2026-179064-l2",
@@ -665,9 +667,9 @@
         "longitud": 69.16,
         "cantidad": 1,
         "horasHombre": 3.44,
-        "csHoraHombre": 41.45,
-        "csMaterial": 26.32,
-        "csTotal": 67.77,
+        "csHoraHombre": 0,
+        "csMaterial": 0,
+        "csTotal": 0,
         "cargo": "Línea",
         "aplica": "Pendiente Revisión",
         "medida": "CM",
@@ -691,7 +693,8 @@
             "fecha": "17/08/2026 14:20:11"
           }
         ],
-        "comentarios": []
+        "comentarios": [],
+        "sinTarifa": true
       },
       {
         "id": "ERSBM-2026-179065-l2",
@@ -938,9 +941,9 @@
         "longitud": 0,
         "cantidad": 1,
         "horasHombre": 1,
-        "csHoraHombre": 9,
-        "csMaterial": 13.35,
-        "csTotal": 22.35,
+        "csHoraHombre": 0,
+        "csMaterial": 0,
+        "csTotal": 0,
         "cargo": "Línea",
         "aplica": "Pendiente Revisión",
         "medida": "UN",
@@ -949,7 +952,8 @@
         "tieneVideo": false,
         "seccion": "ESTRUCTURAL",
         "fotos": [],
-        "comentarios": []
+        "comentarios": [],
+        "sinTarifa": true
       },
       {
         "id": "ERSBM-2026-179066-l2",
@@ -1406,9 +1410,9 @@
         "longitud": 20,
         "cantidad": 1,
         "horasHombre": 0.77,
-        "csHoraHombre": 6.93,
-        "csMaterial": 7.45,
-        "csTotal": 14.38,
+        "csHoraHombre": 0,
+        "csMaterial": 0,
+        "csTotal": 0,
         "cargo": "Línea",
         "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
@@ -1478,7 +1482,8 @@
             "csTotal",
             "aplica"
           ]
-        }
+        },
+        "sinTarifa": true
       }
     ],
     "notas": [],
@@ -1614,9 +1619,9 @@
         "longitud": 39.94,
         "cantidad": 1,
         "horasHombre": 1.36,
-        "csHoraHombre": 9.98,
-        "csMaterial": 16.74,
-        "csTotal": 26.72,
+        "csHoraHombre": 0,
+        "csMaterial": 0,
+        "csTotal": 0,
         "cargo": "Línea",
         "aplica": "Pendiente Revisión",
         "medida": "CM",
@@ -1666,7 +1671,8 @@
             "tipo": "ACEPTADO",
             "mensaje": "Conforme con el ajuste, procede la liquidación del ítem."
           }
-        ]
+        ],
+        "sinTarifa": true
       },
       {
         "id": "ERSBM-2026-179068-l2",
@@ -1908,9 +1914,9 @@
         "longitud": 0,
         "cantidad": 1,
         "horasHombre": 1.63,
-        "csHoraHombre": 12.61,
-        "csMaterial": 20.22,
-        "csTotal": 32.83,
+        "csHoraHombre": 0,
+        "csMaterial": 0,
+        "csTotal": 0,
         "cargo": "Línea",
         "aplica": "Pendiente Revisión",
         "medida": "UN",
@@ -1941,7 +1947,8 @@
             "fecha": "17/08/2026 14:20:11"
           }
         ],
-        "comentarios": []
+        "comentarios": [],
+        "sinTarifa": true
       },
       {
         "id": "ERSBM-2026-179069-l2",
@@ -2183,9 +2190,9 @@
         "longitud": 24.52,
         "cantidad": 1,
         "horasHombre": 1.87,
-        "csHoraHombre": 20.49,
-        "csMaterial": 57.49,
-        "csTotal": 77.98,
+        "csHoraHombre": 0,
+        "csMaterial": 0,
+        "csTotal": 0,
         "cargo": "Línea",
         "aplica": "Pendiente Revisión",
         "medida": "CM",
@@ -2209,7 +2216,8 @@
             "fecha": "17/08/2026 14:20:11"
           }
         ],
-        "comentarios": []
+        "comentarios": [],
+        "sinTarifa": true
       },
       {
         "id": "ERSBM-2026-179070-l2",

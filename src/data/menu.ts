@@ -24,7 +24,7 @@ export const MENU_GRUPOS: MenuGrupo[] = [
         href: '/reportes/estimaciones',
         label: 'Aprobaciones de Estimados',
         icon: 'ClipboardCheck',
-        descripcion: 'Validar, push a SBM, reversar y eliminar',
+        descripcion: 'Validar, enviar a SBM, reversar y eliminar',
         roles: ['liquidaciones'],
       },
       {

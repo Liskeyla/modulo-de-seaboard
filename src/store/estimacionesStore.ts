@@ -17,7 +17,7 @@ import type {
 import { aLineaHistorial, APLICA_APROBADO_SBM, APLICA_RECHAZADO_SBM, CARGO_RECHAZADO, valoresCeroPorRechazoItem } from '@/types/estimacion';
 import { esNavieraSeaboard } from '@/lib/seaboardFlow';
 
-const STORAGE_KEY = 'dms-estimaciones-prototipo-v15';
+const STORAGE_KEY = 'dms-estimaciones-prototipo-v16';
 const CLAVES_OBSOLETAS = [
   'dms-estimaciones-prototipo',
   'dms-estimaciones-prototipo-v2',
@@ -33,6 +33,7 @@ const CLAVES_OBSOLETAS = [
   'dms-estimaciones-prototipo-v12',
   'dms-estimaciones-prototipo-v13',
   'dms-estimaciones-prototipo-v14',
+  'dms-estimaciones-prototipo-v15',
 ];
 
 function ahoraFmt() {
@@ -227,8 +228,8 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                   comentarioSeaboard(
                     'ENVIAR',
                     pendientesLiq > 0
-                      ? `Push a SBM · ${pendientesLiq} comentario(s) de liquidaciones pendientes.`
-                      : 'Push a SBM · estimado validado por liquidaciones, pendiente de revisión Seaboard.',
+                      ? `Enviar a SBM · ${pendientesLiq} comentario(s) de liquidaciones pendientes.`
+                      : 'Enviar a SBM · estimado validado por liquidaciones, pendiente de revisión Seaboard.',
                     usuario
                   ),
                 ],
@@ -269,7 +270,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                   usuario,
                   'VALIDACIÓN LIQUIDACIONES',
                   esNavieraSeaboard(e.naviera)
-                    ? 'Validado por liquidaciones. Listo para push a Seaboard Marine.'
+                    ? 'Validado por liquidaciones. Listo para enviar a Seaboard Marine.'
                     : 'Validado por liquidaciones (naviera distinta de Seaboard).'
                 ),
               ],

@@ -342,6 +342,10 @@
     @apply border-cyan-200 bg-cyan-50 text-[#31b0d5] hover:bg-cyan-100;
   }
 
+  .dms-btn-reparar {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600 active:scale-[0.98];
+  }
+
   .dms-btn-eliminar {
     @apply border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100;
   }
@@ -741,6 +745,31 @@
     box-shadow: 0 0 0 2px rgba(241, 110, 38, 0.2);
   }
 
+  /* Alertas Liquidaciones (columna izq. de Acciones) — estilo DMS */
+  .dms-alertas-cell {
+    @apply flex min-w-[4.75rem] flex-col items-center gap-1.5 py-0.5;
+  }
+
+  .dms-alerta-pill {
+    @apply inline-flex w-[4.6rem] flex-col items-center justify-center rounded-xl bg-[#e53935] px-1.5 py-1.5 text-center text-[9px] font-extrabold leading-[1.15] text-white shadow-sm;
+  }
+
+  .dms-alerta-pill__icono {
+    @apply inline-flex items-center justify-center gap-0.5;
+  }
+
+  .dms-alerta-pill--mod {
+    @apply bg-[#f16e26];
+  }
+
+  .dms-alerta-pill--cambio {
+    @apply bg-[#d97706];
+  }
+
+  .dms-alerta-pill--rechazo {
+    @apply bg-[#b91c1c];
+  }
+
   .dms-select-actividad {
     @apply h-8 min-w-[5.5rem] px-1.5 text-[10px] font-bold text-[#152483];
   }
@@ -1016,7 +1045,7 @@
   }
 
   .dms-dano-check--on {
-    @apply text-black;
+    @apply text-emerald-600;
   }
 
   .dms-dano-check--off {

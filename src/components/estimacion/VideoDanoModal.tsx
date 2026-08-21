@@ -20,6 +20,8 @@ export function VideoDanoModal({
   if (!dano) return null;
 
   const poster = dano.fotos[0]?.url;
+  const videoCargado =
+    dano.archivos?.find((a) => a.clase === 'VIDEO' && a.url)?.url ?? null;
 
   return (
     <Modal
@@ -39,12 +41,12 @@ export function VideoDanoModal({
         </button>
       }
     >
-      {dano.tieneVideo ? (
+      {dano.tieneVideo || videoCargado ? (
         <div className="space-y-3">
           <div className="relative overflow-hidden rounded-xl bg-black">
             <video
-              key={dano.id}
-              src={VIDEO_DEMO}
+              key={videoCargado ?? dano.id}
+              src={videoCargado ?? VIDEO_DEMO}
               poster={poster}
               controls
               playsInline

@@ -1,13 +1,15 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   Download,
   Eye,
   FileText,
   FileWarning,
+  ImagePlus,
   RotateCcw,
   Trash2,
+  Upload,
 } from 'lucide-react';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Modal } from '@/components/ui/Modal';
@@ -20,13 +22,14 @@ import {
   nombreDataLog,
 } from '@/lib/descargas';
 import { cn, toast } from '@/lib/utils';
-import { fotosRealesDano } from '@/lib/fotosDano';
+import { esFotoEsquema } from '@/lib/fotosDano';
 import type {
   ArchivoDano,
   ClaseArchivo,
   DanoEstimacion,
   Estimacion,
   FotoDano,
+  GrupoArchivo,
 } from '@/types/estimacion';
 
 function dataLogDemo(dano: DanoEstimacion, estimacion: Estimacion): ArchivoDano {
@@ -46,6 +49,55 @@ function archivosDe(dano: DanoEstimacion, estimacion: Estimacion): ArchivoDano[]
   return [dataLogDemo(dano, estimacion)];
 }
 
+function ahoraFmtLocal() {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(
+    d.getMinutes()
+  )}:${pad(d.getSeconds())}`;
+}
+
+function uidLocal(prefijo: string) {
+  return `${prefijo}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function leerArchivoComoDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ''));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+function claseDesdeFile(file: File): ClaseArchivo {
+  const t = file.type.toLowerCase();
+  const n = file.name.toLowerCase();
+  if (t.startsWith('image/')) return 'IMAGEN';
+  if (t.startsWith('video/') || /\.(mp4|webm|mov|avi)$/i.test(n)) return 'VIDEO';
+  if (t === 'application/pdf' || n.endsWith('.pdf')) return 'PDF';
+  if (t.includes('csv') || t.includes('text') || /\.(csv|txt|log|dat)$/i.test(n)) {
+    return 'DATALOG';
+  }
+  if (/\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(n)) return 'IMAGEN';
+  return 'PDF';
+}
+
+function etiquetaClase(clase: ClaseArchivo) {
+  switch (clase) {
+    case 'IMAGEN':
+      return 'imagen';
+    case 'VIDEO':
+      return 'video';
+    case 'DATALOG':
+      return 'data log';
+    case 'PDF':
+      return 'PDF';
+    default:
+      return 'archivo';
+  }
+}
+
 export function InfoDanoPanel({
   estimacion,
   dano,
@@ -62,17 +114,21 @@ export function InfoDanoPanel({
   onVerVideo: (dano: DanoEstimacion) => void;
 }) {
   const [bajando, setBajando] = useState<'fotos' | 'logs' | null>(null);
+  const [subiendo, setSubiendo] = useState(false);
   const [eliminar, setEliminar] = useState<ArchivoDano | FotoDano | null>(null);
   const [papelera, setPapelera] = useState<ArchivoDano | null>(null);
   const [previewLog, setPreviewLog] = useState(false);
   const [fotoAmpliada, setFotoAmpliada] = useState<FotoDano | null>(null);
+  const [grupoCarga, setGrupoCarga] = useState<GrupoArchivo>('ESTIMACION');
+  const [tipoFoto, setTipoFoto] = useState<'DANO' | 'REPARADO'>('DANO');
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const archivos = useMemo(
     () => (dano ? archivosDe(dano, estimacion) : []),
     [dano, estimacion]
   );
   const fotosVisibles = useMemo(
-    () => (dano ? fotosRealesDano(dano.fotos) : []),
+    () => (dano ? dano.fotos.filter((f) => !esFotoEsquema(f.url)) : []),
     [dano]
   );
   const logs = archivos.filter((a) => a.clase === 'DATALOG');
@@ -81,7 +137,11 @@ export function InfoDanoPanel({
     REPARADO: archivos.filter((a) => a.grupo === 'REPARADO'),
   };
 
-  function persistirArchivos(lista: ArchivoDano[], resumen: string, extra: Partial<DanoEstimacion> = {}) {
+  function persistirArchivos(
+    lista: ArchivoDano[],
+    resumen: string,
+    extra: Partial<DanoEstimacion> = {}
+  ) {
     if (!dano) return;
     onActualizar({ archivos: lista, ...extra }, resumen);
   }
@@ -93,7 +153,11 @@ export function InfoDanoPanel({
     }
     setBajando('fotos');
     try {
-      const n = await descargarFotosListaZip(fotosVisibles, estimacion.codigo, estimacion.contenedor);
+      const n = await descargarFotosListaZip(
+        fotosVisibles,
+        estimacion.codigo,
+        estimacion.contenedor
+      );
       toast(`${n} imagen(es) empaquetadas en el .zip.`, 'success');
     } catch {
       toast('No se pudo generar el zip de imágenes.', 'error');
@@ -115,6 +179,84 @@ export function InfoDanoPanel({
       toast('No se pudo generar el zip de data logs.', 'error');
     } finally {
       setBajando(null);
+    }
+  }
+
+  async function alElegirArchivos(lista: FileList | null) {
+    if (!dano || !editable || !lista?.length) return;
+    setSubiendo(true);
+    try {
+      const fecha = ahoraFmtLocal();
+      const nuevasFotos: FotoDano[] = [];
+      const nuevosArchivos: ArchivoDano[] = [];
+      let video = dano.tieneVideo;
+
+      for (const file of Array.from(lista)) {
+        const clase = claseDesdeFile(file);
+        const url = await leerArchivoComoDataUrl(file);
+        if (!url) continue;
+
+        if (clase === 'IMAGEN') {
+          nuevasFotos.push({
+            id: uidLocal('foto'),
+            url,
+            tipo: tipoFoto,
+            descripcion: file.name,
+            fecha,
+            importada: true,
+          });
+          nuevosArchivos.push({
+            id: uidLocal('img'),
+            url,
+            clase: 'IMAGEN',
+            grupo: grupoCarga,
+            nombre: file.name,
+            fecha,
+          });
+        } else {
+          if (clase === 'VIDEO') video = true;
+          nuevosArchivos.push({
+            id: uidLocal(clase.toLowerCase()),
+            url,
+            clase,
+            grupo: grupoCarga,
+            nombre: file.name,
+            fecha,
+          });
+        }
+      }
+
+      if (nuevasFotos.length === 0 && nuevosArchivos.length === 0) {
+        toast('No se pudo leer ningún archivo.', 'error');
+        return;
+      }
+
+      const otros = nuevosArchivos.filter((a) => a.clase !== 'IMAGEN');
+      const resumenPartes: string[] = [];
+      if (nuevasFotos.length) resumenPartes.push(`${nuevasFotos.length} foto(s)`);
+      if (otros.length) {
+        resumenPartes.push(
+          otros.map((a) => `${etiquetaClase(a.clase)}:${a.nombre}`).join(', ')
+        );
+      }
+
+      onActualizar(
+        {
+          fotos: [...dano.fotos, ...nuevasFotos],
+          archivos: [...archivos.filter((a) => !a.sintetico), ...nuevosArchivos],
+          tieneVideo: video,
+        },
+        `Línea ${dano.linea} · cargado: ${resumenPartes.join(' · ')}`
+      );
+      toast(
+        `Se cargaron ${nuevasFotos.length + otros.length} archivo(s) en la línea ${dano.linea}.`,
+        'success'
+      );
+    } catch {
+      toast('Error al cargar archivos. Intente de nuevo.', 'error');
+    } finally {
+      setSubiendo(false);
+      if (inputRef.current) inputRef.current.value = '';
     }
   }
 
@@ -141,13 +283,16 @@ export function InfoDanoPanel({
   function reversar(archivo: ArchivoDano) {
     if (!dano) return;
     const reversados = dano.archivosReversados ?? [];
-    const restaurar = papelera?.id === archivo.id ? papelera : reversados.find((a) => a.id === archivo.id);
+    const restaurar =
+      papelera?.id === archivo.id
+        ? papelera
+        : reversados.find((a) => a.id === archivo.id);
     if (!restaurar) {
       toast('El archivo está vigente; no hay nada que reversar.', 'info');
       return;
     }
     persistirArchivos(
-      [...archivos, restaurar],
+      [...archivos.filter((a) => !a.sintetico), restaurar],
       `Línea ${dano.linea} · archivo restaurado: ${restaurar.nombre}`,
       {
         archivosReversados: reversados.filter((a) => a.id !== restaurar.id),
@@ -165,6 +310,10 @@ export function InfoDanoPanel({
       return;
     }
     if (archivo.clase === 'DATALOG') {
+      if (archivo.url && !archivo.sintetico) {
+        window.open(archivo.url, '_blank', 'noopener,noreferrer');
+        return;
+      }
       setPreviewLog(true);
       return;
     }
@@ -172,7 +321,7 @@ export function InfoDanoPanel({
   }
 
   function bajarArchivo(archivo: ArchivoDano) {
-    if (archivo.sintetico || archivo.clase === 'DATALOG') {
+    if (archivo.sintetico || (archivo.clase === 'DATALOG' && !archivo.url)) {
       descargarDataLog(estimacion, `${archivo.nombre}.csv`);
       return;
     }
@@ -187,8 +336,8 @@ export function InfoDanoPanel({
         </header>
         <div className="dms-card-body">
           <p className="text-[11px] leading-relaxed text-gray-400">
-            Seleccione una línea del <strong>Listado de Daños</strong> para visualizar el anexo
-            fotográfico, videos, data logs o PDF asociados.
+            Seleccione una línea del <strong>Listado de Daños</strong> para visualizar o cargar
+            el anexo fotográfico, videos, data logs o PDF asociados.
           </p>
         </div>
       </section>
@@ -212,17 +361,95 @@ export function InfoDanoPanel({
           <span className="truncate text-[11px] text-slate-500">{dano.dano}</span>
         </div>
 
+        {editable && (
+          <div className="rounded-lg border border-dashed border-sky-200 bg-sky-50/60 p-3">
+            <p className="dms-field-label mb-2">Cargar evidencias</p>
+            <div className="mb-2 flex flex-wrap gap-2">
+              <label className="flex items-center gap-1.5 text-[11px] text-slate-600">
+                Grupo
+                <select
+                  className="dms-select h-8 text-[11px]"
+                  value={grupoCarga}
+                  onChange={(e) => setGrupoCarga(e.target.value as GrupoArchivo)}
+                >
+                  <option value="ESTIMACION">Estimación</option>
+                  <option value="REPARADO">Reparado</option>
+                </select>
+              </label>
+              <label className="flex items-center gap-1.5 text-[11px] text-slate-600">
+                Tipo foto
+                <select
+                  className="dms-select h-8 text-[11px]"
+                  value={tipoFoto}
+                  onChange={(e) => setTipoFoto(e.target.value as 'DANO' | 'REPARADO')}
+                >
+                  <option value="DANO">Daño / Estimación</option>
+                  <option value="REPARADO">Reparado</option>
+                </select>
+              </label>
+            </div>
+            <input
+              ref={inputRef}
+              type="file"
+              multiple
+              accept="image/*,video/*,.pdf,application/pdf,.csv,.txt,.log,.dat,text/csv,text/plain"
+              className="hidden"
+              onChange={(e) => void alElegirArchivos(e.target.files)}
+            />
+            <button
+              type="button"
+              className="dms-btn-azul inline-flex items-center gap-2 px-3 py-2 text-xs"
+              disabled={subiendo}
+              onClick={() => inputRef.current?.click()}
+            >
+              {subiendo ? (
+                <>Subiendo…</>
+              ) : (
+                <>
+                  <Upload className="h-3.5 w-3.5" />
+                  Subir fotos, PDF, video o data log
+                </>
+              )}
+            </button>
+            <p className="mt-1.5 text-[10px] leading-relaxed text-slate-500">
+              Acepta imágenes, PDF, videos y archivos de data log (.csv, .txt, .log). Quedan
+              asociados a la línea seleccionada.
+            </p>
+          </div>
+        )}
+
+        {!editable && (
+          <p className="rounded-md bg-amber-50 px-2.5 py-1.5 text-[10px] text-amber-800">
+            Aperture la estimación para cargar o eliminar evidencias (fotos, PDF, video, data
+            log).
+          </p>
+        )}
+
         <div>
           <p className="dms-field-label mb-1.5">Anexo Fotográfico</p>
-          <button
-            type="button"
-            className="dms-zip-btn"
-            disabled={bajando === 'fotos' || fotosVisibles.length === 0}
-            onClick={() => void bajarFotos()}
-          >
-            <Download className="h-3.5 w-3.5" />
-            {bajando === 'fotos' ? 'Preparando zip…' : 'Descargar todas las imágenes (.zip)'}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="dms-zip-btn"
+              disabled={bajando === 'fotos' || fotosVisibles.length === 0}
+              onClick={() => void bajarFotos()}
+            >
+              <Download className="h-3.5 w-3.5" />
+              {bajando === 'fotos' ? 'Preparando zip…' : 'Descargar todas las imágenes (.zip)'}
+            </button>
+            {editable && (
+              <button
+                type="button"
+                className="dms-zip-btn"
+                onClick={() => {
+                  setTipoFoto('DANO');
+                  inputRef.current?.click();
+                }}
+              >
+                <ImagePlus className="h-3.5 w-3.5" /> Cargar imágenes
+              </button>
+            )}
+          </div>
           {fotosVisibles.length === 0 ? (
             <p className="mt-2 text-[11px] text-slate-400">Esta línea aún no tiene fotografías.</p>
           ) : (
@@ -261,7 +488,7 @@ export function InfoDanoPanel({
         </div>
 
         <div>
-          <p className="dms-field-label mb-1.5">Archivos Data Log</p>
+          <p className="dms-field-label mb-1.5">Archivos Data Log / PDF / Video</p>
           <button
             type="button"
             className="dms-zip-btn"
@@ -284,6 +511,9 @@ export function InfoDanoPanel({
                       <FileText className="mt-0.5 h-4 w-4 shrink-0 text-[#152483]" />
                       <span className="break-all text-[11px] font-semibold text-slate-800">
                         {archivo.nombre}
+                        <span className="ml-1 font-normal text-slate-400">
+                          ({etiquetaClase(archivo.clase)})
+                        </span>
                       </span>
                     </div>
                     <div className="mt-1.5 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
@@ -336,7 +566,8 @@ export function InfoDanoPanel({
       >
         {eliminar && (
           <>
-            Se eliminará <strong>{'nombre' in eliminar ? eliminar.nombre : eliminar.descripcion}</strong> de
+            Se eliminará{' '}
+            <strong>{'nombre' in eliminar ? eliminar.nombre : eliminar.descripcion}</strong> de
             la línea {String(dano.linea).padStart(2, '0')}. Puede restaurarlo con Reversar.
           </>
         )}
@@ -347,82 +578,48 @@ export function InfoDanoPanel({
         onClose={() => setPreviewLog(false)}
         size="lg"
         icon={<FileText className="h-4 w-4" />}
-        title={`Data Log · ${nombreDataLog(estimacion.contenedor, estimacion.fechaElaboracion)}`}
-        subtitle={`${estimacion.contenedor} · ${estimacion.modeloMaquina}`}
+        title="Data Log"
+        subtitle={dano ? `Línea ${dano.linea} · ${estimacion.contenedor}` : undefined}
         footer={
-          <>
-            <button
-              type="button"
-              className="dms-btn-action border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
-              onClick={() => setPreviewLog(false)}
-            >
-              Cerrar
-            </button>
-            <button
-              type="button"
-              className="dms-btn-azul px-4 py-2 text-sm"
-              onClick={() =>
-                descargarDataLog(
-                  estimacion,
-                  `${nombreDataLog(estimacion.contenedor, estimacion.fechaElaboracion)}.csv`
-                )
-              }
-            >
-              <Download className="h-4 w-4" /> Descargar CSV
-            </button>
-          </>
+          <button
+            type="button"
+            className="dms-btn-azul inline-flex items-center gap-2 px-3 py-2 text-sm"
+            onClick={() =>
+              descargarDataLog(
+                estimacion,
+                `DataLog_${estimacion.contenedor}_${estimacion.codigo}.csv`
+              )
+            }
+          >
+            <Download className="h-4 w-4" /> Descargar CSV
+          </button>
         }
       >
-        <div className="max-h-[55vh] overflow-auto rounded-lg border border-slate-200">
-          <table className="dms-table text-[10px]">
-            <thead>
-              <tr>
-                {filasLog[0]?.split(';').map((h) => (
-                  <th key={h}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filasLog.slice(1, 25).map((fila, i) => (
-                <tr key={i}>
-                  {fila.split(';').map((c, j) => (
-                    <td key={j} className={c === 'ALARMA' ? 'font-bold text-red-600' : ''}>
-                      {c || '—'}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="px-3 py-2 text-[10px] text-slate-400">Mostrando las primeras 24 lecturas de 96.</p>
+        <div className="max-h-[50vh] overflow-auto rounded border border-slate-200 bg-white text-[11px]">
+          <pre className="whitespace-pre-wrap p-3 font-mono text-slate-700">
+            {filasLog.slice(0, 40).join('\n')}
+            {filasLog.length > 40 ? '\n…' : ''}
+          </pre>
         </div>
       </Modal>
 
-      {fotoAmpliada && (
-        <div className="dms-lightbox" onClick={() => setFotoAmpliada(null)}>
-          <figure className="dms-lightbox-figure" onClick={(e) => e.stopPropagation()}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={fotoAmpliada.url}
-              alt={fotoAmpliada.descripcion}
-              className="max-h-[78vh] w-auto rounded-lg object-contain shadow-2xl"
-            />
-            <figcaption className="dms-lightbox-caption">
-              <span className="font-semibold">
-                {fotoAmpliada.tipo === 'DANO' ? 'Estimación' : 'Reparado'}
-              </span>{' '}
-              · {fotoAmpliada.descripcion} · {fotoAmpliada.fecha}
-            </figcaption>
-          </figure>
-        </div>
-      )}
+      <Modal
+        open={!!fotoAmpliada}
+        onClose={() => setFotoAmpliada(null)}
+        size="lg"
+        icon={<ImagePlus className="h-4 w-4" />}
+        title={fotoAmpliada?.descripcion ?? 'Foto'}
+        subtitle={fotoAmpliada?.fecha}
+      >
+        {fotoAmpliada && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={fotoAmpliada.url}
+            alt={fotoAmpliada.descripcion}
+            className="mx-auto max-h-[70vh] w-auto rounded-lg object-contain"
+          />
+        )}
+      </Modal>
     </section>
   );
-}
-
-function etiquetaClase(clase: ClaseArchivo) {
-  if (clase === 'IMAGEN') return 'Imagen';
-  if (clase === 'VIDEO') return 'Video';
-  if (clase === 'PDF') return 'PDF';
-  return 'Data Log';
 }

@@ -205,6 +205,8 @@ export interface DanoEstimacion {
   /** Videos, data logs y PDF. Si es undefined, el panel muestra un data log de ejemplo. */
   archivos?: ArchivoDano[];
   archivosReversados?: ArchivoDano[];
+  /** Marca explícita: la línea no tiene tarifa de catálogo. */
+  sinTarifa?: boolean;
   comentarios: ComentarioDano[];
   /** Resumen de la última edición (subfila de color en el listado). */
   edicionReciente?: EdicionRecienteDano;

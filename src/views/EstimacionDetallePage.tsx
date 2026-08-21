@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   ArrowLeft,
   CheckCircle2,
+  Database,
   FileStack,
   ListChecks,
   Lock,
@@ -14,10 +15,11 @@ import {
   Save,
   Send,
   StickyNote,
-  Trash2,
   Unlock,
   Upload,
+  Wrench,
   XCircle,
+  Pencil,
 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { EstadoEstimacionBadge } from '@/components/dms/EstadoEstimacionBadge';
@@ -38,11 +40,10 @@ import {
   notificarRechazoALiquidaciones,
 } from '@/components/estimacion/ConfirmacionEstimacionModal';
 import { ListadoDanosTable } from '@/components/estimacion/ListadoDanosTable';
-import { RespuestaSeaboardBanner } from '@/components/estimacion/RespuestaSeaboardBanner';
+import { AgregarDanoCard } from '@/components/estimacion/AgregarDanoCard';
 import { VideoDanoModal } from '@/components/estimacion/VideoDanoModal';
 import {
   esNavieraSeaboard,
-  enBandejaSeaboard,
   puedeValidarLiquidaciones,
 } from '@/lib/seaboardFlow';
 import { useAuthStore } from '@/store';
@@ -148,7 +149,6 @@ type Dialogo =
   | { tipo: 'CERRAR_APERTURA'; resumen: string[] }
   | { tipo: 'SALIR_BLOQUEADO' }
   | { tipo: 'SALIR_SIN_ACCION' }
-  | { tipo: 'ELIMINAR_EST' }
   | { tipo: 'REVERSAR_APROB' }
   | { tipo: 'ELIMINAR_DANO'; danoId: string; linea: number }
   | { tipo: 'PUSH_SBM' };
@@ -165,9 +165,11 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     aprobar,
     rechazar,
     reversarAprobacion,
-    eliminar,
     eliminarDano,
     actualizarDano,
+    agregarDano,
+    setSap,
+    marcarReparado,
     resolverItemsMasivo,
     agregarComentarioDano,
     agregarNota,
@@ -184,12 +186,20 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   const [aperturada, setAperturada] = useState(false);
   const [snapshotApertura, setSnapshotApertura] = useState<SnapshotApertura | null>(null);
   const [marcadosIds, setMarcadosIds] = useState<string[]>([]);
+  const [itinerarioSap, setItinerarioSapLocal] = useState('');
+  const [almacenSap, setAlmacenSapLocal] = useState('');
   const snapshotRef = useRef<SnapshotApertura | null>(null);
   const vistaRegistradaRef = useRef<string | null>(null);
 
   useEffect(() => {
     snapshotRef.current = snapshotApertura;
   }, [snapshotApertura]);
+
+  useEffect(() => {
+    if (!estimacion) return;
+    setItinerarioSapLocal(estimacion.itinerarioSap || '');
+    setAlmacenSapLocal(estimacion.almacenSap || '');
+  }, [estimacion?.id, estimacion?.itinerarioSap, estimacion?.almacenSap]);
 
   useEffect(() => {
     if (!estimacion) return;
@@ -304,20 +314,30 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   const esOperadorDms = user?.rol === 'dms';
   const esSeaboard = user?.rol === 'seaboard';
   const esLiquidaciones = user?.rol === 'liquidaciones';
-  const enSbm = enBandejaSeaboard(estimacion);
   const esSeaboardNav = esNavieraSeaboard(estimacion.naviera);
   /**
    * Gestor Seaboard: aperturar · modificar · aprobar/rechazar ítems y estimado.
-   * Liquidaciones: validar · push a SBM (Seaboard) · reversar aprobación · eliminar · ítems.
+   * Liquidaciones: validar · enviar a SBM (Seaboard) · reversar aprobación · eliminar · ítems.
    */
   const puedeRevisarItems =
     esSeaboard && ESTADOS_SEABOARD.includes(estimacion.estado);
   const puedeEditarLiquidaciones =
     esLiquidaciones &&
-    !enSbm &&
-    ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(estimacion.estado);
-  const puedeAperturar = puedeRevisarItems || puedeEditarLiquidaciones;
+    ['PENDIENTE', 'RECHAZADO', 'REVERSADO', 'APROBADO', 'REPARADO'].includes(
+      estimacion.estado
+    );
+  /** Vista post-aprobación Liquidaciones (como DMS). */
+  const vistaAprobadoLiq =
+    esLiquidaciones && estimacion.estado === 'APROBADO';
+  const vistaReparadoLiq =
+    esLiquidaciones && estimacion.estado === 'REPARADO';
+  const vistaCerradaLiq = vistaAprobadoLiq || vistaReparadoLiq;
+  const puedeAperturar =
+    (puedeRevisarItems || puedeEditarLiquidaciones) && !vistaCerradaLiq;
   const editable = aperturada && (esSeaboard || esLiquidaciones);
+  /** Liquidaciones puede cargar evidencias (fotos, PDF, video, data log) al aperturar. */
+  const puedeCargarEvidencias =
+    (editable && (esLiquidaciones || esSeaboard)) || vistaCerradaLiq;
   const puedeEnviarLiquidaciones =
     esSeaboard && ESTADOS_SEABOARD.includes(estimacion.estado);
   const puedeEnviarASeaboard =
@@ -327,15 +347,22 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     (esOperadorDms || (esLiquidaciones && !!estimacion.validadoLiquidaciones));
   const puedeValidarLiq =
     esLiquidaciones && puedeValidarLiquidaciones(estimacion);
-  const puedeReversarAprobLiq =
-    esLiquidaciones && ['APROBADO', 'REPARADO'].includes(estimacion.estado);
-  const puedeEliminarEst =
-    esLiquidaciones &&
-    !enSbm &&
-    ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(estimacion.estado);
+  /** Solo APROBADO: se puede reparar o reversar. REPARADO ya no. */
+  const puedeReversarAprobLiq = vistaAprobadoLiq;
+  const puedeRepararLiq = vistaAprobadoLiq;
+  /** APROBADO y REPARADO: Actualizar Información Contenedor. */
+  const puedeActualizarContenedorLiq = vistaCerradaLiq;
   const puedeComentar = esSeaboard || esLiquidaciones;
-  const puedeEditarNotas = editable;
-  const puedeRevalidar = editable && esSeaboard;
+  /** Pendiente: SAP + Agregar daño + notas (inhabilitados hasta aperturar). */
+  const mostrarAgregarDanoLiq =
+    esLiquidaciones &&
+    ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(estimacion.estado);
+  /** APROBADO/REPARADO/PENDIENTE: SAP y notas visibles. */
+  const mostrarSapNotasLiq = mostrarAgregarDanoLiq || vistaCerradaLiq;
+  /** En APROBADO/REPARADO los campos van habilitados (sin aperturar). */
+  const formulariosLiqActivos = vistaCerradaLiq || aperturada;
+  const puedeEditarNotas = editable || mostrarSapNotasLiq;
+  const puedeRevalidar = editable && (esSeaboard || esLiquidaciones);
   const danoSeleccionado = estimacion.danos.find((d) => d.id === danoSelId) ?? null;
   const pendientes = contarComentariosPendientes(estimacion.danos);
   const itemsPendientesRevision = itemsSinRevisionSbm(estimacion.danos);
@@ -598,33 +625,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 {estimacion.naviera}
               </p>
             </div>
-            {esLiquidaciones && (
-              <div className="dms-info-box mt-2 w-full max-w-3xl">
-                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-200/70 text-xs font-bold">
-                  i
-                </span>
-                <div className="text-xs leading-relaxed text-slate-700">
-                  <strong>Aprobaciones de Estimados</strong>
-                  {user?.pais ? ` · ${user.pais === 'PERU' ? 'Perú' : 'Ecuador'}` : ''}.
-                  Valide el estimado y, si la naviera es Seaboard, haga <strong>Push a SBM</strong>{' '}
-                  (queda en el reporte Seaboard en estado pendiente). Puede reversar aprobación,
-                  eliminar el estimado o ítems. Al volver de Seaboard verá modificados / rechazados.
-                </div>
-              </div>
-            )}
-            {esLiquidaciones && <RespuestaSeaboardBanner estimacion={estimacion} />}
-            {esLiquidaciones && enSbm && (
-              <div className="dms-info-box mt-1 w-full max-w-3xl border-sky-200 bg-sky-50">
-                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sky-200/70 text-xs font-bold">
-                  →
-                </span>
-                <div className="text-xs leading-relaxed text-slate-700">
-                  <strong>En bandeja Seaboard</strong> · estado pendiente de revisión SBM
-                  {estimacion.fechaEnvio ? ` · enviado ${estimacion.fechaEnvio}` : ''}.
-                  Espere la decisión (aprobado / rechazado con comentarios).
-                </div>
-              </div>
-            )}
             <div className="flex flex-wrap items-center gap-2">
               <EstadoEstimacionBadge estado={estimacion.estado} />
               <span className="dms-hero-chip">
@@ -702,6 +702,41 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   <Unlock className="h-3 w-3" /> Estimación aperturada
                 </span>
               )}
+              {puedeRepararLiq && (
+                <button
+                  type="button"
+                  className="dms-btn-reparar"
+                  onClick={() => {
+                    marcarReparado(estimacion.id, actor);
+                    toast(
+                      `Estimación ${estimacion.codigo} marcada como REPARADO.`,
+                      'success'
+                    );
+                  }}
+                >
+                  <Wrench className="h-4 w-4" /> Reparar
+                </button>
+              )}
+              {puedeActualizarContenedorLiq && (
+                <button
+                  type="button"
+                  className="dms-btn-azul"
+                  onClick={() => {
+                    registrarActividad(
+                      estimacion.id,
+                      actor,
+                      'Actualizó información del contenedor',
+                      `${actor} actualizó información del contenedor ${estimacion.contenedor}`
+                    );
+                    toast(
+                      'Información del contenedor actualizada (prototipo).',
+                      'success'
+                    );
+                  }}
+                >
+                  <Pencil className="h-4 w-4" /> Actualizar Información Contenedor
+                </button>
+              )}
               {puedeRevalidar && (
                 <button
                   type="button"
@@ -718,13 +753,15 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   <RefreshCw className="h-4 w-4" /> Revalidar Tarifas
                 </button>
               )}
-              <button
-                type="button"
-                className="dms-btn-azul"
-                onClick={() => setDialogo({ tipo: 'FOTOS', danoId: 'TODAS' })}
-              >
-                <FileStack className="h-4 w-4" /> Ver evidencias
-              </button>
+              {!vistaCerradaLiq && (
+                <button
+                  type="button"
+                  className="dms-btn-azul"
+                  onClick={() => setDialogo({ tipo: 'FOTOS', danoId: 'TODAS' })}
+                >
+                  <FileStack className="h-4 w-4" /> Ver evidencias
+                </button>
+              )}
             </div>
 
             <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
@@ -747,15 +784,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   onClick={() => setDialogo({ tipo: 'REVERSAR_APROB' })}
                 >
                   Reversar aprobación
-                </button>
-              )}
-              {puedeEliminarEst && (
-                <button
-                  type="button"
-                  className="dms-btn-eliminar"
-                  onClick={() => setDialogo({ tipo: 'ELIMINAR_EST' })}
-                >
-                  <Trash2 className="h-4 w-4" /> Eliminar
                 </button>
               )}
               {puedeEnviarLiquidaciones && (
@@ -796,9 +824,9 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   disabled={estimacion.danos.length === 0 || aperturada}
                   title={
                     aperturada
-                      ? 'Cierre la estimación antes del push a SBM'
+                      ? 'Cierre la estimación antes del enviar a SBM'
                       : esLiquidaciones
-                        ? 'Push a SBM · el estimado queda pendiente en el reporte Seaboard'
+                        ? 'Enviar a SBM · el estimado queda pendiente en el reporte Seaboard'
                         : 'Enviar a Seaboard Marine'
                   }
                   onClick={() => {
@@ -814,7 +842,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   }}
                 >
                   <Upload className="h-4 w-4" />{' '}
-                  {esLiquidaciones ? 'Push a SBM' : 'Enviar a Seaboard'}
+                  {esLiquidaciones ? 'Enviar a SBM' : 'Enviar a Seaboard'}
                 </button>
               )}
               {estimacion.estado === 'ENVIADO' && esOperadorDms && (
@@ -842,6 +870,80 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
 
           <div className="grid items-start gap-3 xl:grid-cols-[minmax(0,1fr)_380px]">
             <div className="min-w-0 space-y-3">
+              {mostrarSapNotasLiq && (
+                <section className="dms-card">
+                  <header className="dms-card-header">
+                    <Database className="h-3.5 w-3.5" /> Información SAP
+                  </header>
+                  <div className="dms-card-body grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <label className="dms-field-label">Itinerario Sap</label>
+                      <input
+                        className="dms-input-sm"
+                        value={itinerarioSap}
+                        placeholder="digitar descripcion"
+                        disabled={!formulariosLiqActivos}
+                        onChange={(e) => setItinerarioSapLocal(e.target.value)}
+                        onBlur={() => {
+                          if (!formulariosLiqActivos) return;
+                          if (itinerarioSap === (estimacion.itinerarioSap || '')) return;
+                          setSap(estimacion.id, { itinerarioSap }, actor);
+                        }}
+                        onFocus={() => {
+                          if (!formulariosLiqActivos) {
+                            toast('Aperture la estimación para editar SAP.', 'info');
+                          }
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="dms-field-label">Almacen Sap</label>
+                      <select
+                        className="dms-select h-9 w-full text-xs"
+                        value={almacenSap}
+                        disabled={!formulariosLiqActivos}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          setAlmacenSapLocal(v);
+                          if (!formulariosLiqActivos) return;
+                          setSap(estimacion.id, { almacenSap: v }, actor);
+                        }}
+                        onFocus={() => {
+                          if (!formulariosLiqActivos) {
+                            toast('Aperture la estimación para editar SAP.', 'info');
+                          }
+                        }}
+                      >
+                        <option value="">Seleccione un Almacen Sap</option>
+                        <option value="RFS1">RFS 1</option>
+                        <option value="RFS2">RFS 2</option>
+                        <option value="PATIO-EC">Patio Ecuador</option>
+                        <option value="PATIO-PE">Patio Perú</option>
+                      </select>
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {mostrarAgregarDanoLiq && (
+                <AgregarDanoCard
+                  editable={aperturada}
+                  seccionSugerida={
+                    estimacion.tipoEstimacion.toUpperCase().includes('BOX')
+                      ? 'ESTRUCTURAL'
+                      : 'MAQUINA'
+                  }
+                  onAgregar={(dano) => {
+                    if (!aperturada) {
+                      toast('Aperture la estimación para agregar daños.', 'info');
+                      return;
+                    }
+                    agregarDano(estimacion.id, dano, actor);
+                    toast('Daño agregado al listado.', 'success');
+                  }}
+                />
+              )}
+
               <section className="dms-card">
                 <header className="dms-card-header">
                   <StickyNote className="h-3.5 w-3.5" /> Notas de Estimación
@@ -851,15 +953,23 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                     <>
                       <textarea
                         rows={3}
-                        className="w-full rounded-lg border border-gray-300 bg-white p-2.5 text-xs shadow-sm transition-colors focus:border-rfsorange-500 focus:outline-none focus:ring-2 focus:ring-rfsorange-500/20"
+                        className="w-full rounded-lg border border-gray-300 bg-white p-2.5 text-xs shadow-sm transition-colors focus:border-rfsorange-500 focus:outline-none focus:ring-2 focus:ring-rfsorange-500/20 disabled:bg-slate-50 disabled:text-slate-500"
                         value={nota}
                         placeholder="Escriba una nota para el estimado…"
+                        disabled={mostrarSapNotasLiq ? !formulariosLiqActivos : !editable}
                         onChange={(e) => {
-                          if (exigirApertura()) return;
+                          if (mostrarSapNotasLiq && !formulariosLiqActivos) {
+                            toast('Aperture la estimación para agregar notas.', 'info');
+                            return;
+                          }
+                          if (!vistaCerradaLiq && exigirApertura()) return;
                           setNota(e.target.value);
                         }}
                         onFocus={() => {
-                          if (!aperturada) {
+                          if (
+                            !formulariosLiqActivos &&
+                            (mostrarAgregarDanoLiq || puedeAperturar)
+                          ) {
                             toast('Aperture la estimación para modificar ítems.', 'info');
                           }
                         }}
@@ -867,15 +977,24 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                       <button
                         type="button"
                         className="dms-btn-primary mt-2 px-4 py-2 text-sm disabled:opacity-50"
-                        disabled={nota.trim().length < 3 || !aperturada}
+                        disabled={
+                          nota.trim().length < 3 ||
+                          (mostrarSapNotasLiq ? !formulariosLiqActivos : !aperturada)
+                        }
                         onClick={() => {
-                          if (exigirApertura()) return;
+                          if (!vistaCerradaLiq && exigirApertura()) return;
+                          if (vistaCerradaLiq && !formulariosLiqActivos) return;
                           agregarNota(estimacion.id, nota.trim(), actor);
                           setNota('');
                           toast('Nota agregada al estimado.', 'success');
                         }}
                       >
-                        <Save className="h-4 w-4" /> Agregar
+                        {formulariosLiqActivos || !mostrarSapNotasLiq ? (
+                          <Save className="h-4 w-4" />
+                        ) : (
+                          <Lock className="h-4 w-4" />
+                        )}{' '}
+                        Agregar
                       </button>
                     </>
                   ) : estimacion.notas.length === 0 ? (
@@ -1094,7 +1213,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
             <InfoDanoPanel
               estimacion={estimacion}
               dano={danoSeleccionado}
-              editable={editable}
+              editable={puedeCargarEvidencias}
               onActualizar={(cambios, resumen) => {
                 if (!danoSeleccionado) return;
                 cambiarDano(danoSeleccionado, cambios, resumen);
@@ -1142,9 +1261,9 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       {/* Push / envío a bandeja Seaboard (queda PENDIENTE de revisión SBM) */}
       <ConfirmModal
         open={dialogo.tipo === 'ENVIAR_SEABOARD' || dialogo.tipo === 'PUSH_SBM'}
-        title="Push a Seaboard Marine"
+        title="Enviar a Seaboard Marine"
         subtitle={`${estimacion.codigo} · ${estimacion.contenedor} · ${estimacion.naviera}`}
-        confirmLabel="Confirmar push a SBM"
+        confirmLabel="Confirmar envío a SBM"
         confirmClass="dms-btn-enviar"
         onClose={cerrar}
         onConfirm={() => {
@@ -1160,26 +1279,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
           El estimado validado se envía al <strong>reporte / bandeja Seaboard</strong> en estado{' '}
           <strong>PENDIENTE</strong>. El gestor Seaboard podrá modificar ítems, comentar y
           devolverlo <strong>aprobado o rechazado</strong> a liquidaciones.
-        </p>
-      </ConfirmModal>
-
-      <ConfirmModal
-        open={dialogo.tipo === 'ELIMINAR_EST'}
-        title="Eliminar estimación"
-        subtitle={estimacion.codigo}
-        confirmLabel="Eliminar"
-        confirmClass="dms-btn-eliminar"
-        onClose={cerrar}
-        onConfirm={() => {
-          eliminar(estimacion.id, actor);
-          toast(`Estimación ${estimacion.codigo} eliminada.`, 'success');
-          cerrar();
-          router.push('/reportes/estimaciones');
-        }}
-      >
-        <p className="text-sm text-gray-600">
-          Se eliminará el estimado <strong>{estimacion.codigo}</strong> del reporte de
-          liquidaciones. Esta acción es solo de prototipo.
         </p>
       </ConfirmModal>
 
