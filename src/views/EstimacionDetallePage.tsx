@@ -46,7 +46,7 @@ import { AgregarDanoCard } from '@/components/estimacion/AgregarDanoCard';
 import { VideoDanoModal } from '@/components/estimacion/VideoDanoModal';
 import {
   esNavieraSeaboard,
-  puedeValidarLiquidaciones,
+  puedePushASbm,
 } from '@/lib/seaboardFlow';
 import { useAuthStore } from '@/store';
 import { useEstimacionesStore } from '@/store/estimacionesStore';
@@ -165,7 +165,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     getByCodigo,
     revalidarTarifas,
     enviarAprobacion,
-    validarLiquidaciones,
     aprobar,
     rechazar,
     reversarAprobacion,
@@ -349,9 +348,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     esSeaboardNav &&
     estimacion.enviarAprobacion !== 'SI' &&
     ESTADOS_DMS_ENVIO.includes(estimacion.estado) &&
-    (esOperadorDms || (esLiquidaciones && !!estimacion.validadoLiquidaciones));
-  const puedeValidarLiq =
-    esLiquidaciones && puedeValidarLiquidaciones(estimacion);
+    (esOperadorDms || (esLiquidaciones && puedePushASbm(estimacion)));
   /** Solo APROBADO: se puede reparar o reversar. REPARADO ya no. */
   const puedeReversarAprobLiq = vistaAprobadoLiq;
   const puedeRepararLiq = vistaAprobadoLiq;
@@ -814,18 +811,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
             </div>
 
             <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
-              {puedeValidarLiq && (
-                <button
-                  type="button"
-                  className="dms-btn-aprobar"
-                  onClick={() => {
-                    validarLiquidaciones(estimacion.id, actor);
-                    toast('Estimado validado por liquidaciones.', 'success');
-                  }}
-                >
-                  <CheckCircle2 className="h-4 w-4" /> Validar liquidaciones
-                </button>
-              )}
               {puedeReversarAprobLiq && (
                 <button
                   type="button"
@@ -875,16 +860,12 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                     aperturada
                       ? 'Cierre la estimación antes del enviar a SBM'
                       : esLiquidaciones
-                        ? 'Enviar a SBM · el estimado queda pendiente en el reporte Seaboard'
+                        ? 'Enviar a SBM · el estimado queda ENVIADO en el reporte Seaboard'
                         : 'Enviar a Seaboard Marine'
                   }
                   onClick={() => {
                     if (aperturada) {
                       toast('Cierre la estimación antes de enviarla a Seaboard Marine.', 'info');
-                      return;
-                    }
-                    if (esLiquidaciones && !estimacion.validadoLiquidaciones) {
-                      toast('Primero valide el estimado con liquidaciones.', 'info');
                       return;
                     }
                     setDialogo({ tipo: 'ENVIAR_SEABOARD' });
@@ -1299,7 +1280,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
         }}
       />
 
-      {/* Push / envío a bandeja Seaboard (queda PENDIENTE de revisión SBM) */}
+      {/* Push / envío a bandeja Seaboard (queda ENVIADO) */}
       <ConfirmModal
         open={dialogo.tipo === 'ENVIAR_SEABOARD' || dialogo.tipo === 'PUSH_SBM'}
         title="Enviar a Seaboard Marine"
@@ -1310,15 +1291,15 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
         onConfirm={() => {
           enviarAprobacion([estimacion.id], actor);
           toast(
-            `Estimación ${estimacion.codigo} enviada a Seaboard (estado PENDIENTE).`,
+            `Estimación ${estimacion.codigo} enviada a Seaboard (estado ENVIADO).`,
             'success'
           );
           cerrar();
         }}
       >
         <p className="text-sm leading-relaxed text-gray-600">
-          El estimado validado se envía al <strong>reporte / bandeja Seaboard</strong> en estado{' '}
-          <strong>PENDIENTE</strong>. El gestor Seaboard podrá modificar ítems, comentar y
+          El estimado se envía al <strong>reporte / bandeja Seaboard</strong> en estado{' '}
+          <strong>ENVIADO</strong>. El gestor Seaboard podrá modificar ítems, comentar y
           devolverlo <strong>aprobado o rechazado</strong> a liquidaciones.
         </p>
       </ConfirmModal>

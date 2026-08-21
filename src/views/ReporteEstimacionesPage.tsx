@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import {
   ChevronDown,
   ChevronRight,
-  CheckCircle2,
   Database,
   Download,
   Eye,
@@ -45,7 +44,6 @@ import {
   esNavieraSeaboard,
   enBandejaSeaboard,
   puedePushASbm,
-  puedeValidarLiquidaciones,
 } from '@/lib/seaboardFlow';
 import {
   ACTIVIDADES,
@@ -213,7 +211,6 @@ export default function ReporteEstimacionesPage() {
   const {
     estimaciones,
     enviarAprobacion,
-    validarLiquidaciones,
     aprobar,
     rechazar,
     reversarAprobacion,
@@ -439,16 +436,13 @@ export default function ReporteEstimacionesPage() {
         )}
         {['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) &&
           (user?.rol === 'dms' ||
-            (esLiquidaciones &&
-              esNavieraSeaboard(row.naviera) &&
-              row.validadoLiquidaciones &&
-              row.enviarAprobacion !== 'SI')) && (
+            (esLiquidaciones && puedePushASbm(row))) && (
           <button
             type="button"
             className="dms-icon-action dms-icon-action--enviar"
             title={
               esLiquidaciones
-                ? 'Enviar a SBM · queda pendiente en reporte Seaboard'
+                ? 'Enviar a SBM · queda ENVIADO en reporte Seaboard'
                 : 'Enviar a Seaboard Marine'
             }
             onClick={() => {
@@ -460,19 +454,6 @@ export default function ReporteEstimacionesPage() {
             ) : (
               <Send className="h-3.5 w-3.5" />
             )}
-          </button>
-        )}
-        {esLiquidaciones && puedeValidarLiquidaciones(row) && (
-          <button
-            type="button"
-            className="dms-icon-action dms-icon-action--enviar"
-            title="Validar por liquidaciones"
-            onClick={() => {
-              validarLiquidaciones(row.id, actor);
-              toast(`${row.codigo} validado por liquidaciones.`, 'success');
-            }}
-          >
-            <CheckCircle2 className="h-3.5 w-3.5" />
           </button>
         )}
         {esLiquidaciones && row.estado === 'APROBADO' && (
@@ -537,8 +518,8 @@ export default function ReporteEstimacionesPage() {
 
   const subtituloReporte = esLiquidaciones
     ? user?.pais === 'PERU'
-      ? 'Aprobaciones de Estimados · Perú · Validar, enviar a SBM, reversar y eliminar'
-      : 'Aprobaciones de Estimados · Ecuador · Validar, enviar a SBM, reversar y eliminar'
+      ? 'Aprobaciones de Estimados · Perú · Enviar a SBM, reversar y eliminar'
+      : 'Aprobaciones de Estimados · Ecuador · Enviar a SBM, reversar y eliminar'
     : 'Usuario Seaboard · Ver, modificar y aprobar / rechazar estimados';
 
   return (
@@ -803,7 +784,7 @@ export default function ReporteEstimacionesPage() {
                               {esLiquidaciones && <ChipsRetornoSeaboard estimacion={row} />}
                               {esLiquidaciones && enBandejaSeaboard(row) && (
                                 <span className="mt-1 block rounded bg-sky-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-sky-800">
-                                  En SBM · pendiente
+                                  En SBM · {row.estado === 'ENVIADO' ? 'enviado' : 'pendiente'}
                                 </span>
                               )}
                             </td>
@@ -1239,21 +1220,21 @@ export default function ReporteEstimacionesPage() {
           if (!activa) return;
           if (esLiquidaciones && !puedePushASbm(activa)) {
             toast(
-              'Valide el estimado y confirme que la naviera es Seaboard antes del push.',
+              'Confirme que la naviera es Seaboard y que el estimado aún no fue enviado.',
               'info'
             );
             return;
           }
           enviarAprobacion([activa.id], actor);
           toast(
-            `Estimación ${activa.codigo} enviada a Seaboard (estado PENDIENTE).`,
+            `Estimación ${activa.codigo} enviada a Seaboard (estado ENVIADO).`,
             'success'
           );
           cerrar();
         }}
       >
         <p className="text-sm leading-relaxed text-gray-600">
-          El estimado validado se envía al reporte Seaboard en estado <strong>PENDIENTE</strong>.
+          El estimado se envía al reporte Seaboard en estado <strong>ENVIADO</strong>.
           Cuando el gestor lo apruebe o rechace (con comentarios y cambios), volverá visible aquí
           con el detalle de ítems modificados / rechazados.
         </p>

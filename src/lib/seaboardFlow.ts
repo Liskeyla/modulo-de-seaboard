@@ -18,19 +18,10 @@ export function enBandejaSeaboard(e: Estimacion) {
   );
 }
 
-/** Liquidaciones ya validó y puede hacer push a SBM (solo Seaboard). */
+/** Liquidaciones puede enviar a SBM (solo Seaboard, aún no enviado). */
 export function puedePushASbm(e: Estimacion) {
   return (
-    !!e.validadoLiquidaciones &&
     esNavieraSeaboard(e.naviera) &&
-    e.enviarAprobacion !== 'SI' &&
-    ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(e.estado)
-  );
-}
-
-export function puedeValidarLiquidaciones(e: Estimacion) {
-  return (
-    !e.validadoLiquidaciones &&
     e.enviarAprobacion !== 'SI' &&
     ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(e.estado) &&
     e.danos.length > 0

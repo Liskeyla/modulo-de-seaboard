@@ -219,8 +219,8 @@ export const useEstimacionesStore = create<EstimacionesState>()(
               const destino = 'Seaboard Marine';
               return {
                 ...e,
-                /** Llega a la bandeja Seaboard en estado pendiente de revisión. */
-                estado: 'PENDIENTE' as EstadoEstimacion,
+                /** Llega a la bandeja Seaboard en estado ENVIADO. */
+                estado: 'ENVIADO' as EstadoEstimacion,
                 enviarAprobacion: 'SI',
                 validadoLiquidaciones: true,
                 /** Fecha en que Liquidaciones envió el estimado al reporte Seaboard. */
@@ -233,7 +233,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                     'ENVIAR',
                     pendientesLiq > 0
                       ? `Enviar a SBM · ${pendientesLiq} comentario(s) de liquidaciones pendientes.`
-                      : 'Enviar a SBM · estimado validado por liquidaciones, pendiente de revisión Seaboard.',
+                      : 'Enviar a SBM · estimado en revisión Seaboard.',
                     usuario
                   ),
                 ],
@@ -242,7 +242,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                   evento(
                     usuario,
                     'PUSH A SEABOARD',
-                    `Enviado a ${destino} (estado PENDIENTE) · $${e.pvpTotal.toFixed(2)}` +
+                    `Enviado a ${destino} (estado ENVIADO) · $${e.pvpTotal.toFixed(2)}` +
                       (pendientesLiq > 0
                         ? ` · ${pendientesLiq} comentario(s) liquidaciones pendientes`
                         : '')
