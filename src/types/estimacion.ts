@@ -22,7 +22,6 @@ export const APLICA_DANO = [
   'Aprobado por Linea SBM',
   'Rechazado SBM',
   'Aprobado Linea',
-  'Aprobado Dueño',
   'Rechazado',
   'No Aplica',
 ] as const;

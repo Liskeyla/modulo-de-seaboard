@@ -15,7 +15,7 @@ import type {
 } from '@/types/estimacion';
 import { APLICA_APROBADO_SBM, APLICA_RECHAZADO_SBM } from '@/types/estimacion';
 
-const STORAGE_KEY = 'dms-estimaciones-prototipo-v8';
+const STORAGE_KEY = 'dms-estimaciones-prototipo-v9';
 const CLAVES_OBSOLETAS = [
   'dms-estimaciones-prototipo',
   'dms-estimaciones-prototipo-v2',
@@ -24,6 +24,7 @@ const CLAVES_OBSOLETAS = [
   'dms-estimaciones-prototipo-v5',
   'dms-estimaciones-prototipo-v6',
   'dms-estimaciones-prototipo-v7',
+  'dms-estimaciones-prototipo-v8',
 ];
 
 function ahoraFmt() {
