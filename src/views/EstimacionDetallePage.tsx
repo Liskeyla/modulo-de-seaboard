@@ -17,7 +17,6 @@ import {
   Search,
   Send,
   StickyNote,
-  Wrench,
   XCircle,
 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
@@ -58,7 +57,6 @@ type Dialogo =
   | { tipo: 'APORTAR' }
   | { tipo: 'ENVIAR' }
   | { tipo: 'RECHAZAR' }
-  | { tipo: 'REPARADO' }
   | { tipo: 'ELIMINAR_DANO'; dano: DanoEstimacion }
   | { tipo: 'EDITAR_DANO'; dano: DanoEstimacion }
   | { tipo: 'COMENTARIOS'; danoId: string }
@@ -78,7 +76,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     enviarAprobacion,
     aprobar,
     rechazar,
-    marcarReparado,
     agregarDano,
     actualizarDano,
     eliminarDano,
@@ -274,17 +271,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 <span className="dms-aviso-espera">
                   <Send className="h-3.5 w-3.5" /> En espera de {estimacion.naviera}
                 </span>
-              )}
-              {estimacion.estado === 'APROBADO' && (
-                <>
-                  <button
-                    type="button"
-                    className="dms-btn-teal"
-                    onClick={() => setDialogo({ tipo: 'REPARADO' })}
-                  >
-                    <Wrench className="h-4 w-4" /> Marcar Reparado
-                  </button>
-                </>
               )}
               <DescargasMenu
                 estimacion={estimacion}
@@ -648,22 +634,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
             Atención: hay {pendientes} comentario(s) de liquidaciones sin resolver.
           </p>
         )}
-      </ConfirmModal>
-
-      <ConfirmModal
-        open={dialogo.tipo === 'REPARADO'}
-        title="Marcar como Reparado"
-        subtitle="Confirme que los trabajos fueron ejecutados"
-        confirmLabel="Marcar Reparado"
-        confirmClass="dms-btn-teal"
-        onClose={cerrar}
-        onConfirm={() => {
-          marcarReparado(estimacion.id, usuario);
-          toast(`Estimación ${estimacion.codigo} marcada como REPARADO.`, 'success');
-        }}
-      >
-        El estimado pasará a estado <strong>REPARADO</strong> y se registrará la fecha de
-        reparación.
       </ConfirmModal>
 
       <ConfirmModal
