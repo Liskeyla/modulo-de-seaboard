@@ -1,5 +1,6 @@
 'use client';
 
+import { Fragment } from 'react';
 import { CheckCircle2, ClipboardList, Images, MessageSquare, PencilLine, Video } from 'lucide-react';
 import {
   totalesDanos,
@@ -50,6 +51,8 @@ export function ListadoDanosTable({
   const totales = totalesDanos(danos);
   const colspanAntesHh =
     (mostrarMarcacion ? 1 : 0) + 10 + (mostrarDimensiones ? 4 : 0) + 1; // hasta Cant. inclusive
+  const totalColumnas =
+    (mostrarMarcacion ? 1 : 0) + 22 + (mostrarDimensiones ? 4 : 0);
   const todosMarcados =
     marcacionHabilitada &&
     danos.length > 0 &&
@@ -153,170 +156,203 @@ export function ListadoDanosTable({
             const ultimo = d.comentarios[d.comentarios.length - 1];
             const resuelto =
               d.comentarios.length > 0 && ultimo?.tipo === 'ACEPTADO';
+            const edicion = d.edicionReciente;
             return (
-              <tr
-                key={d.id}
-                className={cn(
-                  'cursor-pointer',
-                  activo && 'dms-row-selected',
-                  marcado && 'dms-row-marcado'
-                )}
-                onClick={() => onSeleccionar(d)}
-              >
-                {mostrarMarcacion && (
-                  <td className="text-center" onClick={(e) => e.stopPropagation()}>
+              <Fragment key={d.id}>
+                <tr
+                  className={cn(
+                    'cursor-pointer',
+                    activo && 'dms-row-selected',
+                    marcado && 'dms-row-marcado'
+                  )}
+                  onClick={() => onSeleccionar(d)}
+                >
+                  {mostrarMarcacion && (
+                    <td className="text-center" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        className="dms-check-dano"
+                        checked={marcacionHabilitada && marcado}
+                        disabled={!marcacionHabilitada}
+                        onChange={() => {
+                          if (!marcacionHabilitada) return;
+                          onToggleMarcado?.(d.id);
+                        }}
+                        aria-label={`Marcar línea ${d.linea}`}
+                        title={
+                          marcacionHabilitada
+                            ? undefined
+                            : 'Aperture la estimación para marcar ítems'
+                        }
+                      />
+                    </td>
+                  )}
+                  <td className="text-center">
+                    <span
+                      className={cn(
+                        'dms-dano-check',
+                        activo ? 'dms-dano-check--on' : 'dms-dano-check--off'
+                      )}
+                      aria-hidden
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                    </span>
+                  </td>
+                  <td className="whitespace-nowrap font-semibold text-rfs-navy">{d.comp}</td>
+                  <td className="text-center">{d.partNumber || '—'}</td>
+                  <td className="text-center">{d.ubicacion || '—'}</td>
+                  <td className="dms-cell-wrap text-[10px] font-semibold">{d.dano}</td>
+                  <td className="dms-cell-wrap max-w-[10rem] text-[10px] text-gray-600">
+                    {d.obsAnalisis || '—'}
+                  </td>
+                  <td className="text-center text-gray-500">{d.metRep || '—'}</td>
+                  <td className="text-center font-semibold">{d.newMetRep || '—'}</td>
+                  <td className="text-center text-[10px] tabular-nums">{d.serieAnterior || '—'}</td>
+                  <td className="text-center text-[10px] tabular-nums">{d.serieEntregado || '—'}</td>
+                  {mostrarDimensiones && (
+                    <>
+                      <td className="text-right tabular-nums">
+                        {d.largo ? d.largo.toFixed(2) : ''}
+                      </td>
+                      <td className="text-right tabular-nums">
+                        {d.ancho ? d.ancho.toFixed(2) : ''}
+                      </td>
+                      <td className="text-right tabular-nums">
+                        {d.area ? d.area.toFixed(2) : ''}
+                      </td>
+                      <td className="text-right tabular-nums">
+                        {d.longitud ? d.longitud.toFixed(2) : ''}
+                      </td>
+                    </>
+                  )}
+                  <td className="text-right tabular-nums">{d.cantidad.toFixed(2)}</td>
+                  <td className="text-right tabular-nums">{d.horasHombre.toFixed(2)}</td>
+                  <td className="text-right tabular-nums">${formatMoney(d.csHoraHombre)}</td>
+                  <td className="text-right tabular-nums">${formatMoney(d.csMaterial)}</td>
+                  <td className="text-right font-semibold tabular-nums text-rfs-navy">
+                    ${formatMoney(d.csTotal)}
+                  </td>
+                  <td className="text-center whitespace-nowrap">{d.cargo}</td>
+                  <td className="text-center whitespace-nowrap text-[11px] font-semibold text-black">
+                    {d.aplica}
+                  </td>
+                  <td className="text-center">{d.medida || '—'}</td>
+                  <td onClick={(e) => e.stopPropagation()}>
                     <input
-                      type="checkbox"
-                      className="dms-check-dano"
-                      checked={marcacionHabilitada && marcado}
-                      disabled={!marcacionHabilitada}
-                      onChange={() => {
-                        if (!marcacionHabilitada) return;
-                        onToggleMarcado?.(d.id);
+                      className="dms-input-inline"
+                      defaultValue={d.remark}
+                      key={`${d.id}-${d.remark}`}
+                      placeholder="Remark…"
+                      disabled={!editable}
+                      onBlur={(e) => {
+                        if (e.target.value !== d.remark) onRemarkChange(d, e.target.value);
                       }}
-                      aria-label={`Marcar línea ${d.linea}`}
-                      title={
-                        marcacionHabilitada
-                          ? undefined
-                          : 'Aperture la estimación para marcar ítems'
-                      }
                     />
                   </td>
-                )}
-                <td className="text-center">
-                  <span
-                    className={cn(
-                      'dms-dano-check',
-                      activo ? 'dms-dano-check--on' : 'dms-dano-check--off'
-                    )}
-                    aria-hidden
-                  >
-                    <CheckCircle2 className="h-4 w-4" />
-                  </span>
-                </td>
-                <td className="whitespace-nowrap font-semibold text-rfs-navy">{d.comp}</td>
-                <td className="text-center">{d.partNumber || '—'}</td>
-                <td className="text-center">{d.ubicacion || '—'}</td>
-                <td className="dms-cell-wrap text-[10px] font-semibold">{d.dano}</td>
-                <td className="dms-cell-wrap max-w-[10rem] text-[10px] text-gray-600">
-                  {d.obsAnalisis || '—'}
-                </td>
-                <td className="text-center text-gray-500">{d.metRep || '—'}</td>
-                <td className="text-center font-semibold">{d.newMetRep || '—'}</td>
-                <td className="text-center text-[10px] tabular-nums">{d.serieAnterior || '—'}</td>
-                <td className="text-center text-[10px] tabular-nums">{d.serieEntregado || '—'}</td>
-                {mostrarDimensiones && (
-                  <>
-                    <td className="text-right tabular-nums">
-                      {d.largo ? d.largo.toFixed(2) : ''}
-                    </td>
-                    <td className="text-right tabular-nums">
-                      {d.ancho ? d.ancho.toFixed(2) : ''}
-                    </td>
-                    <td className="text-right tabular-nums">
-                      {d.area ? d.area.toFixed(2) : ''}
-                    </td>
-                    <td className="text-right tabular-nums">
-                      {d.longitud ? d.longitud.toFixed(2) : ''}
-                    </td>
-                  </>
-                )}
-                <td className="text-right tabular-nums">{d.cantidad.toFixed(2)}</td>
-                <td className="text-right tabular-nums">{d.horasHombre.toFixed(2)}</td>
-                <td className="text-right tabular-nums">${formatMoney(d.csHoraHombre)}</td>
-                <td className="text-right tabular-nums">${formatMoney(d.csMaterial)}</td>
-                <td className="text-right font-semibold tabular-nums text-rfs-navy">
-                  ${formatMoney(d.csTotal)}
-                </td>
-                <td className="text-center whitespace-nowrap">{d.cargo}</td>
-                <td className="text-center whitespace-nowrap text-[11px] font-semibold text-black">
-                  {d.aplica}
-                </td>
-                <td className="text-center">{d.medida || '—'}</td>
-                <td onClick={(e) => e.stopPropagation()}>
-                  <input
-                    className="dms-input-inline"
-                    defaultValue={d.remark}
-                    key={`${d.id}-${d.remark}`}
-                    placeholder="Remark…"
-                    disabled={!editable}
-                    onBlur={(e) => {
-                      if (e.target.value !== d.remark) onRemarkChange(d, e.target.value);
-                    }}
-                  />
-                </td>
-                <td onClick={(e) => e.stopPropagation()}>
-                  <input
-                    className="dms-input-inline w-32 text-center uppercase"
-                    defaultValue={d.contenedorDonante}
-                    key={`${d.id}-${d.contenedorDonante}`}
-                    placeholder="Sin donante"
-                    disabled={!editable}
-                    onBlur={(e) => {
-                      if (e.target.value !== d.contenedorDonante) {
-                        onDonanteChange(d, e.target.value.toUpperCase());
-                      }
-                    }}
-                  />
-                </td>
-                <td onClick={(e) => e.stopPropagation()}>
-                  <button
-                    type="button"
-                    className={cn(
-                      'dms-btn-comentarios',
-                      pendientes > 0 && 'dms-btn-comentarios--pendiente',
-                      resuelto && 'dms-btn-comentarios--ok'
-                    )}
-                    onClick={() => onComentarios(d)}
-                    title={
-                      d.comentarios.length
-                        ? `${d.comentarios.length} comentario(s) · ${pendientes} pendiente(s)`
-                        : 'Sin comentarios · abrir para escribir a liquidaciones'
-                    }
-                  >
-                    <MessageSquare className="h-3.5 w-3.5" />
-                    <span className="tabular-nums">{d.comentarios.length}</span>
-                    {pendientes > 0 && <span className="dms-btn-comentarios-dot" />}
-                  </button>
-                </td>
-                <td onClick={(e) => e.stopPropagation()}>
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      className="dms-icon-btn dms-icon-btn--azul"
-                      title={
-                        editable
-                          ? 'Editar daño'
-                          : 'Aperture la estimación para modificar ítems'
-                      }
+                  <td onClick={(e) => e.stopPropagation()}>
+                    <input
+                      className="dms-input-inline w-32 text-center uppercase"
+                      defaultValue={d.contenedorDonante}
+                      key={`${d.id}-${d.contenedorDonante}`}
+                      placeholder="Sin donante"
                       disabled={!editable}
-                      onClick={() => onEditar(d)}
-                    >
-                      <PencilLine className="h-3.5 w-3.5" />
-                    </button>
+                      onBlur={(e) => {
+                        if (e.target.value !== d.contenedorDonante) {
+                          onDonanteChange(d, e.target.value.toUpperCase());
+                        }
+                      }}
+                    />
+                  </td>
+                  <td onClick={(e) => e.stopPropagation()}>
                     <button
                       type="button"
-                      className="dms-icon-btn dms-icon-btn--indigo"
-                      title={`Ver ${d.fotos.length} foto(s)`}
-                      onClick={() => onFotos(d)}
+                      className={cn(
+                        'dms-btn-comentarios',
+                        pendientes > 0 && 'dms-btn-comentarios--pendiente',
+                        resuelto && 'dms-btn-comentarios--ok'
+                      )}
+                      onClick={() => onComentarios(d)}
+                      title={
+                        d.comentarios.length
+                          ? `${d.comentarios.length} comentario(s) · ${pendientes} pendiente(s)`
+                          : 'Sin comentarios · abrir para escribir a liquidaciones'
+                      }
                     >
-                      <Images className="h-3.5 w-3.5" />
-                      <span className="ml-0.5 text-[10px] font-bold tabular-nums">
-                        {d.fotos.length}
-                      </span>
+                      <MessageSquare className="h-3.5 w-3.5" />
+                      <span className="tabular-nums">{d.comentarios.length}</span>
+                      {pendientes > 0 && <span className="dms-btn-comentarios-dot" />}
                     </button>
-                    <button
-                      type="button"
-                      className="dms-icon-btn dms-icon-btn--verde"
-                      title={d.tieneVideo ? 'Ver video de inspección' : 'Sin video registrado'}
-                      onClick={() => onVideo(d)}
-                    >
-                      <Video className="h-3.5 w-3.5" />
-                      <span className="ml-0.5 text-[10px] font-bold">Video</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
+                  </td>
+                  <td onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        className="dms-icon-btn dms-icon-btn--azul"
+                        title={
+                          editable
+                            ? 'Editar daño'
+                            : 'Aperture la estimación para modificar ítems'
+                        }
+                        disabled={!editable}
+                        onClick={() => onEditar(d)}
+                      >
+                        <PencilLine className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        className="dms-icon-btn dms-icon-btn--indigo"
+                        title={`Ver ${d.fotos.length} foto(s)`}
+                        onClick={() => onFotos(d)}
+                      >
+                        <Images className="h-3.5 w-3.5" />
+                        <span className="ml-0.5 text-[10px] font-bold tabular-nums">
+                          {d.fotos.length}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        className="dms-icon-btn dms-icon-btn--verde"
+                        title={d.tieneVideo ? 'Ver video de inspección' : 'Sin video registrado'}
+                        onClick={() => onVideo(d)}
+                      >
+                        <Video className="h-3.5 w-3.5" />
+                        <span className="ml-0.5 text-[10px] font-bold">Video</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                {edicion && (
+                  <tr className="dms-dano-subfila">
+                    <td colSpan={totalColumnas}>
+                      <div className="dms-dano-cambio">
+                        <div className="dms-dano-cambio-meta">
+                          <span>Cambios de la línea</span>
+                          <span className="normal-case tracking-normal text-amber-800/70">
+                            {edicion.usuario} · {edicion.fecha}
+                          </span>
+                        </div>
+                        <p className="dms-dano-cambio-resumen">{edicion.resumenCambios}</p>
+                        {edicion.comentarioSbm && (
+                          <div className="dms-dano-cmt-sbm">
+                            <span className="dms-dano-cmt-label text-sky-700">
+                              Comentarios línea SBM:
+                            </span>
+                            {edicion.comentarioSbm}
+                          </div>
+                        )}
+                        {edicion.comentarioRfs && (
+                          <div className="dms-dano-cmt-rfs">
+                            <span className="dms-dano-cmt-label text-emerald-700">
+                              Comentarios RFS:
+                            </span>
+                            {edicion.comentarioRfs}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </Fragment>
             );
           })}
         </tbody>
