@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, CheckCircle2, FileText, Send, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, FileText, XCircle } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import {
   contarComentariosPendientes,
@@ -85,18 +85,16 @@ interface ConfirmacionEstimacionModalProps {
   modo: ModoConfirmacionEstimacion;
   estimacion: Estimacion | null;
   onClose: () => void;
-  onEnviar: () => void;
   onAprobar: () => void;
   onRechazar: (comentario: string) => void;
 }
 
-/** Confirmación con informe/resumen para Enviar, Aprobar o Rechazar el estimado. */
+/** Confirmación con informe/resumen: Aprobar o Rechazar (sin botón Enviar). */
 export function ConfirmacionEstimacionModal({
   open,
   modo,
   estimacion,
   onClose,
-  onEnviar,
   onAprobar,
   onRechazar,
 }: ConfirmacionEstimacionModalProps) {
@@ -132,13 +130,11 @@ export function ConfirmacionEstimacionModal({
   if (!estimacion) return null;
 
   const titulo =
-    modo === 'ENVIAR'
-      ? 'Confirmar envío a aprobación'
-      : 'Aprobación Seaboard Marine';
+    modo === 'ENVIAR' ? 'Enviar a Aprobación' : 'Aprobación Seaboard Marine';
   const destinoLabel = destinoRfs ? 'RFS (Liquidaciones)' : estimacion.naviera;
   const subtitle =
     modo === 'ENVIAR'
-      ? `${estimacion.codigo} · Destino: ${destinoLabel}`
+      ? `Destino: ${destinoLabel}`
       : `${estimacion.codigo} · ${estimacion.contenedor} · Total $${formatMoney(estimacion.pvpTotal)}`;
 
   function confirmarRechazo() {
@@ -168,10 +164,6 @@ export function ConfirmacionEstimacionModal({
     onAprobar();
   }
 
-  function confirmarEnviar() {
-    onEnviar();
-  }
-
   return (
     <Modal
       open={open}
@@ -190,17 +182,7 @@ export function ConfirmacionEstimacionModal({
           >
             Cancelar
           </button>
-          {modo === 'ENVIAR' && (
-            <button
-              type="button"
-              className="dms-btn-enviar px-4 py-2 text-sm"
-              onClick={confirmarEnviar}
-            >
-              <Send className="h-4 w-4" />{' '}
-              {destinoRfs ? 'Enviar a RFS' : 'Enviar a Aprobación'}
-            </button>
-          )}
-          {modo === 'DECISION' && !rechazando && (
+          {!rechazando && (
             <>
               <button
                 type="button"
@@ -239,7 +221,7 @@ export function ConfirmacionEstimacionModal({
               </button>
             </>
           )}
-          {modo === 'DECISION' && rechazando && (
+          {rechazando && (
             <>
               <button
                 type="button"
@@ -268,23 +250,23 @@ export function ConfirmacionEstimacionModal({
           {modo === 'ENVIAR' ? (
             destinoRfs ? (
               <>
-                Hay comentarios de liquidaciones sin resolver. El destino es{' '}
-                <strong>RFS (Liquidaciones)</strong>. Al confirmar, el estimado pasará a estado{' '}
-                <strong>ENVIADO</strong> hacia RFS (no a la naviera) hasta resolver las
-                observaciones.
+                Atención: hay comentarios de liquidaciones sin resolver. Destino:{' '}
+                <strong>RFS</strong>. Pulse <strong>Aprobar</strong> para pasar a estado{' '}
+                <strong>APROBADO</strong>, o <strong>Rechazar</strong> para{' '}
+                <strong>RECHAZADO</strong>.
               </>
             ) : (
               <>
-                Revise el informe resumen del estimado antes de enviarlo a{' '}
-                <strong>{estimacion.naviera}</strong>. Pasará a estado <strong>ENVIADO</strong> y
-                quedará en espera de la naviera.
+                Destino: <strong>{estimacion.naviera}</strong>. Pulse <strong>Aprobar</strong> para
+                pasar a estado <strong>ENVIADO</strong> (en espera de la naviera), o{' '}
+                <strong>Rechazar</strong> para <strong>RECHAZADO</strong>.
               </>
             )
           ) : (
             <>
-              Revise el informe del estimado. Tras decidir, el estimado pasará a estado{' '}
-              <strong>APROBADO</strong> o <strong>RECHAZADO</strong>. Si rechaza, indique un
-              comentario general y se notificará a liquidaciones RFS.
+              Revise el informe. Pulse <strong>Aprobar</strong> (
+              <strong>APROBADO</strong>) o <strong>Rechazar</strong> (
+              <strong>RECHAZADO</strong>). Si rechaza, se notificará a liquidaciones RFS.
             </>
           )}
         </p>
@@ -325,7 +307,7 @@ export function ConfirmacionEstimacionModal({
             </ul>
           </div>
         )}
-        {modo === 'DECISION' && rechazando && (
+        {rechazando && (
           <div>
             <label className="dms-field-label">Comentario general del rechazo</label>
             <textarea

@@ -237,20 +237,31 @@ export const useEstimacionesStore = create<EstimacionesState>()(
         aprobar: (ids, usuario, comentario = 'Aprobado sin novedades por la naviera.') => {
           set((s) => ({
             estimaciones: s.estimaciones.map((e) => {
-              if (!ids.includes(e.id) || e.estado !== 'ENVIADO') return e;
+              if (!ids.includes(e.id)) return e;
+              const desdeEnviado = e.estado === 'ENVIADO';
+              const desdeRfs = ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(e.estado);
+              if (!desdeEnviado && !desdeRfs) return e;
               return {
                 ...e,
                 estado: 'APROBADO' as EstadoEstimacion,
                 fechaAprobacion: ahoraFmt(),
                 fechaModificacion: ahoraFmt(),
                 usuarioModificacion: usuario,
+                enviarAprobacion: 'SI',
+                fechaEnvio: e.fechaEnvio || ahoraFmt(),
                 comentariosSeaboard: [
                   ...e.comentariosSeaboard,
                   comentarioSeaboard('APROBAR', comentario, usuario),
                 ],
                 auditoria: [
                   ...e.auditoria,
-                  evento(usuario, 'APROBACIÓN', 'La naviera aprobó el estimado. Habilitado para reparación.'),
+                  evento(
+                    usuario,
+                    'APROBACIÓN',
+                    desdeEnviado
+                      ? 'La naviera aprobó el estimado. Habilitado para reparación.'
+                      : 'Aprobado por RFS (Liquidaciones). Habilitado para reparación.'
+                  ),
                 ],
               };
             }),
@@ -260,7 +271,12 @@ export const useEstimacionesStore = create<EstimacionesState>()(
         rechazar: (ids, usuario, comentario) => {
           set((s) => ({
             estimaciones: s.estimaciones.map((e) => {
-              if (!ids.includes(e.id) || e.estado !== 'ENVIADO') return e;
+              if (
+                !ids.includes(e.id) ||
+                !['ENVIADO', 'PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(e.estado)
+              ) {
+                return e;
+              }
               return {
                 ...e,
                 estado: 'RECHAZADO' as EstadoEstimacion,

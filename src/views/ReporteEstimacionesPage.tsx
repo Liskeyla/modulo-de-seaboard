@@ -78,7 +78,7 @@ type Dialogo =
 export default function ReporteEstimacionesPage() {
   const router = useRouter();
   const { user } = useAuthStore();
-  const { estimaciones, enviarAprobacion, setActividad } =
+  const { estimaciones, enviarAprobacion, aprobar, rechazar, setActividad } =
     useEstimacionesStore();
   const { pais } = useUiStore();
 
@@ -871,20 +871,34 @@ export default function ReporteEstimacionesPage() {
         modo="ENVIAR"
         estimacion={activa}
         onClose={cerrar}
-        onEnviar={() => {
+        onAprobar={() => {
           if (!activa) return;
           const pendientes = contarComentariosPendientes(activa.danos);
-          enviarAprobacion([activa.id], usuario);
-          toast(
-            `Estimación ${activa.codigo} enviada a ${
-              pendientes > 0 ? 'RFS (Liquidaciones)' : activa.naviera
-            } (estado ENVIADO).`,
-            'success'
-          );
+          if (pendientes > 0) {
+            aprobar(
+              [activa.id],
+              usuario,
+              'Aprobado por RFS (comentarios de liquidaciones pendientes).'
+            );
+            toast(
+              `Estimación ${activa.codigo} aprobada · Destino RFS (estado APROBADO).`,
+              'success'
+            );
+          } else {
+            enviarAprobacion([activa.id], usuario);
+            toast(
+              `Estimación ${activa.codigo} aprobada · Destino ${activa.naviera} (estado ENVIADO).`,
+              'success'
+            );
+          }
           cerrar();
         }}
-        onAprobar={() => undefined}
-        onRechazar={() => undefined}
+        onRechazar={(comentario) => {
+          if (!activa) return;
+          rechazar([activa.id], usuario, comentario);
+          toast(`Estimación ${activa.codigo} rechazada (estado RECHAZADO).`, 'success');
+          cerrar();
+        }}
       />
     </>
   );

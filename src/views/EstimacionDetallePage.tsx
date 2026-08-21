@@ -815,24 +815,38 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
 
       {/* ── Diálogos ─────────────────────────────────────────────── */}
 
-      {/* DMS: envío con informe; destino RFS si hay comentarios de liquidaciones pendientes */}
+      {/* DMS: Aprobar → ENVIADO (naviera) o APROBADO (RFS); Rechazar → RECHAZADO */}
       <ConfirmacionEstimacionModal
         open={dialogo.tipo === 'ENVIAR'}
         modo="ENVIAR"
         estimacion={estimacion}
         onClose={cerrar}
-        onEnviar={() => {
-          enviarAprobacion([estimacion.id], usuario);
-          const destino =
-            pendientes > 0 ? 'RFS (Liquidaciones)' : estimacion.naviera;
-          toast(
-            `Estimación ${estimacion.codigo} enviada a ${destino} (estado ENVIADO).`,
-            'success'
-          );
+        onAprobar={() => {
+          if (pendientes > 0) {
+            aprobar(
+              [estimacion.id],
+              usuario,
+              'Aprobado por RFS (comentarios de liquidaciones pendientes).'
+            );
+            toast(
+              `Estimación ${estimacion.codigo} aprobada · Destino RFS (estado APROBADO).`,
+              'success'
+            );
+          } else {
+            enviarAprobacion([estimacion.id], usuario);
+            toast(
+              `Estimación ${estimacion.codigo} aprobada · Destino ${estimacion.naviera} (estado ENVIADO).`,
+              'success'
+            );
+          }
           cerrar();
         }}
-        onAprobar={() => undefined}
-        onRechazar={() => undefined}
+        onRechazar={(comentario) => {
+          rechazar([estimacion.id], usuario, comentario);
+          notificarRechazoALiquidaciones(estimacion, comentario, usuario);
+          toast(`Estimación ${estimacion.codigo} rechazada (estado RECHAZADO).`, 'success');
+          cerrar();
+        }}
       />
 
       {/* Seaboard Marine: informe + Aprobar / Rechazar (exige ítems revisados) */}
@@ -841,7 +855,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
         modo="DECISION"
         estimacion={estimacion}
         onClose={cerrar}
-        onEnviar={() => undefined}
         onAprobar={() => {
           aprobar([estimacion.id], usuario);
           toast(`Estimación ${estimacion.codigo} aprobada (estado APROBADO).`, 'success');
