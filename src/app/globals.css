@@ -1308,7 +1308,7 @@
   }
 
   .dms-zip-btn {
-    @apply inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-[#3b82f6] px-3 py-2 text-[11px] font-bold text-white shadow-sm transition-all hover:bg-[#2563eb] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex w-full items-center justify-center gap-1.5 rounded px-3 py-2 text-[11px] font-bold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-45 bg-[#152483] hover:bg-[#0f1a5c];
   }
 
   .dms-anexo-grid {
@@ -1328,27 +1328,31 @@
   }
 
   .dms-archivo-grupo {
-    @apply rounded-lg border border-slate-200 bg-slate-50/80 p-2.5;
+    @apply rounded-lg border border-slate-300 bg-white p-2.5;
   }
 
   .dms-archivo-grupo > p {
-    @apply mb-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-600;
+    @apply mb-2 text-[11px] font-extrabold uppercase tracking-wider text-[#152483];
   }
 
   .dms-archivo-accion {
-    @apply inline-flex w-full items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-[10px] font-bold text-white shadow-sm transition-all hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex w-full items-center justify-center gap-1.5 rounded px-2.5 py-2 text-[11px] font-bold text-white shadow-none transition-colors disabled:cursor-not-allowed disabled:opacity-45;
   }
 
   .dms-archivo-accion--ver {
-    @apply bg-[#14b8a6] hover:bg-[#0f9b8e];
+    @apply bg-[#152483] hover:bg-[#0f1a5c];
   }
 
   .dms-archivo-accion--bajar {
-    @apply bg-[#6b7280] hover:bg-[#4b5563];
+    @apply bg-[#334155] hover:bg-[#1e293b];
   }
 
   .dms-archivo-accion--borrar {
-    @apply bg-[#d9534f] hover:bg-[#c9302c];
+    @apply bg-[#b91c1c] hover:bg-[#991b1b];
+  }
+
+  .dms-archivo-accion--reversar {
+    @apply bg-[#c2410c] hover:bg-[#9a3412];
   }
 
   .dms-insp-grid {
@@ -1376,10 +1380,6 @@
   }
 
   .dms-insp-importar--ok {
-    @apply bg-emerald-600 hover:bg-emerald-600;
-  }
-
-  .dms-archivo-accion--reversar {
-    @apply bg-[#3b82f6] hover:bg-[#2563eb];
+    @apply bg-[#152483] hover:bg-[#152483];
   }
 }

@@ -6,7 +6,6 @@ import {
   AlertTriangle,
   ArrowLeft,
   CheckCircle2,
-  ClipboardList,
   FileStack,
   ListChecks,
   Lock,
@@ -779,55 +778,9 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 onComentarios={(d) => setDialogo({ tipo: 'COMENTARIOS', danoId: d.id })}
               />
               </div>
-
-              <div className="dms-resumen-valores">
-                <span>
-                  PVP Horas Hombre <strong>${formatMoney(estimacion.pvpHorasHombre)}</strong>
-                </span>
-                <span>
-                  PVP Materiales <strong>${formatMoney(estimacion.pvpMateriales)}</strong>
-                </span>
-                <span>
-                  Horas Hombre <strong>{estimacion.horasHombre.toFixed(2)}</strong>
-                </span>
-                <span className="dms-resumen-total">
-                  PVP Total <strong>${formatMoney(estimacion.pvpTotal)}</strong>
-                </span>
-              </div>
             </div>
           </section>
 
-            <section className="dms-card">
-              <header className="dms-card-header">
-                <ClipboardList className="h-3.5 w-3.5" /> Últimos movimientos
-              </header>
-              <div className="dms-card-body">
-                <ul className="space-y-2">
-                  {estimacion.auditoria
-                    .slice(-4)
-                    .reverse()
-                    .map((ev) => (
-                      <li key={ev.id} className="dms-nota-item">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-[11px] font-bold uppercase tracking-wide text-rfs-700">
-                            {ev.accion}
-                          </span>
-                          <span className="dms-chip-user">{ev.usuario || 'sistema'}</span>
-                          <span className="text-[10px] tabular-nums text-gray-400">{ev.fecha}</span>
-                        </div>
-                        <p className="mt-1 text-xs leading-relaxed text-gray-600">{ev.detalle}</p>
-                      </li>
-                    ))}
-                </ul>
-                <button
-                  type="button"
-                  className="dms-btn-action dms-btn-info mt-3"
-                  onClick={() => setDialogo({ tipo: 'HISTORIAL' })}
-                >
-                  <ClipboardList className="h-3 w-3" /> Ver historial completo
-                </button>
-              </div>
-            </section>
             </div>
 
             <aside

@@ -282,18 +282,12 @@ export function InfoDanoPanel({
                 {porGrupo[grupo].map((archivo) => (
                   <li key={archivo.id}>
                     <div className="flex items-start gap-2">
-                      {archivo.clase === 'VIDEO' ? (
-                        <Video className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                      ) : archivo.clase === 'PDF' ? (
-                        <FileText className="mt-0.5 h-4 w-4 shrink-0 text-teal-600" />
-                      ) : (
-                        <FileText className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
-                      )}
-                      <span className="break-all text-[11px] font-semibold text-slate-700">
+                      <FileText className="mt-0.5 h-4 w-4 shrink-0 text-[#152483]" />
+                      <span className="break-all text-[11px] font-semibold text-slate-800">
                         {archivo.nombre}
                       </span>
                     </div>
-                    <div className="mt-1.5 flex flex-col gap-1">
+                    <div className="mt-1.5 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                       <button
                         type="button"
                         className="dms-archivo-accion dms-archivo-accion--ver"
