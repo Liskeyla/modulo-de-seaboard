@@ -7,7 +7,6 @@ import {
   ArrowLeft,
   CheckCircle2,
   ClipboardList,
-  Container,
   FileStack,
   ListChecks,
   Lock,
@@ -117,7 +116,6 @@ function resumirCambiosApertura(snap: SnapshotApertura, est: Estimacion): string
 
 type Dialogo =
   | { tipo: 'NINGUNO' }
-  | { tipo: 'CONTENEDOR' }
   | { tipo: 'ENVIAR' }
   | { tipo: 'RECHAZAR' }
   | { tipo: 'RECHAZAR_ITEMS' }
@@ -384,16 +382,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                     }}
                   >
                     <RefreshCw className="h-4 w-4" /> Revalidar Tarifas
-                  </button>
-                  <button
-                    type="button"
-                    className="dms-btn-azul"
-                    onClick={() => {
-                      if (exigirApertura()) return;
-                      setDialogo({ tipo: 'CONTENEDOR' });
-                    }}
-                  >
-                    <Container className="h-4 w-4" /> Actualizar Información Contenedor
                   </button>
                 </>
               )}
@@ -699,58 +687,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       </main>
 
       {/* ── Diálogos ─────────────────────────────────────────────── */}
-
-      <Modal
-        open={dialogo.tipo === 'CONTENEDOR'}
-        onClose={cerrar}
-        size="md"
-        icon={<Container className="h-4 w-4" />}
-        title={`Información del contenedor ${estimacion.contenedor}`}
-        subtitle="Datos sincronizados desde el maestro de contenedores"
-        footer={
-          <>
-            <button
-              type="button"
-              className="dms-btn-action border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
-              onClick={cerrar}
-            >
-              Cerrar
-            </button>
-            <button
-              type="button"
-              className="dms-btn-primary px-4 py-2 text-sm"
-              onClick={() => {
-                toast(`Información de ${estimacion.contenedor} consultada.`, 'success');
-                cerrar();
-              }}
-            >
-              <RefreshCw className="h-4 w-4" /> Actualizar información
-            </button>
-          </>
-        }
-      >
-        <dl className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
-          {[
-            ['Contenedor', estimacion.contenedor],
-            ['Código RFS', estimacion.codigoRfs],
-            ['Tipo', estimacion.tipoContenedor],
-            ['Modelo máquina', estimacion.modeloMaquina],
-            ['Naviera', estimacion.naviera],
-            ['Buque', estimacion.buque],
-            ['Viaje', estimacion.viaje],
-            ['Gate In', estimacion.fechaGateIn],
-            ['Días de estadía', String(estimacion.diasEstadia)],
-            ['Depósito', estimacion.lugarEstimacion],
-            ['Estado PTI', estimacion.estadoPti || 'Sin PTI'],
-            ['Fin PTI', estimacion.fechaFinPti || '—'],
-          ].map(([k, v]) => (
-            <div key={k} className="dms-mini-dato">
-              <dt>{k}</dt>
-              <dd>{v || '—'}</dd>
-            </div>
-          ))}
-        </dl>
-      </Modal>
 
       <ConfirmModal
         open={dialogo.tipo === 'ENVIAR'}
