@@ -22,7 +22,7 @@ import { EstadoEstimacionBadge } from '@/components/dms/EstadoEstimacionBadge';
 import { ComentarioModal } from '@/components/aprobaciones/ComentarioModal';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Modal } from '@/components/ui/Modal';
-import { ComentariosDanoModal, rolDeUsuario } from '@/components/estimacion/ComentariosDanoModal';
+import { rolDeUsuario } from '@/components/estimacion/ComentariosDanoModal';
 import { DescargasMenu } from '@/components/estimacion/DescargasMenu';
 import { EditarDanoModal } from '@/components/estimacion/EditarDanoModal';
 import { GaleriaFotosModal } from '@/components/estimacion/GaleriaFotosModal';
@@ -130,7 +130,6 @@ type Dialogo =
   | { tipo: 'RECHAZAR_ITEMS' }
   | { tipo: 'RECHAZAR_ITEM'; dano: DanoEstimacion }
   | { tipo: 'EDITAR_DANO'; dano: DanoEstimacion }
-  | { tipo: 'COMENTARIOS'; danoId: string }
   | { tipo: 'FOTOS'; danoId: string | 'TODAS' }
   | { tipo: 'VIDEO'; dano: DanoEstimacion }
   | { tipo: 'HISTORIAL' }
@@ -294,11 +293,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
             estimacion.danos.find((d) => d.id === dialogo.danoId)?.fotos ?? []
           )
       : [];
-
-  const danoComentarios =
-    dialogo.tipo === 'COMENTARIOS'
-      ? (estimacion.danos.find((d) => d.id === dialogo.danoId) ?? null)
-      : null;
 
   function exigirApertura(): boolean {
     if (!puedeAperturar || aperturada) return false;
@@ -805,7 +799,18 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 }}
                 onFotos={(d) => setDialogo({ tipo: 'FOTOS', danoId: d.id })}
                 onVideo={(d) => setDialogo({ tipo: 'VIDEO', dano: d })}
-                onComentarios={(d) => setDialogo({ tipo: 'COMENTARIOS', danoId: d.id })}
+                comentarioUsuario={usuario}
+                comentarioRol={rolComentario}
+                comentariosSoloLectura={!puedeComentar}
+                onEnviarComentario={(d, entrada) => {
+                  if (!puedeComentar) return;
+                  agregarComentarioDano(estimacion.id, d.id, {
+                    usuario,
+                    rol: rolComentario,
+                    ...entrada,
+                  });
+                  toast('Comentario publicado con trazabilidad.', 'success');
+                }}
               />
               </div>
             </div>
@@ -987,25 +992,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
           guardarEdicionDano(dialogo.dano, cambios, resumen, comentarios);
           toast('Línea de daño actualizada con comentarios.', 'success');
           cerrar();
-        }}
-      />
-
-      <ComentariosDanoModal
-        open={dialogo.tipo === 'COMENTARIOS'}
-        estimacion={estimacion}
-        dano={danoComentarios}
-        usuario={usuario}
-        rol={rolComentario}
-        soloLectura={!puedeComentar}
-        onClose={cerrar}
-        onEnviar={(entrada) => {
-          if (dialogo.tipo !== 'COMENTARIOS' || !puedeComentar) return;
-          agregarComentarioDano(estimacion.id, dialogo.danoId, {
-            usuario,
-            rol: rolComentario,
-            ...entrada,
-          });
-          toast('Comentario publicado con trazabilidad.', 'success');
         }}
       />
 

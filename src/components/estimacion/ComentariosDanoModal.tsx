@@ -1,24 +1,24 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   AlertCircle,
   CheckCircle2,
   Info,
   MessageSquare,
   Send,
+  X,
   XCircle,
 } from 'lucide-react';
-import { Modal } from '@/components/ui/Modal';
 import type {
+  ComentarioDano,
   DanoEstimacion,
-  Estimacion,
   RolComentario,
   TipoComentario,
 } from '@/types/estimacion';
-import { cn, formatMoney } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
-/** Campos del daño sobre los que liquidaciones suele pedir una corrección. */
 export const CAMPOS_DANO = [
   'Cs. Mat.',
   'Cs. H.H.',
@@ -57,42 +57,67 @@ const META_ROL: Record<RolComentario, { label: string; clase: string }> = {
 };
 
 /** El rol del comentario se deduce del usuario autenticado. */
-export function rolDeUsuario(rolUsuario: string | undefined, username: string | undefined): RolComentario {
+export function rolDeUsuario(
+  rolUsuario: string | undefined,
+  username: string | undefined
+): RolComentario {
   if (rolUsuario === 'seaboard') return 'SEABOARD';
   if (rolUsuario === 'liquidaciones') return 'LIQUIDACIONES';
   if (username === 'apptelink') return 'SUPERVISOR';
   return 'TECNICO';
 }
 
-interface ComentariosDanoModalProps {
+/** Agrupa comentarios por usuario, manteniendo orden cronológico dentro de cada grupo. */
+function comentariosPorUsuario(comentarios: ComentarioDano[]) {
+  const orden: string[] = [];
+  const mapa = new Map<string, ComentarioDano[]>();
+  comentarios.forEach((c) => {
+    if (!mapa.has(c.usuario)) {
+      mapa.set(c.usuario, []);
+      orden.push(c.usuario);
+    }
+    mapa.get(c.usuario)!.push(c);
+  });
+  return orden.map((usuario) => ({
+    usuario,
+    rol: mapa.get(usuario)![0].rol,
+    items: mapa.get(usuario)!,
+  }));
+}
+
+export type EntradaComentario = {
+  tipo: TipoComentario;
+  mensaje: string;
+  campoAfectado?: string;
+};
+
+interface ComentariosDanoPopoverProps {
   open: boolean;
-  estimacion: Estimacion;
-  dano: DanoEstimacion | null;
+  anclaRef: React.RefObject<HTMLElement | null>;
+  dano: DanoEstimacion;
   usuario: string;
   rol: RolComentario;
   soloLectura?: boolean;
   onClose: () => void;
-  onEnviar: (entrada: {
-    tipo: TipoComentario;
-    mensaje: string;
-    campoAfectado?: string;
-  }) => void;
+  onEnviar: (entrada: EntradaComentario) => void;
 }
 
-export function ComentariosDanoModal({
+/** Panel flotante (no pantalla/modal) con comentarios agrupados por usuario. */
+export function ComentariosDanoPopover({
   open,
-  estimacion,
+  anclaRef,
   dano,
   usuario,
   rol,
   soloLectura = false,
   onClose,
   onEnviar,
-}: ComentariosDanoModalProps) {
+}: ComentariosDanoPopoverProps) {
   const [mensaje, setMensaje] = useState('');
-  const [tipo, setTipo] = useState<TipoComentario>('SOLICITA_CAMBIO');
-  const [campo, setCampo] = useState<string>('');
-  const finRef = useRef<HTMLDivElement>(null);
+  const [tipo, setTipo] = useState<TipoComentario>('INFORMATIVO');
+  const [campo, setCampo] = useState('');
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) {
@@ -102,41 +127,175 @@ export function ComentariosDanoModal({
     }
   }, [open, rol]);
 
-  useEffect(() => {
-    if (open) finRef.current?.scrollIntoView({ block: 'end' });
-  }, [open, dano?.comentarios.length]);
+  useLayoutEffect(() => {
+    if (!open || !anclaRef.current) {
+      setPos(null);
+      return;
+    }
+    const rect = anclaRef.current.getBoundingClientRect();
+    const ancho = Math.min(352, window.innerWidth - 16);
+    let left = rect.right - ancho;
+    if (left < 8) left = 8;
+    let top = rect.bottom + 6;
+    if (top + 320 > window.innerHeight) {
+      top = Math.max(8, rect.top - 326);
+    }
+    setPos({ top, left });
+  }, [open, anclaRef, dano.id, dano.comentarios.length]);
 
+  useEffect(() => {
+    if (!open) return;
+    function alClickFuera(e: MouseEvent) {
+      const t = e.target as Node;
+      if (panelRef.current?.contains(t)) return;
+      if (anclaRef.current?.contains(t)) return;
+      onClose();
+    }
+    function alEscape(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    function alScroll() {
+      onClose();
+    }
+    document.addEventListener('mousedown', alClickFuera);
+    document.addEventListener('keydown', alEscape);
+    window.addEventListener('scroll', alScroll, true);
+    return () => {
+      document.removeEventListener('mousedown', alClickFuera);
+      document.removeEventListener('keydown', alEscape);
+      window.removeEventListener('scroll', alScroll, true);
+    };
+  }, [open, onClose, anclaRef]);
+
+  const porUsuario = useMemo(
+    () => comentariosPorUsuario(dano.comentarios),
+    [dano.comentarios]
+  );
   const pendientes = useMemo(
-    () => (dano?.comentarios ?? []).filter((c) => c.tipo === 'SOLICITA_CAMBIO').length,
-    [dano]
+    () => dano.comentarios.filter((c) => c.tipo === 'SOLICITA_CAMBIO').length,
+    [dano.comentarios]
   );
 
-  if (!dano) return null;
+  if (!open || !pos || typeof document === 'undefined') return null;
 
   const puedeEnviar = mensaje.trim().length >= 3;
 
-  return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      size="lg"
-      icon={<MessageSquare className="h-4 w-4" />}
-      title={`Comentarios · Línea ${String(dano.linea).padStart(2, '0')} · ${dano.comp}`}
-      subtitle={`${estimacion.codigo} · ${estimacion.contenedor} · Trazabilidad con liquidaciones`}
-      footer={
-        <>
-          <button
-            type="button"
-            className="dms-btn-action border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
-            onClick={onClose}
-          >
-            Cerrar
-          </button>
-          {!soloLectura && (
+  return createPortal(
+    <div
+      ref={panelRef}
+      className="dms-cmt-popover"
+      style={{ top: pos.top, left: pos.left }}
+      role="dialog"
+      aria-label={`Comentarios línea ${dano.linea}`}
+    >
+      <header className="dms-cmt-popover-header">
+        <div className="min-w-0">
+          <p className="flex items-center gap-1.5 text-[11px] font-bold text-rfs-700">
+            <MessageSquare className="h-3.5 w-3.5 shrink-0" />
+            Comentarios · L{String(dano.linea).padStart(2, '0')} · {dano.comp}
+          </p>
+          <p className="mt-0.5 truncate text-[10px] text-slate-500">
+            {dano.comentarios.length} comentario(s)
+            {pendientes > 0 ? ` · ${pendientes} pendiente(s)` : ''}
+          </p>
+        </div>
+        <button
+          type="button"
+          className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+          onClick={onClose}
+          aria-label="Cerrar comentarios"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </header>
+
+      <div className="dms-cmt-popover-body">
+        {porUsuario.length === 0 ? (
+          <p className="px-3 py-5 text-center text-[11px] text-slate-400">
+            Sin comentarios todavía.
+          </p>
+        ) : (
+          porUsuario.map((grupo) => {
+            const metaRol = META_ROL[grupo.rol];
+            return (
+              <section key={grupo.usuario} className="dms-cmt-usuario">
+                <div className="dms-cmt-usuario-cabecera">
+                  <span className={cn('dms-cmt-rol', metaRol.clase)}>{metaRol.label}</span>
+                  <span className="text-[11px] font-bold text-slate-800">{grupo.usuario}</span>
+                  <span className="ml-auto text-[10px] tabular-nums text-slate-400">
+                    {grupo.items.length} msg
+                  </span>
+                </div>
+                <ul className="space-y-1.5">
+                  {grupo.items.map((c) => {
+                    const metaTipo = META_TIPO[c.tipo];
+                    const Icon = metaTipo.Icon;
+                    return (
+                      <li key={c.id} className="dms-cmt-usuario-msg">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className={cn('dms-cmt-tag', metaTipo.clase)}>
+                            <Icon className="h-2.5 w-2.5" />
+                            {metaTipo.label}
+                          </span>
+                          <span className="text-[10px] tabular-nums text-slate-400">{c.fecha}</span>
+                        </div>
+                        <p className="mt-1 text-[11px] leading-snug text-slate-700">{c.mensaje}</p>
+                        {c.campoAfectado && (
+                          <p className="mt-1 text-[9px] font-semibold uppercase tracking-wide text-rfsorange-600">
+                            Campo: {c.campoAfectado}
+                          </p>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            );
+          })
+        )}
+      </div>
+
+      {!soloLectura && (
+        <div className="dms-cmt-popover-nuevo">
+          <div className="flex flex-wrap gap-1.5">
+            <select
+              className="dms-select min-w-0 flex-1 text-[11px]"
+              value={tipo}
+              onChange={(e) => setTipo(e.target.value as TipoComentario)}
+            >
+              {(Object.keys(META_TIPO) as TipoComentario[]).map((t) => (
+                <option key={t} value={t}>
+                  {META_TIPO[t].label}
+                </option>
+              ))}
+            </select>
+            <select
+              className="dms-select min-w-0 flex-1 text-[11px]"
+              value={campo}
+              disabled={tipo !== 'SOLICITA_CAMBIO'}
+              onChange={(e) => setCampo(e.target.value)}
+            >
+              <option value="">Campo…</option>
+              {CAMPOS_DANO.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="mt-1.5 flex gap-1.5">
+            <textarea
+              rows={2}
+              value={mensaje}
+              onChange={(e) => setMensaje(e.target.value)}
+              placeholder={`Comentar como ${usuario}…`}
+              className="min-w-0 flex-1 rounded-md border border-slate-200 px-2 py-1.5 text-[11px] focus:border-rfsorange-500 focus:outline-none focus:ring-1 focus:ring-rfsorange-500/30"
+            />
             <button
               type="button"
-              className="dms-btn-primary px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+              className="dms-btn-primary shrink-0 self-end px-2.5 py-2 text-xs disabled:opacity-40"
               disabled={!puedeEnviar}
+              title="Publicar"
               onClick={() => {
                 onEnviar({
                   tipo,
@@ -147,134 +306,12 @@ export function ComentariosDanoModal({
                 setCampo('');
               }}
             >
-              <Send className="h-4 w-4" /> Publicar comentario
+              <Send className="h-3.5 w-3.5" />
             </button>
-          )}
-        </>
-      }
-    >
-      <div className="dms-cmt-resumen">
-        <div>
-          <span className="dms-cmt-resumen-label">Daño</span>
-          <p>{dano.dano}</p>
-        </div>
-        <div>
-          <span className="dms-cmt-resumen-label">Ubicación</span>
-          <p>{dano.ubicacion || '—'}</p>
-        </div>
-        <div>
-          <span className="dms-cmt-resumen-label">Cant. / H.H.</span>
-          <p>
-            {dano.cantidad.toFixed(2)} / {dano.horasHombre.toFixed(2)}
-          </p>
-        </div>
-        <div>
-          <span className="dms-cmt-resumen-label">Cs. Total</span>
-          <p className="font-bold text-rfs-700">${formatMoney(dano.csTotal)}</p>
-        </div>
-        <div>
-          <span className="dms-cmt-resumen-label">Aplica</span>
-          <p>{dano.aplica}</p>
-        </div>
-        <div>
-          <span className="dms-cmt-resumen-label">Pendientes</span>
-          <p className={pendientes > 0 ? 'font-bold text-rfsorange-600' : 'text-gray-500'}>
-            {pendientes} solicitud(es)
-          </p>
-        </div>
-      </div>
-
-      <div className="dms-cmt-hilo">
-        {dano.comentarios.length === 0 && (
-          <p className="py-6 text-center text-xs text-gray-400">
-            Sin comentarios todavía. Inicie la conversación con el área de liquidaciones.
-          </p>
-        )}
-        {dano.comentarios.map((c) => {
-          const metaTipo = META_TIPO[c.tipo];
-          const metaRol = META_ROL[c.rol];
-          const Icon = metaTipo.Icon;
-          const propio = c.usuario === usuario;
-          return (
-            <article
-              key={c.id}
-              className={cn('dms-cmt-item', propio && 'dms-cmt-item--propio')}
-            >
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span className={cn('dms-cmt-rol', metaRol.clase)}>{metaRol.label}</span>
-                <span className="text-[11px] font-bold text-gray-700">{c.usuario}</span>
-                <span className="text-[10px] tabular-nums text-gray-400">{c.fecha}</span>
-                <span className={cn('dms-cmt-tag ml-auto', metaTipo.clase)}>
-                  <Icon className="h-3 w-3" />
-                  {metaTipo.label}
-                </span>
-              </div>
-              <p className="mt-2 text-xs leading-relaxed text-gray-700">{c.mensaje}</p>
-              {c.campoAfectado && (
-                <p className="mt-2 text-[10px] font-semibold uppercase tracking-wide text-rfsorange-600">
-                  Campo a modificar: <span className="text-gray-600">{c.campoAfectado}</span>
-                </p>
-              )}
-            </article>
-          );
-        })}
-        <div ref={finRef} />
-      </div>
-
-      {!soloLectura && (
-      <div className="dms-cmt-nuevo">
-        <div className="flex flex-wrap items-end gap-2">
-          <div className="min-w-[9rem] flex-1">
-            <label className="dms-field-label">Tipo de comentario</label>
-            <select
-              className="dms-select"
-              value={tipo}
-              onChange={(e) => setTipo(e.target.value as TipoComentario)}
-            >
-              {(Object.keys(META_TIPO) as TipoComentario[]).map((t) => (
-                <option key={t} value={t}>
-                  {META_TIPO[t].label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="min-w-[10rem] flex-1">
-            <label className="dms-field-label">Campo a modificar</label>
-            <select
-              className="dms-select"
-              value={campo}
-              disabled={tipo !== 'SOLICITA_CAMBIO'}
-              onChange={(e) => setCampo(e.target.value)}
-            >
-              <option value="">Sin campo específico</option>
-              {CAMPOS_DANO.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="min-w-[7rem]">
-            <label className="dms-field-label">Publica como</label>
-            <div className="dms-cmt-autor">
-              <span className={cn('dms-cmt-rol', META_ROL[rol].clase)}>{META_ROL[rol].label}</span>
-              <span className="truncate text-[11px] font-semibold text-gray-600">{usuario}</span>
-            </div>
           </div>
         </div>
-        <textarea
-          rows={3}
-          value={mensaje}
-          onChange={(e) => setMensaje(e.target.value)}
-          placeholder="Escriba el detalle de lo que debe modificarse o confirmarse…"
-          className="mt-2 w-full rounded-lg border border-gray-300 p-2.5 text-xs shadow-sm transition-colors focus:border-rfsorange-500 focus:outline-none focus:ring-2 focus:ring-rfsorange-500/20"
-        />
-        <p className="mt-1 text-[10px] text-gray-400">
-          El comentario queda firmado con su usuario y hora, y se registra en el historial de
-          actividad de la estimación.
-        </p>
-      </div>
       )}
-    </Modal>
+    </div>,
+    document.body
   );
 }

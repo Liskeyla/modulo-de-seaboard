@@ -1112,6 +1112,34 @@
     @apply absolute -right-1 -top-1 h-2 w-2 rounded-full bg-[#f16e26];
   }
 
+  .dms-cmt-popover {
+    @apply fixed z-[60] flex w-[min(22rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl animate-fade-up;
+  }
+
+  .dms-cmt-popover-header {
+    @apply flex items-start justify-between gap-2 border-b border-slate-100 bg-slate-50 px-3 py-2;
+  }
+
+  .dms-cmt-popover-body {
+    @apply max-h-56 space-y-2.5 overflow-y-auto px-2.5 py-2;
+  }
+
+  .dms-cmt-usuario {
+    @apply rounded-lg border border-slate-100 bg-slate-50/80 p-2;
+  }
+
+  .dms-cmt-usuario-cabecera {
+    @apply mb-1.5 flex flex-wrap items-center gap-1.5 border-b border-slate-100 pb-1.5;
+  }
+
+  .dms-cmt-usuario-msg {
+    @apply rounded-md border border-white bg-white px-2 py-1.5 shadow-sm;
+  }
+
+  .dms-cmt-popover-nuevo {
+    @apply border-t border-slate-100 bg-white px-2.5 py-2;
+  }
+
   /* ── Hilo de comentarios con liquidaciones ──────────────────────── */
   .dms-cmt-resumen {
     @apply mb-3 grid grid-cols-2 gap-2 rounded-lg border border-slate-100 bg-slate-50 p-2.5 text-[11px] sm:grid-cols-3 lg:grid-cols-6;

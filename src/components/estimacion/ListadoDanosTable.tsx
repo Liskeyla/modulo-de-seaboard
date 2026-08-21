@@ -1,7 +1,11 @@
 'use client';
 
-import { Fragment } from 'react';
+import { Fragment, useRef, useState } from 'react';
 import { CheckCircle2, ClipboardList, Images, MessageSquare, PencilLine, Video } from 'lucide-react';
+import {
+  ComentariosDanoPopover,
+  type EntradaComentario,
+} from '@/components/estimacion/ComentariosDanoModal';
 import {
   APLICA_DANO,
   CARGOS_DANO,
@@ -11,6 +15,7 @@ import {
   type CargoDano,
   type DanoEstimacion,
   type EdicionRecienteDano,
+  type RolComentario,
 } from '@/types/estimacion';
 import { cn, formatMoney } from '@/lib/utils';
 
@@ -34,7 +39,11 @@ interface ListadoDanosTableProps {
   onEditar: (dano: DanoEstimacion) => void;
   onFotos: (dano: DanoEstimacion) => void;
   onVideo: (dano: DanoEstimacion) => void;
-  onComentarios: (dano: DanoEstimacion) => void;
+  /** Usuario autenticado para el panel de comentarios. */
+  comentarioUsuario?: string;
+  comentarioRol?: RolComentario;
+  comentariosSoloLectura?: boolean;
+  onEnviarComentario?: (dano: DanoEstimacion, entrada: EntradaComentario) => void;
 }
 
 function celdaCambiada(edicion: EdicionRecienteDano, campo: CampoSnapshotLinea) {
@@ -151,6 +160,67 @@ function SubfilaEdicion({
   );
 }
 
+function CeldaComentarios({
+  dano,
+  abierto,
+  onToggle,
+  onClose,
+  usuario,
+  rol,
+  soloLectura,
+  onEnviar,
+}: {
+  dano: DanoEstimacion;
+  abierto: boolean;
+  onToggle: () => void;
+  onClose: () => void;
+  usuario: string;
+  rol: RolComentario;
+  soloLectura: boolean;
+  onEnviar?: (entrada: EntradaComentario) => void;
+}) {
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const pendientes = dano.comentarios.filter((c) => c.tipo === 'SOLICITA_CAMBIO').length;
+  const resuelto =
+    dano.comentarios.length > 0 &&
+    dano.comentarios.some((c) => c.tipo === 'ACEPTADO') &&
+    pendientes === 0;
+
+  return (
+    <td className="relative" onClick={(e) => e.stopPropagation()}>
+      <button
+        ref={btnRef}
+        type="button"
+        className={cn(
+          'dms-btn-comentarios',
+          pendientes > 0 && 'dms-btn-comentarios--pendiente',
+          resuelto && 'dms-btn-comentarios--ok'
+        )}
+        onClick={onToggle}
+        title={
+          dano.comentarios.length
+            ? `${dano.comentarios.length} comentario(s) · ${pendientes} pendiente(s)`
+            : 'Sin comentarios'
+        }
+      >
+        <MessageSquare className="h-3.5 w-3.5" />
+        <span className="tabular-nums">{dano.comentarios.length}</span>
+        {pendientes > 0 && <span className="dms-btn-comentarios-dot" />}
+      </button>
+      <ComentariosDanoPopover
+        open={abierto}
+        anclaRef={btnRef}
+        dano={dano}
+        usuario={usuario}
+        rol={rol}
+        soloLectura={soloLectura}
+        onClose={onClose}
+        onEnviar={(entrada) => onEnviar?.(entrada)}
+      />
+    </td>
+  );
+}
+
 export function ListadoDanosTable({
   danos,
   seleccionadoId,
@@ -170,8 +240,12 @@ export function ListadoDanosTable({
   onEditar,
   onFotos,
   onVideo,
-  onComentarios,
+  comentarioUsuario = 'usuario',
+  comentarioRol = 'TECNICO',
+  comentariosSoloLectura = true,
+  onEnviarComentario,
 }: ListadoDanosTableProps) {
+  const [comentariosAbiertoId, setComentariosAbiertoId] = useState<string | null>(null);
   const totales = totalesDanos(danos);
   const colspanAntesHh =
     (mostrarMarcacion ? 1 : 0) + 10 + (mostrarDimensiones ? 4 : 0) + 1;
@@ -408,26 +482,18 @@ export function ListadoDanosTable({
                   <td className="text-center text-[10px] uppercase text-slate-600">
                     {d.contenedorDonante || '—'}
                   </td>
-                  <td onClick={(e) => e.stopPropagation()}>
-                    <button
-                      type="button"
-                      className={cn(
-                        'dms-btn-comentarios',
-                        pendientes > 0 && 'dms-btn-comentarios--pendiente',
-                        resuelto && 'dms-btn-comentarios--ok'
-                      )}
-                      onClick={() => onComentarios(d)}
-                      title={
-                        d.comentarios.length
-                          ? `${d.comentarios.length} comentario(s) · ${pendientes} pendiente(s)`
-                          : 'Sin comentarios'
-                      }
-                    >
-                      <MessageSquare className="h-3.5 w-3.5" />
-                      <span className="tabular-nums">{d.comentarios.length}</span>
-                      {pendientes > 0 && <span className="dms-btn-comentarios-dot" />}
-                    </button>
-                  </td>
+                  <CeldaComentarios
+                    dano={d}
+                    abierto={comentariosAbiertoId === d.id}
+                    onToggle={() =>
+                      setComentariosAbiertoId((prev) => (prev === d.id ? null : d.id))
+                    }
+                    onClose={() => setComentariosAbiertoId(null)}
+                    usuario={comentarioUsuario}
+                    rol={comentarioRol}
+                    soloLectura={comentariosSoloLectura}
+                    onEnviar={(entrada) => onEnviarComentario?.(d, entrada)}
+                  />
                   <td onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center gap-1">
                       <button
