@@ -17,9 +17,11 @@ import {
   StickyNote,
   Unlock,
   Upload,
+  Users,
   Wrench,
   XCircle,
   Pencil,
+  Ship,
 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { EstadoEstimacionBadge } from '@/components/dms/EstadoEstimacionBadge';
@@ -54,9 +56,11 @@ import {
   itemsSinRevisionSbm,
   aLineaHistorial,
   snapshotDesdeDano,
+  inferirTipoCobro,
   type CampoSnapshotLinea,
   type DanoEstimacion,
   type Estimacion,
+  type TipoCobro,
 } from '@/types/estimacion';
 import { textoComentariosRfs } from '@/components/estimacion/EditarDanoModal';
 import { cn, formatMoney, toast } from '@/lib/utils';
@@ -169,6 +173,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     actualizarDano,
     agregarDano,
     setSap,
+    setTipoCobro,
     marcarReparado,
     resolverItemsMasivo,
     agregarComentarioDano,
@@ -352,6 +357,12 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   const puedeRepararLiq = vistaAprobadoLiq;
   /** APROBADO y REPARADO: Actualizar Información Contenedor. */
   const puedeActualizarContenedorLiq = vistaCerradaLiq;
+  const puedeDefinirCobroLiq =
+    esLiquidaciones &&
+    ['PENDIENTE', 'RECHAZADO', 'REVERSADO', 'APROBADO', 'REPARADO'].includes(
+      estimacion.estado
+    );
+  const tipoCobroActual = inferirTipoCobro(estimacion);
   const puedeComentar = esSeaboard || esLiquidaciones;
   /** Pendiente: SAP + Agregar daño + notas (inhabilitados hasta aperturar). */
   const mostrarAgregarDanoLiq =
@@ -736,6 +747,44 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 >
                   <Pencil className="h-4 w-4" /> Actualizar Información Contenedor
                 </button>
+              )}
+              {puedeDefinirCobroLiq && (
+                <div
+                  className="dms-cobro-toggle"
+                  title="Define si el cobro del estimado es al Cliente o a la Línea"
+                >
+                  <span className="dms-cobro-toggle__label">Cobro</span>
+                  <button
+                    type="button"
+                    className={cn(
+                      'dms-cobro-btn',
+                      tipoCobroActual === 'CLIENTE' && 'dms-cobro-btn--on-cliente'
+                    )}
+                    onClick={() => {
+                      const tipo: TipoCobro = 'CLIENTE';
+                      if (tipoCobroActual === tipo) return;
+                      setTipoCobro(estimacion.id, tipo, actor);
+                      toast('Cobro marcado al Cliente.', 'success');
+                    }}
+                  >
+                    <Users className="h-3.5 w-3.5" /> Cliente
+                  </button>
+                  <button
+                    type="button"
+                    className={cn(
+                      'dms-cobro-btn',
+                      tipoCobroActual === 'LINEA' && 'dms-cobro-btn--on-linea'
+                    )}
+                    onClick={() => {
+                      const tipo: TipoCobro = 'LINEA';
+                      if (tipoCobroActual === tipo) return;
+                      setTipoCobro(estimacion.id, tipo, actor);
+                      toast('Cobro marcado a la Línea.', 'success');
+                    }}
+                  >
+                    <Ship className="h-3.5 w-3.5" /> Línea
+                  </button>
+                </div>
               )}
               {puedeRevalidar && (
                 <button
@@ -1214,6 +1263,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
               estimacion={estimacion}
               dano={danoSeleccionado}
               editable={puedeCargarEvidencias}
+              modoLiquidaciones={esLiquidaciones}
               onActualizar={(cambios, resumen) => {
                 if (!danoSeleccionado) return;
                 cambiarDano(danoSeleccionado, cambios, resumen);

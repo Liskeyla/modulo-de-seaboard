@@ -161,7 +161,7 @@
   }
 
   .dms-icon-action--borrar {
-    @apply border-slate-300 bg-slate-400;
+    @apply border-red-700 bg-[#d9534f] hover:bg-[#c9302c];
   }
 
   .dms-sticky-col {
@@ -346,8 +346,32 @@
     @apply inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600 active:scale-[0.98];
   }
 
+  .dms-cobro-toggle {
+    @apply inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1;
+  }
+
+  .dms-cobro-toggle--compact {
+    @apply min-w-[9.5rem] flex-col gap-0.5 p-0.5 sm:flex-row;
+  }
+
+  .dms-cobro-toggle__label {
+    @apply px-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-500;
+  }
+
+  .dms-cobro-btn {
+    @apply inline-flex items-center justify-center gap-1 rounded-md px-2.5 py-1.5 text-[11px] font-bold text-slate-600 transition hover:bg-white hover:text-slate-900;
+  }
+
+  .dms-cobro-btn--on-cliente {
+    @apply bg-[#f16e26] text-white shadow-sm hover:bg-[#e05310] hover:text-white;
+  }
+
+  .dms-cobro-btn--on-linea {
+    @apply bg-[#152483] text-white shadow-sm hover:bg-[#0f1a5c] hover:text-white;
+  }
+
   .dms-btn-eliminar {
-    @apply border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#d43f3a] bg-gradient-to-r from-[#d9534f] to-[#c9302c] px-4 py-2 text-sm font-bold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98];
   }
 
   .dms-btn-sin-danos {
@@ -1507,7 +1531,7 @@
   }
 
   .dms-archivo-accion--reversar {
-    @apply bg-[#c2410c] hover:bg-[#9a3412];
+    @apply bg-[#2563eb] hover:bg-[#1d4ed8];
   }
 
   .dms-insp-grid {

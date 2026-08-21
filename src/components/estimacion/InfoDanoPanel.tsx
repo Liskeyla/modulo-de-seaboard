@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from 'react';
 import {
+  CloudUpload,
   Download,
   Eye,
   FileText,
@@ -9,7 +10,7 @@ import {
   ImagePlus,
   RotateCcw,
   Trash2,
-  Upload,
+  Video,
 } from 'lucide-react';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Modal } from '@/components/ui/Modal';
@@ -31,6 +32,9 @@ import type {
   FotoDano,
   GrupoArchivo,
 } from '@/types/estimacion';
+
+type TipoArchivoUi = 'NINGUNA' | GrupoArchivo;
+type ClaseCarga = ClaseArchivo;
 
 function dataLogDemo(dano: DanoEstimacion, estimacion: Estimacion): ArchivoDano {
   return {
@@ -70,38 +74,56 @@ function leerArchivoComoDataUrl(file: File): Promise<string> {
   });
 }
 
-function claseDesdeFile(file: File): ClaseArchivo {
-  const t = file.type.toLowerCase();
-  const n = file.name.toLowerCase();
-  if (t.startsWith('image/')) return 'IMAGEN';
-  if (t.startsWith('video/') || /\.(mp4|webm|mov|avi)$/i.test(n)) return 'VIDEO';
-  if (t === 'application/pdf' || n.endsWith('.pdf')) return 'PDF';
-  if (t.includes('csv') || t.includes('text') || /\.(csv|txt|log|dat)$/i.test(n)) {
-    return 'DATALOG';
-  }
-  if (/\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(n)) return 'IMAGEN';
-  return 'PDF';
-}
-
 function etiquetaClase(clase: ClaseArchivo) {
   switch (clase) {
     case 'IMAGEN':
-      return 'imagen';
+      return 'Imagen';
     case 'VIDEO':
-      return 'video';
+      return 'Video';
     case 'DATALOG':
-      return 'data log';
+      return 'Data Log';
     case 'PDF':
       return 'PDF';
     default:
-      return 'archivo';
+      return 'Archivo';
   }
+}
+
+function acceptDeClase(clase: ClaseCarga) {
+  switch (clase) {
+    case 'IMAGEN':
+      return 'image/*';
+    case 'VIDEO':
+      return 'video/*,.mp4,.webm,.mov,.avi';
+    case 'DATALOG':
+      return '.csv,.txt,.log,.dat,text/csv,text/plain';
+    case 'PDF':
+      return '.pdf,application/pdf';
+    default:
+      return '*/*';
+  }
+}
+
+function archivoCoincideClase(file: File, clase: ClaseCarga) {
+  const t = file.type.toLowerCase();
+  const n = file.name.toLowerCase();
+  if (clase === 'IMAGEN') {
+    return t.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(n);
+  }
+  if (clase === 'VIDEO') {
+    return t.startsWith('video/') || /\.(mp4|webm|mov|avi)$/i.test(n);
+  }
+  if (clase === 'DATALOG') {
+    return t.includes('csv') || t.includes('text') || /\.(csv|txt|log|dat)$/i.test(n);
+  }
+  return t === 'application/pdf' || n.endsWith('.pdf');
 }
 
 export function InfoDanoPanel({
   estimacion,
   dano,
   editable,
+  modoLiquidaciones = false,
   onActualizar,
   onVerFotos,
   onVerVideo,
@@ -109,6 +131,8 @@ export function InfoDanoPanel({
   estimacion: Estimacion;
   dano: DanoEstimacion | null;
   editable: boolean;
+  /** UI de carga DMS (Tipo Archivo + 4 botones). Solo Liquidaciones. */
+  modoLiquidaciones?: boolean;
   onActualizar: (cambios: Partial<DanoEstimacion>, resumen: string) => void;
   onVerFotos: (dano: DanoEstimacion) => void;
   onVerVideo: (dano: DanoEstimacion) => void;
@@ -119,8 +143,8 @@ export function InfoDanoPanel({
   const [papelera, setPapelera] = useState<ArchivoDano | null>(null);
   const [previewLog, setPreviewLog] = useState(false);
   const [fotoAmpliada, setFotoAmpliada] = useState<FotoDano | null>(null);
-  const [grupoCarga, setGrupoCarga] = useState<GrupoArchivo>('ESTIMACION');
-  const [tipoFoto, setTipoFoto] = useState<'DANO' | 'REPARADO'>('DANO');
+  const [tipoArchivo, setTipoArchivo] = useState<TipoArchivoUi>('NINGUNA');
+  const [clasePendiente, setClasePendiente] = useState<ClaseCarga>('IMAGEN');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const archivos = useMemo(
@@ -137,6 +161,8 @@ export function InfoDanoPanel({
     REPARADO: archivos.filter((a) => a.grupo === 'REPARADO'),
   };
 
+  const puedeCargar = modoLiquidaciones && editable;
+
   function persistirArchivos(
     lista: ArchivoDano[],
     resumen: string,
@@ -144,6 +170,21 @@ export function InfoDanoPanel({
   ) {
     if (!dano) return;
     onActualizar({ archivos: lista, ...extra }, resumen);
+  }
+
+  function exigirTipoArchivo(): GrupoArchivo | null {
+    if (tipoArchivo === 'NINGUNA') {
+      toast('Seleccione Tipo Archivo: Estimación o Reparado.', 'info');
+      return null;
+    }
+    return tipoArchivo;
+  }
+
+  function abrirSelector(clase: ClaseCarga) {
+    if (!puedeCargar) return;
+    if (!exigirTipoArchivo()) return;
+    setClasePendiente(clase);
+    window.setTimeout(() => inputRef.current?.click(), 0);
   }
 
   async function bajarFotos() {
@@ -183,7 +224,20 @@ export function InfoDanoPanel({
   }
 
   async function alElegirArchivos(lista: FileList | null) {
-    if (!dano || !editable || !lista?.length) return;
+    if (!dano || !puedeCargar || !lista?.length) return;
+    const grupo = exigirTipoArchivo();
+    if (!grupo) {
+      if (inputRef.current) inputRef.current.value = '';
+      return;
+    }
+
+    const validos = Array.from(lista).filter((f) => archivoCoincideClase(f, clasePendiente));
+    if (validos.length === 0) {
+      toast(`Seleccione archivo(s) válidos para ${etiquetaClase(clasePendiente)}.`, 'error');
+      if (inputRef.current) inputRef.current.value = '';
+      return;
+    }
+
     setSubiendo(true);
     try {
       const fecha = ahoraFmtLocal();
@@ -191,16 +245,15 @@ export function InfoDanoPanel({
       const nuevosArchivos: ArchivoDano[] = [];
       let video = dano.tieneVideo;
 
-      for (const file of Array.from(lista)) {
-        const clase = claseDesdeFile(file);
+      for (const file of validos) {
         const url = await leerArchivoComoDataUrl(file);
         if (!url) continue;
 
-        if (clase === 'IMAGEN') {
+        if (clasePendiente === 'IMAGEN') {
           nuevasFotos.push({
             id: uidLocal('foto'),
             url,
-            tipo: tipoFoto,
+            tipo: grupo === 'REPARADO' ? 'REPARADO' : 'DANO',
             descripcion: file.name,
             fecha,
             importada: true,
@@ -209,17 +262,17 @@ export function InfoDanoPanel({
             id: uidLocal('img'),
             url,
             clase: 'IMAGEN',
-            grupo: grupoCarga,
+            grupo,
             nombre: file.name,
             fecha,
           });
         } else {
-          if (clase === 'VIDEO') video = true;
+          if (clasePendiente === 'VIDEO') video = true;
           nuevosArchivos.push({
-            id: uidLocal(clase.toLowerCase()),
+            id: uidLocal(clasePendiente.toLowerCase()),
             url,
-            clase,
-            grupo: grupoCarga,
+            clase: clasePendiente,
+            grupo,
             nombre: file.name,
             fecha,
           });
@@ -246,7 +299,7 @@ export function InfoDanoPanel({
           archivos: [...archivos.filter((a) => !a.sintetico), ...nuevosArchivos],
           tieneVideo: video,
         },
-        `Línea ${dano.linea} · cargado: ${resumenPartes.join(' · ')}`
+        `Línea ${dano.linea} · cargado (${grupo === 'REPARADO' ? 'Reparado' : 'Estimación'}): ${resumenPartes.join(' · ')}`
       );
       toast(
         `Se cargaron ${nuevasFotos.length + otros.length} archivo(s) en la línea ${dano.linea}.`,
@@ -266,10 +319,10 @@ export function InfoDanoPanel({
       setPapelera(eliminar);
       persistirArchivos(
         archivos.filter((a) => a.id !== eliminar.id),
-        `Línea ${dano.linea} · archivo reversado: ${eliminar.nombre}`,
+        `Línea ${dano.linea} · archivo eliminado: ${eliminar.nombre}`,
         { archivosReversados: [...(dano.archivosReversados ?? []), eliminar] }
       );
-      toast(`Se reversó ${eliminar.nombre}. Quedó en Archivos reversados.`, 'success');
+      toast(`Se eliminó ${eliminar.nombre}. Puede restaurarlo con Reversar.`, 'success');
     } else {
       onActualizar(
         { fotos: dano.fotos.filter((f) => f.id !== eliminar.id) },
@@ -336,8 +389,9 @@ export function InfoDanoPanel({
         </header>
         <div className="dms-card-body">
           <p className="text-[11px] leading-relaxed text-gray-400">
-            Seleccione una línea del <strong>Listado de Daños</strong> para visualizar o cargar
-            el anexo fotográfico, videos, data logs o PDF asociados.
+            Seleccione una línea del <strong>Listado de Daños</strong> para visualizar
+            {modoLiquidaciones ? ' o cargar' : ''} el anexo fotográfico, videos, data logs o PDF
+            asociados.
           </p>
         </div>
       </section>
@@ -361,95 +415,116 @@ export function InfoDanoPanel({
           <span className="truncate text-[11px] text-slate-500">{dano.dano}</span>
         </div>
 
-        {editable && (
-          <div className="rounded-lg border border-dashed border-sky-200 bg-sky-50/60 p-3">
-            <p className="dms-field-label mb-2">Cargar evidencias</p>
-            <div className="mb-2 flex flex-wrap gap-2">
-              <label className="flex items-center gap-1.5 text-[11px] text-slate-600">
-                Grupo
-                <select
-                  className="dms-select h-8 text-[11px]"
-                  value={grupoCarga}
-                  onChange={(e) => setGrupoCarga(e.target.value as GrupoArchivo)}
-                >
-                  <option value="ESTIMACION">Estimación</option>
-                  <option value="REPARADO">Reparado</option>
-                </select>
-              </label>
-              <label className="flex items-center gap-1.5 text-[11px] text-slate-600">
-                Tipo foto
-                <select
-                  className="dms-select h-8 text-[11px]"
-                  value={tipoFoto}
-                  onChange={(e) => setTipoFoto(e.target.value as 'DANO' | 'REPARADO')}
-                >
-                  <option value="DANO">Daño / Estimación</option>
-                  <option value="REPARADO">Reparado</option>
-                </select>
-              </label>
+        {modoLiquidaciones && (
+          <div className="space-y-2.5">
+            <div>
+              <p className="dms-field-label mb-1.5">Tipo Archivo</p>
+              <div className="flex flex-wrap gap-3 text-[11px] font-semibold text-slate-700">
+                {(
+                  [
+                    ['NINGUNA', 'Ninguna'],
+                    ['ESTIMACION', 'Estimación'],
+                    ['REPARADO', 'Reparado'],
+                  ] as const
+                ).map(([valor, label]) => (
+                  <label key={valor} className="inline-flex cursor-pointer items-center gap-1.5">
+                    <input
+                      type="radio"
+                      name="tipo-archivo-dano"
+                      className="h-3.5 w-3.5 accent-[#152483]"
+                      checked={tipoArchivo === valor}
+                      disabled={!puedeCargar}
+                      onChange={() => setTipoArchivo(valor)}
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
             </div>
-            <input
-              ref={inputRef}
-              type="file"
-              multiple
-              accept="image/*,video/*,.pdf,application/pdf,.csv,.txt,.log,.dat,text/csv,text/plain"
-              className="hidden"
-              onChange={(e) => void alElegirArchivos(e.target.files)}
-            />
-            <button
-              type="button"
-              className="dms-btn-azul inline-flex items-center gap-2 px-3 py-2 text-xs"
-              disabled={subiendo}
-              onClick={() => inputRef.current?.click()}
-            >
-              {subiendo ? (
-                <>Subiendo…</>
-              ) : (
-                <>
-                  <Upload className="h-3.5 w-3.5" />
-                  Subir fotos, PDF, video o data log
-                </>
-              )}
-            </button>
-            <p className="mt-1.5 text-[10px] leading-relaxed text-slate-500">
-              Acepta imágenes, PDF, videos y archivos de data log (.csv, .txt, .log). Quedan
-              asociados a la línea seleccionada.
-            </p>
+
+            <div>
+              <p className="dms-field-label mb-1.5">Cargar Archivo</p>
+              <div className="rounded border border-slate-200 bg-white px-2 py-1.5">
+                <input
+                  ref={inputRef}
+                  type="file"
+                  multiple
+                  accept={acceptDeClase(clasePendiente)}
+                  className="dms-file-native"
+                  disabled={!puedeCargar || subiendo}
+                  onChange={(e) => void alElegirArchivos(e.target.files)}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-1.5">
+              <button
+                type="button"
+                className="dms-upload-btn dms-upload-btn--img"
+                disabled={!puedeCargar || subiendo}
+                onClick={() => abrirSelector('IMAGEN')}
+              >
+                <CloudUpload className="h-3.5 w-3.5 shrink-0" />
+                Subir Imágenes
+              </button>
+              <button
+                type="button"
+                className="dms-upload-btn dms-upload-btn--video"
+                disabled={!puedeCargar || subiendo}
+                onClick={() => abrirSelector('VIDEO')}
+              >
+                <Video className="h-3.5 w-3.5 shrink-0" />
+                Subir Videos
+              </button>
+              <button
+                type="button"
+                className="dms-upload-btn dms-upload-btn--log"
+                disabled={!puedeCargar || subiendo}
+                onClick={() => abrirSelector('DATALOG')}
+              >
+                <FileText className="h-3.5 w-3.5 shrink-0" />
+                Subir Archivos Data Log
+              </button>
+              <button
+                type="button"
+                className="dms-upload-btn dms-upload-btn--pdf"
+                disabled={!puedeCargar || subiendo}
+                onClick={() => abrirSelector('PDF')}
+              >
+                <FileText className="h-3.5 w-3.5 shrink-0" />
+                Subir Archivos PDF
+              </button>
+            </div>
+
+            {!puedeCargar && (
+              <p className="rounded-md bg-amber-50 px-2.5 py-1.5 text-[10px] text-amber-800">
+                Aperture la estimación (o use un estimado APROBADO/REPARADO) para cargar
+                evidencias.
+              </p>
+            )}
+            {subiendo && (
+              <p className="text-[10px] font-semibold text-sky-700">Subiendo archivos…</p>
+            )}
           </div>
         )}
 
-        {!editable && (
-          <p className="rounded-md bg-amber-50 px-2.5 py-1.5 text-[10px] text-amber-800">
-            Aperture la estimación para cargar o eliminar evidencias (fotos, PDF, video, data
-            log).
+        {!modoLiquidaciones && (
+          <p className="rounded-md bg-slate-50 px-2.5 py-1.5 text-[10px] text-slate-600">
+            Solo visualización de evidencias. La carga de archivos corresponde a Liquidaciones.
           </p>
         )}
 
         <div>
           <p className="dms-field-label mb-1.5">Anexo Fotográfico</p>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              className="dms-zip-btn"
-              disabled={bajando === 'fotos' || fotosVisibles.length === 0}
-              onClick={() => void bajarFotos()}
-            >
-              <Download className="h-3.5 w-3.5" />
-              {bajando === 'fotos' ? 'Preparando zip…' : 'Descargar todas las imágenes (.zip)'}
-            </button>
-            {editable && (
-              <button
-                type="button"
-                className="dms-zip-btn"
-                onClick={() => {
-                  setTipoFoto('DANO');
-                  inputRef.current?.click();
-                }}
-              >
-                <ImagePlus className="h-3.5 w-3.5" /> Cargar imágenes
-              </button>
-            )}
-          </div>
+          <button
+            type="button"
+            className="dms-zip-btn"
+            disabled={bajando === 'fotos' || fotosVisibles.length === 0}
+            onClick={() => void bajarFotos()}
+          >
+            <Download className="h-3.5 w-3.5" />
+            {bajando === 'fotos' ? 'Preparando zip…' : 'Descargar todas las imágenes (.zip)'}
+          </button>
           {fotosVisibles.length === 0 ? (
             <p className="mt-2 text-[11px] text-slate-400">Esta línea aún no tiene fotografías.</p>
           ) : (
@@ -488,7 +563,7 @@ export function InfoDanoPanel({
         </div>
 
         <div>
-          <p className="dms-field-label mb-1.5">Archivos Data Log / PDF / Video</p>
+          <p className="dms-field-label mb-1.5">Archivos Data Log</p>
           <button
             type="button"
             className="dms-zip-btn"
@@ -496,7 +571,9 @@ export function InfoDanoPanel({
             onClick={() => void bajarLogs()}
           >
             <Download className="h-3.5 w-3.5" />
-            {bajando === 'logs' ? 'Preparando zip…' : 'Descargar todos los Data Logs (.zip)'}
+            {bajando === 'logs'
+              ? 'Preparando zip…'
+              : 'Descargar todos los Data Logs (.zip)'}
           </button>
         </div>
 
@@ -505,51 +582,55 @@ export function InfoDanoPanel({
             <div key={grupo} className="dms-archivo-grupo">
               <p>{grupo === 'ESTIMACION' ? 'Estimación' : 'Reparado'}</p>
               <ul className="space-y-2">
-                {porGrupo[grupo].map((archivo) => (
-                  <li key={archivo.id}>
-                    <div className="flex items-start gap-2">
-                      <FileText className="mt-0.5 h-4 w-4 shrink-0 text-[#152483]" />
-                      <span className="break-all text-[11px] font-semibold text-slate-800">
-                        {archivo.nombre}
-                        <span className="ml-1 font-normal text-slate-400">
-                          ({etiquetaClase(archivo.clase)})
+                {porGrupo[grupo].map((archivo) => {
+                  const etiqueta = etiquetaClase(archivo.clase);
+                  return (
+                    <li key={archivo.id}>
+                      <div className="flex items-start gap-2">
+                        <FileText className="mt-0.5 h-4 w-4 shrink-0 text-[#152483]" />
+                        <span className="break-all text-[11px] font-semibold text-slate-800">
+                          {archivo.nombre}
                         </span>
-                      </span>
-                    </div>
-                    <div className="mt-1.5 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-                      <button
-                        type="button"
-                        className="dms-archivo-accion dms-archivo-accion--ver"
-                        onClick={() => verArchivo(archivo)}
-                      >
-                        <Eye className="h-3 w-3" /> Ver {etiquetaClase(archivo.clase)}
-                      </button>
-                      <button
-                        type="button"
-                        className="dms-archivo-accion dms-archivo-accion--bajar"
-                        onClick={() => bajarArchivo(archivo)}
-                      >
-                        <Download className="h-3 w-3" /> Descargar {etiquetaClase(archivo.clase)}
-                      </button>
-                      <button
-                        type="button"
-                        className="dms-archivo-accion dms-archivo-accion--borrar"
-                        disabled={!editable}
-                        onClick={() => setEliminar(archivo)}
-                      >
-                        <Trash2 className="h-3 w-3" /> Eliminar {etiquetaClase(archivo.clase)}
-                      </button>
-                      <button
-                        type="button"
-                        className="dms-archivo-accion dms-archivo-accion--reversar"
-                        disabled={!editable}
-                        onClick={() => reversar(archivo)}
-                      >
-                        <RotateCcw className="h-3 w-3" /> Reversar {etiquetaClase(archivo.clase)}
-                      </button>
-                    </div>
-                  </li>
-                ))}
+                      </div>
+                      <div className="mt-1.5 grid grid-cols-1 gap-1.5">
+                        <button
+                          type="button"
+                          className="dms-archivo-accion dms-archivo-accion--ver"
+                          onClick={() => verArchivo(archivo)}
+                        >
+                          <Eye className="h-3 w-3" /> Ver {etiqueta}
+                        </button>
+                        <button
+                          type="button"
+                          className="dms-archivo-accion dms-archivo-accion--bajar"
+                          onClick={() => bajarArchivo(archivo)}
+                        >
+                          <Download className="h-3 w-3" /> Descargar {etiqueta}
+                        </button>
+                        {modoLiquidaciones && (
+                          <>
+                            <button
+                              type="button"
+                              className="dms-archivo-accion dms-archivo-accion--borrar"
+                              disabled={!puedeCargar}
+                              onClick={() => setEliminar(archivo)}
+                            >
+                              <Trash2 className="h-3 w-3" /> Eliminar {etiqueta}
+                            </button>
+                            <button
+                              type="button"
+                              className="dms-archivo-accion dms-archivo-accion--reversar"
+                              disabled={!puedeCargar}
+                              onClick={() => reversar(archivo)}
+                            >
+                              <RotateCcw className="h-3 w-3" /> Reversar {etiqueta}
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           )
@@ -561,6 +642,7 @@ export function InfoDanoPanel({
         title="Eliminar archivo"
         subtitle="La evidencia se retira de esta línea de daño"
         confirmLabel="Eliminar"
+        confirmClass="dms-btn-eliminar"
         onClose={() => setEliminar(null)}
         onConfirm={confirmarEliminar}
       >

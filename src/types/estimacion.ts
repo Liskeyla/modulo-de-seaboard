@@ -54,6 +54,24 @@ export type CargoDano = (typeof CARGOS_DANO)[number];
 /** Cargo que se asigna al rechazar un ítem por línea SBM. */
 export const CARGO_RECHAZADO: CargoDano = 'Rechazado';
 
+/** Cobro del estimado (Liquidaciones): Cliente o Línea. */
+export type TipoCobro = 'CLIENTE' | 'LINEA';
+
+export function cargoDesdeTipoCobro(tipo: TipoCobro): CargoDano {
+  return tipo === 'CLIENTE' ? 'Cliente' : 'Línea';
+}
+
+export function inferirTipoCobro(e: {
+  tipoCobro?: TipoCobro;
+  danos: { cargo: string }[];
+}): TipoCobro {
+  if (e.tipoCobro === 'CLIENTE' || e.tipoCobro === 'LINEA') return e.tipoCobro;
+  const vigentes = e.danos.filter((d) => d.cargo !== 'Rechazado');
+  if (vigentes.length === 0) return 'LINEA';
+  const clientes = vigentes.filter((d) => d.cargo === 'Cliente').length;
+  return clientes > vigentes.length / 2 ? 'CLIENTE' : 'LINEA';
+}
+
 /** Área funcional del autor del comentario, para la trazabilidad con liquidaciones. */
 export type RolComentario = 'LIQUIDACIONES' | 'TECNICO' | 'SEABOARD' | 'SUPERVISOR' | 'RFS';
 
@@ -342,6 +360,8 @@ export interface Estimacion {
   /** Liquidaciones validó el estimado (habilita push a SBM si es Seaboard). */
   validadoLiquidaciones?: boolean;
   fechaValidacionLiquidaciones?: string;
+  /** Cobro del estimado: Cliente o Línea (Liquidaciones). */
+  tipoCobro?: TipoCobro;
   /** Operación del estimado. Si falta, se infiere del código. */
   pais?: 'ECUADOR' | 'PERU';
 }

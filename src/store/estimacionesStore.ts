@@ -12,12 +12,13 @@ import type {
   EventoAuditoria,
   LineaHistorialDano,
   RolComentario,
+  TipoCobro,
   TipoComentario,
 } from '@/types/estimacion';
-import { aLineaHistorial, APLICA_APROBADO_SBM, APLICA_RECHAZADO_SBM, CARGO_RECHAZADO, valoresCeroPorRechazoItem } from '@/types/estimacion';
+import { aLineaHistorial, APLICA_APROBADO_SBM, APLICA_RECHAZADO_SBM, CARGO_RECHAZADO, cargoDesdeTipoCobro, valoresCeroPorRechazoItem } from '@/types/estimacion';
 import { esNavieraSeaboard } from '@/lib/seaboardFlow';
 
-const STORAGE_KEY = 'dms-estimaciones-prototipo-v16';
+const STORAGE_KEY = 'dms-estimaciones-prototipo-v17';
 const CLAVES_OBSOLETAS = [
   'dms-estimaciones-prototipo',
   'dms-estimaciones-prototipo-v2',
@@ -34,6 +35,7 @@ const CLAVES_OBSOLETAS = [
   'dms-estimaciones-prototipo-v13',
   'dms-estimaciones-prototipo-v14',
   'dms-estimaciones-prototipo-v15',
+  'dms-estimaciones-prototipo-v16',
 ];
 
 function ahoraFmt() {
@@ -110,6 +112,8 @@ interface EstimacionesState {
   // Edición del estimado
   setActividad: (id: string, actividad: Actividad, usuario: string) => void;
   setSap: (id: string, campos: { itinerarioSap?: string; almacenSap?: string }, usuario: string) => void;
+  /** Liquidaciones: marca cobro al Cliente o a la Línea (aplica a ítems no rechazados). */
+  setTipoCobro: (id: string, tipo: TipoCobro, usuario: string) => void;
   revalidarTarifas: (id: string, usuario: string) => void;
 
   // Listado de daños
@@ -458,6 +462,32 @@ export const useEstimacionesStore = create<EstimacionesState>()(
               fechaModificacion: ahoraFmt(),
               usuarioModificacion: usuario,
               auditoria: [...e.auditoria, evento(usuario, 'ACTUALIZACIÓN SAP', detalles.join(' · '))],
+            };
+          });
+        },
+
+        setTipoCobro: (id, tipo, usuario) => {
+          mutar(id, (e) => {
+            if (e.tipoCobro === tipo) return e;
+            const cargo = cargoDesdeTipoCobro(tipo);
+            const danos = e.danos.map((d) =>
+              d.cargo === CARGO_RECHAZADO ? d : { ...d, cargo }
+            );
+            const etiqueta = tipo === 'CLIENTE' ? 'Cliente' : 'Línea';
+            return {
+              ...e,
+              tipoCobro: tipo,
+              danos,
+              fechaModificacion: ahoraFmt(),
+              usuarioModificacion: usuario,
+              auditoria: [
+                ...e.auditoria,
+                evento(
+                  usuario,
+                  'TIPO DE COBRO',
+                  `Cobro marcado a ${etiqueta}. Se actualizó el cargo de las líneas vigentes.`
+                ),
+              ],
             };
           });
         },

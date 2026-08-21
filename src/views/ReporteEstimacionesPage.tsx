@@ -20,6 +20,7 @@ import {
   Trash2,
   Undo2,
   Upload,
+  Users,
 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { DmsReportLayout } from '@/components/dms/DmsReportLayout';
@@ -51,9 +52,11 @@ import {
   ESTADOS_ESTIMACION,
   contarComentariosPendientes,
   itemsSinRevisionSbm,
+  inferirTipoCobro,
   MSG_ITEMS_SIN_APROBAR,
   type Actividad,
   type Estimacion,
+  type TipoCobro,
 } from '@/types/estimacion';
 import { descargarDataLog, type VarianteInforme } from '@/lib/descargas';
 import { cn, formatMoney, toast } from '@/lib/utils';
@@ -216,6 +219,7 @@ export default function ReporteEstimacionesPage() {
     reversarAprobacion,
     eliminar,
     setActividad,
+    setTipoCobro,
   } = useEstimacionesStore();
   const { pais } = useUiStore();
 
@@ -486,7 +490,7 @@ export default function ReporteEstimacionesPage() {
           ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) && (
             <button
               type="button"
-              className="dms-icon-action dms-icon-action--info"
+              className="dms-icon-action dms-icon-action--borrar"
               title="Eliminar estimado"
               onClick={() => setDialogo({ tipo: 'ELIMINAR', id: row.id })}
             >
@@ -710,6 +714,9 @@ export default function ReporteEstimacionesPage() {
                       <th>Semana</th>
                       <th>Año</th>
                       <th>Estado</th>
+                      {esLiquidaciones && (
+                        <th title="Cobro del estimado: Cliente o Línea">Cobro</th>
+                      )}
                       <th>Contenedor</th>
                       <th>Tipo contenedor</th>
                       <th>Modelo Maquina</th>
@@ -805,6 +812,55 @@ export default function ReporteEstimacionesPage() {
                             <td>
                               <EstadoEstimacionBadge estado={row.estado} />
                             </td>
+                            {esLiquidaciones && (
+                              <td
+                                className="align-middle"
+                                onDoubleClick={(e) => e.stopPropagation()}
+                              >
+                                {(['PENDIENTE', 'RECHAZADO', 'REVERSADO', 'APROBADO', 'REPARADO'].includes(
+                                  row.estado
+                                ) && !row.sinDanos) ? (
+                                  <div className="dms-cobro-toggle dms-cobro-toggle--compact">
+                                    <button
+                                      type="button"
+                                      className={cn(
+                                        'dms-cobro-btn',
+                                        inferirTipoCobro(row) === 'CLIENTE' &&
+                                          'dms-cobro-btn--on-cliente'
+                                      )}
+                                      title="Cobro al Cliente"
+                                      onClick={() => {
+                                        const tipo: TipoCobro = 'CLIENTE';
+                                        if (inferirTipoCobro(row) === tipo) return;
+                                        setTipoCobro(row.id, tipo, actor);
+                                        toast(`${row.codigo}: cobro al Cliente.`, 'success');
+                                      }}
+                                    >
+                                      <Users className="h-3 w-3" /> Cliente
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className={cn(
+                                        'dms-cobro-btn',
+                                        inferirTipoCobro(row) === 'LINEA' &&
+                                          'dms-cobro-btn--on-linea'
+                                      )}
+                                      title="Cobro a la Línea"
+                                      onClick={() => {
+                                        const tipo: TipoCobro = 'LINEA';
+                                        if (inferirTipoCobro(row) === tipo) return;
+                                        setTipoCobro(row.id, tipo, actor);
+                                        toast(`${row.codigo}: cobro a la Línea.`, 'success');
+                                      }}
+                                    >
+                                      <Ship className="h-3 w-3" /> Línea
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <span className="text-[10px] text-slate-400">—</span>
+                                )}
+                              </td>
+                            )}
                             <td className="font-semibold text-rfs-navy">{row.contenedor}</td>
                             <td className="text-[11px]">{row.tipoContenedor || '—'}</td>
                             <td className="text-xs">{row.modeloMaquina || '—'}</td>
