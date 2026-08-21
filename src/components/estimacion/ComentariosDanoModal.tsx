@@ -126,15 +126,19 @@ export function ComentariosDanoPopover({
       setPos(null);
       return;
     }
-    const rect = anclaRef.current.getBoundingClientRect();
-    const ancho = Math.min(380, window.innerWidth - 16);
-    let left = rect.right - ancho;
-    if (left < 8) left = 8;
-    let top = rect.bottom + 6;
-    if (top + 420 > window.innerHeight) {
-      top = Math.max(8, rect.top - 426);
+    function actualizarPosicion() {
+      if (!anclaRef.current) return;
+      const rect = anclaRef.current.getBoundingClientRect();
+      const ancho = Math.min(380, window.innerWidth - 16);
+      let left = rect.right - ancho;
+      if (left < 8) left = 8;
+      let top = rect.bottom + 6;
+      if (top + 420 > window.innerHeight) {
+        top = Math.max(8, rect.top - 426);
+      }
+      setPos({ top, left });
     }
-    setPos({ top, left });
+    actualizarPosicion();
   }, [open, anclaRef, dano.id, dano.comentarios.length]);
 
   useEffect(() => {
@@ -148,16 +152,38 @@ export function ComentariosDanoPopover({
     function alEscape(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose();
     }
-    function alScroll() {
-      onClose();
+    /** No cerrar al scrollear el hilo de comentarios; solo reposicionar si se mueve el ancla. */
+    function alScroll(e: Event) {
+      const target = e.target;
+      if (target instanceof Node && panelRef.current?.contains(target)) return;
+      if (!anclaRef.current) {
+        onClose();
+        return;
+      }
+      const rect = anclaRef.current.getBoundingClientRect();
+      const ancho = Math.min(380, window.innerWidth - 16);
+      let left = rect.right - ancho;
+      if (left < 8) left = 8;
+      let top = rect.bottom + 6;
+      if (top + 420 > window.innerHeight) {
+        top = Math.max(8, rect.top - 426);
+      }
+      // Si el ancla salió de la ventana, cerrar; si no, mantener abierto y mover el panel.
+      if (rect.bottom < 0 || rect.top > window.innerHeight) {
+        onClose();
+        return;
+      }
+      setPos({ top, left });
     }
     document.addEventListener('mousedown', alClickFuera);
     document.addEventListener('keydown', alEscape);
     window.addEventListener('scroll', alScroll, true);
+    window.addEventListener('resize', alScroll);
     return () => {
       document.removeEventListener('mousedown', alClickFuera);
       document.removeEventListener('keydown', alEscape);
       window.removeEventListener('scroll', alScroll, true);
+      window.removeEventListener('resize', alScroll);
     };
   }, [open, onClose, anclaRef]);
 
@@ -196,6 +222,9 @@ export function ComentariosDanoPopover({
       style={{ top: pos.top, left: pos.left, width: Math.min(380, window.innerWidth - 16) }}
       role="dialog"
       aria-label={`Comentarios línea ${dano.linea}`}
+      onMouseDown={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+      onWheel={(e) => e.stopPropagation()}
     >
       <header className="dms-cmt-popover-header">
         <div className="min-w-0">

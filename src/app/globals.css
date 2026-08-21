@@ -1111,6 +1111,78 @@
     @apply text-[12px] leading-snug text-slate-800;
   }
 
+  .dms-dano-subfila-comentario > td {
+    @apply border-t-0 bg-[#f8fafc] px-2 py-2 align-top;
+  }
+
+  .dms-dano-cmt-bloque {
+    @apply mx-1 space-y-2 rounded-lg border border-slate-200 bg-white px-3 py-2.5 shadow-sm;
+  }
+
+  .dms-dano-cambios-sbm {
+    @apply rounded-md border border-emerald-200 bg-emerald-50/80 px-2.5 py-2;
+  }
+
+  .dms-dano-cambios-sbm__label {
+    @apply text-[10px] font-bold uppercase tracking-wide text-emerald-800;
+  }
+
+  .dms-dano-cambios-sbm__texto {
+    @apply mt-0.5 text-[12px] leading-snug text-slate-800;
+  }
+
+  .dms-dano-cambios-sbm__resumen {
+    @apply mt-1 text-[11px] text-slate-600;
+  }
+
+  .dms-dano-ultimo-cmt {
+    @apply rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2;
+  }
+
+  .dms-dano-ultimo-cmt--pendiente {
+    @apply border-amber-300 bg-amber-50;
+  }
+
+  .dms-dano-ultimo-cmt--sbm {
+    @apply border-sky-200 bg-sky-50/70;
+  }
+
+  .dms-dano-ultimo-cmt__meta {
+    @apply mb-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] text-slate-600;
+  }
+
+  .dms-dano-ultimo-cmt__rol {
+    @apply rounded bg-white px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#152483] ring-1 ring-slate-200;
+  }
+
+  .dms-dano-ultimo-cmt__texto {
+    @apply text-[13px] leading-relaxed text-slate-900;
+  }
+
+  .dms-dano-cmt-acciones {
+    @apply flex flex-wrap items-center gap-3;
+  }
+
+  .dms-dano-cmt-link {
+    @apply inline-flex items-center gap-1 text-[11px] font-semibold text-[#152483] hover:underline;
+  }
+
+  .dms-dano-cmt-form {
+    @apply space-y-2 border-t border-slate-100 pt-2;
+  }
+
+  .dms-cmt-celda {
+    @apply space-y-0.5;
+  }
+
+  .dms-cmt-celda__meta {
+    @apply text-[10px] leading-tight;
+  }
+
+  .dms-cmt-celda__texto {
+    @apply line-clamp-3 text-[12px] leading-snug text-slate-900;
+  }
+
   /* Valores modificados por Seaboard: texto verde en la fila principal */
   .dms-celda-modificada {
     @apply font-semibold text-emerald-600;
@@ -1204,7 +1276,7 @@
   }
 
   .dms-cmt-popover {
-    @apply fixed z-[60] flex max-h-[min(28rem,85vh)] w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl animate-fade-up;
+    @apply fixed z-[80] flex max-h-[min(28rem,85vh)] w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl;
   }
 
   .dms-cmt-popover-header {
@@ -1212,7 +1284,7 @@
   }
 
   .dms-cmt-popover-body {
-    @apply min-h-[8rem] flex-1 space-y-2.5 overflow-y-auto bg-slate-50/80 px-3 py-3;
+    @apply min-h-[8rem] flex-1 space-y-2.5 overflow-y-auto overscroll-contain bg-slate-50 px-3 py-3;
   }
 
   .dms-cmt-vacio {
@@ -1240,7 +1312,7 @@
   }
 
   .dms-cmt-burbuja-texto {
-    @apply text-[13px] leading-relaxed text-slate-800;
+    @apply select-text text-[13px] leading-relaxed text-slate-900;
   }
 
   .dms-cmt-burbuja-campo {

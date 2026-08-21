@@ -285,9 +285,10 @@ export function HistorialActividadModal({
     >
       <div className="max-h-[min(70vh,560px)] overflow-auto bg-slate-50/80 p-3">
         <p className="mb-2 text-[11px] text-slate-500">
-          Cada fila muestra el <strong>último cambio</strong> del ítem. Expanda para ver{' '}
-          <strong>todos los cambios y comentarios</strong>; los campos modificados aparecen en{' '}
-          <span className="font-semibold text-emerald-600">verde</span>.
+          Aquí está el <strong>historial completo</strong> de cada ítem (cambios de campos y
+          comentarios). En el listado de daños solo se muestra el <strong>último comentario</strong>{' '}
+          y el resumen de lo modificado por Seaboard. Expanda una fila para ver el detalle; los
+          campos modificados aparecen en <span className="font-semibold text-emerald-600">verde</span>.
         </p>
         <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
           <table className="w-full border-collapse text-left text-xs text-slate-800">
