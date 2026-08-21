@@ -1028,6 +1028,18 @@
     @apply border-t-0 bg-amber-50/90 px-3 py-2 align-top;
   }
 
+  .dms-dano-subfila-row > td {
+    @apply border-t border-amber-200/60 bg-amber-50/70 py-1.5 text-[10px] text-amber-950;
+  }
+
+  .dms-dano-subfila-notas > td {
+    @apply border-t-0 bg-amber-50/40 py-0;
+  }
+
+  .dms-celda-cambiada {
+    @apply bg-amber-200/90 font-bold text-amber-950 ring-1 ring-inset ring-amber-400/60;
+  }
+
   .dms-dano-cambio {
     @apply space-y-1.5 rounded-md border border-amber-200/80 bg-gradient-to-r from-amber-50 to-orange-50/80 px-3 py-2 text-[11px] leading-snug text-amber-950 shadow-sm;
   }

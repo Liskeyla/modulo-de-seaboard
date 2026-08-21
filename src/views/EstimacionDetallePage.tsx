@@ -39,9 +39,12 @@ import { useUiStore } from '@/store/uiStore';
 import {
   contarComentariosPendientes,
   aLineaHistorial,
+  snapshotDesdeDano,
+  type CampoSnapshotLinea,
   type DanoEstimacion,
   type Estimacion,
 } from '@/types/estimacion';
+import { textoComentariosRfs } from '@/components/estimacion/EditarDanoModal';
 import { cn, formatMoney, toast } from '@/lib/utils';
 import { fotosRealesDano } from '@/lib/fotosDano';
 
@@ -400,6 +403,21 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       second: '2-digit',
       hour12: false,
     });
+
+    const mezclado: DanoEstimacion = {
+      ...dano,
+      ...cambios,
+      csTotal:
+        Number(cambios.csHoraHombre ?? dano.csHoraHombre) +
+        Number(cambios.csMaterial ?? dano.csMaterial),
+    };
+    const snapshot = snapshotDesdeDano(mezclado);
+    const antes = snapshotDesdeDano(dano);
+    const camposCambiados = (Object.keys(snapshot) as CampoSnapshotLinea[]).filter(
+      (k) => String(antes[k] ?? '') !== String(snapshot[k] ?? '')
+    );
+    const rfsExistente = textoComentariosRfs(dano);
+
     actualizarDano(
       estimacion!.id,
       dano.id,
@@ -409,8 +427,12 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
           fecha: ahora,
           usuario,
           resumenCambios: resumen,
+          snapshot,
+          camposCambiados,
           ...(comentarios.sbm ? { comentarioSbm: comentarios.sbm } : {}),
-          ...(comentarios.rfs ? { comentarioRfs: comentarios.rfs } : {}),
+          comentarioRfs: rfsExistente.startsWith('Sin comentarios')
+            ? undefined
+            : rfsExistente,
         },
       },
       usuario,
@@ -423,15 +445,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
         tipo: 'INFORMATIVO',
         mensaje: comentarios.sbm,
         campoAfectado: 'Comentarios línea SBM',
-      });
-    }
-    if (comentarios.rfs) {
-      agregarComentarioDano(estimacion!.id, dano.id, {
-        usuario,
-        rol: 'RFS',
-        tipo: 'INFORMATIVO',
-        mensaje: comentarios.rfs,
-        campoAfectado: 'Comentarios RFS',
       });
     }
   }

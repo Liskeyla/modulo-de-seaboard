@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { PencilLine, Save } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import {
@@ -9,9 +9,16 @@ import {
   type CargoDano,
   type DanoEstimacion,
 } from '@/types/estimacion';
-import { toast } from '@/lib/utils';
+import { cn, toast } from '@/lib/utils';
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
+
+/** Campos que el usuario SBM no puede modificar (datos de RFS / inspección). */
+const CAMPOS_BLOQUEADOS: (keyof Formulario)[] = [
+  'ubicacion',
+  'obsAnalisis',
+  'contenedorDonante',
+];
 
 interface Formulario {
   comp: string;
@@ -34,13 +41,29 @@ interface Formulario {
   remark: string;
   contenedorDonante: string;
   comentarioSbm: string;
-  comentarioRfs: string;
 }
 
 export type ComentariosEdicionDano = {
   sbm: string;
   rfs: string;
 };
+
+/** Comentarios de liquidador / RFS / técnico para mostrar solo lectura al usuario SBM. */
+export function textoComentariosRfs(dano: DanoEstimacion): string {
+  const relevantes = dano.comentarios.filter(
+    (c) =>
+      c.rol === 'LIQUIDACIONES' ||
+      c.rol === 'RFS' ||
+      c.rol === 'TECNICO' ||
+      c.campoAfectado === 'Comentarios RFS'
+  );
+  if (relevantes.length === 0) {
+    return 'Sin comentarios de RFS / liquidaciones en esta línea.';
+  }
+  return relevantes
+    .map((c) => `[${c.fecha}] ${c.usuario} (${c.rol}): ${c.mensaje}`)
+    .join('\n\n');
+}
 
 function desdeDano(d: DanoEstimacion): Formulario {
   return {
@@ -64,7 +87,6 @@ function desdeDano(d: DanoEstimacion): Formulario {
     remark: d.remark,
     contenedorDonante: d.contenedorDonante,
     comentarioSbm: '',
-    comentarioRfs: '',
   };
 }
 
@@ -88,6 +110,11 @@ export function EditarDanoModal({
 }) {
   const [form, setForm] = useState<Formulario | null>(null);
 
+  const comentariosRfs = useMemo(
+    () => (dano ? textoComentariosRfs(dano) : ''),
+    [dano]
+  );
+
   useEffect(() => {
     setForm(dano ? desdeDano(dano) : null);
   }, [dano]);
@@ -110,12 +137,13 @@ export function EditarDanoModal({
   const guardar = () => {
     const largoFinal = mostrarDimensiones ? largo : dano.largo;
     const anchoFinal = mostrarDimensiones ? ancho : dano.ancho;
+    // Ubicación, Obs. Análisis y Contenedor Donante quedan fijos (solo lectura SBM).
     const cambios: Partial<DanoEstimacion> = {
       comp: form.comp.trim(),
       partNumber: form.partNumber.trim(),
-      ubicacion: form.ubicacion.trim(),
+      ubicacion: dano.ubicacion,
       dano: form.dano.trim(),
-      obsAnalisis: form.obsAnalisis.trim(),
+      obsAnalisis: dano.obsAnalisis,
       newMetRep: form.newMetRep.trim(),
       serieAnterior: form.serieAnterior.trim(),
       serieEntregado: form.serieEntregado.trim(),
@@ -130,7 +158,7 @@ export function EditarDanoModal({
       cargo: form.cargo,
       medida: form.medida.trim(),
       remark: form.remark.trim(),
-      contenedorDonante: form.contenedorDonante.trim(),
+      contenedorDonante: dano.contenedorDonante,
     };
 
     const difs: string[] = [];
@@ -143,25 +171,21 @@ export function EditarDanoModal({
     });
 
     const sbm = form.comentarioSbm.trim();
-    const rfs = form.comentarioRfs.trim();
 
-    if (difs.length > 0 && !sbm && !rfs) {
-      toast(
-        'Indique el motivo del cambio en Comentarios línea SBM o Comentarios RFS.',
-        'info'
-      );
+    if (difs.length > 0 && !sbm) {
+      toast('Indique el motivo del cambio en Comentarios línea SBM.', 'info');
       return;
     }
 
-    if (difs.length === 0 && !sbm && !rfs) {
-      toast('No hay cambios ni comentarios para guardar.', 'info');
+    if (difs.length === 0 && !sbm) {
+      toast('No hay cambios ni comentarios SBM para guardar.', 'info');
       return;
     }
 
     onGuardar(
       cambios,
-      difs.length ? difs.join(' · ') : 'Sin cambios de campos (solo comentarios)',
-      { sbm, rfs }
+      difs.length ? difs.join(' · ') : 'Sin cambios de campos (solo comentario SBM)',
+      { sbm, rfs: '' }
     );
   };
 
@@ -169,19 +193,30 @@ export function EditarDanoModal({
     label: string,
     key: keyof Formulario,
     props: { type?: string; step?: string; placeholder?: string } = {}
-  ) => (
-    <div>
-      <label className="dms-field-label">{label}</label>
-      <input
-        className="dms-input-sm"
-        value={form[key] as string}
-        type={props.type ?? 'text'}
-        step={props.step}
-        placeholder={props.placeholder}
-        onChange={(e) => set(key, e.target.value as Formulario[typeof key])}
-      />
-    </div>
-  );
+  ) => {
+    const bloqueado = CAMPOS_BLOQUEADOS.includes(key);
+    return (
+      <div>
+        <label className="dms-field-label">{label}</label>
+        <input
+          className={cn('dms-input-sm', bloqueado && 'bg-slate-100 text-slate-600')}
+          value={form[key] as string}
+          type={props.type ?? 'text'}
+          step={props.step}
+          placeholder={props.placeholder}
+          disabled={bloqueado}
+          readOnly={bloqueado}
+          onChange={(e) => {
+            if (bloqueado) return;
+            set(key, e.target.value as Formulario[typeof key]);
+          }}
+        />
+        {bloqueado && (
+          <p className="mt-0.5 text-[10px] text-slate-400">Solo lectura (dato RFS)</p>
+        )}
+      </div>
+    );
+  };
 
   return (
     <Modal
@@ -190,7 +225,7 @@ export function EditarDanoModal({
       size="lg"
       icon={<PencilLine className="h-4 w-4" />}
       title={`Editar Daño · Línea ${String(dano.linea).padStart(2, '0')}`}
-      subtitle="Los cambios quedan registrados en el historial de actividad"
+      subtitle="Vista SBM · Los cambios quedan en el historial y como subfila del listado"
       footer={
         <>
           <button
@@ -263,10 +298,12 @@ export function EditarDanoModal({
           <label className="dms-field-label">Obs. Análisis</label>
           <textarea
             rows={3}
-            className="dms-input-sm h-auto"
+            className="dms-input-sm h-auto bg-slate-100 text-slate-600"
             value={form.obsAnalisis}
-            onChange={(e) => set('obsAnalisis', e.target.value)}
+            disabled
+            readOnly
           />
+          <p className="mt-0.5 text-[10px] text-slate-400">Solo lectura (dato RFS)</p>
         </div>
         <div>
           <label className="dms-field-label">Remark</label>
@@ -283,7 +320,7 @@ export function EditarDanoModal({
             rows={3}
             className="dms-input-sm h-auto border-sky-200 bg-sky-50/50"
             value={form.comentarioSbm}
-            placeholder="Explique los cambios realizados para Seaboard (SBM)…"
+            placeholder="Explique los cambios realizados (usuario SBM)…"
             onChange={(e) => set('comentarioSbm', e.target.value)}
           />
         </div>
@@ -291,16 +328,19 @@ export function EditarDanoModal({
           <label className="dms-field-label">Comentarios RFS</label>
           <textarea
             rows={3}
-            className="dms-input-sm h-auto border-emerald-200 bg-emerald-50/50"
-            value={form.comentarioRfs}
-            placeholder="Explique los cambios realizados para RFS…"
-            onChange={(e) => set('comentarioRfs', e.target.value)}
+            className="dms-input-sm h-auto border-emerald-200 bg-emerald-50/80 text-emerald-950"
+            value={comentariosRfs}
+            disabled
+            readOnly
           />
+          <p className="mt-0.5 text-[10px] text-slate-400">
+            Solo lectura · Comentarios del liquidador / RFS
+          </p>
         </div>
       </div>
       <p className="mt-2 text-[11px] text-slate-500">
-        Si modifica campos del ítem, debe indicar el motivo en al menos uno de los comentarios
-        (SBM o RFS). Quedarán visibles bajo la línea en el listado y en Comentarios.
+        Si modifica campos del ítem, indique el motivo en Comentarios línea SBM. Los cambios se
+        mostrarán como subfila del listado, resaltando las columnas modificadas.
       </p>
     </Modal>
   );

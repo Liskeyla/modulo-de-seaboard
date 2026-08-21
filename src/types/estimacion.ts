@@ -58,12 +58,72 @@ export interface ComentarioDano {
 }
 
 /** Última edición del ítem (subfila visible en el listado de daños). */
+export interface SnapshotLineaDano {
+  comp: string;
+  partNumber: string;
+  ubicacion: string;
+  dano: string;
+  obsAnalisis: string;
+  metRep: string;
+  newMetRep: string;
+  serieAnterior: string;
+  serieEntregado: string;
+  cantidad: number;
+  horasHombre: number;
+  csHoraHombre: number;
+  csMaterial: number;
+  csTotal: number;
+  cargo: string;
+  aplica: string;
+  medida: string;
+  remark: string;
+  contenedorDonante: string;
+  largo?: number;
+  ancho?: number;
+  area?: number;
+  longitud?: number;
+}
+
+export type CampoSnapshotLinea = keyof SnapshotLineaDano;
+
 export interface EdicionRecienteDano {
   fecha: string;
   usuario: string;
   resumenCambios: string;
   comentarioSbm?: string;
   comentarioRfs?: string;
+  /** Valores de la línea tras la edición (misma estructura del listado). */
+  snapshot: SnapshotLineaDano;
+  /** Campos que cambiaron respecto al valor anterior (se resaltan en la subfila). */
+  camposCambiados: CampoSnapshotLinea[];
+}
+
+export function snapshotDesdeDano(d: DanoEstimacion): SnapshotLineaDano {
+  return {
+    comp: d.comp,
+    partNumber: d.partNumber,
+    ubicacion: d.ubicacion,
+    dano: d.dano,
+    obsAnalisis: d.obsAnalisis,
+    metRep: d.metRep,
+    newMetRep: d.newMetRep,
+    serieAnterior: d.serieAnterior,
+    serieEntregado: d.serieEntregado,
+    cantidad: d.cantidad,
+    horasHombre: d.horasHombre,
+    csHoraHombre: d.csHoraHombre,
+    csMaterial: d.csMaterial,
+    csTotal: d.csTotal,
+    cargo: d.cargo,
+    aplica: d.aplica,
+    medida: d.medida,
+    remark: d.remark,
+    contenedorDonante: d.contenedorDonante,
+    largo: d.largo,
+    ancho: d.ancho,
+    area: d.area,
+    longitud: d.longitud,
+  };
 }
 
 export interface FotoDano {
