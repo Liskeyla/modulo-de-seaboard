@@ -794,7 +794,7 @@
   }
 
   .dms-danos-total td {
-    @apply whitespace-nowrap border-t-2 border-[#152483]/20 bg-[#eef1fb] px-3 py-2 text-[11px] font-extrabold text-[#152483];
+    @apply whitespace-nowrap border-t-2 border-slate-300 bg-white px-3 py-2 text-[11px] font-extrabold text-black;
   }
 
   /* ── Detalle del estimado ────────────────────────────────────────── */
@@ -974,43 +974,41 @@
   }
 
   .dms-table--danos {
-    @apply w-max min-w-full border-collapse bg-white;
+    @apply w-max min-w-full border-collapse bg-white text-black;
   }
 
   .dms-table--danos th {
-    @apply border border-slate-300 bg-slate-100 px-2 py-2 text-center text-[10px] font-bold uppercase tracking-wide text-slate-700;
+    @apply border border-slate-300 bg-white px-2 py-2 text-center text-[10px] font-bold uppercase tracking-wide text-black;
   }
 
   .dms-table--danos td {
-    @apply border border-slate-200 bg-white px-2 py-2 text-[11px] text-slate-800;
+    @apply border border-slate-200 bg-white px-2 py-2 text-[11px] text-black;
   }
 
-  .dms-table--danos tbody tr:nth-child(even) td {
-    @apply bg-slate-50;
-  }
-
-  .dms-table--danos tbody tr:hover td {
-    @apply bg-[#eef1fb];
-  }
-
-  .dms-table--danos tbody tr.dms-row-selected td {
-    @apply bg-[#dde3f8];
+  .dms-table--danos tbody tr:nth-child(even) td,
+  .dms-table--danos tbody tr:hover td,
+  .dms-table--danos tbody tr.dms-row-selected td,
+  .dms-table--danos tbody tr.dms-row-marcado td {
+    @apply bg-white text-black;
   }
 
   .dms-table--danos tfoot tr.dms-danos-total td {
-    @apply border border-slate-300 bg-[#eef1fb] font-bold text-rfs-navy;
+    @apply border border-slate-300 bg-white font-bold text-black;
+  }
+
+  .dms-table--danos .text-rfs-navy,
+  .dms-table--danos .text-gray-500,
+  .dms-table--danos .text-gray-600,
+  .dms-table--danos .text-slate-800 {
+    @apply text-black;
   }
 
   .dms-danos-acciones-masivas {
-    @apply mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2;
+    @apply mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2;
   }
 
   .dms-check-dano {
-    @apply h-3.5 w-3.5 cursor-pointer rounded border-slate-400 text-[#152483] focus:ring-[#152483]/40;
-  }
-
-  .dms-table--danos tbody tr.dms-row-marcado td {
-    @apply bg-emerald-50/70;
+    @apply h-3.5 w-3.5 cursor-pointer rounded border-slate-400 text-black focus:ring-black/30;
   }
 
   .dms-dano-check {
@@ -1018,11 +1016,11 @@
   }
 
   .dms-dano-check--on {
-    @apply text-emerald-500;
+    @apply text-black;
   }
 
   .dms-dano-check--off {
-    @apply text-slate-200;
+    @apply text-slate-300;
   }
 
   .dms-select-aplica {
