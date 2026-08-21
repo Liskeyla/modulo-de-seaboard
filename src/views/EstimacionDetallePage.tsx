@@ -230,10 +230,12 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   }
 
   const esOperadorDms = user?.rol === 'dms';
-  const puedeAperturar =
-    esOperadorDms && ESTADOS_EDITABLES.includes(estimacion.estado);
+  /** El gestor DMS puede aperturar cualquier estimado, en cualquier estado. */
+  const puedeAperturar = esOperadorDms;
   /** Solo con la estimación aperturada se pueden mutar ítems. */
   const editable = puedeAperturar && aperturada;
+  const puedeEnviar =
+    puedeAperturar && ESTADOS_EDITABLES.includes(estimacion.estado);
   const puedeComentar = user?.rol === 'dms' || user?.rol === 'liquidaciones';
   const danoSeleccionado = estimacion.danos.find((d) => d.id === danoSelId) ?? null;
   const pendientes = contarComentariosPendientes(estimacion.danos);
@@ -437,7 +439,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
             </div>
 
             <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
-              {puedeAperturar && (
+              {puedeEnviar && (
                 <button
                   type="button"
                   className="dms-btn-enviar"
