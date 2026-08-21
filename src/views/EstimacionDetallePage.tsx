@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   AlertTriangle,
@@ -35,6 +35,7 @@ import { ListadoDanosTable } from '@/components/estimacion/ListadoDanosTable';
 import { VideoDanoModal } from '@/components/estimacion/VideoDanoModal';
 import { useAuthStore } from '@/store';
 import { useEstimacionesStore } from '@/store/estimacionesStore';
+import { useUiStore } from '@/store/uiStore';
 import {
   contarComentariosPendientes,
   type DanoEstimacion,
@@ -144,6 +145,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     agregarComentarioDano,
     agregarNota,
   } = useEstimacionesStore();
+  const setGuardiaSesion = useUiStore((s) => s.setGuardiaSesion);
 
   const estimacion = useMemo(() => getByCodigo(codigo), [codigo, estimaciones, getByCodigo]);
 
@@ -153,6 +155,11 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   const [aperturada, setAperturada] = useState(false);
   const [snapshotApertura, setSnapshotApertura] = useState<SnapshotApertura | null>(null);
   const [marcadosIds, setMarcadosIds] = useState<string[]>([]);
+  const snapshotRef = useRef<SnapshotApertura | null>(null);
+
+  useEffect(() => {
+    snapshotRef.current = snapshotApertura;
+  }, [snapshotApertura]);
 
   useEffect(() => {
     if (!estimacion) return;
@@ -170,6 +177,41 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     window.addEventListener('beforeunload', onBeforeUnload);
     return () => window.removeEventListener('beforeunload', onBeforeUnload);
   }, [aperturada]);
+
+  useEffect(() => {
+    if (!aperturada || !estimacion) {
+      setGuardiaSesion(null);
+      return;
+    }
+    const idEst = estimacion.id;
+    const codigoEst = estimacion.codigo;
+    setGuardiaSesion({
+      codigo: codigoEst,
+      getResumen: () => {
+        const snap = snapshotRef.current;
+        const est = useEstimacionesStore.getState().getByCodigo(codigoEst);
+        if (!snap || !est) return [];
+        return resumirCambiosApertura(snap, est);
+      },
+      guardarYLiberar: () => {
+        setAperturada(false);
+        setSnapshotApertura(null);
+        setMarcadosIds([]);
+        setGuardiaSesion(null);
+      },
+      descartarYLiberar: () => {
+        const snap = snapshotRef.current;
+        if (snap) {
+          useEstimacionesStore.getState().restaurarDesdeApertura(idEst, snap);
+        }
+        setAperturada(false);
+        setSnapshotApertura(null);
+        setMarcadosIds([]);
+        setGuardiaSesion(null);
+      },
+    });
+    return () => setGuardiaSesion(null);
+  }, [aperturada, estimacion?.id, estimacion?.codigo, setGuardiaSesion]);
 
   const usuario = user?.username ?? 'apptelink';
   const rolComentario = rolDeUsuario(user?.rol, user?.username);

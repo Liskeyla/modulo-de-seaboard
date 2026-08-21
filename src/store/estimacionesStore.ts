@@ -107,6 +107,11 @@ interface EstimacionesState {
     comentario?: string
   ) => void;
   eliminarDano: (id: string, danoId: string, usuario: string) => void;
+  /** Restaura daños y notas al estado de una apertura (descartar cambios). */
+  restaurarDesdeApertura: (
+    id: string,
+    snap: { danos: DanoEstimacion[]; notasCount: number }
+  ) => void;
 
   // Trazabilidad con liquidaciones
   agregarComentarioDano: (
@@ -521,6 +526,16 @@ export const useEstimacionesStore = create<EstimacionesState>()(
             usuarioModificacion: usuario,
             auditoria: [...e.auditoria, evento(usuario, 'NOTA AGREGADA', texto)],
           }));
+        },
+
+        restaurarDesdeApertura: (id, snap) => {
+          mutar(id, (e) =>
+            recalcular({
+              ...e,
+              danos: structuredClone(snap.danos),
+              notas: e.notas.slice(0, Math.max(0, snap.notasCount)),
+            })
+          );
         },
       };
     },

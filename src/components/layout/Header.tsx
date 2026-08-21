@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
+  AlertTriangle,
   Bell,
   CheckCheck,
   ChevronDown,
@@ -12,9 +13,10 @@ import {
   UserRound,
 } from 'lucide-react';
 import { Flag } from '@/components/ui/Flag';
+import { Modal } from '@/components/ui/Modal';
 import { useAuthStore } from '@/store';
 import { useUiStore } from '@/store/uiStore';
-import { metaPais, PAISES_UI } from '@/lib/pais';
+import { metaPais, PAISES_UI, type PaisOperacion } from '@/lib/pais';
 import { cn, toast } from '@/lib/utils';
 
 interface HeaderProps {
@@ -45,13 +47,21 @@ const NOTIFICACIONES = [
 
 const tonos = { amber: 'bg-amber-500', emerald: 'bg-emerald-500', red: 'bg-red-500' };
 
+type CambioPaisPendiente = {
+  pais: PaisOperacion;
+  paso: 'confirmar' | 'guardar';
+  resumen: string[];
+  codigo: string;
+};
+
 /** Cabecera blanca RFS (misma estructura que layout-dms). */
 export function Header({ title, subtitle }: HeaderProps) {
   const router = useRouter();
-  const { menuAbierto, alternarMenu, pais, setPais } = useUiStore();
+  const { menuAbierto, alternarMenu, pais, setPais, guardiaSesion } = useUiStore();
   const { user, logout } = useAuthStore();
 
   const [menuActivo, setMenuActivo] = useState<'notificaciones' | 'usuario' | 'pais' | null>(null);
+  const [cambioPais, setCambioPais] = useState<CambioPaisPendiente | null>(null);
   const [pendientes, setPendientes] = useState(NOTIFICACIONES);
   const [hora, setHora] = useState<string | null>(null);
   const contenedorRef = useRef<HTMLDivElement>(null);
@@ -93,9 +103,74 @@ export function Header({ title, subtitle }: HeaderProps) {
     router.replace('/login');
   }
 
+  function aplicarCambioPais(nuevo: PaisOperacion) {
+    setPais(nuevo);
+    setCambioPais(null);
+    toast(
+      `Operación ${metaPais(nuevo).label}\nSe muestran los estimados de ese país.`,
+      'success'
+    );
+    router.push('/reportes/estimaciones');
+  }
+
+  function solicitarCambioPais(nuevo: PaisOperacion) {
+    if (nuevo === pais) {
+      setMenuActivo(null);
+      return;
+    }
+    setMenuActivo(null);
+    const guardia = useUiStore.getState().guardiaSesion;
+    if (guardia) {
+      setCambioPais({
+        pais: nuevo,
+        paso: 'confirmar',
+        resumen: guardia.getResumen(),
+        codigo: guardia.codigo,
+      });
+      return;
+    }
+    setPais(nuevo);
+    toast(
+      `Operación ${metaPais(nuevo).label}\nSe muestran los estimados de ese país.`,
+      'success'
+    );
+  }
+
+  function confirmarCambioPais() {
+    if (!cambioPais) return;
+    const guardia = useUiStore.getState().guardiaSesion;
+    const resumen = guardia?.getResumen() ?? cambioPais.resumen;
+    if (resumen.length > 0) {
+      setCambioPais({
+        ...cambioPais,
+        paso: 'guardar',
+        resumen,
+        codigo: guardia?.codigo ?? cambioPais.codigo,
+      });
+      return;
+    }
+    guardia?.guardarYLiberar();
+    aplicarCambioPais(cambioPais.pais);
+  }
+
+  function guardarYCambiarPais() {
+    if (!cambioPais) return;
+    useUiStore.getState().guardiaSesion?.guardarYLiberar();
+    toast('Cambios guardados. Estimación cerrada.', 'success');
+    aplicarCambioPais(cambioPais.pais);
+  }
+
+  function descartarYCambiarPais() {
+    if (!cambioPais) return;
+    useUiStore.getState().guardiaSesion?.descartarYLiberar();
+    toast('Cambios descartados. Estimación cerrada.', 'info');
+    aplicarCambioPais(cambioPais.pais);
+  }
+
   const iniciales = (user?.nombre ?? user?.username ?? 'U').charAt(0).toUpperCase();
 
   return (
+    <>
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 text-slate-800 shadow-sm backdrop-blur-md">
       <div className="flex h-16 items-center justify-between gap-3 px-3 sm:px-5">
         <div className="flex min-w-0 items-center gap-3">
@@ -160,14 +235,7 @@ export function Header({ title, subtitle }: HeaderProps) {
                     type="button"
                     role="option"
                     aria-selected={pais === opcion.id}
-                    onClick={() => {
-                      setPais(opcion.id);
-                      setMenuActivo(null);
-                      toast(
-                        `Operación ${opcion.label}\nSe muestran los estimados de ese país.`,
-                        'success'
-                      );
-                    }}
+                    onClick={() => solicitarCambioPais(opcion.id)}
                     className={cn(
                       'flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-sm transition hover:bg-rfs-50',
                       pais === opcion.id && 'bg-rfs-50 font-semibold text-rfs-700'
@@ -326,5 +394,95 @@ export function Header({ title, subtitle }: HeaderProps) {
         </div>
       </div>
     </header>
+
+    <Modal
+      open={cambioPais?.paso === 'confirmar'}
+      onClose={() => setCambioPais(null)}
+      size="sm"
+      icon={<AlertTriangle className="h-4 w-4" />}
+      title="Cambiar país de operación"
+      subtitle={
+        cambioPais
+          ? `De ${metaPais(pais).label} a ${metaPais(cambioPais.pais).label}`
+          : undefined
+      }
+      footer={
+        <>
+          <button
+            type="button"
+            className="dms-btn-action border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
+            onClick={() => setCambioPais(null)}
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            className="dms-btn-primary px-4 py-2 text-sm"
+            onClick={confirmarCambioPais}
+          >
+            Sí, cambiar país
+          </button>
+        </>
+      }
+    >
+      <p className="text-sm leading-relaxed text-gray-600">
+        Tiene la estimación <strong>{cambioPais?.codigo ?? guardiaSesion?.codigo}</strong>{' '}
+        aperturada. ¿Desea cambiar de país de operación?
+      </p>
+    </Modal>
+
+    <Modal
+      open={cambioPais?.paso === 'guardar'}
+      onClose={() => setCambioPais(null)}
+      size="sm"
+      icon={<AlertTriangle className="h-4 w-4" />}
+      title="Guardar cambios"
+      subtitle={cambioPais ? `Estimación ${cambioPais.codigo}` : undefined}
+      footer={
+        <>
+          <button
+            type="button"
+            className="dms-btn-action border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
+            onClick={() => setCambioPais(null)}
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            className="dms-btn-action border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800"
+            onClick={descartarYCambiarPais}
+          >
+            Cambiar sin guardar
+          </button>
+          <button
+            type="button"
+            className="dms-btn-cerrar-est px-4 py-2 text-sm"
+            onClick={guardarYCambiarPais}
+          >
+            Guardar y cambiar
+          </button>
+        </>
+      }
+    >
+      <p className="mb-2 text-sm leading-relaxed text-gray-600">
+        Hay cambios en la estimación aperturada. ¿Desea guardarlos antes de cambiar a{' '}
+        <strong>{cambioPais ? metaPais(cambioPais.pais).label : ''}</strong>?
+      </p>
+      {cambioPais && cambioPais.resumen.length > 0 && (
+        <div className="max-h-48 overflow-y-auto rounded-lg border border-slate-200 bg-white">
+          <p className="border-b border-slate-100 bg-slate-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
+            Resumen ({cambioPais.resumen.length})
+          </p>
+          <ul className="divide-y divide-slate-100 text-xs text-slate-700">
+            {cambioPais.resumen.map((r, i) => (
+              <li key={i} className="px-3 py-2 leading-snug">
+                {r}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </Modal>
+    </>
   );
 }
