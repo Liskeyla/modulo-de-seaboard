@@ -166,6 +166,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     rechazar,
     agregarDano,
     actualizarDano,
+    resolverItemsMasivo,
     eliminarDano,
     agregarComentarioDano,
     agregarNota,
@@ -180,6 +181,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   const [nota, setNota] = useState('');
   const [aperturada, setAperturada] = useState(false);
   const [snapshotApertura, setSnapshotApertura] = useState<SnapshotApertura | null>(null);
+  const [marcadosIds, setMarcadosIds] = useState<string[]>([]);
 
   useEffect(() => {
     if (!estimacion) return;
@@ -268,6 +270,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   function aperturarEstimacion() {
     setSnapshotApertura(capturarSnapshot(estimacion!, itinerario, almacen));
     setAperturada(true);
+    setMarcadosIds([]);
     toast('Estimación aperturada. Ya puede modificar ítems.', 'success');
   }
 
@@ -288,7 +291,36 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     }
     setAperturada(false);
     setSnapshotApertura(null);
+    setMarcadosIds([]);
     toast('Estimación cerrada. Cambios guardados.', 'success');
+  }
+
+  function aprobarItemsMarcados() {
+    if (!aperturada) {
+      toast('Aperture la estimación para modificar ítems.', 'info');
+      return;
+    }
+    if (marcadosIds.length === 0) {
+      toast('Marque al menos un ítem del listado de daños.', 'info');
+      return;
+    }
+    resolverItemsMasivo(estimacion!.id, marcadosIds, 'APROBAR', usuario);
+    toast(`${marcadosIds.length} ítem(s) aprobado(s).`, 'success');
+    setMarcadosIds([]);
+  }
+
+  function rechazarItemsMarcados() {
+    if (!aperturada) {
+      toast('Aperture la estimación para modificar ítems.', 'info');
+      return;
+    }
+    if (marcadosIds.length === 0) {
+      toast('Marque al menos un ítem del listado de daños.', 'info');
+      return;
+    }
+    resolverItemsMasivo(estimacion!.id, marcadosIds, 'RECHAZAR', usuario);
+    toast(`${marcadosIds.length} ítem(s) rechazado(s).`, 'success');
+    setMarcadosIds([]);
   }
 
   function intentarRegresar() {
@@ -650,11 +682,42 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   {puedeAperturar && !aperturada && (
                     <>
                       {' '}
-                      Para editar líneas, pulse <strong>Aperturar estimación</strong>.
+                      Para editar o aprobar/rechazar líneas, pulse{' '}
+                      <strong>Aperturar estimación</strong>.
                     </>
                   )}
                 </div>
               </div>
+
+              {aperturada && (
+                <div className="dms-danos-acciones-masivas">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      className="dms-btn-aprobar px-3 py-1.5 text-xs"
+                      disabled={marcadosIds.length === 0}
+                      onClick={aprobarItemsMarcados}
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5" /> Aprobar ítems
+                      {marcadosIds.length > 0 ? ` (${marcadosIds.length})` : ''}
+                    </button>
+                    <button
+                      type="button"
+                      className="dms-btn-rechazar px-3 py-1.5 text-xs"
+                      disabled={marcadosIds.length === 0}
+                      onClick={rechazarItemsMarcados}
+                    >
+                      <XCircle className="h-3.5 w-3.5" /> Rechazar ítems
+                      {marcadosIds.length > 0 ? ` (${marcadosIds.length})` : ''}
+                    </button>
+                  </div>
+                  <span className="text-[11px] text-slate-500">
+                    {marcadosIds.length === 0
+                      ? 'Marque ítems con el check a la izquierda de ⓘ'
+                      : `${marcadosIds.length} ítem(s) marcado(s)`}
+                  </span>
+                </div>
+              )}
 
               <div className="dms-danos-table-wrap">
               <ListadoDanosTable
@@ -662,6 +725,16 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 seleccionadoId={danoSelId}
                 editable={puedeAperturar}
                 mostrarDimensiones={estimacion.tipoEstimacion.toUpperCase().includes('BOX')}
+                permiteMarcar={aperturada}
+                marcadosIds={marcadosIds}
+                onToggleMarcado={(id) =>
+                  setMarcadosIds((prev) =>
+                    prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+                  )
+                }
+                onToggleTodos={(marcar) =>
+                  setMarcadosIds(marcar ? estimacion.danos.map((d) => d.id) : [])
+                }
                 onSeleccionar={(d) => {
                   setDanoSelId((prev) => (prev === d.id ? null : d.id));
                   if (typeof window !== 'undefined' && window.matchMedia('(max-width: 1279px)').matches) {

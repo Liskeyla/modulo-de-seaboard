@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import seedData from '@/data/estimacionesSeed.json';
 import type {
   Actividad,
+  AplicaDano,
   ComentarioDano,
   ComentarioSeaboard,
   DanoEstimacion,
@@ -13,13 +14,14 @@ import type {
   TipoComentario,
 } from '@/types/estimacion';
 
-const STORAGE_KEY = 'dms-estimaciones-prototipo-v6';
+const STORAGE_KEY = 'dms-estimaciones-prototipo-v7';
 const CLAVES_OBSOLETAS = [
   'dms-estimaciones-prototipo',
   'dms-estimaciones-prototipo-v2',
   'dms-estimaciones-prototipo-v3',
   'dms-estimaciones-prototipo-v4',
   'dms-estimaciones-prototipo-v5',
+  'dms-estimaciones-prototipo-v6',
 ];
 
 function ahoraFmt() {
@@ -92,6 +94,13 @@ interface EstimacionesState {
     cambios: Partial<DanoEstimacion>,
     usuario: string,
     etiqueta?: string
+  ) => void;
+  /** Aprueba o rechaza varias líneas (Aplica) en una sola auditoría. */
+  resolverItemsMasivo: (
+    id: string,
+    danoIds: string[],
+    accion: 'APROBAR' | 'RECHAZAR',
+    usuario: string
   ) => void;
   eliminarDano: (id: string, danoId: string, usuario: string) => void;
 
@@ -389,6 +398,37 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                   usuario,
                   'DAÑO MODIFICADO',
                   etiqueta ?? `Línea ${anterior.linea} · ${anterior.comp} actualizado`
+                ),
+              ],
+            });
+          });
+        },
+
+        resolverItemsMasivo: (id, danoIds, accion, usuario) => {
+          if (danoIds.length === 0) return;
+          const ids = new Set(danoIds);
+          mutar(id, (e) => {
+            const afectados = e.danos.filter((d) => ids.has(d.id));
+            if (afectados.length === 0) return e;
+            const danos = e.danos.map((d) => {
+              if (!ids.has(d.id)) return d;
+              if (accion === 'RECHAZAR') return { ...d, aplica: 'Rechazado' as AplicaDano };
+              const aplica: AplicaDano =
+                d.cargo === 'Dueño' ? 'Aprobado Dueño' : 'Aprobado Linea';
+              return { ...d, aplica };
+            });
+            const lineas = afectados.map((d) => String(d.linea).padStart(2, '0')).join(', ');
+            return recalcular({
+              ...e,
+              danos,
+              fechaModificacion: ahoraFmt(),
+              usuarioModificacion: usuario,
+              auditoria: [
+                ...e.auditoria,
+                evento(
+                  usuario,
+                  accion === 'RECHAZAR' ? 'ÍTEMS RECHAZADOS' : 'ÍTEMS APROBADOS',
+                  `${afectados.length} línea(s): ${lineas}`
                 ),
               ],
             });

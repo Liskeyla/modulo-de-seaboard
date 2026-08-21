@@ -1001,6 +1001,18 @@
     @apply border border-slate-300 bg-[#eef1fb] font-bold text-rfs-navy;
   }
 
+  .dms-danos-acciones-masivas {
+    @apply mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2;
+  }
+
+  .dms-check-dano {
+    @apply h-3.5 w-3.5 cursor-pointer rounded border-slate-400 text-[#152483] focus:ring-[#152483]/40;
+  }
+
+  .dms-table--danos tbody tr.dms-row-marcado td {
+    @apply bg-emerald-50/70;
+  }
+
   .dms-dano-check {
     @apply inline-flex transition-colors;
   }

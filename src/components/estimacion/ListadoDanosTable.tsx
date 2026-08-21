@@ -23,6 +23,11 @@ interface ListadoDanosTableProps {
   editable: boolean;
   /** Solo estimados BOX muestran Largo / Ancho / Área / Longitud. */
   mostrarDimensiones?: boolean;
+  /** Checkbox de marcado masivo (solo con estimado aperturado). */
+  permiteMarcar?: boolean;
+  marcadosIds?: string[];
+  onToggleMarcado?: (danoId: string) => void;
+  onToggleTodos?: (marcar: boolean) => void;
   onSeleccionar: (dano: DanoEstimacion) => void;
   onAplicaChange: (dano: DanoEstimacion, aplica: AplicaDano) => void;
   onRemarkChange: (dano: DanoEstimacion, remark: string) => void;
@@ -39,6 +44,10 @@ export function ListadoDanosTable({
   seleccionadoId,
   editable,
   mostrarDimensiones = false,
+  permiteMarcar = false,
+  marcadosIds = [],
+  onToggleMarcado,
+  onToggleTodos,
   onSeleccionar,
   onAplicaChange,
   onRemarkChange,
@@ -50,7 +59,10 @@ export function ListadoDanosTable({
   onComentarios,
 }: ListadoDanosTableProps) {
   const totales = totalesDanos(danos);
-  const colspanAntesHh = 10 + (mostrarDimensiones ? 4 : 0) + 1; // hasta Cant. inclusive
+  const colspanAntesHh =
+    (permiteMarcar ? 1 : 0) + 10 + (mostrarDimensiones ? 4 : 0) + 1; // hasta Cant. inclusive
+  const todosMarcados = danos.length > 0 && danos.every((d) => marcadosIds.includes(d.id));
+  const algunosMarcados = danos.some((d) => marcadosIds.includes(d.id)) && !todosMarcados;
 
   if (danos.length === 0) {
     return (
@@ -73,6 +85,20 @@ export function ListadoDanosTable({
       <table className="dms-table dms-table--danos">
         <thead>
           <tr>
+            {permiteMarcar && (
+              <th className="w-9" title="Marcar ítems para aprobar o rechazar">
+                <input
+                  type="checkbox"
+                  className="dms-check-dano"
+                  checked={todosMarcados}
+                  ref={(el) => {
+                    if (el) el.indeterminate = algunosMarcados;
+                  }}
+                  onChange={(e) => onToggleTodos?.(e.target.checked)}
+                  aria-label="Marcar todos los ítems"
+                />
+              </th>
+            )}
             <th className="w-8" title="Seleccione un daño para ver su información">
               <span className="sr-only">Seleccionar</span>ⓘ
             </th>
@@ -118,6 +144,7 @@ export function ListadoDanosTable({
         <tbody>
           {danos.map((d) => {
             const activo = seleccionadoId === d.id;
+            const marcado = marcadosIds.includes(d.id);
             const pendientes = d.comentarios.filter((c) => c.tipo === 'SOLICITA_CAMBIO').length;
             const ultimo = d.comentarios[d.comentarios.length - 1];
             const resuelto =
@@ -125,9 +152,24 @@ export function ListadoDanosTable({
             return (
               <tr
                 key={d.id}
-                className={cn('cursor-pointer', activo && 'dms-row-selected')}
+                className={cn(
+                  'cursor-pointer',
+                  activo && 'dms-row-selected',
+                  marcado && 'dms-row-marcado'
+                )}
                 onClick={() => onSeleccionar(d)}
               >
+                {permiteMarcar && (
+                  <td className="text-center" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      className="dms-check-dano"
+                      checked={marcado}
+                      onChange={() => onToggleMarcado?.(d.id)}
+                      aria-label={`Marcar línea ${d.linea}`}
+                    />
+                  </td>
+                )}
                 <td className="text-center">
                   <span
                     className={cn(
