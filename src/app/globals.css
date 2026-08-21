@@ -1008,7 +1008,7 @@
   }
 
   .dms-check-dano {
-    @apply h-3.5 w-3.5 cursor-pointer rounded border-slate-400 text-black focus:ring-black/30;
+    @apply h-3.5 w-3.5 cursor-pointer rounded border-slate-400 text-black focus:ring-black/30 disabled:cursor-not-allowed disabled:opacity-40;
   }
 
   .dms-dano-check {

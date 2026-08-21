@@ -15,8 +15,10 @@ interface ListadoDanosTableProps {
   editable: boolean;
   /** Solo estimados BOX muestran Largo / Ancho / Área / Longitud. */
   mostrarDimensiones?: boolean;
-  /** Checkbox de marcado masivo (solo con estimado aperturado). */
-  permiteMarcar?: boolean;
+  /** Mostrar columna de check (visible aunque esté deshabilitada). */
+  mostrarMarcacion?: boolean;
+  /** Permite marcar/desmarcar checks (solo con estimado aperturado). */
+  marcacionHabilitada?: boolean;
   marcadosIds?: string[];
   onToggleMarcado?: (danoId: string) => void;
   onToggleTodos?: (marcar: boolean) => void;
@@ -35,7 +37,8 @@ export function ListadoDanosTable({
   seleccionadoId,
   editable,
   mostrarDimensiones = false,
-  permiteMarcar = false,
+  mostrarMarcacion = false,
+  marcacionHabilitada = false,
   marcadosIds = [],
   onToggleMarcado,
   onToggleTodos,
@@ -50,9 +53,15 @@ export function ListadoDanosTable({
 }: ListadoDanosTableProps) {
   const totales = totalesDanos(danos);
   const colspanAntesHh =
-    (permiteMarcar ? 1 : 0) + 10 + (mostrarDimensiones ? 4 : 0) + 1; // hasta Cant. inclusive
-  const todosMarcados = danos.length > 0 && danos.every((d) => marcadosIds.includes(d.id));
-  const algunosMarcados = danos.some((d) => marcadosIds.includes(d.id)) && !todosMarcados;
+    (mostrarMarcacion ? 1 : 0) + 10 + (mostrarDimensiones ? 4 : 0) + 1; // hasta Cant. inclusive
+  const todosMarcados =
+    marcacionHabilitada &&
+    danos.length > 0 &&
+    danos.every((d) => marcadosIds.includes(d.id));
+  const algunosMarcados =
+    marcacionHabilitada &&
+    danos.some((d) => marcadosIds.includes(d.id)) &&
+    !todosMarcados;
 
   if (danos.length === 0) {
     return (
@@ -73,16 +82,27 @@ export function ListadoDanosTable({
       <table className="dms-table dms-table--danos">
         <thead>
           <tr>
-            {permiteMarcar && (
-              <th className="w-9" title="Marcar ítems para aprobar o rechazar">
+            {mostrarMarcacion && (
+              <th
+                className="w-9"
+                title={
+                  marcacionHabilitada
+                    ? 'Marcar ítems para aprobar o rechazar'
+                    : 'Aperture la estimación para marcar ítems'
+                }
+              >
                 <input
                   type="checkbox"
                   className="dms-check-dano"
                   checked={todosMarcados}
+                  disabled={!marcacionHabilitada}
                   ref={(el) => {
                     if (el) el.indeterminate = algunosMarcados;
                   }}
-                  onChange={(e) => onToggleTodos?.(e.target.checked)}
+                  onChange={(e) => {
+                    if (!marcacionHabilitada) return;
+                    onToggleTodos?.(e.target.checked);
+                  }}
                   aria-label="Marcar todos los ítems"
                 />
               </th>
@@ -147,14 +167,23 @@ export function ListadoDanosTable({
                 )}
                 onClick={() => onSeleccionar(d)}
               >
-                {permiteMarcar && (
+                {mostrarMarcacion && (
                   <td className="text-center" onClick={(e) => e.stopPropagation()}>
                     <input
                       type="checkbox"
                       className="dms-check-dano"
-                      checked={marcado}
-                      onChange={() => onToggleMarcado?.(d.id)}
+                      checked={marcacionHabilitada && marcado}
+                      disabled={!marcacionHabilitada}
+                      onChange={() => {
+                        if (!marcacionHabilitada) return;
+                        onToggleMarcado?.(d.id);
+                      }}
                       aria-label={`Marcar línea ${d.linea}`}
+                      title={
+                        marcacionHabilitada
+                          ? undefined
+                          : 'Aperture la estimación para marcar ítems'
+                      }
                     />
                   </td>
                 )}

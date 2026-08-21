@@ -527,13 +527,20 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 </div>
               </div>
 
-              {aperturada && (
+              {puedeAperturar && (
                 <div className="dms-danos-acciones-masivas">
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
-                      className="dms-btn-aprobar px-3 py-1.5 text-xs"
-                      disabled={marcadosIds.length === 0}
+                      className="dms-btn-aprobar px-3 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={!aperturada || marcadosIds.length === 0}
+                      title={
+                        !aperturada
+                          ? 'Aperture la estimación para aprobar ítems'
+                          : marcadosIds.length === 0
+                            ? 'Marque al menos un ítem'
+                            : undefined
+                      }
                       onClick={aprobarItemsMarcados}
                     >
                       <CheckCircle2 className="h-3.5 w-3.5" /> Aprobar ítems
@@ -541,8 +548,15 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                     </button>
                     <button
                       type="button"
-                      className="dms-btn-rechazar px-3 py-1.5 text-xs"
-                      disabled={marcadosIds.length === 0}
+                      className="dms-btn-rechazar px-3 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={!aperturada || marcadosIds.length === 0}
+                      title={
+                        !aperturada
+                          ? 'Aperture la estimación para rechazar ítems'
+                          : marcadosIds.length === 0
+                            ? 'Marque al menos un ítem'
+                            : undefined
+                      }
                       onClick={rechazarItemsMarcados}
                     >
                       <XCircle className="h-3.5 w-3.5" /> Rechazar ítems
@@ -550,9 +564,11 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                     </button>
                   </div>
                   <span className="text-[11px] text-slate-500">
-                    {marcadosIds.length === 0
-                      ? 'Marque ítems con el check a la izquierda de ⓘ'
-                      : `${marcadosIds.length} ítem(s) marcado(s)`}
+                    {!aperturada
+                      ? 'Aperture la estimación para marcar y aprobar/rechazar ítems'
+                      : marcadosIds.length === 0
+                        ? 'Marque ítems con el check a la izquierda de ⓘ'
+                        : `${marcadosIds.length} ítem(s) marcado(s)`}
                   </span>
                 </div>
               )}
@@ -563,7 +579,8 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 seleccionadoId={danoSelId}
                 editable={puedeAperturar}
                 mostrarDimensiones={estimacion.tipoEstimacion.toUpperCase().includes('BOX')}
-                permiteMarcar={aperturada}
+                mostrarMarcacion={puedeAperturar}
+                marcacionHabilitada={aperturada}
                 marcadosIds={marcadosIds}
                 onToggleMarcado={(id) =>
                   setMarcadosIds((prev) =>
