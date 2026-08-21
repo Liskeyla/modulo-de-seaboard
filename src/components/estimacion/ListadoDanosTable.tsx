@@ -1,8 +1,10 @@
 'use client';
 
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import {
   CheckCircle2,
+  ChevronDown,
+  ChevronRight,
   ClipboardList,
   Images,
   PencilLine,
@@ -95,8 +97,7 @@ function fmtCelda(valor: string | number | undefined | null, money = false) {
 }
 
 /**
- * Fila histórica: valores ANTES del cambio.
- * La fila principal muestra el valor actual (en verde si cambió).
+ * Segundo nivel desplegable: valores ANTES del cambio + comentario en columna de texto.
  */
 function SubfilaHistorico({
   edicion,
@@ -112,76 +113,95 @@ function SubfilaHistorico({
 
   const ch = (campo: CampoSnapshotLinea) =>
     cn(celdaCambiada(edicion, campo) && 'dms-celda-historico');
+  const comentarioTexto =
+    edicion.comentarioSbm?.trim() ||
+    edicion.resumenCambios?.trim() ||
+    '';
 
   return (
-    <>
-      <tr className="dms-dano-subfila-row" title="Registro anterior al cambio">
-        {mostrarMarcacion && <td />}
-        <td className="text-center">
-          <span className="dms-badge-antes">Antes</span>
-        </td>
-        <td className={cn('whitespace-nowrap', ch('comp'))}>{fmtCelda(s.comp)}</td>
-        <td className={cn('text-center', ch('partNumber'))}>{fmtCelda(s.partNumber)}</td>
-        <td className={cn('text-center', ch('ubicacion'))}>{fmtCelda(s.ubicacion)}</td>
-        <td className={cn('dms-cell-wrap text-[10px]', ch('dano'))}>{fmtCelda(s.dano)}</td>
-        <td className={cn('dms-cell-wrap max-w-[10rem] text-[10px]', ch('obsAnalisis'))}>
-          {fmtCelda(s.obsAnalisis)}
-        </td>
-        <td className={cn('text-center', ch('metRep'))}>{fmtCelda(s.metRep)}</td>
-        <td className={cn('text-center', ch('newMetRep'))}>{fmtCelda(s.newMetRep)}</td>
-        <td className={cn('text-center text-[10px] tabular-nums', ch('serieAnterior'))}>
-          {fmtCelda(s.serieAnterior)}
-        </td>
-        <td className={cn('text-center text-[10px] tabular-nums', ch('serieEntregado'))}>
-          {fmtCelda(s.serieEntregado)}
-        </td>
-        {mostrarDimensiones && (
-          <>
-            <td className={cn('text-right tabular-nums', ch('largo'))}>
-              {s.largo ? s.largo.toFixed(2) : ''}
-            </td>
-            <td className={cn('text-right tabular-nums', ch('ancho'))}>
-              {s.ancho ? s.ancho.toFixed(2) : ''}
-            </td>
-            <td className={cn('text-right tabular-nums', ch('area'))}>
-              {s.area ? s.area.toFixed(2) : ''}
-            </td>
-            <td className={cn('text-right tabular-nums', ch('longitud'))}>
-              {s.longitud ? s.longitud.toFixed(2) : ''}
-            </td>
-          </>
+    <tr className="dms-dano-subfila-row" title="Registro anterior al cambio (segundo nivel)">
+      {mostrarMarcacion && <td className="dms-dano-nivel2-indent" />}
+      <td className="text-center">
+        <span className="dms-badge-antes">Antes</span>
+      </td>
+      <td className={cn('whitespace-nowrap', ch('comp'))}>{fmtCelda(s.comp)}</td>
+      <td className={cn('text-center', ch('partNumber'))}>{fmtCelda(s.partNumber)}</td>
+      <td className={cn('text-center', ch('ubicacion'))}>{fmtCelda(s.ubicacion)}</td>
+      <td className={cn('dms-cell-wrap text-[10px]', ch('dano'))}>{fmtCelda(s.dano)}</td>
+      <td className={cn('dms-cell-wrap max-w-[10rem] text-[10px]', ch('obsAnalisis'))}>
+        {fmtCelda(s.obsAnalisis)}
+      </td>
+      <td className={cn('text-center', ch('metRep'))}>{fmtCelda(s.metRep)}</td>
+      <td className={cn('text-center', ch('newMetRep'))}>{fmtCelda(s.newMetRep)}</td>
+      <td className={cn('text-center text-[10px] tabular-nums', ch('serieAnterior'))}>
+        {fmtCelda(s.serieAnterior)}
+      </td>
+      <td className={cn('text-center text-[10px] tabular-nums', ch('serieEntregado'))}>
+        {fmtCelda(s.serieEntregado)}
+      </td>
+      {mostrarDimensiones && (
+        <>
+          <td className={cn('text-right tabular-nums', ch('largo'))}>
+            {s.largo ? s.largo.toFixed(2) : ''}
+          </td>
+          <td className={cn('text-right tabular-nums', ch('ancho'))}>
+            {s.ancho ? s.ancho.toFixed(2) : ''}
+          </td>
+          <td className={cn('text-right tabular-nums', ch('area'))}>
+            {s.area ? s.area.toFixed(2) : ''}
+          </td>
+          <td className={cn('text-right tabular-nums', ch('longitud'))}>
+            {s.longitud ? s.longitud.toFixed(2) : ''}
+          </td>
+        </>
+      )}
+      <td className={cn('text-right tabular-nums', ch('cantidad'))}>
+        {s.cantidad.toFixed(2)}
+      </td>
+      <td className={cn('text-right tabular-nums', ch('horasHombre'))}>
+        {s.horasHombre.toFixed(2)}
+      </td>
+      <td className={cn('text-right tabular-nums', ch('csHoraHombre'))}>
+        {fmtCelda(s.csHoraHombre, true)}
+      </td>
+      <td className={cn('text-right tabular-nums', ch('csMaterial'))}>
+        {fmtCelda(s.csMaterial, true)}
+      </td>
+      <td className={cn('text-right tabular-nums', ch('csTotal'))}>
+        {fmtCelda(s.csTotal, true)}
+      </td>
+      <td className={cn('text-center whitespace-nowrap', ch('cargo'))}>{fmtCelda(s.cargo)}</td>
+      <td className={cn('text-center whitespace-nowrap text-[11px]', ch('aplica'))}>
+        {fmtCelda(s.aplica)}
+      </td>
+      <td className={cn('text-center', ch('medida'))}>{fmtCelda(s.medida)}</td>
+      <td className={cn('dms-cell-wrap max-w-[8rem] text-[10px]', ch('remark'))}>
+        {fmtCelda(s.remark)}
+      </td>
+      <td className={cn('text-center text-[10px] uppercase', ch('contenedorDonante'))}>
+        {fmtCelda(s.contenedorDonante)}
+      </td>
+      <td className="dms-cell-wrap max-w-[14rem] align-top">
+        {comentarioTexto ? (
+          <div className="dms-cmt-celda">
+            <p className="dms-cmt-celda__meta">
+              <span className="font-bold text-slate-700">Comentario</span>
+              <span className="text-slate-400">
+                · {edicion.usuario} · {edicion.fecha}
+              </span>
+            </p>
+            <p className="dms-cmt-celda__texto" title={comentarioTexto}>
+              {comentarioTexto}
+            </p>
+          </div>
+        ) : (
+          <span className="text-[10px] text-slate-400">
+            {edicion.usuario} · {edicion.fecha}
+          </span>
         )}
-        <td className={cn('text-right tabular-nums', ch('cantidad'))}>
-          {s.cantidad.toFixed(2)}
-        </td>
-        <td className={cn('text-right tabular-nums', ch('horasHombre'))}>
-          {s.horasHombre.toFixed(2)}
-        </td>
-        <td className={cn('text-right tabular-nums', ch('csHoraHombre'))}>
-          {fmtCelda(s.csHoraHombre, true)}
-        </td>
-        <td className={cn('text-right tabular-nums', ch('csMaterial'))}>
-          {fmtCelda(s.csMaterial, true)}
-        </td>
-        <td className={cn('text-right tabular-nums', ch('csTotal'))}>
-          {fmtCelda(s.csTotal, true)}
-        </td>
-        <td className={cn('text-center whitespace-nowrap', ch('cargo'))}>{fmtCelda(s.cargo)}</td>
-        <td className={cn('text-center whitespace-nowrap text-[11px]', ch('aplica'))}>
-          {fmtCelda(s.aplica)}
-        </td>
-        <td className={cn('text-center', ch('medida'))}>{fmtCelda(s.medida)}</td>
-        <td className={cn('dms-cell-wrap max-w-[8rem] text-[10px]', ch('remark'))}>
-          {fmtCelda(s.remark)}
-        </td>
-        <td className={cn('text-center text-[10px] uppercase', ch('contenedorDonante'))}>
-          {fmtCelda(s.contenedorDonante)}
-        </td>
-        <td colSpan={2} className="text-[10px] text-slate-500">
-          {edicion.usuario} · {edicion.fecha}
-        </td>
-      </tr>
-    </>
+      </td>
+      <td />
+    </tr>
   );
 }
 
@@ -210,6 +230,7 @@ export function ListadoDanosTable({
   comentariosSoloLectura = true,
   onEnviarComentario: _onEnviarComentario,
 }: ListadoDanosTableProps) {
+  const [antesExpandidoIds, setAntesExpandidoIds] = useState<Set<string>>(() => new Set());
   const totales = totalesDanos(danos);
   void comentarioUsuario;
   void comentarioRol;
@@ -225,6 +246,15 @@ export function ListadoDanosTable({
     marcacionHabilitada &&
     danos.some((d) => marcadosIds.includes(d.id)) &&
     !todosMarcados;
+
+  function alternarAntes(id: string) {
+    setAntesExpandidoIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   if (danos.length === 0) {
     return (
@@ -315,6 +345,10 @@ export function ListadoDanosTable({
             const ultimoCmt = ultimoComentarioDe(d);
             const pendientes = d.comentarios.filter((c) => c.tipo === 'SOLICITA_CAMBIO').length;
             const edicion = d.edicionReciente;
+            const tieneAntes =
+              Boolean(edicion?.snapshotAnterior) &&
+              Boolean(edicion?.camposCambiados?.length);
+            const antesAbierto = tieneAntes && antesExpandidoIds.has(d.id);
             const mod = (campo: CampoSnapshotLinea) => claseCampoModificado(edicion, campo);
             return (
               <Fragment key={d.id}>
@@ -323,7 +357,8 @@ export function ListadoDanosTable({
                     'cursor-pointer',
                     activo && 'dms-row-selected',
                     marcado && 'dms-row-marcado',
-                    edicion && 'dms-row-modificada'
+                    edicion && 'dms-row-modificada',
+                    antesAbierto && 'dms-row-nivel1-abierta'
                   )}
                   onClick={() => onSeleccionar(d)}
                 >
@@ -343,18 +378,41 @@ export function ListadoDanosTable({
                       />
                     </td>
                   )}
-                  <td className="text-center">
-                    <span
-                      className={cn(
-                        'dms-dano-check',
-                        activo || d.aplica === APLICA_APROBADO_SBM
-                          ? 'dms-dano-check--on'
-                          : 'dms-dano-check--off'
+                  <td className="text-center" onClick={(e) => e.stopPropagation()}>
+                    <div className="inline-flex items-center justify-center gap-0.5">
+                      {tieneAntes ? (
+                        <button
+                          type="button"
+                          className="dms-dano-nivel-toggle"
+                          title={
+                            antesAbierto
+                              ? 'Ocultar valores anteriores'
+                              : 'Ver valores anteriores (Antes)'
+                          }
+                          aria-expanded={antesAbierto}
+                          onClick={() => alternarAntes(d.id)}
+                        >
+                          {antesAbierto ? (
+                            <ChevronDown className="h-3.5 w-3.5" />
+                          ) : (
+                            <ChevronRight className="h-3.5 w-3.5" />
+                          )}
+                        </button>
+                      ) : (
+                        <span className="inline-block w-3.5" aria-hidden />
                       )}
-                      aria-hidden
-                    >
-                      <CheckCircle2 className="h-4 w-4" />
-                    </span>
+                      <span
+                        className={cn(
+                          'dms-dano-check',
+                          activo || d.aplica === APLICA_APROBADO_SBM
+                            ? 'dms-dano-check--on'
+                            : 'dms-dano-check--off'
+                        )}
+                        aria-hidden
+                      >
+                        <CheckCircle2 className="h-4 w-4" />
+                      </span>
+                    </div>
                   </td>
                   <td className={cn('whitespace-nowrap font-semibold text-rfs-navy', mod('comp'))}>
                     {d.comp}
@@ -586,7 +644,7 @@ export function ListadoDanosTable({
                     </div>
                   </td>
                 </tr>
-                {edicion?.snapshotAnterior && edicion.camposCambiados?.length ? (
+                {antesAbierto && edicion ? (
                   <SubfilaHistorico
                     edicion={edicion}
                     mostrarMarcacion={mostrarMarcacion}
