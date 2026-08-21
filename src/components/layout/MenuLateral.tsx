@@ -254,7 +254,7 @@ export function MenuLateral() {
                   {user.rol === 'seaboard'
                     ? 'Usuario Seaboard'
                     : user.rol === 'liquidaciones'
-                      ? 'Liquidaciones'
+                      ? 'Aprobaciones de Estimados'
                       : 'Operador RFS'}
                 </span>
               </span>

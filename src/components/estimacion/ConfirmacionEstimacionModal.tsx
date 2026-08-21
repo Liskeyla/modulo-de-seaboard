@@ -11,15 +11,22 @@ import {
 } from '@/types/estimacion';
 import { construirInformeHtml } from '@/lib/descargas';
 import { formatMoney, toast } from '@/lib/utils';
+import { paisDe, type PaisOperacion } from '@/lib/pais';
 
-/** Destinatarios prototipo: gestores de liquidaciones RFS. */
-export const CORREOS_LIQUIDACIONES_RFS = [
-  'liquidaciones@rfs.com.ec',
-  'gestor.liquidaciones@rfs.com.ec',
-];
+/** Destinatarios prototipo por país de operación. */
+export const CORREOS_LIQUIDACIONES_POR_PAIS: Record<PaisOperacion, string[]> = {
+  ECUADOR: ['liquidaciones.ec@rfs.com.ec', 'gestor.liquidaciones.ec@rfs.com.ec'],
+  PERU: ['liquidaciones.pe@rfs.com.pe', 'gestor.liquidaciones.pe@rfs.com.pe'],
+};
 
-function mailtoLiquidaciones(asunto: string, cuerpo: string) {
-  const mailto = `mailto:${CORREOS_LIQUIDACIONES_RFS.join(',')}?subject=${encodeURIComponent(
+export const CORREOS_LIQUIDACIONES_RFS = CORREOS_LIQUIDACIONES_POR_PAIS.ECUADOR;
+
+function correosDeEstimacion(estimacion: Estimacion) {
+  return CORREOS_LIQUIDACIONES_POR_PAIS[paisDe(estimacion)];
+}
+
+function mailtoLiquidaciones(correos: string[], asunto: string, cuerpo: string) {
+  const mailto = `mailto:${correos.join(',')}?subject=${encodeURIComponent(
     asunto
   )}&body=${encodeURIComponent(cuerpo)}`;
   if (typeof window !== 'undefined') {
@@ -33,12 +40,15 @@ export function notificarRechazoALiquidaciones(
   comentario: string,
   usuario: string
 ) {
-  const asunto = `Estimación ${estimacion.codigo} RECHAZADA · ${estimacion.contenedor}`;
+  const correos = correosDeEstimacion(estimacion);
+  const paisLabel = paisDe(estimacion) === 'PERU' ? 'Perú' : 'Ecuador';
+  const asunto = `Estimación ${estimacion.codigo} RECHAZADA · ${estimacion.contenedor} · ${paisLabel}`;
   const cuerpo = [
-    `Estimados gestores de liquidaciones RFS,`,
+    `Estimados gestores de liquidaciones RFS (${paisLabel}),`,
     ``,
     `La estimación ${estimacion.codigo} (${estimacion.contenedor}) fue rechazada por Seaboard Marine.`,
     ``,
+    `País: ${paisLabel}`,
     `Naviera: ${estimacion.naviera}`,
     `Total PVP: $${estimacion.pvpTotal.toFixed(2)}`,
     `Líneas de daño: ${estimacion.danos.length}`,
@@ -50,9 +60,9 @@ export function notificarRechazoALiquidaciones(
     `— Notificación automática · Gestor Seaboard Marine (prototipo)`,
   ].join('\n');
 
-  mailtoLiquidaciones(asunto, cuerpo);
+  mailtoLiquidaciones(correos, asunto, cuerpo);
   toast(
-    `Correo de rechazo preparado para liquidaciones RFS\n${CORREOS_LIQUIDACIONES_RFS.join(', ')}`,
+    `Correo de rechazo preparado para liquidaciones ${paisLabel}\n${correos.join(', ')}`,
     'success'
   );
 }
@@ -62,12 +72,15 @@ export function notificarAprobacionALiquidaciones(
   estimacion: Estimacion,
   usuario: string
 ) {
-  const asunto = `Estimación ${estimacion.codigo} APROBADA · ${estimacion.contenedor}`;
+  const correos = correosDeEstimacion(estimacion);
+  const paisLabel = paisDe(estimacion) === 'PERU' ? 'Perú' : 'Ecuador';
+  const asunto = `Estimación ${estimacion.codigo} APROBADA · ${estimacion.contenedor} · ${paisLabel}`;
   const cuerpo = [
-    `Estimados gestores de liquidaciones RFS,`,
+    `Estimados gestores de liquidaciones RFS (${paisLabel}),`,
     ``,
     `La estimación ${estimacion.codigo} (${estimacion.contenedor}) fue aprobada por Seaboard Marine.`,
     ``,
+    `País: ${paisLabel}`,
     `Naviera: ${estimacion.naviera}`,
     `Total PVP: $${estimacion.pvpTotal.toFixed(2)}`,
     `Líneas de daño: ${estimacion.danos.length}`,
@@ -76,9 +89,9 @@ export function notificarAprobacionALiquidaciones(
     `— Notificación automática · Gestor Seaboard Marine (prototipo)`,
   ].join('\n');
 
-  mailtoLiquidaciones(asunto, cuerpo);
+  mailtoLiquidaciones(correos, asunto, cuerpo);
   toast(
-    `Correo de aprobación preparado para liquidaciones RFS\n${CORREOS_LIQUIDACIONES_RFS.join(', ')}`,
+    `Correo de aprobación preparado para liquidaciones ${paisLabel}\n${correos.join(', ')}`,
     'success'
   );
 }
@@ -88,10 +101,10 @@ function resumenCambiosEstimacion(est: Estimacion): string[] {
   est.danos.forEach((d) => {
     if (d.edicionReciente) {
       items.push(
-        `Línea ${String(d.linea).padStart(2, '0')} · ${d.comp}: ${d.edicionReciente.resumenCambios}`
+        `Línea ${String(d.linea).padStart(2, '0')} · ${d.comp} · ${d.edicionReciente.usuario}: ${d.edicionReciente.resumenCambios}`
       );
       if (d.edicionReciente.comentarioSbm) {
-        items.push(`  SBM: ${d.edicionReciente.comentarioSbm}`);
+        items.push(`  Motivo (${d.edicionReciente.usuario}): ${d.edicionReciente.comentarioSbm}`);
       }
     }
   });
@@ -311,7 +324,7 @@ export function ConfirmacionEstimacionModal({
               onChange={(e) => setComentario(e.target.value)}
             />
             <p className="mt-1 text-[10px] text-slate-500">
-              Se notificará a: {CORREOS_LIQUIDACIONES_RFS.join(', ')}
+              Se notificará a: {correosDeEstimacion(estimacion).join(', ')}
             </p>
           </div>
         )}

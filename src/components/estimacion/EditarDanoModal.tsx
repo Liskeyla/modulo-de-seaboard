@@ -5,7 +5,10 @@ import { PencilLine, Save } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import {
   APLICA_DANO,
+  APLICA_RECHAZADO_SBM,
   CARGOS_DANO,
+  CARGO_RECHAZADO,
+  esAplicaRechazado,
   type AplicaDano,
   type CargoDano,
   type DanoEstimacion,
@@ -21,6 +24,13 @@ const CAMPOS_BLOQUEADOS: (keyof Formulario)[] = [
   'contenedorDonante',
   'serieAnterior',
   'serieEntregado',
+];
+
+/** Campos de costo/HH inhabilitados cuando el ítem está rechazado. */
+const CAMPOS_COSTO_RECHAZO: (keyof Formulario)[] = [
+  'horasHombre',
+  'csHoraHombre',
+  'csMaterial',
 ];
 
 interface Formulario {
@@ -124,6 +134,8 @@ export function EditarDanoModal({
 
   if (!dano || !form) return null;
 
+  const itemRechazado = esAplicaRechazado(form.aplica);
+
   const set = <K extends keyof Formulario>(k: K, v: Formulario[K]) =>
     setForm((f) => (f ? { ...f, [k]: v } : f));
 
@@ -132,14 +144,16 @@ export function EditarDanoModal({
     return Number.isFinite(n) ? n : 0;
   };
 
-  const csHH = round2(numero(form.csHoraHombre));
-  const csMat = round2(numero(form.csMaterial));
+  const csHH = itemRechazado ? 0 : round2(numero(form.csHoraHombre));
+  const csMat = itemRechazado ? 0 : round2(numero(form.csMaterial));
+  const hh = itemRechazado ? 0 : round2(numero(form.horasHombre));
   const largo = round2(numero(form.largo));
   const ancho = round2(numero(form.ancho));
 
   const guardar = () => {
     const largoFinal = mostrarDimensiones ? largo : dano.largo;
     const anchoFinal = mostrarDimensiones ? ancho : dano.ancho;
+    const rechazado = esAplicaRechazado(form.aplica);
     // Ubicación, Obs. Análisis y Contenedor Donante quedan fijos (solo lectura SBM).
     const cambios: Partial<DanoEstimacion> = {
       comp: form.comp.trim(),
@@ -155,14 +169,18 @@ export function EditarDanoModal({
       area: mostrarDimensiones ? round2((largoFinal * anchoFinal) / 10000) : dano.area,
       longitud: mostrarDimensiones ? largoFinal : dano.longitud,
       cantidad: round2(numero(form.cantidad)) || 1,
-      horasHombre: round2(numero(form.horasHombre)),
-      csHoraHombre: csHH,
-      csMaterial: csMat,
-      cargo: form.cargo,
+      horasHombre: rechazado ? 0 : hh,
+      csHoraHombre: rechazado ? 0 : csHH,
+      csMaterial: rechazado ? 0 : csMat,
+      cargo: rechazado ? CARGO_RECHAZADO : form.cargo,
+      aplica: form.aplica,
       medida: form.medida.trim(),
       remark: form.remark.trim(),
       contenedorDonante: dano.contenedorDonante,
     };
+    if (rechazado) {
+      cambios.csTotal = 0;
+    }
 
     const difs: string[] = [];
     (Object.keys(cambios) as (keyof DanoEstimacion)[]).forEach((k) => {
@@ -197,18 +215,29 @@ export function EditarDanoModal({
     key: keyof Formulario,
     props: { type?: string; step?: string; placeholder?: string } = {}
   ) => {
-    const bloqueado = CAMPOS_BLOQUEADOS.includes(key);
+    const bloqueado =
+      CAMPOS_BLOQUEADOS.includes(key) ||
+      (itemRechazado && CAMPOS_COSTO_RECHAZO.includes(key));
+    const valor =
+      itemRechazado && CAMPOS_COSTO_RECHAZO.includes(key)
+        ? '0'
+        : (form[key] as string);
     return (
       <div>
         <label className="dms-field-label">{label}</label>
         <input
           className={cn('dms-input-sm', bloqueado && 'bg-slate-100 text-slate-600')}
-          value={form[key] as string}
+          value={valor}
           type={props.type ?? 'text'}
           step={props.step}
           placeholder={props.placeholder}
           disabled={bloqueado}
           readOnly={bloqueado}
+          title={
+            itemRechazado && CAMPOS_COSTO_RECHAZO.includes(key)
+              ? 'Ítem rechazado: valor en $0 (no editable)'
+              : undefined
+          }
           onChange={(e) => {
             if (bloqueado) return;
             set(key, e.target.value as Formulario[typeof key]);
@@ -266,7 +295,8 @@ export function EditarDanoModal({
           <label className="dms-field-label">Cargo</label>
           <select
             className="dms-select"
-            value={form.cargo || 'Línea'}
+            value={itemRechazado ? CARGO_RECHAZADO : form.cargo || 'Línea'}
+            disabled={itemRechazado}
             onChange={(e) => set('cargo', e.target.value as CargoDano)}
           >
             {CARGOS_DANO.map((c) => (
@@ -281,7 +311,25 @@ export function EditarDanoModal({
           <select
             className="dms-select"
             value={form.aplica || 'Pendiente Revisión'}
-            onChange={(e) => set('aplica', e.target.value as AplicaDano)}
+            onChange={(e) => {
+              const aplica = e.target.value as AplicaDano;
+              if (aplica === APLICA_RECHAZADO_SBM) {
+                setForm((f) =>
+                  f
+                    ? {
+                        ...f,
+                        aplica,
+                        cargo: CARGO_RECHAZADO,
+                        horasHombre: '0',
+                        csHoraHombre: '0',
+                        csMaterial: '0',
+                      }
+                    : f
+                );
+              } else {
+                set('aplica', aplica);
+              }
+            }}
           >
             {APLICA_DANO.map((a) => (
               <option key={a} value={a}>
@@ -295,6 +343,11 @@ export function EditarDanoModal({
           <div className="dms-input-sm flex items-center bg-rfs-50 font-bold text-rfs-700">
             ${round2(csHH + csMat).toFixed(2)}
           </div>
+          {itemRechazado && (
+            <p className="mt-0.5 text-[10px] text-slate-400">
+              Ítem rechazado: H.H. y costos en $0
+            </p>
+          )}
         </div>
       </div>
 

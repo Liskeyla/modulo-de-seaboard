@@ -1,11 +1,11 @@
 'use client';
 
 import { Fragment, useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   ChevronDown,
   ChevronRight,
+  CheckCircle2,
   Database,
   Download,
   Eye,
@@ -17,6 +17,9 @@ import {
   SearchX,
   Send,
   Ship,
+  Trash2,
+  Undo2,
+  Upload,
 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { DmsReportLayout } from '@/components/dms/DmsReportLayout';
@@ -24,7 +27,9 @@ import { DmsTableToolbar } from '@/components/dms/DmsTableToolbar';
 import { EstadoEstimacionBadge } from '@/components/dms/EstadoEstimacionBadge';
 import { Modal } from '@/components/ui/Modal';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { ComentarioModal } from '@/components/aprobaciones/ComentarioModal';
 import { InformePreviewModal } from '@/components/estimacion/InformePreviewModal';
+import { ChipsRetornoSeaboard } from '@/components/estimacion/RespuestaSeaboardBanner';
 import {
   ConfirmacionEstimacionModal,
   notificarAprobacionALiquidaciones,
@@ -33,7 +38,13 @@ import {
 import { useAuthStore } from '@/store';
 import { useEstimacionesStore } from '@/store/estimacionesStore';
 import { useUiStore } from '@/store/uiStore';
-import { paisDe } from '@/lib/pais';
+import { metaPais, paisDe } from '@/lib/pais';
+import {
+  esNavieraSeaboard,
+  enBandejaSeaboard,
+  puedePushASbm,
+  puedeValidarLiquidaciones,
+} from '@/lib/seaboardFlow';
 import {
   ACTIVIDADES,
   ESTADOS_ESTIMACION,
@@ -46,27 +57,133 @@ import {
 import { descargarDataLog, type VarianteInforme } from '@/lib/descargas';
 import { cn, formatMoney, toast } from '@/lib/utils';
 
-/** Encabezados del export (incluye columnas del módulo Aprobaciones Seaboard). */
-const EXCEL_HEADERS = [
-  'Codigo', 'Semana', 'Año', 'Estado', 'Contenedor', 'Tipo contenedor', 'Modelo Maquina',
-  'Código RFS', 'Naviera', 'Buque', 'Viaje', 'Actividad', 'Lugar de Estimación',
-  'Lugar de Asistencia', 'Fecha GateIn', 'Fecha de Elaboración', 'Fecha de Reparación',
-  'Tipo de Estimación', 'Horas Hombre', 'PVP Horas Hombre', 'PVP Materiales', 'PVP Total',
-  'Estado PTI', 'Fecha Fin PTI', 'Enviar Aprobacion', 'Fecha Envio', 'Fecha revisión',
-  'Fecha Aprobacion', 'Niveles', 'Dias Estadia', 'Tipo de Daño', 'Análisis de observación',
-  'Fecha de modificación', 'Usuario de Modificación',
-];
+/**
+ * Fechas del flujo (mismo dato, etiquetas distintas por rol):
+ * - fechaEnvio       → Liquidaciones: cuándo envió a Línea/SBM · Seaboard: cuándo recibió
+ * - fechaAprobacion  → cuándo Seaboard aprobó (ambos reportes)
+ * - fechaRevision    → cuándo Seaboard revisó / decidió
+ * - fechaModificacion→ última modificación (ambos reportes)
+ */
+function etiquetasFechasReporte(rol: 'liquidaciones' | 'seaboard' | 'dms' | string | undefined) {
+  if (rol === 'liquidaciones') {
+    return {
+      envio: 'Fecha Envío a Línea',
+      envioTitle:
+        'Fecha en que Liquidaciones envió el estimado a aprobar (reporte Seaboard)',
+      revision: 'Fecha respuesta Línea',
+      revisionTitle: 'Fecha en que Seaboard respondió (revisión / decisión)',
+      aprobacion: 'Fecha Aprobación Línea',
+      aprobacionTitle: 'Fecha en que Seaboard aprobó el estimado',
+      modificacion: 'Fecha de modificación',
+      modificacionTitle: 'Última modificación del estimado',
+    };
+  }
+  if (rol === 'seaboard') {
+    return {
+      envio: 'Fecha Envío a Línea',
+      envioTitle:
+        'Fecha en que Liquidaciones envió el estimado; fecha de recepción en Seaboard',
+      revision: 'Fecha revisión',
+      revisionTitle: 'Fecha en que Seaboard revisó el estimado',
+      aprobacion: 'Fecha Aprobación',
+      aprobacionTitle: 'Fecha en que Seaboard aprobó el estimado',
+      modificacion: 'Fecha de modificación',
+      modificacionTitle: 'Última modificación del estimado (ítems / comentarios)',
+    };
+  }
+  return {
+    envio: 'Fecha Envío a Línea',
+    envioTitle: 'Fecha de envío a Seaboard Marine',
+    revision: 'Fecha revisión',
+    revisionTitle: 'Fecha de revisión',
+    aprobacion: 'Fecha Aprobación',
+    aprobacionTitle: 'Fecha de aprobación Seaboard',
+    modificacion: 'Fecha de modificación',
+    modificacionTitle: 'Última modificación',
+  };
+}
 
-function rowToExcel(e: Estimacion) {
-  return [
-    e.codigo, e.semana, e.anio, e.estado, e.contenedor, e.tipoContenedor, e.modeloMaquina,
-    e.codigoRfs, e.naviera, e.buque, e.viaje, e.actividad, e.lugarEstimacion,
-    e.lugarAsistencia, e.fechaGateIn, e.fechaElaboracion, e.fechaReparacion,
-    e.tipoEstimacion, e.horasHombre, e.pvpHorasHombre, e.pvpMateriales, e.pvpTotal,
-    e.estadoPti, e.fechaFinPti, e.enviarAprobacion, e.fechaEnvio, e.fechaRevision || '',
-    e.fechaAprobacion, e.niveles, e.diasEstadia, e.tipoDano,
-    e.analisisObservacion, e.fechaModificacion, e.usuarioModificacion,
+function excelHeadersParaRol(rol: string | undefined) {
+  const f = etiquetasFechasReporte(rol);
+  const headers = [
+    'Codigo',
+    'Semana',
+    'Año',
+    'Estado',
+    'Contenedor',
+    'Tipo contenedor',
+    'Modelo Maquina',
+    'Código RFS',
+    'Naviera',
+    'Buque',
+    'Viaje',
+    'Actividad',
+    'Lugar de Estimación',
+    'Lugar de Asistencia',
+    'Fecha GateIn',
+    'Fecha de Elaboración',
+    'Fecha de Reparación',
+    'Tipo de Estimación',
+    'Horas Hombre',
+    'PVP Horas Hombre',
+    'PVP Materiales',
+    'PVP Total',
+    'Estado PTI',
+    'Fecha Fin PTI',
+    'Enviar Aprobacion',
+    f.envio,
+    f.revision,
+    f.aprobacion,
+    ...(rol === 'seaboard' ? [] : ['Niveles']),
+    'Dias Estadia',
+    'Tipo de Daño',
+    'Análisis de observación',
+    f.modificacion,
+    'Usuario de Modificación',
   ];
+  return headers;
+}
+
+function rowToExcel(e: Estimacion, rol?: string) {
+  const base = [
+    e.codigo,
+    e.semana,
+    e.anio,
+    e.estado,
+    e.contenedor,
+    e.tipoContenedor,
+    e.modeloMaquina,
+    e.codigoRfs,
+    e.naviera,
+    e.buque,
+    e.viaje,
+    e.actividad,
+    e.lugarEstimacion,
+    e.lugarAsistencia,
+    e.fechaGateIn,
+    e.fechaElaboracion,
+    e.fechaReparacion,
+    e.tipoEstimacion,
+    e.horasHombre,
+    e.pvpHorasHombre,
+    e.pvpMateriales,
+    e.pvpTotal,
+    e.estadoPti,
+    e.fechaFinPti,
+    e.enviarAprobacion,
+    e.fechaEnvio,
+    e.fechaRevision || '',
+    e.fechaAprobacion,
+  ];
+  const cola = [
+    e.diasEstadia,
+    e.tipoDano,
+    e.analisisObservacion,
+    e.fechaModificacion,
+    e.usuarioModificacion,
+  ];
+  if (rol === 'seaboard') return [...base, ...cola];
+  return [...base, e.niveles, ...cola];
 }
 
 /** Convierte "dd/mm/yyyy hh:mm" a "yyyy-mm-dd" para comparar con los filtros de fecha. */
@@ -81,13 +198,24 @@ type Dialogo =
   | { tipo: 'INFORME'; id: string; variante: VarianteInforme }
   | { tipo: 'NOTA'; id: string }
   | { tipo: 'INFO'; id: string }
-  | { tipo: 'ENVIAR'; id: string };
+  | { tipo: 'ENVIAR'; id: string }
+  | { tipo: 'ELIMINAR'; id: string }
+  | { tipo: 'REVERSAR_APROB'; id: string }
+  | { tipo: 'PUSH_SBM'; id: string };
 
 export default function ReporteEstimacionesPage() {
   const router = useRouter();
   const { user } = useAuthStore();
-  const { estimaciones, enviarAprobacion, aprobar, rechazar, setActividad } =
-    useEstimacionesStore();
+  const {
+    estimaciones,
+    enviarAprobacion,
+    validarLiquidaciones,
+    aprobar,
+    rechazar,
+    reversarAprobacion,
+    eliminar,
+    setActividad,
+  } = useEstimacionesStore();
   const { pais } = useUiStore();
 
   useEffect(() => {
@@ -114,14 +242,25 @@ export default function ReporteEstimacionesPage() {
   const [expandidas, setExpandidas] = useState<Set<string>>(new Set());
   const [dialogo, setDialogo] = useState<Dialogo>({ tipo: 'NINGUNO' });
 
-  const usuario = user?.username ?? 'apptelink';
-  const puedeEditarActividad = user?.rol === 'seaboard' || user?.rol === 'dms';
+  const usuario = user?.username ?? 'seaboard';
+  const actor =
+    user?.nombre && user.nombre !== usuario
+      ? `${user.nombre} (${usuario})`
+      : usuario;
+  const esLiquidaciones = user?.rol === 'liquidaciones';
+  const esSeaboard = user?.rol === 'seaboard';
+  const puedeEditarActividad = esSeaboard || user?.rol === 'dms';
+  const etiquetasFecha = etiquetasFechasReporte(user?.rol);
   const cerrar = () => setDialogo({ tipo: 'NINGUNO' });
 
-  const porPais = useMemo(
-    () => estimaciones.filter((e) => paisDe(e) === pais),
-    [estimaciones, pais]
-  );
+  /** Liquidaciones: todas las navieras del país. Seaboard: solo Seaboard. */
+  const porPais = useMemo(() => {
+    return estimaciones.filter((e) => {
+      if (paisDe(e) !== pais) return false;
+      if (esSeaboard) return esNavieraSeaboard(e.naviera);
+      return true;
+    });
+  }, [estimaciones, pais, esSeaboard]);
 
   // Las opciones de los filtros salen de los datos reales cargados en el store.
   const opciones = useMemo(() => {
@@ -294,18 +433,65 @@ export default function ReporteEstimacionesPage() {
           </button>
         )}
         {['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) &&
-          user?.rol === 'dms' && (
+          (user?.rol === 'dms' ||
+            (esLiquidaciones &&
+              esNavieraSeaboard(row.naviera) &&
+              row.validadoLiquidaciones &&
+              row.enviarAprobacion !== 'SI')) && (
           <button
             type="button"
             className="dms-icon-action dms-icon-action--enviar"
-            title="Enviar a Seaboard Marine"
+            title={
+              esLiquidaciones
+                ? 'Push a SBM · queda pendiente en reporte Seaboard'
+                : 'Enviar a Seaboard Marine'
+            }
             onClick={() => {
-              setDialogo({ tipo: 'ENVIAR', id: row.id });
+              setDialogo({ tipo: esLiquidaciones ? 'PUSH_SBM' : 'ENVIAR', id: row.id });
             }}
           >
-            <Send className="h-3.5 w-3.5" />
+            {esLiquidaciones ? (
+              <Upload className="h-3.5 w-3.5" />
+            ) : (
+              <Send className="h-3.5 w-3.5" />
+            )}
           </button>
         )}
+        {esLiquidaciones && puedeValidarLiquidaciones(row) && (
+          <button
+            type="button"
+            className="dms-icon-action dms-icon-action--enviar"
+            title="Validar por liquidaciones"
+            onClick={() => {
+              validarLiquidaciones(row.id, actor);
+              toast(`${row.codigo} validado por liquidaciones.`, 'success');
+            }}
+          >
+            <CheckCircle2 className="h-3.5 w-3.5" />
+          </button>
+        )}
+        {esLiquidaciones && ['APROBADO', 'REPARADO'].includes(row.estado) && (
+          <button
+            type="button"
+            className="dms-icon-action dms-icon-action--info"
+            title="Reversar aprobación"
+            onClick={() => setDialogo({ tipo: 'REVERSAR_APROB', id: row.id })}
+          >
+            <Undo2 className="h-3.5 w-3.5" />
+          </button>
+        )}
+        {esLiquidaciones &&
+          !enBandejaSeaboard(row) &&
+          ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) && (
+            <button
+              type="button"
+              className="dms-icon-action dms-icon-action--info"
+              title="Eliminar estimado"
+              onClick={() => setDialogo({ tipo: 'ELIMINAR', id: row.id })}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          )}
         {['ENVIADO', 'PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) &&
           user?.rol === 'seaboard' && (
           <button
@@ -340,17 +526,24 @@ export default function ReporteEstimacionesPage() {
     );
   }
 
+  const tituloReporte = esLiquidaciones
+    ? `Aprobaciones de Estimados · ${metaPais(pais).label}`
+    : 'Reporte de Estimaciones Seaboard Marine';
+
+  const subtituloReporte = esLiquidaciones
+    ? user?.pais === 'PERU'
+      ? 'Aprobaciones de Estimados · Perú · Validar, push a SBM, reversar y eliminar'
+      : 'Aprobaciones de Estimados · Ecuador · Validar, push a SBM, reversar y eliminar'
+    : 'Usuario Seaboard · Ver, modificar y aprobar / rechazar estimados';
+
   return (
     <>
-      <Header
-        title="Reporte de Estimaciones Seaboard Marine"
-        subtitle="Usuario Seaboard · Ver, modificar y aprobar / rechazar estimados"
-      />
+      <Header title={tituloReporte} subtitle={subtituloReporte} />
       <main className="px-3 py-4 md:px-5 md:py-6">
         <div className="dms-shell">
           <DmsReportLayout
-            title="Reporte de Estimaciones Seaboard Marine"
-            subtitle="Usuario Seaboard · Ver, modificar y aprobar / rechazar estimados"
+            title={tituloReporte}
+            subtitle={subtituloReporte}
             heroIcon={<FileBarChart className="h-5 w-5" />}
             filtros={[
               { label: 'Desde', type: 'date', value: desde, onChange: (v) => setDesde(String(v)) },
@@ -448,9 +641,6 @@ export default function ReporteEstimacionesPage() {
                 <span className="dms-link-option dms-link-option--disabled">
                   <FileText className="h-3 w-3" /> Generar Nueva Estimación Máquina
                 </span>
-                <Link href="/aprobaciones/seaboard" className="dms-link-option">
-                  <Send className="h-3 w-3" /> Aprobaciones Estimados Seaboard
-                </Link>
               </div>
             }
           >
@@ -486,8 +676,8 @@ export default function ReporteEstimacionesPage() {
                 setPage(1);
               }}
               excelFilename="Reporte de Estimaciones Seaboard Marine.xlsx"
-              excelHeaders={EXCEL_HEADERS}
-              excelRows={filtered.map(rowToExcel)}
+              excelHeaders={excelHeadersParaRol(user?.rol)}
+              excelRows={filtered.map((e) => rowToExcel(e, user?.rol))}
             />
 
             {paginated.length === 0 ? (
@@ -535,14 +725,16 @@ export default function ReporteEstimacionesPage() {
                       <th>Estado PTI</th>
                       <th>Fecha Fin PTI</th>
                       <th>Enviar Aprobacion</th>
-                      <th>Fecha Envio</th>
-                      <th>Fecha revisión</th>
-                      <th>Fecha Aprobacion</th>
-                      <th>Niveles</th>
+                      <th title={etiquetasFecha.envioTitle}>{etiquetasFecha.envio}</th>
+                      <th title={etiquetasFecha.revisionTitle}>{etiquetasFecha.revision}</th>
+                      <th title={etiquetasFecha.aprobacionTitle}>{etiquetasFecha.aprobacion}</th>
+                      {!esSeaboard && <th>Niveles</th>}
                       <th>Dias Estadia</th>
                       <th>Tipo de Daño</th>
                       <th>Análisis de observación</th>
-                      <th>Fecha de modificación</th>
+                      <th title={etiquetasFecha.modificacionTitle}>
+                        {etiquetasFecha.modificacion}
+                      </th>
                       <th>Usuario de Modificacion</th>
                     </tr>
                   </thead>
@@ -590,6 +782,12 @@ export default function ReporteEstimacionesPage() {
                                   title={`${pendientes} cambio(s) solicitados por liquidaciones`}
                                 />
                               )}
+                              {esLiquidaciones && <ChipsRetornoSeaboard estimacion={row} />}
+                              {esLiquidaciones && enBandejaSeaboard(row) && (
+                                <span className="mt-1 block rounded bg-sky-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-sky-800">
+                                  En SBM · pendiente
+                                </span>
+                              )}
                             </td>
                             <td className="text-center tabular-nums">{row.semana}</td>
                             <td className="text-center tabular-nums">{row.anio}</td>
@@ -609,7 +807,7 @@ export default function ReporteEstimacionesPage() {
                                   className="dms-select dms-select-actividad"
                                   value={row.actividad}
                                   onChange={(e) => {
-                                    setActividad(row.id, e.target.value as Actividad, usuario);
+                                    setActividad(row.id, e.target.value as Actividad, actor);
                                     toast(
                                       `Actividad de ${row.codigo} cambiada a ${e.target.value}.`,
                                       'success'
@@ -664,22 +862,50 @@ export default function ReporteEstimacionesPage() {
                                 {row.enviarAprobacion}
                               </span>
                             </td>
-                            <td className="text-[10px] tabular-nums">{row.fechaEnvio || '—'}</td>
-                            <td className="text-[10px] tabular-nums text-gray-500">
+                            <td
+                              className="text-[10px] tabular-nums"
+                              title={
+                                row.fechaEnvio ? etiquetasFecha.envioTitle : undefined
+                              }
+                            >
+                              {row.fechaEnvio || '—'}
+                            </td>
+                            <td
+                              className="text-[10px] tabular-nums text-gray-500"
+                              title={
+                                row.fechaRevision ? etiquetasFecha.revisionTitle : undefined
+                              }
+                            >
                               {row.fechaRevision || '—'}
                             </td>
-                            <td className="text-[10px] tabular-nums">
+                            <td
+                              className="text-[10px] tabular-nums"
+                              title={
+                                row.fechaAprobacion
+                                  ? etiquetasFecha.aprobacionTitle
+                                  : undefined
+                              }
+                            >
                               {row.fechaAprobacion || '—'}
                             </td>
-                            <td className="dms-cell-wrap max-w-[9rem] text-[10px]">
-                              {row.niveles || '—'}
-                            </td>
+                            {!esSeaboard && (
+                              <td className="dms-cell-wrap max-w-[9rem] text-[10px]">
+                                {row.niveles || '—'}
+                              </td>
+                            )}
                             <td className="text-center tabular-nums">{row.diasEstadia}</td>
                             <td className="text-center text-[10px]">{row.tipoDano || '—'}</td>
                             <td className="dms-cell-wrap max-w-[13rem] text-[10px] text-gray-600">
                               {row.analisisObservacion || '—'}
                             </td>
-                            <td className="text-[10px] tabular-nums text-gray-500">
+                            <td
+                              className="text-[10px] tabular-nums text-gray-500"
+                              title={
+                                row.fechaModificacion
+                                  ? etiquetasFecha.modificacionTitle
+                                  : undefined
+                              }
+                            >
                               {row.fechaModificacion || '—'}
                             </td>
                             <td className="text-xs">{row.usuarioModificacion || 'N/A'}</td>
@@ -906,10 +1132,10 @@ export default function ReporteEstimacionesPage() {
           }
           aprobar(
             [activa.id],
-            usuario,
-            'Aprobado por Seaboard Marine. Enviado a liquidaciones RFS.'
+            actor,
+            `Aprobado por ${actor}. Enviado a liquidaciones RFS.`
           );
-          notificarAprobacionALiquidaciones(activa, usuario);
+          notificarAprobacionALiquidaciones(activa, actor);
           toast(
             `Estimación ${activa.codigo} aprobada y enviada a liquidaciones RFS (APROBADO).`,
             'success'
@@ -922,8 +1148,8 @@ export default function ReporteEstimacionesPage() {
             toast(MSG_ITEMS_SIN_APROBAR, 'info');
             return;
           }
-          rechazar([activa.id], usuario, comentario);
-          notificarRechazoALiquidaciones(activa, comentario, usuario);
+          rechazar([activa.id], actor, comentario);
+          notificarRechazoALiquidaciones(activa, comentario, actor);
           toast(
             `Estimación ${activa.codigo} rechazada y notificada a liquidaciones RFS.`,
             'success'
@@ -933,27 +1159,73 @@ export default function ReporteEstimacionesPage() {
       />
 
       <ConfirmModal
-        open={dialogo.tipo === 'ENVIAR' && user?.rol === 'dms'}
-        title="Enviar a Seaboard Marine"
+        open={
+          (dialogo.tipo === 'ENVIAR' && user?.rol === 'dms') ||
+          dialogo.tipo === 'PUSH_SBM'
+        }
+        title="Push a Seaboard Marine"
         subtitle={activa ? `${activa.codigo} · ${activa.contenedor}` : undefined}
-        confirmLabel="Confirmar envío"
+        confirmLabel="Confirmar push a SBM"
         confirmClass="dms-btn-enviar"
         onClose={cerrar}
         onConfirm={() => {
           if (!activa) return;
-          enviarAprobacion([activa.id], usuario);
+          if (esLiquidaciones && !puedePushASbm(activa)) {
+            toast(
+              'Valide el estimado y confirme que la naviera es Seaboard antes del push.',
+              'info'
+            );
+            return;
+          }
+          enviarAprobacion([activa.id], actor);
           toast(
-            `Estimación ${activa.codigo} enviada a Seaboard Marine (estado ENVIADO).`,
+            `Estimación ${activa.codigo} enviada a Seaboard (estado PENDIENTE).`,
             'success'
           );
           cerrar();
         }}
       >
         <p className="text-sm leading-relaxed text-gray-600">
-          El estimado pasará a estado <strong>ENVIADO</strong> para que el gestor Seaboard lo
-          revise y envíe su decisión a <strong>liquidaciones RFS</strong>.
+          El estimado validado se envía al reporte Seaboard en estado <strong>PENDIENTE</strong>.
+          Cuando el gestor lo apruebe o rechace (con comentarios y cambios), volverá visible aquí
+          con el detalle de ítems modificados / rechazados.
         </p>
       </ConfirmModal>
+
+      <ConfirmModal
+        open={dialogo.tipo === 'ELIMINAR'}
+        title="Eliminar estimación"
+        subtitle={activa?.codigo}
+        confirmLabel="Eliminar"
+        confirmClass="dms-btn-eliminar"
+        onClose={cerrar}
+        onConfirm={() => {
+          if (!activa) return;
+          eliminar(activa.id, actor);
+          toast(`Estimación ${activa.codigo} eliminada.`, 'success');
+          cerrar();
+        }}
+      >
+        <p className="text-sm text-gray-600">
+          Se eliminará el estimado del reporte de liquidaciones (prototipo).
+        </p>
+      </ConfirmModal>
+
+      <ComentarioModal
+        open={dialogo.tipo === 'REVERSAR_APROB'}
+        title="Reversar aprobación"
+        subtitle={activa ? `${activa.codigo} · vuelve a PENDIENTE` : undefined}
+        label="Motivo del reverso"
+        confirmLabel="Confirmar reverso"
+        confirmClass="dms-btn-reversar"
+        onClose={cerrar}
+        onConfirm={(comentario) => {
+          if (!activa) return;
+          reversarAprobacion(activa.id, actor, comentario);
+          toast(`Aprobación de ${activa.codigo} reversada.`, 'success');
+          cerrar();
+        }}
+      />
     </>
   );
 }

@@ -14,9 +14,10 @@ import type {
   RolComentario,
   TipoComentario,
 } from '@/types/estimacion';
-import { aLineaHistorial, APLICA_APROBADO_SBM, APLICA_RECHAZADO_SBM, CARGO_RECHAZADO } from '@/types/estimacion';
+import { aLineaHistorial, APLICA_APROBADO_SBM, APLICA_RECHAZADO_SBM, CARGO_RECHAZADO, valoresCeroPorRechazoItem } from '@/types/estimacion';
+import { esNavieraSeaboard } from '@/lib/seaboardFlow';
 
-const STORAGE_KEY = 'dms-estimaciones-prototipo-v12';
+const STORAGE_KEY = 'dms-estimaciones-prototipo-v15';
 const CLAVES_OBSOLETAS = [
   'dms-estimaciones-prototipo',
   'dms-estimaciones-prototipo-v2',
@@ -29,6 +30,9 @@ const CLAVES_OBSOLETAS = [
   'dms-estimaciones-prototipo-v9',
   'dms-estimaciones-prototipo-v10',
   'dms-estimaciones-prototipo-v11',
+  'dms-estimaciones-prototipo-v12',
+  'dms-estimaciones-prototipo-v13',
+  'dms-estimaciones-prototipo-v14',
 ];
 
 function ahoraFmt() {
@@ -92,6 +96,8 @@ interface EstimacionesState {
 
   // Flujo de aprobación
   enviarAprobacion: (ids: string[], usuario: string) => void;
+  /** Liquidaciones marca el estimado como validado (habilita push a SBM). */
+  validarLiquidaciones: (id: string, usuario: string) => void;
   aprobar: (ids: string[], usuario: string, comentario?: string) => void;
   rechazar: (ids: string[], usuario: string, comentario: string) => void;
   reversar: (ids: string[], usuario: string, comentario: string) => void;
@@ -197,6 +203,9 @@ export const useEstimacionesStore = create<EstimacionesState>()(
               if (!ids.includes(e.id) || !['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(e.estado)) {
                 return e;
               }
+              if (e.enviarAprobacion === 'SI') return e;
+              // Push a SBM solo aplica a naviera Seaboard (otras navieras no entran a bandeja SBM).
+              if (!esNavieraSeaboard(e.naviera)) return e;
               const pendientesLiq = e.danos.reduce(
                 (acc, d) =>
                   acc + d.comentarios.filter((c) => c.tipo === 'SOLICITA_CAMBIO').length,
@@ -205,8 +214,11 @@ export const useEstimacionesStore = create<EstimacionesState>()(
               const destino = 'Seaboard Marine';
               return {
                 ...e,
-                estado: 'ENVIADO' as EstadoEstimacion,
+                /** Llega a la bandeja Seaboard en estado pendiente de revisión. */
+                estado: 'PENDIENTE' as EstadoEstimacion,
                 enviarAprobacion: 'SI',
+                validadoLiquidaciones: true,
+                /** Fecha en que Liquidaciones envió el estimado al reporte Seaboard. */
                 fechaEnvio: ahoraFmt(),
                 fechaModificacion: ahoraFmt(),
                 usuarioModificacion: usuario,
@@ -215,8 +227,8 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                   comentarioSeaboard(
                     'ENVIAR',
                     pendientesLiq > 0
-                      ? `Enviado a Seaboard Marine · ${pendientesLiq} comentario(s) de liquidaciones pendientes.`
-                      : 'Enviado a Seaboard Marine para revisión y decisión.',
+                      ? `Push a SBM · ${pendientesLiq} comentario(s) de liquidaciones pendientes.`
+                      : 'Push a SBM · estimado validado por liquidaciones, pendiente de revisión Seaboard.',
                     usuario
                   ),
                 ],
@@ -224,8 +236,8 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                   ...e.auditoria,
                   evento(
                     usuario,
-                    'ENVÍO A SEABOARD',
-                    `Enviado a ${destino} por un total de $${e.pvpTotal.toFixed(2)}` +
+                    'PUSH A SEABOARD',
+                    `Enviado a ${destino} (estado PENDIENTE) · $${e.pvpTotal.toFixed(2)}` +
                       (pendientesLiq > 0
                         ? ` · ${pendientesLiq} comentario(s) liquidaciones pendientes`
                         : '')
@@ -234,6 +246,35 @@ export const useEstimacionesStore = create<EstimacionesState>()(
               };
             }),
           }));
+        },
+
+        validarLiquidaciones: (id, usuario) => {
+          mutar(id, (e) => {
+            if (
+              e.validadoLiquidaciones ||
+              e.enviarAprobacion === 'SI' ||
+              !['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(e.estado)
+            ) {
+              return e;
+            }
+            return {
+              ...e,
+              validadoLiquidaciones: true,
+              fechaValidacionLiquidaciones: ahoraFmt(),
+              fechaModificacion: ahoraFmt(),
+              usuarioModificacion: usuario,
+              auditoria: [
+                ...e.auditoria,
+                evento(
+                  usuario,
+                  'VALIDACIÓN LIQUIDACIONES',
+                  esNavieraSeaboard(e.naviera)
+                    ? 'Validado por liquidaciones. Listo para push a Seaboard Marine.'
+                    : 'Validado por liquidaciones (naviera distinta de Seaboard).'
+                ),
+              ],
+            };
+          });
         },
 
         aprobar: (ids, usuario, comentario = 'Aprobado por Seaboard Marine. Enviado a liquidaciones RFS.') => {
@@ -248,10 +289,12 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                 ...e,
                 estado: 'APROBADO' as EstadoEstimacion,
                 fechaAprobacion: ahoraFmt(),
+                fechaRevision: ahoraFmt(),
                 fechaModificacion: ahoraFmt(),
                 usuarioModificacion: usuario,
                 enviarAprobacion: 'SI',
-                fechaEnvio: e.fechaEnvio || ahoraFmt(),
+                /** Conserva la fecha del push Liquidaciones → Seaboard (no la de aprobación). */
+                fechaEnvio: e.fechaEnvio,
                 comentariosSeaboard: [
                   ...e.comentariosSeaboard,
                   comentarioSeaboard('APROBAR', comentario, usuario),
@@ -281,8 +324,11 @@ export const useEstimacionesStore = create<EstimacionesState>()(
               return {
                 ...e,
                 estado: 'RECHAZADO' as EstadoEstimacion,
+                fechaRevision: ahoraFmt(),
                 fechaModificacion: ahoraFmt(),
                 usuarioModificacion: usuario,
+                /** Conserva la fecha del push Liquidaciones → Seaboard. */
+                fechaEnvio: e.fechaEnvio,
                 comentariosSeaboard: [
                   ...e.comentariosSeaboard,
                   comentarioSeaboard('RECHAZAR', comentario, usuario),
@@ -303,7 +349,12 @@ export const useEstimacionesStore = create<EstimacionesState>()(
         reversar: (ids, usuario, comentario) => {
           set((s) => ({
             estimaciones: s.estimaciones.map((e) => {
-              if (!ids.includes(e.id) || e.estado !== 'ENVIADO') return e;
+              if (
+                !ids.includes(e.id) ||
+                !(e.estado === 'ENVIADO' || (e.estado === 'PENDIENTE' && e.enviarAprobacion === 'SI'))
+              ) {
+                return e;
+              }
               return {
                 ...e,
                 estado: 'REVERSADO' as EstadoEstimacion,
@@ -364,7 +415,10 @@ export const useEstimacionesStore = create<EstimacionesState>()(
 
         getEnviadosSeaboard: () =>
           get().estimaciones.filter(
-            (e) => e.estado === 'ENVIADO' && e.naviera.toUpperCase().includes('SEABOARD')
+            (e) =>
+              esNavieraSeaboard(e.naviera) &&
+              e.enviarAprobacion === 'SI' &&
+              (e.estado === 'PENDIENTE' || e.estado === 'ENVIADO')
           ),
 
         setActividad: (id, actividad, usuario) => {
@@ -475,7 +529,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                 evento(
                   usuario,
                   'DAÑO MODIFICADO',
-                  etiqueta ?? `Línea ${anterior.linea} · ${anterior.comp} actualizado`,
+                  `${usuario}: ${etiqueta ?? `Línea ${anterior.linea} · ${anterior.comp} actualizado`}`,
                   [aLineaHistorial(actualizado)]
                 ),
               ],
@@ -497,22 +551,38 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                 const cmt: ComentarioDano = {
                   id: uid('cmt'),
                   usuario,
-                  rol: 'TECNICO',
+                  rol: 'SEABOARD',
                   fecha: ahoraFmt(),
                   tipo: 'RECHAZADO',
                   mensaje: motivo,
                   campoAfectado: 'Aplica / Cargo',
-                  valorAnterior: `${d.aplica} · ${d.cargo}`,
-                  valorNuevo: `${APLICA_RECHAZADO_SBM} · ${CARGO_RECHAZADO}`,
+                  valorAnterior: `${d.aplica} · ${d.cargo} · HH ${d.horasHombre} · $${d.csTotal}`,
+                  valorNuevo: `${APLICA_RECHAZADO_SBM} · ${CARGO_RECHAZADO} · HH 0 · $0`,
                 };
                 return {
                   ...d,
                   aplica: APLICA_RECHAZADO_SBM,
                   cargo: CARGO_RECHAZADO,
+                  ...valoresCeroPorRechazoItem(),
                   comentarios: [...d.comentarios, cmt],
                 };
               }
-              return { ...d, aplica: APLICA_APROBADO_SBM };
+              const cmtAprobado: ComentarioDano = {
+                id: uid('cmt'),
+                usuario,
+                rol: 'SEABOARD',
+                fecha: ahoraFmt(),
+                tipo: 'ACEPTADO',
+                mensaje: `Ítem aprobado por ${usuario}`,
+                campoAfectado: 'Aplica',
+                valorAnterior: d.aplica,
+                valorNuevo: APLICA_APROBADO_SBM,
+              };
+              return {
+                ...d,
+                aplica: APLICA_APROBADO_SBM,
+                comentarios: [...d.comentarios, cmtAprobado],
+              };
             });
             const lineasTxt = afectados.map((d) => String(d.linea).padStart(2, '0')).join(', ');
             const lineasSnap = danos.filter((d) => ids.has(d.id)).map(aLineaHistorial);
@@ -527,8 +597,8 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                   usuario,
                   accion === 'RECHAZAR' ? 'ÍTEMS RECHAZADOS' : 'ÍTEMS APROBADOS',
                   accion === 'RECHAZAR'
-                    ? `${afectados.length} línea(s): ${lineasTxt}. Motivo: ${motivo}`
-                    : `${afectados.length} línea(s): ${lineasTxt}`,
+                    ? `${usuario} rechazó ${afectados.length} línea(s): ${lineasTxt}. Motivo: ${motivo}`
+                    : `${usuario} aprobó ${afectados.length} línea(s): ${lineasTxt}`,
                   lineasSnap
                 ),
               ],
@@ -584,7 +654,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                 evento(
                   entrada.usuario,
                   'COMENTARIO EN DAÑO',
-                  `Línea ${objetivo.linea} · ${entrada.rol} · ${entrada.tipo.replace('_', ' ')}: ${entrada.mensaje}`
+                  `${entrada.usuario} · Línea ${objetivo.linea} · ${entrada.rol} · ${entrada.tipo.replace('_', ' ')}: ${entrada.mensaje}`
                 ),
               ],
             };

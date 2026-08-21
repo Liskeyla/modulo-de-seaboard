@@ -21,8 +21,6 @@ export const APLICA_DANO = [
   'Pendiente Revisión',
   'Aprobado por Linea SBM',
   'Rechazado SBM',
-  'Aprobado Linea',
-  'Rechazado',
   'No Aplica',
 ] as const;
 export type AplicaDano = (typeof APLICA_DANO)[number];
@@ -32,7 +30,17 @@ export const APLICA_APROBADO_SBM: AplicaDano = 'Aprobado por Linea SBM';
 export const APLICA_RECHAZADO_SBM: AplicaDano = 'Rechazado SBM';
 
 export function esAplicaRechazado(aplica: string) {
-  return aplica === 'Rechazado SBM' || aplica === 'Rechazado';
+  return aplica === APLICA_RECHAZADO_SBM;
+}
+
+/** Al rechazar un ítem: H.H. y costos quedan en cero. */
+export function valoresCeroPorRechazoItem() {
+  return {
+    horasHombre: 0,
+    csHoraHombre: 0,
+    csMaterial: 0,
+    csTotal: 0,
+  };
 }
 
 /** Ítem ya revisado por Seaboard (aprobado o rechazado por línea SBM). */
@@ -40,7 +48,7 @@ export function esItemRevisadoSbm(aplica: string) {
   return aplica === APLICA_APROBADO_SBM || aplica === APLICA_RECHAZADO_SBM;
 }
 
-export const CARGOS_DANO = ['Línea', 'Dueño', 'Garantía', 'Rechazado'] as const;
+export const CARGOS_DANO = ['Línea', 'Cliente', 'Garantía', 'Rechazado'] as const;
 export type CargoDano = (typeof CARGOS_DANO)[number];
 
 /** Cargo que se asigna al rechazar un ítem por línea SBM. */
@@ -329,6 +337,9 @@ export interface Estimacion {
   notas: NotaEstimacion[];
   auditoria: EventoAuditoria[];
   comentariosSeaboard: ComentarioSeaboard[];
+  /** Liquidaciones validó el estimado (habilita push a SBM si es Seaboard). */
+  validadoLiquidaciones?: boolean;
+  fechaValidacionLiquidaciones?: string;
   /** Operación del estimado. Si falta, se infiere del código. */
   pais?: 'ECUADOR' | 'PERU';
 }

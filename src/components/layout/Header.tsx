@@ -63,6 +63,14 @@ export function Header({ title, subtitle }: HeaderProps) {
     useUiStore();
   const { user, logout } = useAuthStore();
 
+  const paisFijo = user?.rol === 'liquidaciones' && user.pais ? user.pais : null;
+
+  useEffect(() => {
+    if (paisFijo && pais !== paisFijo) {
+      setPais(paisFijo);
+    }
+  }, [paisFijo, pais, setPais]);
+
   const [menuActivo, setMenuActivo] = useState<'notificaciones' | 'usuario' | 'pais' | null>(null);
   const [cambioPais, setCambioPais] = useState<CambioPaisPendiente | null>(null);
   const [pendientes, setPendientes] = useState(NOTIFICACIONES);
@@ -117,6 +125,14 @@ export function Header({ title, subtitle }: HeaderProps) {
   }
 
   function solicitarCambioPais(nuevo: PaisOperacion) {
+    if (paisFijo) {
+      toast(
+        `Su usuario está asignado a ${metaPais(paisFijo).label}.\nSolo ve el reporte de ese país.`,
+        'info'
+      );
+      setMenuActivo(null);
+      return;
+    }
     if (nuevo === pais) {
       setMenuActivo(null);
       return;
@@ -219,23 +235,38 @@ export function Header({ title, subtitle }: HeaderProps) {
           <div className="relative">
             <button
               type="button"
-              onClick={() => setMenuActivo((m) => (m === 'pais' ? null : 'pais'))}
+              onClick={() => {
+                if (paisFijo) {
+                  toast(
+                    `Operación fija: ${metaPais(paisFijo).label} (Aprobaciones de Estimados).`,
+                    'info'
+                  );
+                  return;
+                }
+                setMenuActivo((m) => (m === 'pais' ? null : 'pais'));
+              }}
               className="inline-flex items-center gap-1.5 rounded-full bg-rfs-50 px-2.5 py-1.5 text-xs font-semibold text-rfs-700 ring-1 ring-rfs-100 transition hover:bg-rfs-100"
               aria-expanded={menuActivo === 'pais'}
               aria-haspopup="listbox"
-              title="Filtrar por país de operación"
+              title={
+                paisFijo
+                  ? `País fijo · ${metaPais(paisFijo).label}`
+                  : 'Filtrar por país de operación'
+              }
             >
               <Flag pais={pais} className="h-3 w-[18px]" />
               {metaPais(pais).label}
-              <ChevronDown
-                className={cn(
-                  'h-3.5 w-3.5 text-rfs-700 transition-transform',
-                  menuActivo === 'pais' && 'rotate-180'
-                )}
-              />
+              {!paisFijo && (
+                <ChevronDown
+                  className={cn(
+                    'h-3.5 w-3.5 text-rfs-700 transition-transform',
+                    menuActivo === 'pais' && 'rotate-180'
+                  )}
+                />
+              )}
             </button>
 
-            {menuActivo === 'pais' && (
+            {menuActivo === 'pais' && !paisFijo && (
               <div
                 role="listbox"
                 className="absolute right-0 z-40 mt-2 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white text-slate-800 shadow-xl animate-fade-up"
@@ -378,8 +409,15 @@ export function Header({ title, subtitle }: HeaderProps) {
                   <p className="text-xs text-slate-500">{user?.username}</p>
                   <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white px-2 py-1 text-[11px] font-semibold text-slate-600 ring-1 ring-slate-200">
                     <Flag pais={pais} className="h-2.5 w-4" />
-                    Operación {metaPais(pais).label}
+                    {paisFijo
+                      ? `Fijo · ${metaPais(pais).label}`
+                      : `Operación ${metaPais(pais).label}`}
                   </p>
+                  {user?.rol === 'liquidaciones' && (
+                    <p className="mt-1.5 text-[11px] text-amber-700">
+                      Aprobaciones de Estimados · solo su país
+                    </p>
+                  )}
                 </div>
                 <div className="p-1.5">
                   <button

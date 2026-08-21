@@ -19,19 +19,34 @@ import {
 import { BrandBackdrop } from '@/components/auth/BrandBackdrop';
 import { Flag } from '@/components/ui/Flag';
 import { useAuthStore } from '@/store';
+import { useUiStore } from '@/store/uiStore';
 import { cn, toast } from '@/lib/utils';
 
 const DEMO = [
-  { usuario: 'apptelink', clave: 'admin123', rol: 'Usuario Seaboard' },
-  { usuario: 'seaboard', clave: 'admin123', rol: 'Usuario Seaboard' },
+  {
+    usuario: 'seaboard',
+    clave: 'admin123',
+    rol: 'Usuario Seaboard · EC / PE',
+  },
+  {
+    usuario: 'liqecuador',
+    clave: 'admin123',
+    rol: 'Aprobaciones de Estimados · Ecuador',
+  },
+  {
+    usuario: 'liqperu',
+    clave: 'admin123',
+    rol: 'Aprobaciones de Estimados · Perú',
+  },
 ];
 
 /** Login con la misma estructura visual que layout-dms (formulario + panel). */
 export default function LoginPage() {
   const router = useRouter();
   const { user, isAuthenticated, login, hydrate } = useAuthStore();
+  const setPais = useUiStore((s) => s.setPais);
 
-  const [usuario, setUsuario] = useState('apptelink');
+  const [usuario, setUsuario] = useState('seaboard');
   const [clave, setClave] = useState('admin123');
   const [verClave, setVerClave] = useState(false);
   const [recordar, setRecordar] = useState(true);
@@ -69,9 +84,19 @@ export default function LoginPage() {
     try {
       await login(usuario.trim(), clave);
       setExito(true);
+      const u = useAuthStore.getState().user;
+      if (u?.pais) {
+        setPais(u.pais);
+      }
       router.replace('/reportes/estimaciones');
+      if (u?.rol === 'liquidaciones' && u.pais) {
+        toast(
+          `Aprobaciones de Estimados · ${u.pais === 'PERU' ? 'Perú' : 'Ecuador'}`,
+          'success'
+        );
+      }
     } catch {
-      setError('Credenciales inválidas. Use apptelink o seaboard / admin123');
+      setError('Credenciales inválidas. Use seaboard, liqecuador o liqperu / admin123');
     } finally {
       setCargando(false);
     }
@@ -269,7 +294,10 @@ export default function LoginPage() {
                 Plataforma integral RFS
               </p>
               <h2 className="mt-2 text-2xl font-extrabold leading-tight">
-                Usuario Seaboard · Ver, modificar y aprobar / rechazar
+                Usuario Seaboard y Liquidaciones RFS
+                <span className="mt-2 block text-base font-semibold text-rfsorange-200">
+                  Simule la interacción por país (Ecuador / Perú)
+                </span>
               </h2>
             </div>
 

@@ -1,10 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { PaisOperacion } from '@/lib/pais';
 
-interface User {
+export interface User {
   username: string;
   nombre: string;
   rol: 'dms' | 'seaboard' | 'liquidaciones';
+  /** País fijo para Liquidaciones (EC/PE). Seaboard puede cambiar en cabecera. */
+  pais?: PaisOperacion;
 }
 
 interface AuthState {
@@ -15,14 +18,55 @@ interface AuthState {
   hydrate: () => void;
 }
 
-const DEMO_USERS: Record<string, { password: string; rol: User['rol']; nombre: string }> = {
-  /** Usuario principal del prototipo: gestor Seaboard (misma experiencia que se mejoró en apptelink). */
-  apptelink: { password: 'admin123', rol: 'seaboard', nombre: 'Usuario Seaboard' },
-  seaboard: { password: 'admin123', rol: 'seaboard', nombre: 'Usuario Seaboard' },
-  /** Operativo RFS (solo envía estimados a la bandeja Seaboard). */
-  rfs: { password: 'admin123', rol: 'dms', nombre: 'Operador RFS' },
-  cesarvalencia: { password: 'admin123', rol: 'liquidaciones', nombre: 'César Valencia' },
+type DemoUser = {
+  password: string;
+  rol: User['rol'];
+  nombre: string;
+  pais?: PaisOperacion;
 };
+
+const DEMO_USERS: Record<string, DemoUser> = {
+  /** Gestor Seaboard: ver, modificar con histórico, aprobar/rechazar. */
+  seaboard: {
+    password: 'admin123',
+    rol: 'seaboard',
+    nombre: 'Usuario Seaboard',
+  },
+  apptelink: {
+    password: 'admin123',
+    rol: 'seaboard',
+    nombre: 'Usuario Seaboard',
+  },
+  /** RFS Liquidaciones por país: ven su reporte y comentan (simulación). */
+  liqecuador: {
+    password: 'admin123',
+    rol: 'liquidaciones',
+    nombre: 'Aprobaciones de Estimados Ecuador',
+    pais: 'ECUADOR',
+  },
+  liqperu: {
+    password: 'admin123',
+    rol: 'liquidaciones',
+    nombre: 'Aprobaciones de Estimados Perú',
+    pais: 'PERU',
+  },
+  /** Alias legado → Ecuador */
+  cesarvalencia: {
+    password: 'admin123',
+    rol: 'liquidaciones',
+    nombre: 'Aprobaciones de Estimados Ecuador',
+    pais: 'ECUADOR',
+  },
+};
+
+function aUsuario(key: string, demo: DemoUser): User {
+  return {
+    username: key,
+    nombre: demo.nombre,
+    rol: demo.rol,
+    ...(demo.pais ? { pais: demo.pais } : {}),
+  };
+}
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -31,14 +75,14 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       login: async (username, password) => {
         await new Promise((r) => setTimeout(r, 200));
-        const key = username.toLowerCase();
+        const key = username.trim().toLowerCase();
         const demo = DEMO_USERS[key];
         if (!demo || demo.password !== password) {
           throw new Error('Credenciales inválidas');
         }
         localStorage.setItem('dms_estimaciones_token', 'demo-token');
         set({
-          user: { username: key, nombre: demo.nombre, rol: demo.rol },
+          user: aUsuario(key, demo),
           isAuthenticated: true,
         });
       },
@@ -53,13 +97,12 @@ export const useAuthStore = create<AuthState>()(
           try {
             const parsed = JSON.parse(stored);
             const u = parsed?.state?.user as User | undefined;
-            if (u) {
-              // Asegura que apptelink / seaboard queden siempre como gestor Seaboard.
+            if (u?.username) {
               const demo = DEMO_USERS[u.username.toLowerCase()];
-              const user = demo
-                ? { username: u.username.toLowerCase(), nombre: demo.nombre, rol: demo.rol }
-                : u;
-              set({ user, isAuthenticated: true });
+              set({
+                user: demo ? aUsuario(u.username.toLowerCase(), demo) : u,
+                isAuthenticated: true,
+              });
             }
           } catch {
             /* ignore */
@@ -71,5 +114,6 @@ export const useAuthStore = create<AuthState>()(
   )
 );
 
+export { DEMO_USERS };
 export { useEstimacionesStore } from './estimacionesStore';
 export { useUiStore } from './uiStore';

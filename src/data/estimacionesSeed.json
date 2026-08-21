@@ -8,7 +8,7 @@
     "contenedor": "TEMU9622675",
     "modeloMaquina": "DAIKIN",
     "codigoRfs": "40RC",
-    "naviera": "SEABOARD MARINE LINE",
+    "naviera": "ONE",
     "actividad": "WTY",
     "lugarEstimacion": "RFS 1",
     "lugarAsistencia": "",
@@ -79,7 +79,7 @@
         "csMaterial": 0,
         "csTotal": 6.75,
         "cargo": "Garantía",
-        "aplica": "Pendiente Revisión",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "SMLU5708576",
@@ -134,7 +134,60 @@
             "tipo": "ACEPTADO",
             "mensaje": "Validado contra catálogo. Sin observaciones adicionales."
           }
-        ]
+        ],
+        "edicionReciente": {
+          "fecha": "17/08/2026 00:09:20",
+          "usuario": "Usuario Seaboard (seaboard)",
+          "resumenCambios": "Ajuste SBM · Cs. Mat. y remark",
+          "comentarioSbm": "Se ajusta material según tarifa línea",
+          "snapshot": {
+            "comp": "MOD-DRV",
+            "partNumber": "RP",
+            "ubicacion": "drvpn",
+            "dano": "LO-LOOSE",
+            "obsAnalisis": "Sin continuidad eléctrica en el arnés",
+            "metRep": "RP",
+            "newMetRep": "RP",
+            "serieAnterior": "SN-820138",
+            "serieEntregado": "",
+            "cantidad": 2,
+            "horasHombre": 0.75,
+            "csHoraHombre": 6.75,
+            "csMaterial": 0,
+            "csTotal": 6.75,
+            "cargo": "Garantía",
+            "aplica": "Pendiente Revisión",
+            "medida": "UN",
+            "remark": "",
+            "contenedorDonante": "SMLU5708576"
+          },
+          "snapshotAnterior": {
+            "comp": "MOD-DRV",
+            "partNumber": "RP",
+            "ubicacion": "drvpn",
+            "dano": "LO-LOOSE",
+            "obsAnalisis": "Sin continuidad eléctrica en el arnés",
+            "metRep": "RP",
+            "newMetRep": "RP",
+            "serieAnterior": "SN-820138",
+            "serieEntregado": "",
+            "cantidad": 2,
+            "horasHombre": 0.75,
+            "csHoraHombre": 6.75,
+            "csMaterial": 0,
+            "csTotal": 0,
+            "cargo": "Garantía",
+            "aplica": "Pendiente Revisión",
+            "medida": "UN",
+            "remark": "",
+            "contenedorDonante": "SMLU5708576"
+          },
+          "camposCambiados": [
+            "csMaterial",
+            "csTotal",
+            "aplica"
+          ]
+        }
       }
     ],
     "notas": [
@@ -196,9 +249,17 @@
         "usuario": "kbarco",
         "accion": "APROBAR",
         "comentario": "Estimado aprobado sin novedades por la naviera."
+      },
+      {
+        "id": "sbm-demo-est-001",
+        "accion": "APROBAR",
+        "usuario": "Usuario Seaboard (seaboard)",
+        "fecha": "17/08/2026 00:09:20",
+        "comentario": "Aprobado con ajustes de tarifa y un ítem rechazado."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-002",
@@ -525,7 +586,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": false
   },
   {
     "id": "est-003",
@@ -652,7 +714,7 @@
         "csHoraHombre": 29.04,
         "csMaterial": 44.53,
         "csTotal": 73.57,
-        "cargo": "Dueño",
+        "cargo": "Cliente",
         "aplica": "Pendiente Revisión",
         "medida": "CM",
         "remark": "PTI / SHORT PTI",
@@ -797,7 +859,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": false
   },
   {
     "id": "est-004",
@@ -1264,7 +1327,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": false
   },
   {
     "id": "est-005",
@@ -1346,7 +1410,7 @@
         "csMaterial": 7.45,
         "csTotal": 14.38,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -1361,7 +1425,60 @@
             "fecha": "17/08/2026 00:53:00"
           }
         ],
-        "comentarios": []
+        "comentarios": [],
+        "edicionReciente": {
+          "fecha": "17/08/2026 00:53:08",
+          "usuario": "Usuario Seaboard (seaboard)",
+          "resumenCambios": "Ajuste SBM · Cs. Mat. y remark",
+          "comentarioSbm": "Se ajusta material según tarifa línea",
+          "snapshot": {
+            "comp": "POC",
+            "partNumber": "-",
+            "ubicacion": "RB1N",
+            "dano": "IR-IMPROPER REPAIR",
+            "obsAnalisis": "PATCH EXTERIOR PANELS- STEEL WITH FOAM",
+            "metRep": "",
+            "newMetRep": "PX",
+            "serieAnterior": "N/A",
+            "serieEntregado": "",
+            "cantidad": 1,
+            "horasHombre": 0.77,
+            "csHoraHombre": 6.93,
+            "csMaterial": 7.45,
+            "csTotal": 14.38,
+            "cargo": "Línea",
+            "aplica": "Aprobado por Linea SBM",
+            "medida": "CM",
+            "remark": "",
+            "contenedorDonante": ""
+          },
+          "snapshotAnterior": {
+            "comp": "POC",
+            "partNumber": "-",
+            "ubicacion": "RB1N",
+            "dano": "IR-IMPROPER REPAIR",
+            "obsAnalisis": "PATCH EXTERIOR PANELS- STEEL WITH FOAM",
+            "metRep": "",
+            "newMetRep": "PX",
+            "serieAnterior": "N/A",
+            "serieEntregado": "",
+            "cantidad": 1,
+            "horasHombre": 0.77,
+            "csHoraHombre": 6.93,
+            "csMaterial": 0,
+            "csTotal": 4.380000000000001,
+            "cargo": "Línea",
+            "aplica": "Aprobado por Linea SBM",
+            "medida": "CM",
+            "remark": "",
+            "contenedorDonante": ""
+          },
+          "camposCambiados": [
+            "csMaterial",
+            "csTotal",
+            "aplica"
+          ]
+        }
       }
     ],
     "notas": [],
@@ -1409,9 +1526,17 @@
         "usuario": "seaboard",
         "accion": "APROBAR",
         "comentario": "Estimado aprobado sin novedades por la naviera."
+      },
+      {
+        "id": "sbm-demo-est-005",
+        "accion": "APROBAR",
+        "usuario": "Usuario Seaboard (seaboard)",
+        "fecha": "17/08/2026 00:53:08",
+        "comentario": "Aprobado con ajustes de tarifa y un ítem rechazado."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-006",
@@ -1704,7 +1829,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": false
   },
   {
     "id": "est-007",
@@ -1978,7 +2104,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": false
   },
   {
     "id": "est-008",
@@ -1989,7 +2116,7 @@
     "contenedor": "SZLU5002539",
     "modeloMaquina": "STARCOOL",
     "codigoRfs": "40RC",
-    "naviera": "SEABOARD MARINE LINE",
+    "naviera": "ONE",
     "actividad": "DM",
     "lugarEstimacion": "RFS 1",
     "lugarAsistencia": "",
@@ -2336,7 +2463,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": false
   },
   {
     "id": "est-009",
@@ -2463,7 +2591,7 @@
         "csHoraHombre": 28.51,
         "csMaterial": 18.85,
         "csTotal": 47.36,
-        "cargo": "Dueño",
+        "cargo": "Cliente",
         "aplica": "Pendiente Revisión",
         "medida": "CM",
         "remark": "",
@@ -2641,7 +2769,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": false
   },
   {
     "id": "est-010",
@@ -2877,7 +3006,7 @@
             "rol": "LIQUIDACIONES",
             "fecha": "17/08/2026 11:21:12",
             "tipo": "SOLICITA_CAMBIO",
-            "mensaje": "Este daño debe ir con cargo a Dueño, no a Línea. Revisar responsabilidad del ítem.",
+            "mensaje": "Este daño debe ir con cargo a Cliente, no a Línea. Revisar responsabilidad del ítem.",
             "campoAfectado": "Cargo"
           },
           {
@@ -2953,7 +3082,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": false
   },
   {
     "id": "est-011",
@@ -3035,7 +3165,7 @@
         "csMaterial": 6.72,
         "csTotal": 9.42,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "APLICAR PARCHE OVERLAP",
         "contenedorDonante": "",
@@ -3090,7 +3220,60 @@
             "tipo": "ACEPTADO",
             "mensaje": "Validado contra catálogo. Sin observaciones adicionales."
           }
-        ]
+        ],
+        "edicionReciente": {
+          "fecha": "17/08/2026 03:00:04",
+          "usuario": "Usuario Seaboard (seaboard)",
+          "resumenCambios": "Ajuste SBM · Cs. Mat. y remark",
+          "comentarioSbm": "Se ajusta material según tarifa línea",
+          "snapshot": {
+            "comp": "CMP-SCR",
+            "partNumber": "RP",
+            "ubicacion": "compz",
+            "dano": "NF-NOT FUNCTIONING",
+            "obsAnalisis": "Ruido anormal durante ciclo de enfriamiento",
+            "metRep": "",
+            "newMetRep": "RP",
+            "serieAnterior": "SN-896604",
+            "serieEntregado": "",
+            "cantidad": 1,
+            "horasHombre": 0.3,
+            "csHoraHombre": 2.7,
+            "csMaterial": 6.72,
+            "csTotal": 9.42,
+            "cargo": "Línea",
+            "aplica": "Aprobado por Linea SBM",
+            "medida": "UN",
+            "remark": "APLICAR PARCHE OVERLAP",
+            "contenedorDonante": ""
+          },
+          "snapshotAnterior": {
+            "comp": "CMP-SCR",
+            "partNumber": "RP",
+            "ubicacion": "compz",
+            "dano": "NF-NOT FUNCTIONING",
+            "obsAnalisis": "Ruido anormal durante ciclo de enfriamiento",
+            "metRep": "",
+            "newMetRep": "RP",
+            "serieAnterior": "SN-896604",
+            "serieEntregado": "",
+            "cantidad": 1,
+            "horasHombre": 0.3,
+            "csHoraHombre": 2.7,
+            "csMaterial": 0,
+            "csTotal": 0,
+            "cargo": "Línea",
+            "aplica": "Aprobado por Linea SBM",
+            "medida": "UN",
+            "remark": "APLICAR PARCHE OVERLAP",
+            "contenedorDonante": ""
+          },
+          "camposCambiados": [
+            "csMaterial",
+            "csTotal",
+            "aplica"
+          ]
+        }
       }
     ],
     "notas": [
@@ -3152,9 +3335,17 @@
         "usuario": "SERGIOREYES",
         "accion": "APROBAR",
         "comentario": "Estimado aprobado sin novedades por la naviera."
+      },
+      {
+        "id": "sbm-demo-est-011",
+        "accion": "APROBAR",
+        "usuario": "Usuario Seaboard (seaboard)",
+        "fecha": "17/08/2026 03:00:04",
+        "comentario": "Aprobado con ajustes de tarifa y un ítem rechazado."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-012",
@@ -3235,7 +3426,7 @@
         "csHoraHombre": 6.32,
         "csMaterial": 8.89,
         "csTotal": 15.21,
-        "cargo": "Dueño",
+        "cargo": "Cliente",
         "aplica": "Pendiente Revisión",
         "medida": "CM",
         "remark": "REVISAR EN PATIO",
@@ -3380,7 +3571,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": false
   },
   {
     "id": "est-013",
@@ -3462,7 +3654,7 @@
         "csMaterial": 21.13,
         "csTotal": 36.51,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -3508,7 +3700,7 @@
         "csMaterial": 23.87,
         "csTotal": 51.69,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -3620,7 +3812,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-014",
@@ -3702,7 +3895,7 @@
         "csMaterial": 86.25,
         "csTotal": 127.93,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -3724,7 +3917,60 @@
             "fecha": "17/08/2026 14:20:11"
           }
         ],
-        "comentarios": []
+        "comentarios": [],
+        "edicionReciente": {
+          "fecha": "17/08/2026 09:15:13",
+          "usuario": "Usuario Seaboard (seaboard)",
+          "resumenCambios": "Ajuste SBM · Cs. Mat. y remark",
+          "comentarioSbm": "Se ajusta material según tarifa línea",
+          "snapshot": {
+            "comp": "PSO-TBL",
+            "partNumber": "RN",
+            "ubicacion": "FL2C",
+            "dano": "BR-BROKEN",
+            "obsAnalisis": "Golpe con deformación mayor a 30 mm",
+            "metRep": "",
+            "newMetRep": "RN",
+            "serieAnterior": "N/A",
+            "serieEntregado": "",
+            "cantidad": 1,
+            "horasHombre": 3.33,
+            "csHoraHombre": 41.68,
+            "csMaterial": 86.25,
+            "csTotal": 127.93,
+            "cargo": "Línea",
+            "aplica": "Aprobado por Linea SBM",
+            "medida": "CM",
+            "remark": "",
+            "contenedorDonante": ""
+          },
+          "snapshotAnterior": {
+            "comp": "PSO-TBL",
+            "partNumber": "RN",
+            "ubicacion": "FL2C",
+            "dano": "BR-BROKEN",
+            "obsAnalisis": "Golpe con deformación mayor a 30 mm",
+            "metRep": "",
+            "newMetRep": "RN",
+            "serieAnterior": "N/A",
+            "serieEntregado": "",
+            "cantidad": 1,
+            "horasHombre": 3.33,
+            "csHoraHombre": 41.68,
+            "csMaterial": 76.25,
+            "csTotal": 117.93,
+            "cargo": "Línea",
+            "aplica": "Aprobado por Linea SBM",
+            "medida": "CM",
+            "remark": "",
+            "contenedorDonante": ""
+          },
+          "camposCambiados": [
+            "csMaterial",
+            "csTotal",
+            "aplica"
+          ]
+        }
       },
       {
         "id": "ERSBM-2026-179076-l2",
@@ -3743,12 +3989,12 @@
         "area": 0.32,
         "longitud": 70.5,
         "cantidad": 2,
-        "horasHombre": 5.54,
-        "csHoraHombre": 25.87,
-        "csMaterial": 64.31,
-        "csTotal": 90.18,
-        "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "horasHombre": 0,
+        "csHoraHombre": 0,
+        "csMaterial": 0,
+        "csTotal": 0,
+        "cargo": "Rechazado",
+        "aplica": "Rechazado SBM",
         "medida": "CM",
         "remark": "PTI / SHORT PTI",
         "contenedorDonante": "",
@@ -3794,7 +4040,7 @@
         "csMaterial": 89.18,
         "csTotal": 115.96,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -3840,7 +4086,7 @@
         "csMaterial": 84.66,
         "csTotal": 161.33,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "LAVADO SIMPLE",
         "contenedorDonante": "",
@@ -3936,9 +4182,17 @@
         "usuario": "cesarvalencia",
         "accion": "APROBAR",
         "comentario": "Estimado aprobado sin novedades por la naviera."
+      },
+      {
+        "id": "sbm-demo-est-014",
+        "accion": "APROBAR",
+        "usuario": "Usuario Seaboard (seaboard)",
+        "fecha": "17/08/2026 09:15:13",
+        "comentario": "Aprobado con ajustes de tarifa y un ítem rechazado."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-015",
@@ -3949,7 +4203,7 @@
     "contenedor": "GCXU8017548",
     "modeloMaquina": "STARCOOL",
     "codigoRfs": "40RC",
-    "naviera": "SEABOARD MARINE LINE",
+    "naviera": "ONE",
     "actividad": "DM",
     "lugarEstimacion": "RFS 1",
     "lugarAsistencia": "",
@@ -4020,7 +4274,7 @@
         "csMaterial": 9.79,
         "csTotal": 26.53,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "LAVADO SIMPLE",
         "contenedorDonante": "",
@@ -4066,7 +4320,7 @@
         "csMaterial": 20.81,
         "csTotal": 35.39,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -4102,7 +4356,7 @@
             "rol": "LIQUIDACIONES",
             "fecha": "17/08/2026 13:14:12",
             "tipo": "SOLICITA_CAMBIO",
-            "mensaje": "Este daño debe ir con cargo a Dueño, no a Línea. Revisar responsabilidad del ítem.",
+            "mensaje": "Este daño debe ir con cargo a Cliente, no a Línea. Revisar responsabilidad del ítem.",
             "campoAfectado": "Cargo"
           },
           {
@@ -4171,7 +4425,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-016",
@@ -4253,7 +4508,7 @@
         "csMaterial": 12.88,
         "csTotal": 24.31,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "APLICAR PARCHE OVERLAP",
         "contenedorDonante": "",
@@ -4351,7 +4606,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-017",
@@ -4433,7 +4689,7 @@
         "csMaterial": 35.47,
         "csTotal": 55.93,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -4479,7 +4735,7 @@
         "csMaterial": 52.96,
         "csTotal": 68.03,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -4551,7 +4807,7 @@
         "csMaterial": 37.73,
         "csTotal": 60.51,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -4587,7 +4843,7 @@
             "rol": "LIQUIDACIONES",
             "fecha": "17/08/2026 12:30:12",
             "tipo": "SOLICITA_CAMBIO",
-            "mensaje": "Este daño debe ir con cargo a Dueño, no a Línea. Revisar responsabilidad del ítem.",
+            "mensaje": "Este daño debe ir con cargo a Cliente, no a Línea. Revisar responsabilidad del ítem.",
             "campoAfectado": "Cargo"
           },
           {
@@ -4630,7 +4886,7 @@
         "csMaterial": 27.11,
         "csTotal": 68.34,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -4709,7 +4965,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-018",
@@ -4791,7 +5048,7 @@
         "csMaterial": 7.71,
         "csTotal": 12.29,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -4870,7 +5127,7 @@
         "csMaterial": 9.86,
         "csTotal": 21.39,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "REVISAR EN PATIO",
         "contenedorDonante": "",
@@ -4975,7 +5232,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-019",
@@ -5057,7 +5315,7 @@
         "csMaterial": 10.26,
         "csTotal": 18.74,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -5102,8 +5360,8 @@
         "csHoraHombre": 4.84,
         "csMaterial": 14.62,
         "csTotal": 19.46,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -5189,7 +5447,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-020",
@@ -5271,7 +5530,7 @@
         "csMaterial": 19.45,
         "csTotal": 38.3,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -5317,7 +5576,7 @@
         "csMaterial": 16.86,
         "csTotal": 33.15,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -5370,7 +5629,7 @@
         "csMaterial": 22.27,
         "csTotal": 42.93,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "LAVADO SIMPLE",
         "contenedorDonante": "",
@@ -5456,7 +5715,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-021",
@@ -5538,7 +5798,7 @@
         "csMaterial": 10.48,
         "csTotal": 15.84,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "REVISAR EN PATIO",
         "contenedorDonante": "",
@@ -5584,7 +5844,7 @@
         "csMaterial": 11.37,
         "csTotal": 17.89,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "REVISAR EN PATIO",
         "contenedorDonante": "",
@@ -5663,7 +5923,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-022",
@@ -5674,7 +5935,7 @@
     "contenedor": "SZLU9303150",
     "modeloMaquina": "CARRIER",
     "codigoRfs": "40RC",
-    "naviera": "SEABOARD MARINE LINE",
+    "naviera": "ONE",
     "actividad": "DM",
     "lugarEstimacion": "RFS 1",
     "lugarAsistencia": "",
@@ -5745,7 +6006,7 @@
         "csMaterial": 32.86,
         "csTotal": 78.53,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -5791,7 +6052,7 @@
         "csMaterial": 58.94,
         "csTotal": 88.15,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "APLICAR PARCHE OVERLAP",
         "contenedorDonante": "",
@@ -5844,7 +6105,7 @@
         "csMaterial": 32.21,
         "csTotal": 65.16,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -5916,7 +6177,7 @@
         "csMaterial": 25.39,
         "csTotal": 66.96,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "PTI / SHORT PTI",
         "contenedorDonante": "",
@@ -6021,7 +6282,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-023",
@@ -6103,7 +6365,7 @@
         "csMaterial": 14.76,
         "csTotal": 23.67,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -6189,7 +6451,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-024",
@@ -6270,8 +6533,8 @@
         "csHoraHombre": 6.36,
         "csMaterial": 11.74,
         "csTotal": 18.1,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -6342,8 +6605,8 @@
         "csHoraHombre": 11.1,
         "csMaterial": 6.5,
         "csTotal": 17.6,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -6441,7 +6704,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-025",
@@ -6523,7 +6787,7 @@
         "csMaterial": 23.7,
         "csTotal": 44.89,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -6559,7 +6823,7 @@
             "rol": "LIQUIDACIONES",
             "fecha": "17/08/2026 11:06:12",
             "tipo": "SOLICITA_CAMBIO",
-            "mensaje": "Este daño debe ir con cargo a Dueño, no a Línea. Revisar responsabilidad del ítem.",
+            "mensaje": "Este daño debe ir con cargo a Cliente, no a Línea. Revisar responsabilidad del ítem.",
             "campoAfectado": "Cargo"
           },
           {
@@ -6601,8 +6865,8 @@
         "csHoraHombre": 22.52,
         "csMaterial": 12.02,
         "csTotal": 34.54,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -6648,7 +6912,7 @@
         "csMaterial": 23.88,
         "csTotal": 37.41,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -6727,7 +6991,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-026",
@@ -6878,7 +7143,8 @@
       }
     ],
     "comentariosSeaboard": [],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": false
   },
   {
     "id": "est-027",
@@ -6959,8 +7225,8 @@
         "csHoraHombre": 6.75,
         "csMaterial": 0,
         "csTotal": 6.75,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -7032,14 +7298,15 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-028",
     "codigo": "ERSBM-2026-179090",
     "semana": 34,
     "anio": 2026,
-    "estado": "ENVIADO",
+    "estado": "PENDIENTE",
     "contenedor": "CAAU4189150",
     "modeloMaquina": "STARCOOL",
     "codigoRfs": "40RC",
@@ -7211,7 +7478,8 @@
         "comentario": "Estimado enviado a aprobación de la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-029",
@@ -7222,7 +7490,7 @@
     "contenedor": "GCXU8019849",
     "modeloMaquina": "STARCOOL",
     "codigoRfs": "40RC",
-    "naviera": "SEABOARD MARINE LINE",
+    "naviera": "ONE",
     "actividad": "DM",
     "lugarEstimacion": "RFS 1",
     "lugarAsistencia": "",
@@ -7293,7 +7561,7 @@
         "csMaterial": 6.04,
         "csTotal": 12.54,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -7346,7 +7614,7 @@
         "csMaterial": 8.85,
         "csTotal": 13.06,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "LAVADO SIMPLE",
         "contenedorDonante": "",
@@ -7444,7 +7712,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-030",
@@ -7526,7 +7795,7 @@
         "csMaterial": 18.23,
         "csTotal": 32.41,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "LAVADO SIMPLE",
         "contenedorDonante": "",
@@ -7579,7 +7848,7 @@
         "csMaterial": 18.64,
         "csTotal": 33.13,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "PTI / SHORT PTI",
         "contenedorDonante": "SMLU1768961",
@@ -7625,7 +7894,7 @@
         "csMaterial": 20.57,
         "csTotal": 41.76,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -7737,7 +8006,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-031",
@@ -7819,7 +8089,7 @@
         "csMaterial": 19.68,
         "csTotal": 24.18,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "APLICAR PARCHE OVERLAP",
         "contenedorDonante": "",
@@ -7905,7 +8175,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-032",
@@ -7987,7 +8258,7 @@
         "csMaterial": 13.67,
         "csTotal": 21.75,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "PTI / SHORT PTI",
         "contenedorDonante": "",
@@ -8059,7 +8330,7 @@
         "csMaterial": 19.44,
         "csTotal": 27.56,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -8145,7 +8416,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-033",
@@ -8226,8 +8498,8 @@
         "csHoraHombre": 25.24,
         "csMaterial": 23.47,
         "csTotal": 48.71,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -8280,7 +8552,7 @@
         "csMaterial": 22.63,
         "csTotal": 41.13,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "REVISAR EN PATIO",
         "contenedorDonante": "",
@@ -8366,14 +8638,15 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-034",
     "codigo": "ERSBM-2026-179096",
     "semana": 34,
     "anio": 2026,
-    "estado": "ENVIADO",
+    "estado": "PENDIENTE",
     "contenedor": "SEGU9884766",
     "modeloMaquina": "DAIKIN",
     "codigoRfs": "40RC",
@@ -8493,7 +8766,7 @@
         "csHoraHombre": 11.09,
         "csMaterial": 15.57,
         "csTotal": 26.66,
-        "cargo": "Dueño",
+        "cargo": "Cliente",
         "aplica": "Pendiente Revisión",
         "medida": "CM",
         "remark": "",
@@ -8532,7 +8805,7 @@
         "csHoraHombre": 19.83,
         "csMaterial": 19.67,
         "csTotal": 39.5,
-        "cargo": "Dueño",
+        "cargo": "Cliente",
         "aplica": "Pendiente Revisión",
         "medida": "CM",
         "remark": "",
@@ -8609,7 +8882,8 @@
         "comentario": "Estimado enviado a aprobación de la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-035",
@@ -8691,7 +8965,7 @@
         "csMaterial": 21.79,
         "csTotal": 32.73,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -8737,7 +9011,7 @@
         "csMaterial": 16.69,
         "csTotal": 26.39,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "LAVADO SIMPLE",
         "contenedorDonante": "",
@@ -8790,7 +9064,7 @@
         "csMaterial": 28.54,
         "csTotal": 34.9,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -8862,7 +9136,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-036",
@@ -8873,7 +9148,7 @@
     "contenedor": "BEAU9712425",
     "modeloMaquina": "DAIKIN",
     "codigoRfs": "40RC",
-    "naviera": "SEABOARD MARINE LINE",
+    "naviera": "ONE",
     "actividad": "DM",
     "lugarEstimacion": "RFS 1",
     "lugarAsistencia": "",
@@ -8944,7 +9219,7 @@
         "csMaterial": 66.68,
         "csTotal": 145.48,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -8990,7 +9265,7 @@
         "csMaterial": 42.95,
         "csTotal": 95.2,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -9043,7 +9318,7 @@
         "csMaterial": 68.72,
         "csTotal": 118.05,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "PTI / SHORT PTI",
         "contenedorDonante": "",
@@ -9122,7 +9397,7 @@
         "csMaterial": 55.65,
         "csTotal": 99.91,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -9201,7 +9476,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-037",
@@ -9283,7 +9559,7 @@
         "csMaterial": 17.61,
         "csTotal": 38.73,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "LAVADO SIMPLE",
         "contenedorDonante": "SMLU2094304",
@@ -9336,7 +9612,7 @@
         "csMaterial": 11.61,
         "csTotal": 21.93,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "REVISAR EN PATIO",
         "contenedorDonante": "",
@@ -9388,8 +9664,8 @@
         "csHoraHombre": 15.99,
         "csMaterial": 15.78,
         "csTotal": 31.77,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -9475,7 +9751,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-038",
@@ -9650,7 +9927,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-039",
@@ -9732,7 +10010,7 @@
         "csMaterial": 7.62,
         "csTotal": 12.12,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "MT",
         "remark": "",
         "contenedorDonante": "SMLU3947497",
@@ -9825,14 +10103,15 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-040",
     "codigo": "ERSBM-2026-179102",
     "semana": 34,
     "anio": 2026,
-    "estado": "ENVIADO",
+    "estado": "PENDIENTE",
     "contenedor": "SMLU5471079",
     "modeloMaquina": "STARCOOL",
     "codigoRfs": "40RC",
@@ -10075,7 +10354,8 @@
         "comentario": "Estimado enviado a aprobación de la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-041",
@@ -10243,7 +10523,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-042",
@@ -10364,7 +10645,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-043",
@@ -10375,7 +10657,7 @@
     "contenedor": "SEKU9116736",
     "modeloMaquina": "DAIKIN",
     "codigoRfs": "40RC",
-    "naviera": "SEABOARD MARINE LINE",
+    "naviera": "ONE",
     "actividad": "SVL",
     "lugarEstimacion": "RFS 1",
     "lugarAsistencia": "",
@@ -10613,7 +10895,8 @@
       }
     ],
     "comentariosSeaboard": [],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": false
   },
   {
     "id": "est-044",
@@ -10724,7 +11007,7 @@
             "rol": "LIQUIDACIONES",
             "fecha": "17/08/2026 10:41:12",
             "tipo": "SOLICITA_CAMBIO",
-            "mensaje": "Este daño debe ir con cargo a Dueño, no a Línea. Revisar responsabilidad del ítem.",
+            "mensaje": "Este daño debe ir con cargo a Cliente, no a Línea. Revisar responsabilidad del ítem.",
             "campoAfectado": "Cargo"
           },
           {
@@ -10807,14 +11090,15 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-045",
     "codigo": "ERSBM-2026-179107",
     "semana": 34,
     "anio": 2026,
-    "estado": "ENVIADO",
+    "estado": "PENDIENTE",
     "contenedor": "TXGU9031124",
     "modeloMaquina": "DAIKIN",
     "codigoRfs": "40RC",
@@ -10927,7 +11211,7 @@
         "csHoraHombre": 10.29,
         "csMaterial": 36.51,
         "csTotal": 46.8,
-        "cargo": "Dueño",
+        "cargo": "Cliente",
         "aplica": "Pendiente Revisión",
         "medida": "UN",
         "remark": "PTI / SHORT PTI",
@@ -10997,7 +11281,8 @@
         "comentario": "Estimado enviado a aprobación de la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-046",
@@ -11218,7 +11503,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": false
   },
   {
     "id": "est-047",
@@ -11339,7 +11625,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-048",
@@ -11473,7 +11760,7 @@
         "csHoraHombre": 4.09,
         "csMaterial": 65.61,
         "csTotal": 69.7,
-        "cargo": "Dueño",
+        "cargo": "Cliente",
         "aplica": "Pendiente Revisión",
         "medida": "UN",
         "remark": "",
@@ -11646,7 +11933,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": false
   },
   {
     "id": "est-049",
@@ -11728,7 +12016,7 @@
         "csMaterial": 4.48,
         "csTotal": 13.48,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -11814,7 +12102,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-050",
@@ -11825,7 +12114,7 @@
     "contenedor": "SZLU5011340",
     "modeloMaquina": "STARCOOL",
     "codigoRfs": "40RC",
-    "naviera": "SEABOARD MARINE LINE",
+    "naviera": "ONE",
     "actividad": "DM",
     "lugarEstimacion": "RFS 1",
     "lugarAsistencia": "",
@@ -11896,7 +12185,7 @@
         "csMaterial": 11.46,
         "csTotal": 15.42,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -11949,7 +12238,7 @@
         "csMaterial": 11.14,
         "csTotal": 17.98,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -12035,7 +12324,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-051",
@@ -12117,7 +12407,7 @@
         "csMaterial": 28.13,
         "csTotal": 41.12,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -12162,8 +12452,8 @@
         "csHoraHombre": 13.51,
         "csMaterial": 32.27,
         "csTotal": 45.78,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -12216,7 +12506,7 @@
         "csMaterial": 35.65,
         "csTotal": 56.49,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -12295,7 +12585,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-052",
@@ -12376,8 +12667,8 @@
         "csHoraHombre": 9,
         "csMaterial": 0,
         "csTotal": 9,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -12463,7 +12754,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-053",
@@ -12545,7 +12837,7 @@
         "csMaterial": 11.03,
         "csTotal": 19.67,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -12591,7 +12883,7 @@
         "csMaterial": 9.29,
         "csTotal": 15.86,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -12670,7 +12962,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-054",
@@ -12752,7 +13045,7 @@
         "csMaterial": 28.38,
         "csTotal": 38.33,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "PTI / SHORT PTI",
         "contenedorDonante": "",
@@ -12804,8 +13097,8 @@
         "csHoraHombre": 21.25,
         "csMaterial": 34.07,
         "csTotal": 55.32,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -12851,7 +13144,7 @@
         "csMaterial": 30.74,
         "csTotal": 39.86,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -12930,7 +13223,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-055",
@@ -13012,7 +13306,7 @@
         "csMaterial": 15.58,
         "csTotal": 36.92,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -13083,8 +13377,8 @@
         "csHoraHombre": 16.42,
         "csMaterial": 15.49,
         "csTotal": 31.91,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -13137,7 +13431,7 @@
         "csMaterial": 22.93,
         "csTotal": 37.01,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -13249,7 +13543,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-056",
@@ -13331,7 +13626,7 @@
         "csMaterial": 1.29,
         "csTotal": 2.64,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "SMLU2239941",
@@ -13424,7 +13719,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-057",
@@ -13435,7 +13731,7 @@
     "contenedor": "SMLU5462708",
     "modeloMaquina": "STARCOOL",
     "codigoRfs": "40RC",
-    "naviera": "SEABOARD MARINE LINE",
+    "naviera": "ONE",
     "actividad": "DM",
     "lugarEstimacion": "RFS 1",
     "lugarAsistencia": "",
@@ -13516,7 +13812,8 @@
       }
     ],
     "comentariosSeaboard": [],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": false
   },
   {
     "id": "est-058",
@@ -13597,8 +13894,8 @@
         "csHoraHombre": 22.62,
         "csMaterial": 17.51,
         "csTotal": 40.13,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -13677,7 +13974,7 @@
         "csMaterial": 17.78,
         "csTotal": 33.49,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -13713,7 +14010,7 @@
             "rol": "LIQUIDACIONES",
             "fecha": "17/08/2026 12:26:12",
             "tipo": "SOLICITA_CAMBIO",
-            "mensaje": "Este daño debe ir con cargo a Dueño, no a Línea. Revisar responsabilidad del ítem.",
+            "mensaje": "Este daño debe ir con cargo a Cliente, no a Línea. Revisar responsabilidad del ítem.",
             "campoAfectado": "Cargo"
           },
           {
@@ -13756,7 +14053,7 @@
         "csMaterial": 21.01,
         "csTotal": 30.74,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -13835,7 +14132,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-059",
@@ -14147,7 +14445,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": false
   },
   {
     "id": "est-060",
@@ -14228,8 +14527,8 @@
         "csHoraHombre": 0.45,
         "csMaterial": 0.43,
         "csTotal": 0.88,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -14322,7 +14621,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-061",
@@ -14516,7 +14816,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-062",
@@ -14597,7 +14898,7 @@
         "csHoraHombre": 5.77,
         "csMaterial": 55.06,
         "csTotal": 60.83,
-        "cargo": "Dueño",
+        "cargo": "Cliente",
         "aplica": "Pendiente Revisión",
         "medida": "MT",
         "remark": "",
@@ -14835,7 +15136,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": false
   },
   {
     "id": "est-063",
@@ -14917,7 +15219,7 @@
         "csMaterial": 0,
         "csTotal": 9,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "REVISAR EN PATIO",
         "contenedorDonante": "",
@@ -15003,7 +15305,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-064",
@@ -15014,7 +15317,7 @@
     "contenedor": "SEGU9735058",
     "modeloMaquina": "CARRIER",
     "codigoRfs": "45R1",
-    "naviera": "SEABOARD MARINE LINE",
+    "naviera": "ONE",
     "actividad": "DM",
     "lugarEstimacion": "RFS 1",
     "lugarAsistencia": "",
@@ -15084,8 +15387,8 @@
         "csHoraHombre": 11.09,
         "csMaterial": 15.98,
         "csTotal": 27.07,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "APLICAR PARCHE OVERLAP",
         "contenedorDonante": "",
@@ -15138,7 +15441,7 @@
         "csMaterial": 19.18,
         "csTotal": 37.69,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "REVISAR EN PATIO",
         "contenedorDonante": "",
@@ -15184,7 +15487,7 @@
         "csMaterial": 14.24,
         "csTotal": 32.16,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -15263,7 +15566,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-065",
@@ -15393,7 +15697,7 @@
         "csHoraHombre": 4.4,
         "csMaterial": 12.1,
         "csTotal": 16.5,
-        "cargo": "Dueño",
+        "cargo": "Cliente",
         "aplica": "Pendiente Revisión",
         "medida": "CM",
         "remark": "",
@@ -15437,7 +15741,8 @@
       }
     ],
     "comentariosSeaboard": [],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": false
   },
   {
     "id": "est-066",
@@ -15518,8 +15823,8 @@
         "csHoraHombre": 20.61,
         "csMaterial": 41.05,
         "csTotal": 61.66,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -15591,7 +15896,7 @@
         "csMaterial": 54.46,
         "csTotal": 84.69,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "APLICAR PARCHE OVERLAP",
         "contenedorDonante": "SMLU3468795",
@@ -15643,8 +15948,8 @@
         "csHoraHombre": 23.5,
         "csMaterial": 41.31,
         "csTotal": 64.81,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "LAVADO SIMPLE",
         "contenedorDonante": "",
@@ -15690,7 +15995,7 @@
         "csMaterial": 54.93,
         "csTotal": 83.37,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "REVISAR EN PATIO",
         "contenedorDonante": "",
@@ -15788,7 +16093,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-067",
@@ -15959,7 +16265,7 @@
             "rol": "LIQUIDACIONES",
             "fecha": "17/08/2026 13:04:12",
             "tipo": "SOLICITA_CAMBIO",
-            "mensaje": "Este daño debe ir con cargo a Dueño, no a Línea. Revisar responsabilidad del ítem.",
+            "mensaje": "Este daño debe ir con cargo a Cliente, no a Línea. Revisar responsabilidad del ítem.",
             "campoAfectado": "Cargo"
           },
           {
@@ -16042,7 +16348,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": false
   },
   {
     "id": "est-068",
@@ -16124,7 +16431,7 @@
         "csMaterial": 44.91,
         "csTotal": 74.35,
         "cargo": "Línea",
-        "aplica": "Rechazado",
+        "aplica": "Rechazado SBM",
         "medida": "UN",
         "remark": "REVISAR EN PATIO",
         "contenedorDonante": "",
@@ -16181,7 +16488,7 @@
         "csMaterial": 47.91,
         "csTotal": 62.6,
         "cargo": "Línea",
-        "aplica": "Rechazado",
+        "aplica": "Rechazado SBM",
         "medida": "CM",
         "remark": "PTI / SHORT PTI",
         "contenedorDonante": "",
@@ -16227,7 +16534,7 @@
         "csMaterial": 30.26,
         "csTotal": 48.23,
         "cargo": "Línea",
-        "aplica": "Rechazado",
+        "aplica": "Rechazado SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -16297,9 +16604,17 @@
         "usuario": "seaboard",
         "accion": "RECHAZAR",
         "comentario": "Estimado rechazado: los valores de material no coinciden con el catálogo vigente. Corregir y reenviar."
+      },
+      {
+        "id": "sbm-rej",
+        "accion": "RECHAZAR",
+        "usuario": "Usuario Seaboard (seaboard)",
+        "fecha": "",
+        "comentario": "Rechazo total: estimación no procede por documentación incompleta."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-069",
@@ -16380,8 +16695,8 @@
         "csHoraHombre": 20.2,
         "csMaterial": 33.51,
         "csTotal": 53.71,
-        "cargo": "Dueño",
-        "aplica": "Rechazado",
+        "cargo": "Cliente",
+        "aplica": "Rechazado SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -16410,7 +16725,7 @@
             "rol": "LIQUIDACIONES",
             "fecha": "17/08/2026 12:00:12",
             "tipo": "SOLICITA_CAMBIO",
-            "mensaje": "Este daño debe ir con cargo a Dueño, no a Línea. Revisar responsabilidad del ítem.",
+            "mensaje": "Este daño debe ir con cargo a Cliente, no a Línea. Revisar responsabilidad del ítem.",
             "campoAfectado": "Cargo"
           },
           {
@@ -16445,7 +16760,7 @@
         "csMaterial": 53.82,
         "csTotal": 68.66,
         "cargo": "Línea",
-        "aplica": "Rechazado",
+        "aplica": "Rechazado SBM",
         "medida": "CM",
         "remark": "APLICAR PARCHE OVERLAP",
         "contenedorDonante": "",
@@ -16502,7 +16817,7 @@
         "csMaterial": 38.71,
         "csTotal": 56.11,
         "cargo": "Línea",
-        "aplica": "Rechazado",
+        "aplica": "Rechazado SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -16541,7 +16856,7 @@
         "csMaterial": 24.67,
         "csTotal": 47.65,
         "cargo": "Línea",
-        "aplica": "Rechazado",
+        "aplica": "Rechazado SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "SMLU8094634",
@@ -16606,7 +16921,8 @@
         "comentario": "Estimado rechazado: los valores de material no coinciden con el catálogo vigente. Corregir y reenviar."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-070",
@@ -16688,7 +17004,7 @@
         "csMaterial": 15.41,
         "csTotal": 25.4,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -16760,7 +17076,7 @@
         "csMaterial": 17.91,
         "csTotal": 32.94,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -16832,18 +17148,19 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-071",
     "codigo": "ERSBM-2026-179151",
     "semana": 34,
     "anio": 2026,
-    "estado": "ENVIADO",
+    "estado": "PENDIENTE",
     "contenedor": "BMOU9847955",
     "modeloMaquina": "DAIKIN",
     "codigoRfs": "40RC",
-    "naviera": "SEABOARD MARINE LINE",
+    "naviera": "ONE",
     "actividad": "DM",
     "lugarEstimacion": "RFS 1",
     "lugarAsistencia": "",
@@ -17293,7 +17610,8 @@
         "comentario": "Estimado enviado a aprobación de la naviera."
       }
     ],
-    "pais": "ECUADOR"
+    "pais": "ECUADOR",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-072",
@@ -17514,7 +17832,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": false
   },
   {
     "id": "est-073",
@@ -17596,7 +17915,7 @@
         "csMaterial": 0.51,
         "csTotal": 2.72,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -17696,7 +18015,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-074",
@@ -17967,7 +18287,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": false
   },
   {
     "id": "est-075",
@@ -18049,7 +18370,7 @@
         "csMaterial": 29.93,
         "csTotal": 42.08,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "REVISAR EN PATIO",
         "contenedorDonante": "",
@@ -18095,7 +18416,7 @@
         "csMaterial": 20.69,
         "csTotal": 29.82,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -18148,7 +18469,7 @@
         "csMaterial": 36.05,
         "csTotal": 48.47,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -18227,7 +18548,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-076",
@@ -18309,7 +18631,7 @@
         "csMaterial": 17.9,
         "csTotal": 24.13,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -18355,7 +18677,7 @@
         "csMaterial": 19.2,
         "csTotal": 32.53,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -18401,7 +18723,7 @@
         "csMaterial": 36.76,
         "csTotal": 45.92,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "APLICAR PARCHE OVERLAP",
         "contenedorDonante": "",
@@ -18480,7 +18802,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-077",
@@ -18562,7 +18885,7 @@
         "csMaterial": 20.83,
         "csTotal": 26.39,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -18614,8 +18937,8 @@
         "csHoraHombre": 6.1,
         "csMaterial": 9.16,
         "csTotal": 15.26,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "PTI / SHORT PTI",
         "contenedorDonante": "",
@@ -18687,7 +19010,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-078",
@@ -18768,8 +19092,8 @@
         "csHoraHombre": 12.17,
         "csMaterial": 26.68,
         "csTotal": 38.85,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -18848,7 +19172,7 @@
         "csMaterial": 29.72,
         "csTotal": 40.95,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -18901,7 +19225,7 @@
         "csMaterial": 67.94,
         "csTotal": 87.09,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -18947,7 +19271,7 @@
         "csMaterial": 40.18,
         "csTotal": 61.61,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -19045,7 +19369,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-079",
@@ -19127,7 +19452,7 @@
         "csMaterial": 16.92,
         "csTotal": 25.36,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -19199,7 +19524,7 @@
         "csMaterial": 26.81,
         "csTotal": 35.37,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -19304,7 +19629,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-080",
@@ -19386,7 +19712,7 @@
         "csMaterial": 10.53,
         "csTotal": 13.78,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -19457,8 +19783,8 @@
         "csHoraHombre": 4.51,
         "csMaterial": 9.42,
         "csTotal": 13.93,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -19563,7 +19889,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-081",
@@ -19645,7 +19972,7 @@
         "csMaterial": 19.44,
         "csTotal": 26.69,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -19691,7 +20018,7 @@
         "csMaterial": 16.21,
         "csTotal": 22.83,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "PTI / SHORT PTI",
         "contenedorDonante": "",
@@ -19789,7 +20116,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-082",
@@ -19871,7 +20199,7 @@
         "csMaterial": 7.26,
         "csTotal": 10.08,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -19950,7 +20278,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-083",
@@ -20032,7 +20361,7 @@
         "csMaterial": 45.6,
         "csTotal": 70.63,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "LAVADO SIMPLE",
         "contenedorDonante": "",
@@ -20078,7 +20407,7 @@
         "csMaterial": 64.39,
         "csTotal": 78.96,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -20156,8 +20485,8 @@
         "csHoraHombre": 20.12,
         "csMaterial": 43.58,
         "csTotal": 63.7,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "LAVADO SIMPLE",
         "contenedorDonante": "",
@@ -20236,7 +20565,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-084",
@@ -20317,8 +20647,8 @@
         "csHoraHombre": 4.65,
         "csMaterial": 11.97,
         "csTotal": 16.62,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "SMLU9248822",
@@ -20397,7 +20727,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-085",
@@ -20479,7 +20810,7 @@
         "csMaterial": 9.71,
         "csTotal": 13.49,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -20565,7 +20896,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-086",
@@ -20647,7 +20979,7 @@
         "csMaterial": 14.79,
         "csTotal": 21.83,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -20719,7 +21051,7 @@
         "csMaterial": 16.83,
         "csTotal": 22.08,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -20798,7 +21130,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-087",
@@ -20880,7 +21213,7 @@
         "csMaterial": 15.83,
         "csTotal": 22.12,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -20926,7 +21259,7 @@
         "csMaterial": 8.15,
         "csTotal": 11.19,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "LAVADO SIMPLE",
         "contenedorDonante": "",
@@ -21038,7 +21371,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-088",
@@ -21120,7 +21454,7 @@
         "csMaterial": 17.4,
         "csTotal": 24.17,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -21206,7 +21540,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-089",
@@ -21288,7 +21623,7 @@
         "csMaterial": 6.49,
         "csTotal": 9.02,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -21393,7 +21728,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-090",
@@ -21475,7 +21811,7 @@
         "csMaterial": 34.64,
         "csTotal": 43.51,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -21546,8 +21882,8 @@
         "csHoraHombre": 14.13,
         "csMaterial": 24.51,
         "csTotal": 38.64,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -21633,7 +21969,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-091",
@@ -21714,8 +22051,8 @@
         "csHoraHombre": 39.33,
         "csMaterial": 111.44,
         "csTotal": 150.77,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -21787,7 +22124,7 @@
         "csMaterial": 53.97,
         "csTotal": 97.28,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -21816,7 +22153,7 @@
             "rol": "LIQUIDACIONES",
             "fecha": "17/08/2026 11:43:12",
             "tipo": "SOLICITA_CAMBIO",
-            "mensaje": "Este daño debe ir con cargo a Dueño, no a Línea. Revisar responsabilidad del ítem.",
+            "mensaje": "Este daño debe ir con cargo a Cliente, no a Línea. Revisar responsabilidad del ítem.",
             "campoAfectado": "Cargo"
           },
           {
@@ -21859,7 +22196,7 @@
         "csMaterial": 121.93,
         "csTotal": 168.35,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -21912,7 +22249,7 @@
         "csMaterial": 145.12,
         "csTotal": 184.24,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "LAVADO SIMPLE",
         "contenedorDonante": "",
@@ -21984,7 +22321,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-092",
@@ -22065,8 +22403,8 @@
         "csHoraHombre": 6.34,
         "csMaterial": 16.3,
         "csTotal": 22.64,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -22178,7 +22516,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-093",
@@ -22259,8 +22598,8 @@
         "csHoraHombre": 8.05,
         "csMaterial": 17.28,
         "csTotal": 25.33,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "LAVADO SIMPLE",
         "contenedorDonante": "",
@@ -22306,7 +22645,7 @@
         "csMaterial": 33.09,
         "csTotal": 40.91,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -22352,7 +22691,7 @@
         "csMaterial": 18.29,
         "csTotal": 29.12,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -22431,7 +22770,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-094",
@@ -22513,7 +22853,7 @@
         "csMaterial": 11.43,
         "csTotal": 15.12,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -22592,7 +22932,7 @@
         "csMaterial": 7.57,
         "csTotal": 11.27,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -22704,7 +23044,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-095",
@@ -22786,7 +23127,7 @@
         "csMaterial": 13.25,
         "csTotal": 18.4,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -22865,7 +23206,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-096",
@@ -22947,7 +23289,7 @@
         "csMaterial": 11.08,
         "csTotal": 15.39,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -23033,7 +23375,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-097",
@@ -23115,7 +23458,7 @@
         "csMaterial": 11.03,
         "csTotal": 15.43,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -23161,7 +23504,7 @@
         "csMaterial": 9.38,
         "csTotal": 12.92,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -23247,7 +23590,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-098",
@@ -23329,7 +23673,7 @@
         "csMaterial": 25.75,
         "csTotal": 32.07,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -23408,7 +23752,7 @@
         "csMaterial": 19.61,
         "csTotal": 30.93,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -23487,7 +23831,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-099",
@@ -23569,7 +23914,7 @@
         "csMaterial": 40.88,
         "csTotal": 57.77,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "REVISAR EN PATIO",
         "contenedorDonante": "",
@@ -23622,7 +23967,7 @@
         "csMaterial": 34.41,
         "csTotal": 51.77,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "REVISAR EN PATIO",
         "contenedorDonante": "",
@@ -23668,7 +24013,7 @@
         "csMaterial": 42.49,
         "csTotal": 54.04,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -23697,7 +24042,7 @@
             "rol": "LIQUIDACIONES",
             "fecha": "17/08/2026 10:38:12",
             "tipo": "SOLICITA_CAMBIO",
-            "mensaje": "Este daño debe ir con cargo a Dueño, no a Línea. Revisar responsabilidad del ítem.",
+            "mensaje": "Este daño debe ir con cargo a Cliente, no a Línea. Revisar responsabilidad del ítem.",
             "campoAfectado": "Cargo"
           },
           {
@@ -23766,7 +24111,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-100",
@@ -23848,7 +24194,7 @@
         "csMaterial": 15.86,
         "csTotal": 22.03,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -23953,7 +24299,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-101",
@@ -24035,7 +24382,7 @@
         "csMaterial": 8.02,
         "csTotal": 11.14,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -24107,7 +24454,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-102",
@@ -24188,8 +24536,8 @@
         "csHoraHombre": 2.27,
         "csMaterial": 5.82,
         "csTotal": 8.09,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -24301,7 +24649,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-103",
@@ -24383,7 +24732,7 @@
         "csMaterial": 16.62,
         "csTotal": 23.83,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "APLICAR PARCHE OVERLAP",
         "contenedorDonante": "",
@@ -24436,7 +24785,7 @@
         "csMaterial": 20.78,
         "csTotal": 28.12,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -24534,7 +24883,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-104",
@@ -24616,7 +24966,7 @@
         "csMaterial": 16.55,
         "csTotal": 22.98,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -24688,7 +25038,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-105",
@@ -24770,7 +25121,7 @@
         "csMaterial": 6.72,
         "csTotal": 9.34,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -24856,7 +25207,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-106",
@@ -24937,8 +25289,8 @@
         "csHoraHombre": 4.98,
         "csMaterial": 12.97,
         "csTotal": 17.95,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -25017,7 +25369,7 @@
         "csMaterial": 10.46,
         "csTotal": 14.59,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -25122,7 +25474,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-107",
@@ -25203,8 +25556,8 @@
         "csHoraHombre": 6.51,
         "csMaterial": 16.74,
         "csTotal": 23.25,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -25290,7 +25643,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-108",
@@ -25372,7 +25726,7 @@
         "csMaterial": 40.6,
         "csTotal": 49.99,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -25444,7 +25798,7 @@
         "csMaterial": 21.62,
         "csTotal": 36.42,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -25523,7 +25877,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-109",
@@ -25605,7 +25960,7 @@
         "csMaterial": 10.29,
         "csTotal": 13.7,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -25658,7 +26013,7 @@
         "csMaterial": 7.78,
         "csTotal": 11.4,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "APLICAR PARCHE OVERLAP",
         "contenedorDonante": "",
@@ -25737,7 +26092,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-110",
@@ -25819,7 +26175,7 @@
         "csMaterial": 7.27,
         "csTotal": 10.1,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -25848,7 +26204,7 @@
             "rol": "LIQUIDACIONES",
             "fecha": "17/08/2026 14:43:12",
             "tipo": "SOLICITA_CAMBIO",
-            "mensaje": "Este daño debe ir con cargo a Dueño, no a Línea. Revisar responsabilidad del ítem.",
+            "mensaje": "Este daño debe ir con cargo a Cliente, no a Línea. Revisar responsabilidad del ítem.",
             "campoAfectado": "Cargo"
           },
           {
@@ -25924,7 +26280,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-111",
@@ -26006,7 +26363,7 @@
         "csMaterial": 2.27,
         "csTotal": 3.15,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -26118,7 +26475,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-112",
@@ -26200,7 +26558,7 @@
         "csMaterial": 3.92,
         "csTotal": 5.44,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -26305,7 +26663,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-113",
@@ -26387,7 +26746,7 @@
         "csMaterial": 14.2,
         "csTotal": 19.72,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -26466,7 +26825,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-114",
@@ -26547,8 +26907,8 @@
         "csHoraHombre": 23.37,
         "csMaterial": 52.76,
         "csTotal": 76.13,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -26584,7 +26944,7 @@
             "rol": "LIQUIDACIONES",
             "fecha": "17/08/2026 14:05:12",
             "tipo": "SOLICITA_CAMBIO",
-            "mensaje": "Este daño debe ir con cargo a Dueño, no a Línea. Revisar responsabilidad del ítem.",
+            "mensaje": "Este daño debe ir con cargo a Cliente, no a Línea. Revisar responsabilidad del ítem.",
             "campoAfectado": "Cargo"
           },
           {
@@ -26627,7 +26987,7 @@
         "csMaterial": 33.11,
         "csTotal": 54.61,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "REVISAR EN PATIO",
         "contenedorDonante": "",
@@ -26673,7 +27033,7 @@
         "csMaterial": 42.04,
         "csTotal": 57.41,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -26719,7 +27079,7 @@
         "csMaterial": 55.65,
         "csTotal": 66.8,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -26791,7 +27151,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-115",
@@ -26873,7 +27234,7 @@
         "csMaterial": 5.3,
         "csTotal": 7.36,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -26952,7 +27313,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-116",
@@ -27033,8 +27395,8 @@
         "csHoraHombre": 5.17,
         "csMaterial": 13.28,
         "csTotal": 18.45,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -27070,7 +27432,7 @@
             "rol": "LIQUIDACIONES",
             "fecha": "17/08/2026 12:30:12",
             "tipo": "SOLICITA_CAMBIO",
-            "mensaje": "Este daño debe ir con cargo a Dueño, no a Línea. Revisar responsabilidad del ítem.",
+            "mensaje": "Este daño debe ir con cargo a Cliente, no a Línea. Revisar responsabilidad del ítem.",
             "campoAfectado": "Cargo"
           },
           {
@@ -27146,7 +27508,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-117",
@@ -27228,7 +27591,7 @@
         "csMaterial": 3.15,
         "csTotal": 4.38,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -27314,7 +27677,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-118",
@@ -27396,7 +27760,7 @@
         "csMaterial": 22.05,
         "csTotal": 31.26,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "APLICAR PARCHE OVERLAP",
         "contenedorDonante": "",
@@ -27468,7 +27832,7 @@
         "csMaterial": 21,
         "csTotal": 28.53,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "APLICAR PARCHE OVERLAP",
         "contenedorDonante": "",
@@ -27573,7 +27937,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-119",
@@ -27655,7 +28020,7 @@
         "csMaterial": 14.2,
         "csTotal": 19.72,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -27734,7 +28099,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-120",
@@ -27815,8 +28181,8 @@
         "csHoraHombre": 6.92,
         "csMaterial": 13.54,
         "csTotal": 20.46,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "PTI / SHORT PTI",
         "contenedorDonante": "",
@@ -27887,8 +28253,8 @@
         "csHoraHombre": 3.66,
         "csMaterial": 13.66,
         "csTotal": 17.32,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -27960,7 +28326,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-121",
@@ -28042,7 +28409,7 @@
         "csMaterial": 7.83,
         "csTotal": 10.88,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -28121,7 +28488,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-122",
@@ -28202,8 +28570,8 @@
         "csHoraHombre": 2.76,
         "csMaterial": 7.1,
         "csTotal": 9.86,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "APLICAR PARCHE OVERLAP",
         "contenedorDonante": "",
@@ -28282,7 +28650,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-123",
@@ -28364,7 +28733,7 @@
         "csMaterial": 0.58,
         "csTotal": 0.81,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -28450,7 +28819,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-124",
@@ -28532,7 +28902,7 @@
         "csMaterial": 56.43,
         "csTotal": 78.04,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -28611,7 +28981,7 @@
         "csMaterial": 41.49,
         "csTotal": 57.77,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "REVISAR EN PATIO",
         "contenedorDonante": "",
@@ -28647,7 +29017,7 @@
             "rol": "LIQUIDACIONES",
             "fecha": "17/08/2026 10:16:12",
             "tipo": "SOLICITA_CAMBIO",
-            "mensaje": "Este daño debe ir con cargo a Dueño, no a Línea. Revisar responsabilidad del ítem.",
+            "mensaje": "Este daño debe ir con cargo a Cliente, no a Línea. Revisar responsabilidad del ítem.",
             "campoAfectado": "Cargo"
           },
           {
@@ -28690,7 +29060,7 @@
         "csMaterial": 57.82,
         "csTotal": 69.27,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -28762,7 +29132,7 @@
         "csMaterial": 28.16,
         "csTotal": 50.34,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "APLICAR PARCHE OVERLAP",
         "contenedorDonante": "",
@@ -28834,7 +29204,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-125",
@@ -28916,7 +29287,7 @@
         "csMaterial": 15.42,
         "csTotal": 22.29,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -28962,7 +29333,7 @@
         "csMaterial": 16.17,
         "csTotal": 21.58,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -29060,7 +29431,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-126",
@@ -29142,7 +29514,7 @@
         "csMaterial": 1.99,
         "csTotal": 2.76,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "APLICAR PARCHE OVERLAP",
         "contenedorDonante": "",
@@ -29221,7 +29593,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-127",
@@ -29303,7 +29676,7 @@
         "csMaterial": 9.69,
         "csTotal": 13.16,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -29356,7 +29729,7 @@
         "csMaterial": 8.81,
         "csTotal": 12.53,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -29435,7 +29808,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-128",
@@ -29517,7 +29891,7 @@
         "csMaterial": 25.66,
         "csTotal": 37.57,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -29589,7 +29963,7 @@
         "csMaterial": 25.15,
         "csTotal": 37.02,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -29641,8 +30015,8 @@
         "csHoraHombre": 6.15,
         "csMaterial": 26.14,
         "csTotal": 32.29,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "APLICAR PARCHE OVERLAP",
         "contenedorDonante": "",
@@ -29721,7 +30095,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-129",
@@ -29803,7 +30178,7 @@
         "csMaterial": 5.8,
         "csTotal": 8.06,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -29882,7 +30257,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-130",
@@ -29964,7 +30340,7 @@
         "csMaterial": 8.14,
         "csTotal": 11.31,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -30076,7 +30452,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-131",
@@ -30158,7 +30535,7 @@
         "csMaterial": 21.41,
         "csTotal": 29.3,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "SMLU5283699",
@@ -30230,7 +30607,7 @@
         "csMaterial": 16.97,
         "csTotal": 24,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -30302,7 +30679,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-132",
@@ -30384,7 +30762,7 @@
         "csMaterial": 13.49,
         "csTotal": 18.74,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -30482,7 +30860,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-133",
@@ -30564,7 +30943,7 @@
         "csMaterial": 7.1,
         "csTotal": 9.86,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "PTI / SHORT PTI",
         "contenedorDonante": "",
@@ -30643,7 +31022,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-134",
@@ -30725,7 +31105,7 @@
         "csMaterial": 37.37,
         "csTotal": 49.4,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "REVISAR EN PATIO",
         "contenedorDonante": "",
@@ -30771,7 +31151,7 @@
         "csMaterial": 27.38,
         "csTotal": 40.53,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -30850,7 +31230,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-135",
@@ -30932,7 +31313,7 @@
         "csMaterial": 16.91,
         "csTotal": 23.48,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -31004,7 +31385,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-136",
@@ -31086,7 +31468,7 @@
         "csMaterial": 1.66,
         "csTotal": 6.63,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -31172,7 +31554,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-137",
@@ -31254,7 +31637,7 @@
         "csMaterial": 1.66,
         "csTotal": 6.63,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -31366,7 +31749,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-138",
@@ -31448,7 +31832,7 @@
         "csMaterial": 9.75,
         "csTotal": 49.01,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "LAVADO SIMPLE",
         "contenedorDonante": "SMLU7322512",
@@ -31520,7 +31904,7 @@
         "csMaterial": 16.25,
         "csTotal": 65.02,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -31592,7 +31976,7 @@
         "csMaterial": 18.96,
         "csTotal": 65.8,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -31704,7 +32088,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-139",
@@ -31786,7 +32171,7 @@
         "csMaterial": 11.43,
         "csTotal": 35.44,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "APLICAR PARCHE OVERLAP",
         "contenedorDonante": "",
@@ -31858,7 +32243,7 @@
         "csMaterial": 4.32,
         "csTotal": 24.16,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -31894,7 +32279,7 @@
             "rol": "LIQUIDACIONES",
             "fecha": "17/08/2026 10:01:12",
             "tipo": "SOLICITA_CAMBIO",
-            "mensaje": "Este daño debe ir con cargo a Dueño, no a Línea. Revisar responsabilidad del ítem.",
+            "mensaje": "Este daño debe ir con cargo a Cliente, no a Línea. Revisar responsabilidad del ítem.",
             "campoAfectado": "Cargo"
           },
           {
@@ -31937,7 +32322,7 @@
         "csMaterial": 8.58,
         "csTotal": 37.7,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "MT",
         "remark": "",
         "contenedorDonante": "",
@@ -32030,7 +32415,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-140",
@@ -32112,7 +32498,7 @@
         "csMaterial": 11.12,
         "csTotal": 15.45,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -32210,7 +32596,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-141",
@@ -32292,7 +32679,7 @@
         "csMaterial": 17.2,
         "csTotal": 23.89,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -32364,7 +32751,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-142",
@@ -32446,7 +32834,7 @@
         "csMaterial": 15.89,
         "csTotal": 21.66,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -32525,7 +32913,7 @@
         "csMaterial": 8.99,
         "csTotal": 12.9,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -32561,7 +32949,7 @@
             "rol": "LIQUIDACIONES",
             "fecha": "17/08/2026 12:12:12",
             "tipo": "SOLICITA_CAMBIO",
-            "mensaje": "Este daño debe ir con cargo a Dueño, no a Línea. Revisar responsabilidad del ítem.",
+            "mensaje": "Este daño debe ir con cargo a Cliente, no a Línea. Revisar responsabilidad del ítem.",
             "campoAfectado": "Cargo"
           },
           {
@@ -32630,7 +33018,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-143",
@@ -32712,7 +33101,7 @@
         "csMaterial": 5.41,
         "csTotal": 7.51,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -32810,7 +33199,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-144",
@@ -32891,8 +33281,8 @@
         "csHoraHombre": 4.44,
         "csMaterial": 13.81,
         "csTotal": 18.25,
-        "cargo": "Dueño",
-        "aplica": "Aprobado Linea",
+        "cargo": "Cliente",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -32938,7 +33328,7 @@
         "csMaterial": 5.67,
         "csTotal": 8.81,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "APLICAR PARCHE OVERLAP",
         "contenedorDonante": "",
@@ -33017,7 +33407,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-145",
@@ -33099,7 +33490,7 @@
         "csMaterial": 8.54,
         "csTotal": 12.77,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -33178,7 +33569,7 @@
         "csMaterial": 13.15,
         "csTotal": 17.36,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "CM",
         "remark": "",
         "contenedorDonante": "",
@@ -33250,7 +33641,8 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   },
   {
     "id": "est-146",
@@ -33332,7 +33724,7 @@
         "csMaterial": 18.59,
         "csTotal": 23.55,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "",
@@ -33404,7 +33796,7 @@
         "csMaterial": 9.66,
         "csTotal": 15.68,
         "cargo": "Línea",
-        "aplica": "Aprobado Linea",
+        "aplica": "Aprobado por Linea SBM",
         "medida": "UN",
         "remark": "",
         "contenedorDonante": "SMLU8129429",
@@ -33483,6 +33875,7 @@
         "comentario": "Estimado aprobado sin novedades por la naviera."
       }
     ],
-    "pais": "PERU"
+    "pais": "PERU",
+    "validadoLiquidaciones": true
   }
 ]

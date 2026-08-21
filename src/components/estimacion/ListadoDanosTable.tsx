@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useRef, useState } from 'react';
-import { CheckCircle2, ClipboardList, Images, MessageSquare, PencilLine, Video } from 'lucide-react';
+import { CheckCircle2, ClipboardList, Images, MessageSquare, PencilLine, Trash2, Video } from 'lucide-react';
 import {
   ComentariosDanoPopover,
   type EntradaComentario,
@@ -9,6 +9,7 @@ import {
 import {
   APLICA_DANO,
   CARGOS_DANO,
+  esAplicaRechazado,
   totalesDanos,
   type AplicaDano,
   type CampoSnapshotLinea,
@@ -37,6 +38,8 @@ interface ListadoDanosTableProps {
   onCargoChange?: (dano: DanoEstimacion, cargo: CargoDano) => void;
   onAplicaChange?: (dano: DanoEstimacion, aplica: AplicaDano) => void;
   onEditar: (dano: DanoEstimacion) => void;
+  /** Eliminar línea de daño (Liquidaciones / edición aperturada). */
+  onEliminar?: (dano: DanoEstimacion) => void;
   onFotos: (dano: DanoEstimacion) => void;
   onVideo: (dano: DanoEstimacion) => void;
   /** Usuario autenticado para el panel de comentarios. */
@@ -252,6 +255,7 @@ export function ListadoDanosTable({
   onCargoChange,
   onAplicaChange,
   onEditar,
+  onEliminar,
   onFotos,
   onVideo,
   comentarioUsuario = 'usuario',
@@ -448,19 +452,38 @@ export function ListadoDanosTable({
                   <td className={cn('text-right tabular-nums', mod('cantidad'))}>
                     {d.cantidad.toFixed(2)}
                   </td>
-                  <td className={cn('text-right tabular-nums', mod('horasHombre'))}>
+                  <td
+                    className={cn(
+                      'text-right tabular-nums',
+                      mod('horasHombre'),
+                      esAplicaRechazado(d.aplica) && 'text-slate-400'
+                    )}
+                  >
                     {d.horasHombre.toFixed(2)}
                   </td>
-                  <td className={cn('text-right tabular-nums', mod('csHoraHombre'))}>
+                  <td
+                    className={cn(
+                      'text-right tabular-nums',
+                      mod('csHoraHombre'),
+                      esAplicaRechazado(d.aplica) && 'text-slate-400'
+                    )}
+                  >
                     ${formatMoney(d.csHoraHombre)}
                   </td>
-                  <td className={cn('text-right tabular-nums', mod('csMaterial'))}>
+                  <td
+                    className={cn(
+                      'text-right tabular-nums',
+                      mod('csMaterial'),
+                      esAplicaRechazado(d.aplica) && 'text-slate-400'
+                    )}
+                  >
                     ${formatMoney(d.csMaterial)}
                   </td>
                   <td
                     className={cn(
                       'text-right font-semibold tabular-nums text-rfs-navy',
-                      mod('csTotal')
+                      mod('csTotal'),
+                      esAplicaRechazado(d.aplica) && 'text-slate-400'
                     )}
                   >
                     ${formatMoney(d.csTotal)}
@@ -565,6 +588,20 @@ export function ListadoDanosTable({
                       >
                         <PencilLine className="h-3.5 w-3.5" />
                       </button>
+                      {onEliminar && (
+                        <button
+                          type="button"
+                          className="dms-icon-btn dms-icon-btn--rojo"
+                          title={
+                            editable
+                              ? 'Eliminar ítem de daño'
+                              : 'Aperture la estimación para eliminar ítems'
+                          }
+                          onClick={() => onEliminar(d)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
                       <button
                         type="button"
                         className="dms-icon-btn dms-icon-btn--indigo"

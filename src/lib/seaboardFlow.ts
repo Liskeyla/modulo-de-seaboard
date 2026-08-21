@@ -1,0 +1,67 @@
+import {
+  APLICA_APROBADO_SBM,
+  esAplicaRechazado,
+  type Estimacion,
+} from '@/types/estimacion';
+
+/** Naviera Seaboard (única que sube al reporte / bandeja SBM). */
+export function esNavieraSeaboard(naviera: string) {
+  return naviera.toUpperCase().includes('SEABOARD');
+}
+
+/** Enviado a SBM y aún sin decisión final (bandeja Seaboard). */
+export function enBandejaSeaboard(e: Estimacion) {
+  return (
+    esNavieraSeaboard(e.naviera) &&
+    e.enviarAprobacion === 'SI' &&
+    (e.estado === 'PENDIENTE' || e.estado === 'ENVIADO')
+  );
+}
+
+/** Liquidaciones ya validó y puede hacer push a SBM (solo Seaboard). */
+export function puedePushASbm(e: Estimacion) {
+  return (
+    !!e.validadoLiquidaciones &&
+    esNavieraSeaboard(e.naviera) &&
+    e.enviarAprobacion !== 'SI' &&
+    ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(e.estado)
+  );
+}
+
+export function puedeValidarLiquidaciones(e: Estimacion) {
+  return (
+    !e.validadoLiquidaciones &&
+    e.enviarAprobacion !== 'SI' &&
+    ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(e.estado) &&
+    e.danos.length > 0
+  );
+}
+
+/** Resumen visual de lo que devolvió Seaboard a Liquidaciones. */
+export function resumenRetornoSeaboard(e: Estimacion) {
+  if (!['APROBADO', 'RECHAZADO', 'REPARADO'].includes(e.estado)) {
+    return null;
+  }
+  const itemsModificados = e.danos.filter(
+    (d) =>
+      !!d.edicionReciente &&
+      (/seaboard|apptelink/i.test(d.edicionReciente.usuario) ||
+        (d.edicionReciente.camposCambiados?.length ?? 0) > 0)
+  ).length;
+  const itemsRechazados = e.danos.filter((d) => esAplicaRechazado(d.aplica)).length;
+  const itemsAprobados = e.danos.filter((d) => d.aplica === APLICA_APROBADO_SBM).length;
+  const rechazoTotal = e.estado === 'RECHAZADO';
+  const ultimo = [...e.comentariosSeaboard]
+    .reverse()
+    .find((c) => c.accion === 'APROBAR' || c.accion === 'RECHAZAR');
+
+  return {
+    rechazoTotal,
+    itemsModificados,
+    itemsRechazados,
+    itemsAprobados,
+    comentario: ultimo?.comentario ?? '',
+    fecha: ultimo?.fecha || e.fechaAprobacion || e.fechaModificacion,
+    usuario: ultimo?.usuario ?? e.usuarioModificacion,
+  };
+}

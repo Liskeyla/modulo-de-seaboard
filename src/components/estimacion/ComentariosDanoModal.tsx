@@ -45,12 +45,12 @@ const ROL_CLASE: Record<RolComentario, string> = {
 /** El rol del comentario se deduce del usuario autenticado. */
 export function rolDeUsuario(
   rolUsuario: string | undefined,
-  username: string | undefined
+  _username?: string | undefined
 ): RolComentario {
   if (rolUsuario === 'seaboard') return 'SEABOARD';
   if (rolUsuario === 'liquidaciones') return 'LIQUIDACIONES';
-  if (username === 'apptelink') return 'SUPERVISOR';
-  return 'TECNICO';
+  if (rolUsuario === 'dms') return 'RFS';
+  return 'SEABOARD';
 }
 
 function iniciales(nombre: string) {
@@ -233,7 +233,10 @@ export function ComentariosDanoPopover({
           </div>
         ) : (
           hilo.map((c) => {
-            const propio = c.usuario === usuario;
+            const propio =
+              c.usuario === usuario ||
+              c.usuario.includes(`(${usuario})`) ||
+              c.usuario.startsWith(`${usuario} `);
             const etiqueta = etiquetaTipo(c.tipo);
             return (
               <article

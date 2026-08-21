@@ -16,16 +16,16 @@ interface SidebarProps {
 const LINKS_BASE = [
   {
     href: '/reportes/estimaciones',
-    label: 'Reporte de Estimaciones Seaboard Marine',
-    icon: FileBarChart,
-    hint: 'Ver, modificar con histórico y aprobar / rechazar',
-    roles: ['dms', 'seaboard', 'liquidaciones'] as const,
+    label: 'Aprobaciones de Estimados',
+    icon: ClipboardCheck,
+    hint: 'Validar, push a SBM, reversar y eliminar',
+    roles: ['liquidaciones'] as const,
   },
   {
-    href: '/aprobaciones/seaboard',
-    label: 'Aprobaciones Seaboard',
-    icon: ClipboardCheck,
-    hint: 'Bandeja ENVIADO · decisión a liquidaciones RFS',
+    href: '/reportes/estimaciones',
+    label: 'Reporte de Estimaciones Seaboard Marine',
+    icon: FileBarChart,
+    hint: 'Ver, modificar con histórico y devolver a liquidaciones',
     roles: ['dms', 'seaboard'] as const,
   },
 ];
@@ -63,7 +63,11 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         <div className="flex items-center justify-between border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white p-4">
           <div>
             <p className="text-sm font-bold text-rfs-navy">Navegación</p>
-            <p className="text-[11px] text-gray-500">Gestor Seaboard Marine</p>
+            <p className="text-[11px] text-gray-500">
+              {user?.rol === 'liquidaciones'
+                ? 'Aprobaciones de Estimados'
+                : 'Gestor Seaboard Marine'}
+            </p>
           </div>
           <button
             type="button"
@@ -93,7 +97,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             const activo = pathname === item.href || pathname.startsWith(item.href + '/');
             return (
               <Link
-                key={item.href}
+                key={`${item.href}-${item.label}`}
                 href={item.href}
                 onClick={onClose}
                 className={cn(
@@ -103,7 +107,12 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                     : 'text-slate-700 hover:bg-slate-50'
                 )}
               >
-                <Icon className={cn('mt-0.5 h-5 w-5 shrink-0', activo ? 'text-rfs-700' : 'text-slate-400')} />
+                <Icon
+                  className={cn(
+                    'mt-0.5 h-5 w-5 shrink-0',
+                    activo ? 'text-rfs-700' : 'text-slate-400'
+                  )}
+                />
                 <span>
                   <span className="block text-sm font-semibold">{item.label}</span>
                   <span className="mt-0.5 block text-[11px] text-slate-500">{item.hint}</span>
