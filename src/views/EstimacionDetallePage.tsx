@@ -647,17 +647,10 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sky-200/60 text-xs font-bold">
                   i
                 </span>
-                <div className="min-w-0">
-                  Seleccione un daño para filtrar a la derecha la garantía y las fotos de
-                  inspección. Sin selección, <strong>Fotos de daños</strong> muestra todas las
-                  evidencias del estimado.
-                  {puedeAperturar && !aperturada && (
-                    <>
-                      {' '}
-                      Para editar o aprobar/rechazar líneas, pulse{' '}
-                      <strong>Aperturar estimación</strong>.
-                    </>
-                  )}
+                <div className="min-w-0 truncate">
+                  {puedeAperturar && !aperturada
+                    ? 'Seleccione un daño para ver detalle; para editar, pulse Aperturar estimación.'
+                    : 'Seleccione un daño para filtrar garantía y fotos a la derecha.'}
                 </div>
               </div>
 
