@@ -51,7 +51,7 @@ const tonos = { amber: 'bg-amber-500', emerald: 'bg-emerald-500', red: 'bg-red-5
 
 type CambioPaisPendiente = {
   pais: PaisOperacion;
-  paso: 'confirmar' | 'guardar' | 'visualizacion';
+  paso: 'aperturada_bloqueado' | 'visualizacion';
   resumen: string[];
   codigo: string;
 };
@@ -124,10 +124,11 @@ export function Header({ title, subtitle }: HeaderProps) {
     setMenuActivo(null);
     const guardia = useUiStore.getState().guardiaSesion;
     if (guardia) {
+      // Primero: no se puede cambiar país con estimado aperturado.
       setCambioPais({
         pais: nuevo,
-        paso: 'confirmar',
-        resumen: guardia.getResumen(),
+        paso: 'aperturada_bloqueado',
+        resumen: [],
         codigo: guardia.codigo,
       });
       return;
@@ -153,37 +154,6 @@ export function Header({ title, subtitle }: HeaderProps) {
     if (!cambioPais) return;
     useUiStore.getState().avisoVisualizacion?.confirmarSoloVisualizacion();
     toast('Salida registrada como solo visualización.', 'info');
-    aplicarCambioPais(cambioPais.pais);
-  }
-
-  function confirmarCambioPais() {
-    if (!cambioPais) return;
-    const guardia = useUiStore.getState().guardiaSesion;
-    const resumen = guardia?.getResumen() ?? cambioPais.resumen;
-    if (resumen.length > 0) {
-      setCambioPais({
-        ...cambioPais,
-        paso: 'guardar',
-        resumen,
-        codigo: guardia?.codigo ?? cambioPais.codigo,
-      });
-      return;
-    }
-    guardia?.guardarYLiberar();
-    aplicarCambioPais(cambioPais.pais);
-  }
-
-  function guardarYCambiarPais() {
-    if (!cambioPais) return;
-    useUiStore.getState().guardiaSesion?.guardarYLiberar();
-    toast('Cambios guardados. Estimación cerrada.', 'success');
-    aplicarCambioPais(cambioPais.pais);
-  }
-
-  function descartarYCambiarPais() {
-    if (!cambioPais) return;
-    useUiStore.getState().guardiaSesion?.descartarYLiberar();
-    toast('Cambios descartados. Estimación cerrada.', 'info');
     aplicarCambioPais(cambioPais.pais);
   }
 
@@ -440,93 +410,39 @@ export function Header({ title, subtitle }: HeaderProps) {
     </header>
 
     <Modal
-      open={cambioPais?.paso === 'confirmar'}
+      open={cambioPais?.paso === 'aperturada_bloqueado'}
       onClose={() => setCambioPais(null)}
       size="sm"
       icon={<AlertTriangle className="h-4 w-4" />}
-      title="Cambiar país de operación"
+      title="No puede cambiar de país"
       subtitle={
         cambioPais
-          ? `De ${metaPais(pais).label} a ${metaPais(cambioPais.pais).label}`
+          ? `Estimación ${cambioPais.codigo} aperturada`
           : undefined
       }
       footer={
-        <>
-          <button
-            type="button"
-            className="dms-btn-action border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
-            onClick={() => setCambioPais(null)}
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            className="dms-btn-primary px-4 py-2 text-sm"
-            onClick={confirmarCambioPais}
-          >
-            Sí, cambiar país
-          </button>
-        </>
+        <button
+          type="button"
+          className="dms-btn-primary px-4 py-2 text-sm"
+          onClick={() => setCambioPais(null)}
+        >
+          Entendido
+        </button>
       }
     >
-      <p className="text-sm leading-relaxed text-gray-600">
-        Tiene la estimación <strong>{cambioPais?.codigo ?? guardiaSesion?.codigo}</strong>{' '}
-        aperturada. ¿Desea cambiar de país de operación?
-      </p>
+      <div className="space-y-2 text-sm leading-relaxed text-gray-600">
+        <p>
+          No puede cambiar de país mientras el estimado{' '}
+          <strong>{cambioPais?.codigo ?? guardiaSesion?.codigo}</strong> esté{' '}
+          <strong>aperturado</strong>.
+        </p>
+        <p>
+          Primero debe <strong>cerrar la estimación</strong>, aprobar o rechazar los ítems y
+          dejar todo listo con el estimado. Luego podrá cambiar de país.
+        </p>
+      </div>
     </Modal>
 
-    <Modal
-      open={cambioPais?.paso === 'guardar'}
-      onClose={() => setCambioPais(null)}
-      size="sm"
-      icon={<AlertTriangle className="h-4 w-4" />}
-      title="Guardar cambios"
-      subtitle={cambioPais ? `Estimación ${cambioPais.codigo}` : undefined}
-      footer={
-        <>
-          <button
-            type="button"
-            className="dms-btn-action border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
-            onClick={() => setCambioPais(null)}
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            className="dms-btn-action border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800"
-            onClick={descartarYCambiarPais}
-          >
-            Cambiar sin guardar
-          </button>
-          <button
-            type="button"
-            className="dms-btn-cerrar-est px-4 py-2 text-sm"
-            onClick={guardarYCambiarPais}
-          >
-            Guardar y cambiar
-          </button>
-        </>
-      }
-    >
-      <p className="mb-2 text-sm leading-relaxed text-gray-600">
-        Hay cambios en la estimación aperturada. ¿Desea guardarlos antes de cambiar a{' '}
-        <strong>{cambioPais ? metaPais(cambioPais.pais).label : ''}</strong>?
-      </p>
-      {cambioPais && cambioPais.resumen.length > 0 && (
-        <div className="max-h-48 overflow-y-auto rounded-lg border border-slate-200 bg-white">
-          <p className="border-b border-slate-100 bg-slate-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
-            Resumen ({cambioPais.resumen.length})
-          </p>
-          <ul className="divide-y divide-slate-100 text-xs text-slate-700">
-            {cambioPais.resumen.map((r, i) => (
-              <li key={i} className="px-3 py-2 leading-snug">
-                {r}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </Modal>
     <Modal
       open={cambioPais?.paso === 'visualizacion'}
       onClose={() => setCambioPais(null)}
@@ -572,8 +488,9 @@ export function Header({ title, subtitle }: HeaderProps) {
     >
       <div className="space-y-3 text-sm leading-relaxed text-gray-600">
         <p>
-          Está visualizando el estimado <strong>{cambioPais?.codigo ?? avisoVisualizacion?.codigo}</strong>.
-          Se espera que <strong>apruebe o rechace los ítems de daño</strong> y luego{' '}
+          Está visualizando el estimado{' '}
+          <strong>{cambioPais?.codigo ?? avisoVisualizacion?.codigo}</strong>. Se espera que{' '}
+          <strong>apruebe o rechace los ítems de daño</strong> y luego{' '}
           <strong>apruebe o rechace el estimado</strong>.
         </p>
         {(avisoVisualizacion?.itemsPendientes ?? 0) > 0 && (
