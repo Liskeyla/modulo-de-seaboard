@@ -30,6 +30,10 @@ import { HistorialActividadModal } from '@/components/estimacion/HistorialActivi
 import { InfoDanoPanel } from '@/components/estimacion/InfoDanoPanel';
 import { InfoLateralCards } from '@/components/estimacion/InfoLateralCards';
 import { InformePreviewModal } from '@/components/estimacion/InformePreviewModal';
+import {
+  ConfirmacionEstimacionModal,
+  notificarRechazoALiquidaciones,
+} from '@/components/estimacion/ConfirmacionEstimacionModal';
 import { ListadoDanosTable } from '@/components/estimacion/ListadoDanosTable';
 import { VideoDanoModal } from '@/components/estimacion/VideoDanoModal';
 import { useAuthStore } from '@/store';
@@ -121,7 +125,7 @@ function resumirCambiosApertura(snap: SnapshotApertura, est: Estimacion): string
 type Dialogo =
   | { tipo: 'NINGUNO' }
   | { tipo: 'ENVIAR' }
-  | { tipo: 'RECHAZAR' }
+  | { tipo: 'DECISION_NAVIERA' }
   | { tipo: 'RECHAZAR_ITEMS' }
   | { tipo: 'RECHAZAR_ITEM'; dano: DanoEstimacion }
   | { tipo: 'EDITAR_DANO'; dano: DanoEstimacion }
@@ -567,17 +571,14 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   <button
                     type="button"
                     className="dms-btn-aprobar px-3 py-2 text-sm"
-                    onClick={() => {
-                      aprobar([estimacion.id], usuario);
-                      toast(`Estimación ${estimacion.codigo} aprobada.`, 'success');
-                    }}
+                    onClick={() => setDialogo({ tipo: 'DECISION_NAVIERA' })}
                   >
                     <CheckCircle2 className="h-4 w-4" /> Aprobar
                   </button>
                   <button
                     type="button"
                     className="dms-btn-rechazar px-3 py-2 text-sm"
-                    onClick={() => setDialogo({ tipo: 'RECHAZAR' })}
+                    onClick={() => setDialogo({ tipo: 'DECISION_NAVIERA' })}
                   >
                     <XCircle className="h-4 w-4" /> Rechazar
                   </button>
@@ -809,25 +810,28 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
 
       {/* ── Diálogos ─────────────────────────────────────────────── */}
 
-      <ConfirmModal
-        open={dialogo.tipo === 'ENVIAR'}
-        title="Enviar a Aprobación"
-        subtitle={`Destino: ${estimacion.naviera}`}
-        confirmLabel="Enviar"
-        confirmClass="dms-btn-enviar"
+      <ConfirmacionEstimacionModal
+        open={dialogo.tipo === 'ENVIAR' || dialogo.tipo === 'DECISION_NAVIERA'}
+        modo={dialogo.tipo === 'DECISION_NAVIERA' ? 'DECISION' : 'ENVIAR'}
+        estimacion={estimacion}
         onClose={cerrar}
-        onConfirm={() => {
+        onEnviar={() => {
           enviarAprobacion([estimacion.id], usuario);
           toast(`Estimación ${estimacion.codigo} enviada a aprobación.`, 'success');
+          cerrar();
         }}
-      >
-        El estimado pasará a estado <strong>ENVIADO</strong> y quedará en espera de la naviera.
-        {pendientes > 0 && (
-          <p className="mt-2 text-xs text-rfsorange-600">
-            Atención: hay {pendientes} comentario(s) de liquidaciones sin resolver.
-          </p>
-        )}
-      </ConfirmModal>
+        onAprobar={() => {
+          aprobar([estimacion.id], usuario);
+          toast(`Estimación ${estimacion.codigo} aprobada.`, 'success');
+          cerrar();
+        }}
+        onRechazar={(comentario) => {
+          rechazar([estimacion.id], usuario, comentario);
+          notificarRechazoALiquidaciones(estimacion, comentario, usuario);
+          toast(`Estimación ${estimacion.codigo} rechazada.`, 'success');
+          cerrar();
+        }}
+      />
 
       <ConfirmModal
         open={dialogo.tipo === 'CERRAR_APERTURA'}
@@ -884,21 +888,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
           pulse <strong>Cerrar estimación</strong> y confirme el guardado de cambios.
         </p>
       </Modal>
-
-      <ComentarioModal
-        open={dialogo.tipo === 'RECHAZAR'}
-        title="Rechazar Estimación"
-        subtitle="Indique el motivo; el técnico deberá corregir y reenviar"
-        label="Motivo del rechazo (obligatorio)"
-        confirmLabel="Rechazar estimado"
-        confirmClass="dms-btn-rechazar"
-        onClose={cerrar}
-        onConfirm={(comentario) => {
-          rechazar([estimacion.id], usuario, comentario);
-          toast(`Estimación ${estimacion.codigo} rechazada.`, 'success');
-          cerrar();
-        }}
-      />
 
       <ComentarioModal
         open={dialogo.tipo === 'RECHAZAR_ITEMS'}

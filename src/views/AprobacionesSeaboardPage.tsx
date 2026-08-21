@@ -15,6 +15,7 @@ import { Header } from '@/components/layout/Header';
 import { DmsTableToolbar } from '@/components/dms/DmsTableToolbar';
 import { EstadoEstimacionBadge } from '@/components/dms/EstadoEstimacionBadge';
 import { ComentarioModal } from '@/components/aprobaciones/ComentarioModal';
+import { notificarRechazoALiquidaciones } from '@/components/estimacion/ConfirmacionEstimacionModal';
 import { Input } from '@/components/ui/input';
 import { useAuthStore } from '@/store';
 import { useEstimacionesStore } from '@/store/estimacionesStore';
@@ -196,6 +197,16 @@ export default function AprobacionesSeaboardPage() {
     if (!selectedIds.length) return;
     if (modalAction === 'rechazar') {
       rechazar(selectedIds, usuario, comentario);
+      const afectadas = estimaciones.filter((e) => selectedIds.includes(e.id));
+      if (afectadas.length === 1) {
+        notificarRechazoALiquidaciones(afectadas[0], comentario, usuario);
+      } else if (afectadas.length > 1) {
+        notificarRechazoALiquidaciones(
+          afectadas[0],
+          `Rechazo masivo (${afectadas.length}): ${afectadas.map((e) => e.codigo).join(', ')}\n\n${comentario}`,
+          usuario
+        );
+      }
       toast(`${selectedIds.length} estimación(es) rechazada(s).`, 'success');
     } else if (modalAction === 'reversar') {
       reversar(selectedIds, usuario, comentario);
