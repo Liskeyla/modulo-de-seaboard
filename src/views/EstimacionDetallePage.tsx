@@ -744,7 +744,15 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   );
                 }}
                 onEditar={(d) => {
-                  if (exigirApertura()) return;
+                  if (!editable) {
+                    toast(
+                      puedeAperturar
+                        ? 'Aperture la estimación para modificar ítems.'
+                        : 'No tiene permiso para modificar ítems.',
+                      'info'
+                    );
+                    return;
+                  }
                   setDialogo({ tipo: 'EDITAR_DANO', dano: d });
                 }}
                 onFotos={(d) => setDialogo({ tipo: 'FOTOS', danoId: d.id })}

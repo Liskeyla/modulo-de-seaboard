@@ -293,7 +293,6 @@ export function ListadoDanosTable({
                             ? 'Editar daño'
                             : 'Aperture la estimación para modificar ítems'
                         }
-                        disabled={!editable}
                         onClick={() => onEditar(d)}
                       >
                         <PencilLine className="h-3.5 w-3.5" />
