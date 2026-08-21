@@ -18,11 +18,12 @@ export function enBandejaSeaboard(e: Estimacion) {
   );
 }
 
-/** Liquidaciones puede enviar a SBM (solo Seaboard, aún no enviado). */
+/** Liquidaciones puede enviar a SBM solo si la naviera es Seaboard y aún no está enviado (incl. tras reverso). */
 export function puedePushASbm(e: Estimacion) {
+  const yaEnviado = String(e.enviarAprobacion || '').toUpperCase() === 'SI';
   return (
     esNavieraSeaboard(e.naviera) &&
-    e.enviarAprobacion !== 'SI' &&
+    !yaEnviado &&
     ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(e.estado) &&
     e.danos.length > 0
   );

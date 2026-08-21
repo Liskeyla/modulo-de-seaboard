@@ -18,7 +18,7 @@ const LINKS_BASE = [
     href: '/reportes/estimaciones',
     label: 'Aprobaciones de Estimados',
     icon: ClipboardCheck,
-    hint: 'Enviar a SBM, reversar y eliminar',
+    hint: 'Enviar a SBM (Seaboard), reversar y eliminar',
     roles: ['liquidaciones'] as const,
   },
   {

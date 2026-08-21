@@ -382,9 +382,11 @@ export const useEstimacionesStore = create<EstimacionesState>()(
             if (!['APROBADO', 'REPARADO'].includes(e.estado)) return e;
             return {
               ...e,
-              estado: 'PENDIENTE' as EstadoEstimacion,
+              /** Queda listo para volver a Enviar a SBM. */
+              estado: 'REVERSADO' as EstadoEstimacion,
               fechaAprobacion: '',
               enviarAprobacion: 'NO',
+              validadoLiquidaciones: false,
               fechaModificacion: ahoraFmt(),
               usuarioModificacion: usuario,
               comentariosSeaboard: [

@@ -434,15 +434,17 @@ export default function ReporteEstimacionesPage() {
             <Info className="h-3.5 w-3.5" />
           </button>
         )}
-        {['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) &&
-          (user?.rol === 'dms' ||
-            (esLiquidaciones && puedePushASbm(row))) && (
+        {(user?.rol === 'dms' &&
+          ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) &&
+          esNavieraSeaboard(row.naviera) &&
+          String(row.enviarAprobacion || '').toUpperCase() !== 'SI') ||
+        (esLiquidaciones && puedePushASbm(row)) ? (
           <button
             type="button"
             className="dms-icon-action dms-icon-action--enviar"
             title={
               esLiquidaciones
-                ? 'Enviar a SBM · queda ENVIADO en reporte Seaboard'
+                ? 'Enviar a SBM · solo naviera Seaboard · queda ENVIADO'
                 : 'Enviar a Seaboard Marine'
             }
             onClick={() => {
@@ -455,7 +457,7 @@ export default function ReporteEstimacionesPage() {
               <Send className="h-3.5 w-3.5" />
             )}
           </button>
-        )}
+        ) : null}
         {esLiquidaciones && row.estado === 'APROBADO' && (
           <button
             type="button"
@@ -518,8 +520,8 @@ export default function ReporteEstimacionesPage() {
 
   const subtituloReporte = esLiquidaciones
     ? user?.pais === 'PERU'
-      ? 'Aprobaciones de Estimados · Perú · Enviar a SBM, reversar y eliminar'
-      : 'Aprobaciones de Estimados · Ecuador · Enviar a SBM, reversar y eliminar'
+      ? 'Aprobaciones de Estimados · Perú · Enviar a SBM (Seaboard), reversar y eliminar'
+      : 'Aprobaciones de Estimados · Ecuador · Enviar a SBM (Seaboard), reversar y eliminar'
     : 'Usuario Seaboard · Ver, modificar y aprobar / rechazar estimados';
 
   return (
@@ -1220,7 +1222,7 @@ export default function ReporteEstimacionesPage() {
           if (!activa) return;
           if (esLiquidaciones && !puedePushASbm(activa)) {
             toast(
-              'Confirme que la naviera es Seaboard y que el estimado aún no fue enviado.',
+              'Enviar a SBM solo aplica a naviera Seaboard y estimados no enviados (PENDIENTE / RECHAZADO / REVERSADO).',
               'info'
             );
             return;
@@ -1262,7 +1264,7 @@ export default function ReporteEstimacionesPage() {
       <ComentarioModal
         open={dialogo.tipo === 'REVERSAR_APROB'}
         title="Reversar aprobación"
-        subtitle={activa ? `${activa.codigo} · vuelve a PENDIENTE` : undefined}
+        subtitle={activa ? `${activa.codigo} · queda REVERSADO` : undefined}
         label="Motivo del reverso"
         confirmLabel="Confirmar reverso"
         confirmClass="dms-btn-reversar"
@@ -1270,7 +1272,17 @@ export default function ReporteEstimacionesPage() {
         onConfirm={(comentario) => {
           if (!activa) return;
           reversarAprobacion(activa.id, actor, comentario);
-          toast(`Aprobación de ${activa.codigo} reversada.`, 'success');
+          if (esNavieraSeaboard(activa.naviera)) {
+            toast(
+              `${activa.codigo} reversado. Puede volver a Enviar a SBM (naviera Seaboard).`,
+              'success'
+            );
+          } else {
+            toast(
+              `${activa.codigo} reversado. Enviar a SBM no aplica a esta naviera.`,
+              'success'
+            );
+          }
           cerrar();
         }}
       />

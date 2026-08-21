@@ -344,11 +344,12 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     (editable && (esLiquidaciones || esSeaboard)) || vistaCerradaLiq;
   const puedeEnviarLiquidaciones =
     esSeaboard && ESTADOS_SEABOARD.includes(estimacion.estado);
-  const puedeEnviarASeaboard =
-    esSeaboardNav &&
-    estimacion.enviarAprobacion !== 'SI' &&
-    ESTADOS_DMS_ENVIO.includes(estimacion.estado) &&
-    (esOperadorDms || (esLiquidaciones && puedePushASbm(estimacion)));
+  /** Liquidaciones: Enviar a SBM solo si naviera Seaboard (también tras reverso). */
+  const puedeEnviarASeaboard = esOperadorDms
+    ? esSeaboardNav &&
+      String(estimacion.enviarAprobacion || '').toUpperCase() !== 'SI' &&
+      ESTADOS_DMS_ENVIO.includes(estimacion.estado)
+    : esLiquidaciones && puedePushASbm(estimacion);
   /** Solo APROBADO: se puede reparar o reversar. REPARADO ya no. */
   const puedeReversarAprobLiq = vistaAprobadoLiq;
   const puedeRepararLiq = vistaAprobadoLiq;
@@ -860,12 +861,19 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                     aperturada
                       ? 'Cierre la estimación antes del enviar a SBM'
                       : esLiquidaciones
-                        ? 'Enviar a SBM · el estimado queda ENVIADO en el reporte Seaboard'
+                        ? 'Enviar a SBM · solo naviera Seaboard · queda ENVIADO'
                         : 'Enviar a Seaboard Marine'
                   }
                   onClick={() => {
                     if (aperturada) {
                       toast('Cierre la estimación antes de enviarla a Seaboard Marine.', 'info');
+                      return;
+                    }
+                    if (esLiquidaciones && !esSeaboardNav) {
+                      toast(
+                        'Enviar a SBM solo aplica a estimados de naviera Seaboard.',
+                        'info'
+                      );
                       return;
                     }
                     setDialogo({ tipo: 'ENVIAR_SEABOARD' });
@@ -1329,14 +1337,24 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       <ComentarioModal
         open={dialogo.tipo === 'REVERSAR_APROB'}
         title="Reversar aprobación"
-        subtitle={`${estimacion.codigo} · vuelve a PENDIENTE`}
+        subtitle={`${estimacion.codigo} · queda REVERSADO`}
         label="Motivo del reverso"
         confirmLabel="Confirmar reverso"
         confirmClass="dms-btn-reversar"
         onClose={cerrar}
         onConfirm={(comentario) => {
           reversarAprobacion(estimacion.id, actor, comentario);
-          toast(`Aprobación de ${estimacion.codigo} reversada.`, 'success');
+          if (esNavieraSeaboard(estimacion.naviera)) {
+            toast(
+              `Aprobación de ${estimacion.codigo} reversada. Puede volver a Enviar a SBM (naviera Seaboard).`,
+              'success'
+            );
+          } else {
+            toast(
+              `Aprobación de ${estimacion.codigo} reversada. Enviar a SBM no aplica a esta naviera.`,
+              'success'
+            );
+          }
           cerrar();
         }}
       />
