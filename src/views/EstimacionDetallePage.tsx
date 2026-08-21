@@ -135,7 +135,8 @@ type Dialogo =
   | { tipo: 'HISTORIAL' }
   | { tipo: 'INFORME'; conValores: boolean }
   | { tipo: 'CERRAR_APERTURA'; resumen: string[] }
-  | { tipo: 'SALIR_BLOQUEADO' };
+  | { tipo: 'SALIR_BLOQUEADO' }
+  | { tipo: 'SALIR_SIN_ACCION' };
 
 export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   const router = useRouter();
@@ -380,7 +381,44 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       setDialogo({ tipo: 'SALIR_BLOQUEADO' });
       return;
     }
+    // Si el estimado está pendiente de decisión/envío, recordar que debe actuar o confirmar solo visualización.
+    const seaboardPendiente = esSeaboard && estimacion!.estado === 'ENVIADO';
+    const dmsPendiente =
+      esOperadorDms && ESTADOS_EDITABLES.includes(estimacion!.estado);
+    if (seaboardPendiente || dmsPendiente) {
+      setDialogo({ tipo: 'SALIR_SIN_ACCION' });
+      return;
+    }
     router.push('/reportes/estimaciones');
+  }
+
+  function salirSoloVisualizacion() {
+    registrarActividad(
+      estimacion!.id,
+      usuario,
+      'Salió sin decisión (solo visualización)',
+      `Usuario confirmó salida del estimado ${estimacion!.codigo} sin aprobar/rechazar`
+    );
+    cerrar();
+    router.push('/reportes/estimaciones');
+  }
+
+  function continuarRevision() {
+    cerrar();
+    if (itemsPendientesRevision.length > 0) {
+      toast(
+        'Aperture la estimación, apruebe o rechace los ítems de daño y luego apruebe o rechace el estimado.',
+        'info'
+      );
+      return;
+    }
+    if (esSeaboard && estimacion!.estado === 'ENVIADO') {
+      setDialogo({ tipo: 'DECISION_NAVIERA' });
+      return;
+    }
+    if (esOperadorDms && ESTADOS_EDITABLES.includes(estimacion!.estado)) {
+      setDialogo({ tipo: 'ENVIAR' });
+    }
   }
 
   function cambiarDano(dano: DanoEstimacion, cambios: Partial<DanoEstimacion>, resumen: string) {
@@ -951,6 +989,58 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
           No ha cerrado el estimado. No puede regresar ni salir de esta pantalla hasta que
           pulse <strong>Cerrar estimación</strong> y confirme el guardado de cambios.
         </p>
+      </Modal>
+
+      <Modal
+        open={dialogo.tipo === 'SALIR_SIN_ACCION'}
+        onClose={cerrar}
+        size="md"
+        icon={<AlertTriangle className="h-4 w-4" />}
+        title="¿Salir del estimado?"
+        subtitle={`${estimacion.codigo} · ${estimacion.contenedor}`}
+        footer={
+          <>
+            <button
+              type="button"
+              className="dms-btn-action border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
+              onClick={cerrar}
+            >
+              Quedarme
+            </button>
+            <button
+              type="button"
+              className="dms-btn-action border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-700"
+              onClick={salirSoloVisualizacion}
+            >
+              Solo visualicé · Salir
+            </button>
+            <button
+              type="button"
+              className="dms-btn-enviar px-4 py-2 text-sm"
+              onClick={continuarRevision}
+            >
+              Continuar revisión / decisión
+            </button>
+          </>
+        }
+      >
+        <div className="space-y-3 text-sm leading-relaxed text-gray-600">
+          <p>
+            Al visualizar este estimado se espera que <strong>apruebe o rechace los ítems de
+            daño</strong> y luego <strong>apruebe o rechace el estimado</strong>
+            {esSeaboard ? ' (Enviar a Aprobación).' : ' (Enviar a Aprobación).'}
+          </p>
+          {itemsPendientesRevision.length > 0 && (
+            <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+              Aún hay <strong>{itemsPendientesRevision.length}</strong> ítem(s) sin revisar.
+              Aperture la estimación y use «Aprobar ítems» / «Rechazar ítems».
+            </p>
+          )}
+          <p className="text-xs text-slate-500">
+            Si solo ingresó a consultar y no realizará cambios ni decisión, pulse{' '}
+            <strong>Solo visualicé · Salir</strong>.
+          </p>
+        </div>
       </Modal>
 
       <ComentarioModal
