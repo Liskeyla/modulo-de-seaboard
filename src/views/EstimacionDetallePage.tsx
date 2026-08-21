@@ -143,6 +143,8 @@ type Dialogo =
   | { tipo: 'APORTAR' }
   | { tipo: 'ENVIAR' }
   | { tipo: 'RECHAZAR' }
+  | { tipo: 'RECHAZAR_ITEMS' }
+  | { tipo: 'RECHAZAR_ITEM'; dano: DanoEstimacion }
   | { tipo: 'ELIMINAR_DANO'; dano: DanoEstimacion }
   | { tipo: 'EDITAR_DANO'; dano: DanoEstimacion }
   | { tipo: 'COMENTARIOS'; danoId: string }
@@ -318,9 +320,14 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       toast('Marque al menos un ítem del listado de daños.', 'info');
       return;
     }
-    resolverItemsMasivo(estimacion!.id, marcadosIds, 'RECHAZAR', usuario);
-    toast(`${marcadosIds.length} ítem(s) rechazado(s).`, 'success');
+    setDialogo({ tipo: 'RECHAZAR_ITEMS' });
+  }
+
+  function confirmarRechazoItems(comentario: string, danoIds: string[]) {
+    resolverItemsMasivo(estimacion!.id, danoIds, 'RECHAZAR', usuario, comentario);
+    toast(`${danoIds.length} ítem(s) rechazado(s) con motivo registrado.`, 'success');
     setMarcadosIds([]);
+    cerrar();
   }
 
   function intentarRegresar() {
@@ -745,13 +752,18 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                     }, 50);
                   }
                 }}
-                onAplicaChange={(d, aplica: AplicaDano) =>
+                onAplicaChange={(d, aplica: AplicaDano) => {
+                  if (aplica === 'Rechazado') {
+                    if (exigirApertura()) return;
+                    setDialogo({ tipo: 'RECHAZAR_ITEM', dano: d });
+                    return;
+                  }
                   cambiarDano(
                     d,
                     { aplica },
                     `Línea ${d.linea} · Aplica: "${d.aplica}" → "${aplica}"`
-                  )
-                }
+                  );
+                }}
                 onRemarkChange={(d, remark) =>
                   cambiarDano(d, { remark }, `Línea ${d.linea} · Remark actualizado: "${remark}"`)
                 }
@@ -1036,15 +1048,44 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       <ComentarioModal
         open={dialogo.tipo === 'RECHAZAR'}
         title="Rechazar Estimación"
-        subtitle="El técnico deberá corregir y reenviar"
-        label="Motivo del rechazo"
-        confirmLabel="Rechazar"
+        subtitle="Indique el motivo; el técnico deberá corregir y reenviar"
+        label="Motivo del rechazo (obligatorio)"
+        confirmLabel="Rechazar estimado"
         confirmClass="dms-btn-rechazar"
         onClose={cerrar}
         onConfirm={(comentario) => {
           rechazar([estimacion.id], usuario, comentario);
           toast(`Estimación ${estimacion.codigo} rechazada.`, 'success');
           cerrar();
+        }}
+      />
+
+      <ComentarioModal
+        open={dialogo.tipo === 'RECHAZAR_ITEMS'}
+        title="Rechazar ítems"
+        subtitle={`${marcadosIds.length} línea(s) marcada(s) · indique el motivo`}
+        label="Motivo del rechazo (obligatorio)"
+        confirmLabel="Rechazar ítems"
+        confirmClass="dms-btn-rechazar"
+        onClose={cerrar}
+        onConfirm={(comentario) => confirmarRechazoItems(comentario, marcadosIds)}
+      />
+
+      <ComentarioModal
+        open={dialogo.tipo === 'RECHAZAR_ITEM'}
+        title="Rechazar ítem"
+        subtitle={
+          dialogo.tipo === 'RECHAZAR_ITEM'
+            ? `Línea ${String(dialogo.dano.linea).padStart(2, '0')} · ${dialogo.dano.comp}`
+            : undefined
+        }
+        label="Motivo del rechazo (obligatorio)"
+        confirmLabel="Rechazar ítem"
+        confirmClass="dms-btn-rechazar"
+        onClose={cerrar}
+        onConfirm={(comentario) => {
+          if (dialogo.tipo !== 'RECHAZAR_ITEM') return;
+          confirmarRechazoItems(comentario, [dialogo.dano.id]);
         }}
       />
 
@@ -1055,6 +1096,14 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
         onClose={cerrar}
         onGuardar={(cambios, resumen) => {
           if (dialogo.tipo !== 'EDITAR_DANO') return;
+          if (cambios.aplica === 'Rechazado' && dialogo.dano.aplica !== 'Rechazado') {
+            const { aplica: _a, ...resto } = cambios;
+            if (Object.keys(resto).length) {
+              cambiarDano(dialogo.dano, resto, resumen);
+            }
+            setDialogo({ tipo: 'RECHAZAR_ITEM', dano: dialogo.dano });
+            return;
+          }
           cambiarDano(dialogo.dano, cambios, resumen);
           toast('Línea de daño actualizada.', 'success');
           cerrar();

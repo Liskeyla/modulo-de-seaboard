@@ -100,7 +100,9 @@ interface EstimacionesState {
     id: string,
     danoIds: string[],
     accion: 'APROBAR' | 'RECHAZAR',
-    usuario: string
+    usuario: string,
+    /** Obligatorio al rechazar: motivo que queda en comentarios de cada línea. */
+    comentario?: string
   ) => void;
   eliminarDano: (id: string, danoId: string, usuario: string) => void;
 
@@ -404,15 +406,34 @@ export const useEstimacionesStore = create<EstimacionesState>()(
           });
         },
 
-        resolverItemsMasivo: (id, danoIds, accion, usuario) => {
+        resolverItemsMasivo: (id, danoIds, accion, usuario, comentario) => {
           if (danoIds.length === 0) return;
+          if (accion === 'RECHAZAR' && !String(comentario ?? '').trim()) return;
+          const motivo = String(comentario ?? '').trim();
           const ids = new Set(danoIds);
           mutar(id, (e) => {
             const afectados = e.danos.filter((d) => ids.has(d.id));
             if (afectados.length === 0) return e;
             const danos = e.danos.map((d) => {
               if (!ids.has(d.id)) return d;
-              if (accion === 'RECHAZAR') return { ...d, aplica: 'Rechazado' as AplicaDano };
+              if (accion === 'RECHAZAR') {
+                const cmt: ComentarioDano = {
+                  id: uid('cmt'),
+                  usuario,
+                  rol: 'TECNICO',
+                  fecha: ahoraFmt(),
+                  tipo: 'RECHAZADO',
+                  mensaje: motivo,
+                  campoAfectado: 'Aplica',
+                  valorAnterior: d.aplica,
+                  valorNuevo: 'Rechazado',
+                };
+                return {
+                  ...d,
+                  aplica: 'Rechazado' as AplicaDano,
+                  comentarios: [...d.comentarios, cmt],
+                };
+              }
               const aplica: AplicaDano =
                 d.cargo === 'Dueño' ? 'Aprobado Dueño' : 'Aprobado Linea';
               return { ...d, aplica };
@@ -428,7 +449,9 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                 evento(
                   usuario,
                   accion === 'RECHAZAR' ? 'ÍTEMS RECHAZADOS' : 'ÍTEMS APROBADOS',
-                  `${afectados.length} línea(s): ${lineas}`
+                  accion === 'RECHAZAR'
+                    ? `${afectados.length} línea(s): ${lineas}. Motivo: ${motivo}`
+                    : `${afectados.length} línea(s): ${lineas}`
                 ),
               ],
             });
