@@ -649,8 +649,8 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 </span>
                 <div className="min-w-0 truncate">
                   {puedeAperturar && !aperturada
-                    ? 'Seleccione un daño para ver detalle; para editar, pulse Aperturar estimación.'
-                    : 'Seleccione un daño para filtrar garantía y fotos a la derecha.'}
+                    ? 'Seleccione un daño para ver garantía; para editar, pulse Aperturar estimación.'
+                    : 'Seleccione un daño para editar la información de garantía.'}
                 </div>
               </div>
 

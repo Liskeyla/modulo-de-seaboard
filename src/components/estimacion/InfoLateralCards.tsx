@@ -56,17 +56,14 @@ export function InfoLateralCards({
     setMontoNc(dano.montoNc != null ? String(dano.montoNc) : '');
   }, [dano, estimacion.inspeccion.fecha]);
 
-  const todasLasFotos = useMemo<FotoInspeccion[]>(
+  const fotosDanos = useMemo<FotoInspeccion[]>(
     () =>
       estimacion.danos.flatMap((d) =>
-        d.fotos.map((f) => ({ ...f, linea: d.linea, comp: d.comp }))
+        d.fotos
+          .filter((f) => f.tipo === 'DANO')
+          .map((f) => ({ ...f, linea: d.linea, comp: d.comp }))
       ),
     [estimacion.danos]
-  );
-
-  const fotos = useMemo(
-    () => (dano ? todasLasFotos.filter((f) => f.linea === dano.linea) : todasLasFotos),
-    [dano, todasLasFotos]
   );
 
   const reversados: ArchivoDano[] = useMemo(() => {
@@ -192,20 +189,16 @@ export function InfoLateralCards({
             <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-1">
               <p className="dms-field-label mb-0">Fotos de daños</p>
               <p className="text-[10px] font-semibold text-slate-400">
-                {dano
-                  ? `Línea ${String(dano.linea).padStart(2, '0')} · ${dano.comp} · ${fotos.length}`
-                  : `Todas las líneas · ${fotos.length}`}
+                Todas las líneas · {fotosDanos.length}
               </p>
             </div>
-            {fotos.length === 0 ? (
+            {fotosDanos.length === 0 ? (
               <p className="text-[11px] leading-relaxed text-slate-400">
-                {dano
-                  ? 'Esta línea no tiene fotografías de daño declaradas.'
-                  : 'El estimado no tiene fotografías de daños declarados.'}
+                El estimado no tiene fotografías de daños declarados.
               </p>
             ) : (
               <div className="dms-insp-grid">
-                {fotos.map((foto) => (
+                {fotosDanos.map((foto) => (
                   <button
                     key={`${foto.linea}-${foto.id}`}
                     type="button"
@@ -217,19 +210,12 @@ export function InfoLateralCards({
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={foto.url} alt={foto.descripcion} />
                       <span className="dms-insp-foto-fecha">
-                        {!dano ? `L${String(foto.linea).padStart(2, '0')} · ` : ''}
-                        {foto.fecha.split(' ')[0]}
+                        L{String(foto.linea).padStart(2, '0')} · {foto.fecha.split(' ')[0]}
                       </span>
                     </span>
                   </button>
                 ))}
               </div>
-            )}
-            {dano && todasLasFotos.length > fotos.length && (
-              <p className="mt-1.5 text-[10px] text-slate-400">
-                Mostrando {fotos.length} de {todasLasFotos.length} fotos del estimado. Quite la
-                selección del listado para ver todas.
-              </p>
             )}
           </div>
         </div>
