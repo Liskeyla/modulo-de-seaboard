@@ -284,7 +284,11 @@ export function ListadoDanosTable({
                     <button
                       type="button"
                       className="dms-icon-btn dms-icon-btn--azul"
-                      title="Editar daño"
+                      title={
+                        editable
+                          ? 'Editar daño'
+                          : 'Aperture la estimación para modificar ítems'
+                      }
                       disabled={!editable}
                       onClick={() => onEditar(d)}
                     >

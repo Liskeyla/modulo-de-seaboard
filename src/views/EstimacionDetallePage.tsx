@@ -521,7 +521,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 </span>
                 <div className="min-w-0 truncate">
                   {puedeAperturar && !aperturada
-                    ? 'Seleccione un daño para ver detalle; para editar, pulse Aperturar estimación.'
+                    ? 'Para modificar ítems, pulse Aperturar estimación.'
                     : 'Seleccione un daño para ver su detalle a la derecha.'}
                 </div>
               </div>
@@ -576,7 +576,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
               <ListadoDanosTable
                 danos={estimacion.danos}
                 seleccionadoId={danoSelId}
-                editable={puedeAperturar}
+                editable={editable}
                 mostrarDimensiones={estimacion.tipoEstimacion.toUpperCase().includes('BOX')}
                 mostrarMarcacion={puedeAperturar}
                 marcacionHabilitada={aperturada}
@@ -599,16 +599,18 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                     }, 50);
                   }
                 }}
-                onRemarkChange={(d, remark) =>
-                  cambiarDano(d, { remark }, `Línea ${d.linea} · Remark actualizado: "${remark}"`)
-                }
-                onDonanteChange={(d, contenedorDonante) =>
+                onRemarkChange={(d, remark) => {
+                  if (exigirApertura()) return;
+                  cambiarDano(d, { remark }, `Línea ${d.linea} · Remark actualizado: "${remark}"`);
+                }}
+                onDonanteChange={(d, contenedorDonante) => {
+                  if (exigirApertura()) return;
                   cambiarDano(
                     d,
                     { contenedorDonante },
                     `Línea ${d.linea} · Contenedor donante: "${contenedorDonante}"`
-                  )
-                }
+                  );
+                }}
                 onEditar={(d) => {
                   if (exigirApertura()) return;
                   setDialogo({ tipo: 'EDITAR_DANO', dano: d });
