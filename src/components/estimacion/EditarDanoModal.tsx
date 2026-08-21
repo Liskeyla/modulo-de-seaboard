@@ -9,6 +9,7 @@ import {
   type CargoDano,
   type DanoEstimacion,
 } from '@/types/estimacion';
+import { toast } from '@/lib/utils';
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
@@ -32,7 +33,14 @@ interface Formulario {
   medida: string;
   remark: string;
   contenedorDonante: string;
+  comentarioSbm: string;
+  comentarioRfs: string;
 }
+
+export type ComentariosEdicionDano = {
+  sbm: string;
+  rfs: string;
+};
 
 function desdeDano(d: DanoEstimacion): Formulario {
   return {
@@ -55,6 +63,8 @@ function desdeDano(d: DanoEstimacion): Formulario {
     medida: d.medida,
     remark: d.remark,
     contenedorDonante: d.contenedorDonante,
+    comentarioSbm: '',
+    comentarioRfs: '',
   };
 }
 
@@ -68,7 +78,11 @@ export function EditarDanoModal({
   open: boolean;
   dano: DanoEstimacion | null;
   onClose: () => void;
-  onGuardar: (cambios: Partial<DanoEstimacion>, resumen: string) => void;
+  onGuardar: (
+    cambios: Partial<DanoEstimacion>,
+    resumen: string,
+    comentarios: ComentariosEdicionDano
+  ) => void;
   /** Solo estimados BOX editan Largo / Ancho (Área y Longitud se recalculan). */
   mostrarDimensiones?: boolean;
 }) {
@@ -119,19 +133,35 @@ export function EditarDanoModal({
       contenedorDonante: form.contenedorDonante.trim(),
     };
 
-    // Se resume solo lo que efectivamente cambió, para que la auditoría sea legible.
     const difs: string[] = [];
     (Object.keys(cambios) as (keyof DanoEstimacion)[]).forEach((k) => {
       const antes = dano[k];
       const ahora = cambios[k];
       if (String(antes ?? '') !== String(ahora ?? '') && k !== 'area' && k !== 'longitud') {
-        difs.push(`${k}: "${antes ?? ''}" → "${ahora ?? ''}"`);
+        difs.push(`${String(k)}: «${antes ?? ''}» → «${ahora ?? ''}»`);
       }
     });
 
+    const sbm = form.comentarioSbm.trim();
+    const rfs = form.comentarioRfs.trim();
+
+    if (difs.length > 0 && !sbm && !rfs) {
+      toast(
+        'Indique el motivo del cambio en Comentarios línea SBM o Comentarios RFS.',
+        'info'
+      );
+      return;
+    }
+
+    if (difs.length === 0 && !sbm && !rfs) {
+      toast('No hay cambios ni comentarios para guardar.', 'info');
+      return;
+    }
+
     onGuardar(
       cambios,
-      `Línea ${dano.linea} · ${difs.length ? difs.join(' · ') : 'sin cambios efectivos'}`
+      difs.length ? difs.join(' · ') : 'Sin cambios de campos (solo comentarios)',
+      { sbm, rfs }
     );
   };
 
@@ -247,7 +277,31 @@ export function EditarDanoModal({
             onChange={(e) => set('remark', e.target.value)}
           />
         </div>
+        <div>
+          <label className="dms-field-label">Comentarios línea SBM</label>
+          <textarea
+            rows={3}
+            className="dms-input-sm h-auto border-sky-200 bg-sky-50/50"
+            value={form.comentarioSbm}
+            placeholder="Explique los cambios realizados para Seaboard (SBM)…"
+            onChange={(e) => set('comentarioSbm', e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="dms-field-label">Comentarios RFS</label>
+          <textarea
+            rows={3}
+            className="dms-input-sm h-auto border-emerald-200 bg-emerald-50/50"
+            value={form.comentarioRfs}
+            placeholder="Explique los cambios realizados para RFS…"
+            onChange={(e) => set('comentarioRfs', e.target.value)}
+          />
+        </div>
       </div>
+      <p className="mt-2 text-[11px] text-slate-500">
+        Si modifica campos del ítem, debe indicar el motivo en al menos uno de los comentarios
+        (SBM o RFS). Quedarán visibles bajo la línea en el listado y en Comentarios.
+      </p>
     </Modal>
   );
 }

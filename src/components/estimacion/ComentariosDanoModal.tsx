@@ -51,8 +51,9 @@ const META_TIPO: Record<
 const META_ROL: Record<RolComentario, { label: string; clase: string }> = {
   LIQUIDACIONES: { label: 'Liquidaciones', clase: 'dms-cmt-rol--liq' },
   TECNICO: { label: 'Técnico', clase: 'dms-cmt-rol--tec' },
-  SEABOARD: { label: 'Naviera', clase: 'dms-cmt-rol--nav' },
+  SEABOARD: { label: 'Línea SBM', clase: 'dms-cmt-rol--nav' },
   SUPERVISOR: { label: 'Supervisor', clase: 'dms-cmt-rol--sup' },
+  RFS: { label: 'RFS', clase: 'dms-cmt-rol--rfs' },
 };
 
 /** El rol del comentario se deduce del usuario autenticado. */

@@ -39,7 +39,7 @@ export const CARGOS_DANO = ['Línea', 'Dueño', 'Garantía'] as const;
 export type CargoDano = (typeof CARGOS_DANO)[number];
 
 /** Área funcional del autor del comentario, para la trazabilidad con liquidaciones. */
-export type RolComentario = 'LIQUIDACIONES' | 'TECNICO' | 'SEABOARD' | 'SUPERVISOR';
+export type RolComentario = 'LIQUIDACIONES' | 'TECNICO' | 'SEABOARD' | 'SUPERVISOR' | 'RFS';
 
 /** Intención del comentario: permite ver de un vistazo qué se pidió cambiar y si ya se resolvió. */
 export type TipoComentario = 'SOLICITA_CAMBIO' | 'ACEPTADO' | 'RECHAZADO' | 'INFORMATIVO';
@@ -55,6 +55,15 @@ export interface ComentarioDano {
   campoAfectado?: string;
   valorAnterior?: string;
   valorNuevo?: string;
+}
+
+/** Última edición del ítem (subfila visible en el listado de daños). */
+export interface EdicionRecienteDano {
+  fecha: string;
+  usuario: string;
+  resumenCambios: string;
+  comentarioSbm?: string;
+  comentarioRfs?: string;
 }
 
 export interface FotoDano {
@@ -119,6 +128,8 @@ export interface DanoEstimacion {
   archivos?: ArchivoDano[];
   archivosReversados?: ArchivoDano[];
   comentarios: ComentarioDano[];
+  /** Resumen de la última edición (subfila de color en el listado). */
+  edicionReciente?: EdicionRecienteDano;
 }
 
 export interface NotaEstimacion {

@@ -384,6 +384,58 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     actualizarDano(estimacion!.id, dano.id, cambios, usuario, resumen);
   }
 
+  function guardarEdicionDano(
+    dano: DanoEstimacion,
+    cambios: Partial<DanoEstimacion>,
+    resumen: string,
+    comentarios: { sbm: string; rfs: string }
+  ) {
+    if (exigirApertura()) return;
+    const ahora = new Date().toLocaleString('es-EC', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    });
+    actualizarDano(
+      estimacion!.id,
+      dano.id,
+      {
+        ...cambios,
+        edicionReciente: {
+          fecha: ahora,
+          usuario,
+          resumenCambios: resumen,
+          ...(comentarios.sbm ? { comentarioSbm: comentarios.sbm } : {}),
+          ...(comentarios.rfs ? { comentarioRfs: comentarios.rfs } : {}),
+        },
+      },
+      usuario,
+      `Línea ${dano.linea} · ${resumen}`
+    );
+    if (comentarios.sbm) {
+      agregarComentarioDano(estimacion!.id, dano.id, {
+        usuario,
+        rol: 'SEABOARD',
+        tipo: 'INFORMATIVO',
+        mensaje: comentarios.sbm,
+        campoAfectado: 'Comentarios línea SBM',
+      });
+    }
+    if (comentarios.rfs) {
+      agregarComentarioDano(estimacion!.id, dano.id, {
+        usuario,
+        rol: 'RFS',
+        tipo: 'INFORMATIVO',
+        mensaje: comentarios.rfs,
+        campoAfectado: 'Comentarios RFS',
+      });
+    }
+  }
+
   return (
     <>
       <Header
@@ -902,10 +954,10 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
         dano={dialogo.tipo === 'EDITAR_DANO' ? dialogo.dano : null}
         mostrarDimensiones={estimacion.tipoEstimacion.toUpperCase().includes('BOX')}
         onClose={cerrar}
-        onGuardar={(cambios, resumen) => {
+        onGuardar={(cambios, resumen, comentarios) => {
           if (dialogo.tipo !== 'EDITAR_DANO') return;
-          cambiarDano(dialogo.dano, cambios, resumen);
-          toast('Línea de daño actualizada.', 'success');
+          guardarEdicionDano(dialogo.dano, cambios, resumen, comentarios);
+          toast('Línea de daño actualizada con comentarios.', 'success');
           cerrar();
         }}
       />

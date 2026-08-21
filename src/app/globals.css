@@ -1023,6 +1023,35 @@
     @apply text-slate-300;
   }
 
+  /* Subfila de cambios recientes bajo cada línea de daño */
+  .dms-dano-subfila > td {
+    @apply border-t-0 bg-amber-50/90 px-3 py-2 align-top;
+  }
+
+  .dms-dano-cambio {
+    @apply space-y-1.5 rounded-md border border-amber-200/80 bg-gradient-to-r from-amber-50 to-orange-50/80 px-3 py-2 text-[11px] leading-snug text-amber-950 shadow-sm;
+  }
+
+  .dms-dano-cambio-meta {
+    @apply flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700/80;
+  }
+
+  .dms-dano-cambio-resumen {
+    @apply text-[11px] text-amber-950;
+  }
+
+  .dms-dano-cmt-sbm {
+    @apply rounded border border-sky-200 bg-sky-50 px-2 py-1.5 text-[11px] text-sky-950;
+  }
+
+  .dms-dano-cmt-rfs {
+    @apply rounded border border-emerald-200 bg-emerald-50 px-2 py-1.5 text-[11px] text-emerald-950;
+  }
+
+  .dms-dano-cmt-label {
+    @apply mr-1.5 font-bold uppercase tracking-wide;
+  }
+
   .dms-select-aplica {
     @apply h-8 min-w-[8.5rem] border-slate-300 bg-white px-1.5 text-[10px] font-semibold text-black;
   }
@@ -1114,6 +1143,10 @@
 
   .dms-cmt-rol--sup {
     @apply bg-purple-100 text-purple-800;
+  }
+
+  .dms-cmt-rol--rfs {
+    @apply bg-emerald-100 text-emerald-800;
   }
 
   .dms-cmt-tag {
