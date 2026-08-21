@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { PencilLine, Save } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import {
-  APLICA_DANO,
   CARGOS_DANO,
   type AplicaDano,
   type CargoDano,
@@ -115,7 +114,6 @@ export function EditarDanoModal({
       csHoraHombre: csHH,
       csMaterial: csMat,
       cargo: form.cargo,
-      aplica: form.aplica,
       medida: form.medida.trim(),
       remark: form.remark.trim(),
       contenedorDonante: form.contenedorDonante.trim(),
@@ -215,17 +213,12 @@ export function EditarDanoModal({
         </div>
         <div>
           <label className="dms-field-label">Aplica</label>
-          <select
-            className="dms-select"
-            value={form.aplica}
-            onChange={(e) => set('aplica', e.target.value as AplicaDano)}
-          >
-            {APLICA_DANO.map((a) => (
-              <option key={a} value={a}>
-                {a}
-              </option>
-            ))}
-          </select>
+          <div className="dms-input-sm flex items-center bg-slate-50 font-semibold text-black">
+            {form.aplica}
+          </div>
+          <p className="mt-1 text-[10px] text-slate-400">
+            Se actualiza solo con Aprobar / Rechazar ítems.
+          </p>
         </div>
         <div>
           <label className="dms-field-label">Cs. Total</label>

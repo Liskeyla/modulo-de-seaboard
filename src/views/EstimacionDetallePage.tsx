@@ -37,7 +37,6 @@ import { useAuthStore } from '@/store';
 import { useEstimacionesStore } from '@/store/estimacionesStore';
 import {
   contarComentariosPendientes,
-  type AplicaDano,
   type DanoEstimacion,
   type Estimacion,
 } from '@/types/estimacion';
@@ -600,18 +599,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                     }, 50);
                   }
                 }}
-                onAplicaChange={(d, aplica: AplicaDano) => {
-                  if (aplica === 'Rechazado') {
-                    if (exigirApertura()) return;
-                    setDialogo({ tipo: 'RECHAZAR_ITEM', dano: d });
-                    return;
-                  }
-                  cambiarDano(
-                    d,
-                    { aplica },
-                    `Línea ${d.linea} · Aplica: "${d.aplica}" → "${aplica}"`
-                  );
-                }}
                 onRemarkChange={(d, remark) =>
                   cambiarDano(d, { remark }, `Línea ${d.linea} · Remark actualizado: "${remark}"`)
                 }
@@ -835,14 +822,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
         onClose={cerrar}
         onGuardar={(cambios, resumen) => {
           if (dialogo.tipo !== 'EDITAR_DANO') return;
-          if (cambios.aplica === 'Rechazado' && dialogo.dano.aplica !== 'Rechazado') {
-            const { aplica: _a, ...resto } = cambios;
-            if (Object.keys(resto).length) {
-              cambiarDano(dialogo.dano, resto, resumen);
-            }
-            setDialogo({ tipo: 'RECHAZAR_ITEM', dano: dialogo.dano });
-            return;
-          }
           cambiarDano(dialogo.dano, cambios, resumen);
           toast('Línea de daño actualizada.', 'success');
           cerrar();

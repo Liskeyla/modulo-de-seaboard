@@ -13,6 +13,7 @@ import type {
   RolComentario,
   TipoComentario,
 } from '@/types/estimacion';
+import { APLICA_APROBADO_SBM, APLICA_RECHAZADO_SBM } from '@/types/estimacion';
 
 const STORAGE_KEY = 'dms-estimaciones-prototipo-v8';
 const CLAVES_OBSOLETAS = [
@@ -427,17 +428,15 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                   mensaje: motivo,
                   campoAfectado: 'Aplica',
                   valorAnterior: d.aplica,
-                  valorNuevo: 'Rechazado',
+                  valorNuevo: APLICA_RECHAZADO_SBM,
                 };
                 return {
                   ...d,
-                  aplica: 'Rechazado' as AplicaDano,
+                  aplica: APLICA_RECHAZADO_SBM,
                   comentarios: [...d.comentarios, cmt],
                 };
               }
-              const aplica: AplicaDano =
-                d.cargo === 'Dueño' ? 'Aprobado Dueño' : 'Aprobado Linea';
-              return { ...d, aplica };
+              return { ...d, aplica: APLICA_APROBADO_SBM };
             });
             const lineas = afectados.map((d) => String(d.linea).padStart(2, '0')).join(', ');
             return recalcular({

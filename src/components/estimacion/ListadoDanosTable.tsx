@@ -2,9 +2,7 @@
 
 import { CheckCircle2, ClipboardList, Images, MessageSquare, PencilLine, Video } from 'lucide-react';
 import {
-  APLICA_DANO,
   totalesDanos,
-  type AplicaDano,
   type DanoEstimacion,
 } from '@/types/estimacion';
 import { cn, formatMoney } from '@/lib/utils';
@@ -23,7 +21,6 @@ interface ListadoDanosTableProps {
   onToggleMarcado?: (danoId: string) => void;
   onToggleTodos?: (marcar: boolean) => void;
   onSeleccionar: (dano: DanoEstimacion) => void;
-  onAplicaChange: (dano: DanoEstimacion, aplica: AplicaDano) => void;
   onRemarkChange: (dano: DanoEstimacion, remark: string) => void;
   onDonanteChange: (dano: DanoEstimacion, donante: string) => void;
   onEditar: (dano: DanoEstimacion) => void;
@@ -43,7 +40,6 @@ export function ListadoDanosTable({
   onToggleMarcado,
   onToggleTodos,
   onSeleccionar,
-  onAplicaChange,
   onRemarkChange,
   onDonanteChange,
   onEditar,
@@ -233,19 +229,8 @@ export function ListadoDanosTable({
                   ${formatMoney(d.csTotal)}
                 </td>
                 <td className="text-center whitespace-nowrap">{d.cargo}</td>
-                <td onClick={(e) => e.stopPropagation()}>
-                  <select
-                    className="dms-select dms-select-aplica"
-                    value={d.aplica}
-                    disabled={!editable}
-                    onChange={(e) => onAplicaChange(d, e.target.value as AplicaDano)}
-                  >
-                    {APLICA_DANO.map((a) => (
-                      <option key={a} value={a}>
-                        {a}
-                      </option>
-                    ))}
-                  </select>
+                <td className="text-center whitespace-nowrap text-[11px] font-semibold text-black">
+                  {d.aplica}
                 </td>
                 <td className="text-center">{d.medida || '—'}</td>
                 <td onClick={(e) => e.stopPropagation()}>

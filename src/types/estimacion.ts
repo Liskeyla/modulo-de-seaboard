@@ -18,13 +18,23 @@ export const ACTIVIDADES = ['WTY', 'SVL', 'DM', 'NO APLICA'] as const;
 export type Actividad = (typeof ACTIVIDADES)[number];
 
 export const APLICA_DANO = [
+  'Pendiente Revisión',
+  'Aprobado por Linea SBM',
+  'Rechazado SBM',
   'Aprobado Linea',
   'Aprobado Dueño',
-  'Pendiente Revisión',
   'Rechazado',
   'No Aplica',
 ] as const;
 export type AplicaDano = (typeof APLICA_DANO)[number];
+
+/** Valores que asigna el gestor Seaboard al aprobar/rechazar ítems. */
+export const APLICA_APROBADO_SBM: AplicaDano = 'Aprobado por Linea SBM';
+export const APLICA_RECHAZADO_SBM: AplicaDano = 'Rechazado SBM';
+
+export function esAplicaRechazado(aplica: string) {
+  return aplica === 'Rechazado SBM' || aplica === 'Rechazado';
+}
 
 export const CARGOS_DANO = ['Línea', 'Dueño', 'Garantía'] as const;
 export type CargoDano = (typeof CARGOS_DANO)[number];
