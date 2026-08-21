@@ -14,7 +14,6 @@ import {
   MessageSquare,
   RefreshCw,
   Save,
-  Search,
   Send,
   StickyNote,
   Unlock,
@@ -35,7 +34,6 @@ import { InfoLateralCards } from '@/components/estimacion/InfoLateralCards';
 import { InformePreviewModal } from '@/components/estimacion/InformePreviewModal';
 import { ListadoDanosTable } from '@/components/estimacion/ListadoDanosTable';
 import { VideoDanoModal } from '@/components/estimacion/VideoDanoModal';
-import { ALMACENES_SAP, ITINERARIOS_SAP } from '@/data/tarifas';
 import { useAuthStore } from '@/store';
 import { useEstimacionesStore } from '@/store/estimacionesStore';
 import {
@@ -50,34 +48,19 @@ import { cn, formatMoney, toast } from '@/lib/utils';
 const ESTADOS_EDITABLES = ['PENDIENTE', 'RECHAZADO', 'REVERSADO'];
 
 type SnapshotApertura = {
-  itinerarioSap: string;
-  almacenSap: string;
   notasCount: number;
   danos: DanoEstimacion[];
 };
 
-function capturarSnapshot(est: Estimacion, itinerario: string, almacen: string): SnapshotApertura {
+function capturarSnapshot(est: Estimacion): SnapshotApertura {
   return {
-    itinerarioSap: itinerario,
-    almacenSap: almacen,
     notasCount: est.notas.length,
     danos: structuredClone(est.danos),
   };
 }
 
-function resumirCambiosApertura(
-  snap: SnapshotApertura,
-  est: Estimacion,
-  itinerario: string,
-  almacen: string
-): string[] {
+function resumirCambiosApertura(snap: SnapshotApertura, est: Estimacion): string[] {
   const items: string[] = [];
-  if (snap.itinerarioSap !== itinerario) {
-    items.push(`Itinerario SAP: «${snap.itinerarioSap || '—'}» → «${itinerario || '—'}»`);
-  }
-  if (snap.almacenSap !== almacen) {
-    items.push(`Almacén SAP: «${snap.almacenSap || '—'}» → «${almacen || '—'}»`);
-  }
   const notasNuevas = est.notas.length - snap.notasCount;
   if (notasNuevas > 0) {
     items.push(`${notasNuevas} nota(s) de estimación agregada(s)`);
@@ -154,7 +137,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   const {
     estimaciones,
     getByCodigo,
-    setSap,
     revalidarTarifas,
     enviarAprobacion,
     aprobar,
@@ -169,8 +151,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
 
   const [dialogo, setDialogo] = useState<Dialogo>({ tipo: 'NINGUNO' });
   const [danoSelId, setDanoSelId] = useState<string | null>(null);
-  const [itinerario, setItinerario] = useState('');
-  const [almacen, setAlmacen] = useState('');
   const [nota, setNota] = useState('');
   const [aperturada, setAperturada] = useState(false);
   const [snapshotApertura, setSnapshotApertura] = useState<SnapshotApertura | null>(null);
@@ -178,8 +158,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
 
   useEffect(() => {
     if (!estimacion) return;
-    setItinerario(estimacion.itinerarioSap);
-    setAlmacen(estimacion.almacenSap);
     setDanoSelId((prev) =>
       prev && estimacion.danos.some((d) => d.id === prev) ? prev : (estimacion.danos[0]?.id ?? null)
     );
@@ -239,9 +217,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   const puedeComentar = user?.rol === 'dms' || user?.rol === 'liquidaciones';
   const danoSeleccionado = estimacion.danos.find((d) => d.id === danoSelId) ?? null;
   const pendientes = contarComentariosPendientes(estimacion.danos);
-  const sapPendiente =
-    editable &&
-    (itinerario !== estimacion.itinerarioSap || almacen !== estimacion.almacenSap);
   const esSeaboard = user?.rol === 'seaboard';
 
   const fotosDialogo =
@@ -263,7 +238,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   }
 
   function aperturarEstimacion() {
-    setSnapshotApertura(capturarSnapshot(estimacion!, itinerario, almacen));
+    setSnapshotApertura(capturarSnapshot(estimacion!));
     setAperturada(true);
     setMarcadosIds([]);
     toast('Estimación aperturada. Ya puede modificar ítems.', 'success');
@@ -271,19 +246,12 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
 
   function solicitarCerrarApertura() {
     const resumen = snapshotApertura
-      ? resumirCambiosApertura(snapshotApertura, estimacion!, itinerario, almacen)
+      ? resumirCambiosApertura(snapshotApertura, estimacion!)
       : [];
     setDialogo({ tipo: 'CERRAR_APERTURA', resumen });
   }
 
   function confirmarCerrarApertura() {
-    if (itinerario !== estimacion!.itinerarioSap || almacen !== estimacion!.almacenSap) {
-      setSap(
-        estimacion!.id,
-        { itinerarioSap: itinerario, almacenSap: almacen },
-        usuario
-      );
-    }
     setAperturada(false);
     setSnapshotApertura(null);
     setMarcadosIds([]);
@@ -496,94 +464,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
 
           <div className="grid items-start gap-3 xl:grid-cols-[minmax(0,1fr)_380px]">
             <div className="min-w-0 space-y-3">
-              <section className="dms-card">
-                <div className="dms-card-body">
-                  <div className="grid gap-3 md:grid-cols-2">
-                    <div>
-                      <label className="dms-field-label">Itinerario Sap</label>
-                      <div className="relative">
-                        <input
-                          className="dms-input-sm pr-8"
-                          list="itinerarios-sap"
-                          value={itinerario}
-                          placeholder="digitar descripcion"
-                          disabled={!puedeAperturar}
-                          readOnly={!puedeAperturar}
-                          onChange={(e) => {
-                            if (exigirApertura()) return;
-                            setItinerario(e.target.value);
-                          }}
-                          onFocus={() => {
-                            if (puedeAperturar && !aperturada) {
-                              toast('Aperture la estimación para modificar ítems.', 'info');
-                            }
-                          }}
-                        />
-                        <Search className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
-                        <datalist id="itinerarios-sap">
-                          {ITINERARIOS_SAP.map((i) => (
-                            <option key={i} value={i} />
-                          ))}
-                        </datalist>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="dms-field-label">Almacen Sap</label>
-                      <select
-                        className="dms-select"
-                        value={almacen}
-                        disabled={!puedeAperturar}
-                        onMouseDown={(e) => {
-                          if (puedeAperturar && !aperturada) {
-                            e.preventDefault();
-                            toast('Aperture la estimación para modificar ítems.', 'info');
-                          }
-                        }}
-                        onChange={(e) => {
-                          if (exigirApertura()) return;
-                          setAlmacen(e.target.value);
-                        }}
-                      >
-                        <option value="">Seleccione un Almacen Sap</option>
-                        {ALMACENES_SAP.map((a) => (
-                          <option key={a} value={a}>
-                            {a}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                  {sapPendiente && (
-                    <div className="mt-3 flex items-center gap-2">
-                      <button
-                        type="button"
-                        className="dms-btn-primary px-3 py-1.5 text-xs"
-                        onClick={() => {
-                          setSap(
-                            estimacion.id,
-                            { itinerarioSap: itinerario, almacenSap: almacen },
-                            usuario
-                          );
-                          toast('Información SAP guardada.', 'success');
-                        }}
-                      >
-                        <Save className="h-3.5 w-3.5" /> Guardar SAP
-                      </button>
-                      <button
-                        type="button"
-                        className="dms-btn-action border-gray-300 bg-white px-3 py-1.5 text-xs text-gray-600"
-                        onClick={() => {
-                          setItinerario(estimacion.itinerarioSap);
-                          setAlmacen(estimacion.almacenSap);
-                        }}
-                      >
-                        Descartar
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </section>
-
               <section className="dms-card">
                 <header className="dms-card-header">
                   <StickyNote className="h-3.5 w-3.5" /> Notas de Estimación
@@ -840,12 +720,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
               type="button"
               className="dms-btn-primary px-4 py-2 text-sm"
               onClick={() => {
-                setSap(
-                  estimacion.id,
-                  { itinerarioSap: itinerario, almacenSap: almacen },
-                  usuario
-                );
-                toast(`Información de ${estimacion.contenedor} actualizada.`, 'success');
+                toast(`Información de ${estimacion.contenedor} consultada.`, 'success');
                 cerrar();
               }}
             >
