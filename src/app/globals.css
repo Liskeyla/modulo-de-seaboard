@@ -1024,27 +1024,15 @@
   }
 
   .dms-select-aplica {
-    @apply h-8 min-w-[8.5rem] px-1.5 text-[10px] font-bold;
+    @apply h-8 min-w-[8.5rem] border-slate-300 bg-white px-1.5 text-[10px] font-semibold text-black;
   }
 
-  .dms-aplica--linea {
-    @apply border-blue-200 bg-blue-50 text-blue-700;
-  }
-
-  .dms-aplica--dueno {
-    @apply border-purple-200 bg-purple-50 text-purple-700;
-  }
-
-  .dms-aplica--pendiente {
-    @apply border-amber-200 bg-amber-50 text-amber-700;
-  }
-
-  .dms-aplica--rechazado {
-    @apply border-red-200 bg-red-50 text-red-700;
-  }
-
+  .dms-aplica--linea,
+  .dms-aplica--dueno,
+  .dms-aplica--pendiente,
+  .dms-aplica--rechazado,
   .dms-aplica--na {
-    @apply border-slate-200 bg-slate-50 text-slate-500;
+    @apply border-slate-300 bg-white text-black;
   }
 
   .dms-icon-btn {

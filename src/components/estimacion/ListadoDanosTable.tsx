@@ -9,14 +9,6 @@ import {
 } from '@/types/estimacion';
 import { cn, formatMoney } from '@/lib/utils';
 
-const CLASE_APLICA: Record<AplicaDano, string> = {
-  'Aprobado Linea': 'dms-aplica--linea',
-  'Aprobado Dueño': 'dms-aplica--dueno',
-  'Pendiente Revisión': 'dms-aplica--pendiente',
-  Rechazado: 'dms-aplica--rechazado',
-  'No Aplica': 'dms-aplica--na',
-};
-
 interface ListadoDanosTableProps {
   danos: DanoEstimacion[];
   seleccionadoId: string | null;
@@ -214,7 +206,7 @@ export function ListadoDanosTable({
                 <td className="text-center whitespace-nowrap">{d.cargo}</td>
                 <td onClick={(e) => e.stopPropagation()}>
                   <select
-                    className={cn('dms-select dms-select-aplica', CLASE_APLICA[d.aplica])}
+                    className="dms-select dms-select-aplica"
                     value={d.aplica}
                     disabled={!editable}
                     onChange={(e) => onAplicaChange(d, e.target.value as AplicaDano)}
