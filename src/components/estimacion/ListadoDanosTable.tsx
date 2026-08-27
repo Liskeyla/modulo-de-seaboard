@@ -75,6 +75,8 @@ interface ListadoDanosTableProps {
   comentarioRol?: RolComentario;
   comentariosSoloLectura?: boolean;
   onEnviarComentario?: (dano: DanoEstimacion, entrada: EntradaComentario) => void;
+  /** Oculta columna Acciones (previsualización solo lectura). */
+  ocultarAcciones?: boolean;
 }
 
 function celdaCambiada(edicion: EdicionRecienteDano, campo: CampoSnapshotLinea) {
@@ -103,10 +105,12 @@ function SubfilaHistorico({
   edicion,
   mostrarMarcacion,
   mostrarDimensiones,
+  ocultarAcciones = false,
 }: {
   edicion: EdicionRecienteDano;
   mostrarMarcacion: boolean;
   mostrarDimensiones: boolean;
+  ocultarAcciones?: boolean;
 }) {
   const s = edicion.snapshotAnterior;
   if (!s || !edicion.camposCambiados?.length) return null;
@@ -200,7 +204,7 @@ function SubfilaHistorico({
           </span>
         )}
       </td>
-      <td />
+      {!ocultarAcciones && <td />}
     </tr>
   );
 }
@@ -229,6 +233,7 @@ export function ListadoDanosTable({
   comentarioRol = 'TECNICO',
   comentariosSoloLectura = true,
   onEnviarComentario: _onEnviarComentario,
+  ocultarAcciones = false,
 }: ListadoDanosTableProps) {
   const [antesExpandidoIds, setAntesExpandidoIds] = useState<Set<string>>(() => new Set());
   const totales = totalesDanos(danos);
@@ -335,7 +340,7 @@ export function ListadoDanosTable({
             <th>Remark</th>
             <th>Contenedor Donante</th>
             <th className="min-w-[12rem]">Último comentario</th>
-            <th>Acciones</th>
+            {!ocultarAcciones && <th>Acciones</th>}
           </tr>
         </thead>
         <tbody>
@@ -593,6 +598,7 @@ export function ListadoDanosTable({
                       <span className="text-[11px] text-slate-400">Sin comentarios</span>
                     )}
                   </td>
+                  {!ocultarAcciones && (
                   <td onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center gap-1">
                       <button
@@ -643,12 +649,14 @@ export function ListadoDanosTable({
                       </button>
                     </div>
                   </td>
+                  )}
                 </tr>
                 {antesAbierto && edicion ? (
                   <SubfilaHistorico
                     edicion={edicion}
                     mostrarMarcacion={mostrarMarcacion}
                     mostrarDimensiones={mostrarDimensiones}
+                    ocultarAcciones={ocultarAcciones}
                   />
                 ) : null}
               </Fragment>

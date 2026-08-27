@@ -29,6 +29,7 @@ import { Modal } from '@/components/ui/Modal';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { ComentarioModal } from '@/components/aprobaciones/ComentarioModal';
 import { InformePreviewModal } from '@/components/estimacion/InformePreviewModal';
+import { PreviewListadoDanosModal } from '@/components/estimacion/PreviewListadoDanosModal';
 import { ChipsRetornoSeaboard } from '@/components/estimacion/RespuestaSeaboardBanner';
 import { AlertasLiquidacionesCell } from '@/components/estimacion/AlertasLiquidacionesCell';
 import {
@@ -203,7 +204,8 @@ type Dialogo =
   | { tipo: 'ENVIAR'; id: string }
   | { tipo: 'ELIMINAR'; id: string }
   | { tipo: 'REVERSAR_APROB'; id: string }
-  | { tipo: 'PUSH_SBM'; id: string };
+  | { tipo: 'PUSH_SBM'; id: string }
+  | { tipo: 'PREVIEW_DANOS'; id: string };
 
 export default function ReporteEstimacionesPage() {
   const router = useRouter();
@@ -768,12 +770,12 @@ export default function ReporteEstimacionesPage() {
                             <td onDoubleClick={(e) => e.stopPropagation()}>
                               {accionesDe(row)}
                             </td>
-                            <td>
+                              <td>
                               <button
                                 type="button"
                                 className="dms-cell-container-code dms-cell-link"
-                                onClick={() => router.push(`/reportes/estimaciones/${row.codigo}`)}
-                                title="Abrir el estimado"
+                                onClick={() => setDialogo({ tipo: 'PREVIEW_DANOS', id: row.id })}
+                                title="Previsualizar listado de daños"
                               >
                                 {row.codigo}
                               </button>
@@ -1081,6 +1083,16 @@ export default function ReporteEstimacionesPage() {
         conValores
         variante={dialogo.tipo === 'INFORME' ? dialogo.variante : 'ESTIMADO'}
         onClose={cerrar}
+      />
+
+      <PreviewListadoDanosModal
+        open={dialogo.tipo === 'PREVIEW_DANOS'}
+        estimacion={activa}
+        onClose={cerrar}
+        onAbrirEstimado={(codigo) => {
+          cerrar();
+          router.push(`/reportes/estimaciones/${codigo}`);
+        }}
       />
 
       <Modal

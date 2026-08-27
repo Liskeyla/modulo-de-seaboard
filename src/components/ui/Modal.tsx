@@ -9,7 +9,7 @@ interface ModalProps {
   title: string;
   subtitle?: string;
   icon?: ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
   onClose: () => void;
   footer?: ReactNode;
   children: ReactNode;
@@ -21,6 +21,7 @@ const ANCHOS: Record<NonNullable<ModalProps['size']>, string> = {
   md: 'max-w-2xl',
   lg: 'max-w-4xl',
   xl: 'max-w-6xl',
+  full: 'max-w-[min(96vw,90rem)]',
 };
 
 export function Modal({
