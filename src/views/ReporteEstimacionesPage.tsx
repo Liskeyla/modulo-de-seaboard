@@ -114,7 +114,6 @@ function excelHeadersParaRol(rol: string | undefined) {
     'Año',
     'Estado',
     'Contenedor',
-    'Tipo contenedor',
     'Modelo Maquina',
     'Código RFS',
     'Naviera',
@@ -154,7 +153,6 @@ function rowToExcel(e: Estimacion, rol?: string) {
     e.anio,
     e.estado,
     e.contenedor,
-    e.tipoContenedor,
     e.modeloMaquina,
     e.codigoRfs,
     e.naviera,
@@ -703,7 +701,6 @@ export default function ReporteEstimacionesPage() {
                         <th title="Cobro del estimado: Cliente o Línea">Cobro</th>
                       )}
                       <th>Contenedor</th>
-                      <th>Tipo contenedor</th>
                       <th>Modelo Maquina</th>
                       <th>Código RFS</th>
                       <th>Naviera</th>
@@ -847,7 +844,6 @@ export default function ReporteEstimacionesPage() {
                               </td>
                             )}
                             <td className="font-semibold text-rfs-navy">{row.contenedor}</td>
-                            <td className="text-[11px]">{row.tipoContenedor || '—'}</td>
                             <td className="text-xs">{row.modeloMaquina || '—'}</td>
                             <td className="text-center">{row.codigoRfs || '—'}</td>
                             <td className="dms-cell-wrap text-[10px]">{row.naviera}</td>
