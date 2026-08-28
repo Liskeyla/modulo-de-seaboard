@@ -72,7 +72,6 @@ import {
 import { textoComentariosRfs } from '@/components/estimacion/EditarDanoModal';
 import { resumirCambiosAntesDespues } from '@/lib/cambioAntesDespues';
 import { estimadoRequiereRevisionItems, tituloIndicadorRevisionEstimado } from '@/lib/revisionPendiente';
-import { PillItemsPendientesRevision } from '@/components/dms/IndicadoresRevision';
 import { cn, formatMoney, toast } from '@/lib/utils';
 import { fotosRealesDano } from '@/lib/fotosDano';
 
@@ -166,7 +165,6 @@ type Dialogo =
   | { tipo: 'SALIR_BLOQUEADO' }
   | { tipo: 'SALIR_SIN_ACCION' }
   | { tipo: 'REVERSAR_APROB' }
-  | { tipo: 'ELIMINAR_DANO'; danoId: string; linea: number }
   | { tipo: 'PUSH_SBM' };
 
 export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
@@ -180,7 +178,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     aprobar,
     rechazar,
     reversarAprobacion,
-    eliminarDano,
     actualizarDano,
     agregarDano,
     setSap,
@@ -1390,30 +1387,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   }
                   setDialogo({ tipo: 'EDITAR_DANO', dano: d });
                 }}
-                onEliminar={
-                  esLiquidaciones || esSeaboard
-                    ? (d) => {
-                        if (esItemAprobado(d.aplica)) {
-                          toast(MSG_ITEM_APROBADO_BLOQUEADO, 'info');
-                          return;
-                        }
-                        if (!editable) {
-                          toast(
-                            puedeAperturar
-                              ? 'Aperture la estimación para eliminar ítems.'
-                              : 'No tiene permiso para eliminar ítems.',
-                            'info'
-                          );
-                          return;
-                        }
-                        setDialogo({
-                          tipo: 'ELIMINAR_DANO',
-                          danoId: d.id,
-                          linea: d.linea,
-                        });
-                      }
-                    : undefined
-                }
                 onFotos={(d) => setDialogo({ tipo: 'FOTOS', danoId: d.id })}
                 onVideo={(d) => setDialogo({ tipo: 'VIDEO', dano: d })}
                 comentarioUsuario={actor}
@@ -1502,28 +1475,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
           El estimado se envía al <strong>reporte / bandeja Seaboard</strong> en estado{' '}
           <strong>ENVIADO</strong>. El gestor Seaboard podrá modificar ítems, comentar y
           devolverlo <strong>aprobado o rechazado</strong> a liquidaciones.
-        </p>
-      </ConfirmModal>
-
-      <ConfirmModal
-        open={dialogo.tipo === 'ELIMINAR_DANO'}
-        title="Eliminar ítem de daño"
-        subtitle={
-          dialogo.tipo === 'ELIMINAR_DANO' ? `Línea ${dialogo.linea}` : undefined
-        }
-        confirmLabel="Eliminar ítem"
-        confirmClass="dms-btn-eliminar"
-        onClose={cerrar}
-        onConfirm={() => {
-          if (dialogo.tipo !== 'ELIMINAR_DANO') return;
-          eliminarDano(estimacion.id, dialogo.danoId, actor);
-          if (danoSelId === dialogo.danoId) setDanoSelId(null);
-          toast(`Línea ${dialogo.linea} eliminada.`, 'success');
-          cerrar();
-        }}
-      >
-        <p className="text-sm text-gray-600">
-          Se eliminará la línea de daño del listado. Quedará registrado en la auditoría.
         </p>
       </ConfirmModal>
 

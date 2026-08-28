@@ -10,8 +10,6 @@ import {
   type Estimacion,
 } from '@/types/estimacion';
 import {
-  contarItemsPendientesRevision,
-  estimadoEsRevisionParcial,
   estimadoRequiereRevisionItems,
   esItemPendienteRevision,
   tituloIndicadorItemPendiente,
@@ -73,8 +71,8 @@ export function BadgeEstadoItem({
   );
 }
 
-/** Pill bajo código de estimado o en hero: N ítem(s) por revisar. */
-export function PillItemsPendientesRevision({
+/** Icono de alerta junto al código cuando hay ítems por revisar. */
+export function IconoAlertaRevisionEstimado({
   estimacion,
   className,
 }: {
@@ -82,16 +80,14 @@ export function PillItemsPendientesRevision({
   className?: string;
 }) {
   if (!estimadoRequiereRevisionItems(estimacion)) return null;
-  const n = contarItemsPendientesRevision(estimacion.danos);
-  const parcial = estimadoEsRevisionParcial(estimacion);
+  const titulo = tituloIndicadorRevisionEstimado(estimacion);
   return (
     <span
-      className={cn('dms-pill-revision', parcial && 'dms-pill-revision--parcial', className)}
-      title={tituloIndicadorRevisionEstimado(estimacion)}
+      className={cn('inline-flex shrink-0', className)}
+      title={titulo}
+      aria-label={titulo}
     >
-      <AlertCircle className="h-3 w-3 shrink-0" aria-hidden />
-      {parcial ? 'Revisión parcial' : 'Revisión pendiente'}
-      <span className="dms-pill-revision__count">{n}</span>
+      <AlertCircle className="h-3.5 w-3.5 text-amber-600" aria-hidden />
     </span>
   );
 }

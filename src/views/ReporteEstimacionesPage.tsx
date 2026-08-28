@@ -27,7 +27,7 @@ import { DmsTableToolbar } from '@/components/dms/DmsTableToolbar';
 import { EstadoEstimacionBadge } from '@/components/dms/EstadoEstimacionBadge';
 import {
   claseFilaRevisionPendiente,
-  PillItemsPendientesRevision,
+  IconoAlertaRevisionEstimado,
 } from '@/components/dms/IndicadoresRevision';
 import { Modal } from '@/components/ui/Modal';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
@@ -781,26 +781,25 @@ export default function ReporteEstimacionesPage() {
                               {accionesDe(row)}
                             </td>
                               <td>
-                              <button
-                                type="button"
-                                className="dms-cell-container-code dms-cell-link"
-                                onClick={() => setDialogo({ tipo: 'PREVIEW_DANOS', id: row.id })}
-                                title="Previsualizar listado de daños"
-                              >
-                                {row.codigo}
-                              </button>
-                              {requiereRevision && (
-                                <PillItemsPendientesRevision
-                                  estimacion={row}
-                                  className="block"
-                                />
-                              )}
-                              {pendientes > 0 && (
-                                <span
-                                  className="dms-pendiente-dot"
-                                  title={`${pendientes} cambio(s) solicitados por liquidaciones`}
-                                />
-                              )}
+                              <div className="flex flex-wrap items-center gap-1">
+                                {requiereRevision && (
+                                  <IconoAlertaRevisionEstimado estimacion={row} />
+                                )}
+                                <button
+                                  type="button"
+                                  className="dms-cell-container-code dms-cell-link"
+                                  onClick={() => setDialogo({ tipo: 'PREVIEW_DANOS', id: row.id })}
+                                  title="Previsualizar listado de daños"
+                                >
+                                  {row.codigo}
+                                </button>
+                                {pendientes > 0 && (
+                                  <span
+                                    className="dms-pendiente-dot"
+                                    title={`${pendientes} cambio(s) solicitados por liquidaciones`}
+                                  />
+                                )}
+                              </div>
                               {esLiquidaciones && <ChipsRetornoSeaboard estimacion={row} />}
                               {esLiquidaciones && enBandejaSeaboard(row) && (
                                 <span className="mt-1 block rounded bg-sky-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-sky-800">

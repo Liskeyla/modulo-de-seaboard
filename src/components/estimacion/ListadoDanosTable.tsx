@@ -10,7 +10,6 @@ import {
   Images,
   Lock,
   PencilLine,
-  Trash2,
   Video,
 } from 'lucide-react';
 import { BadgeEstadoItem } from '@/components/dms/IndicadoresRevision';
@@ -77,8 +76,6 @@ interface ListadoDanosTableProps {
   onDonanteChange: (dano: DanoEstimacion, donante: string) => void;
   onCargoChange?: (dano: DanoEstimacion, cargo: CargoDano) => void;
   onEditar: (dano: DanoEstimacion) => void;
-  /** Eliminar línea de daño (Liquidaciones / edición aperturada). */
-  onEliminar?: (dano: DanoEstimacion) => void;
   onFotos: (dano: DanoEstimacion) => void;
   onVideo: (dano: DanoEstimacion) => void;
   /** Usuario autenticado para el panel de comentarios. */
@@ -318,7 +315,6 @@ export function ListadoDanosTable({
   onDonanteChange: _onDonanteChange,
   onCargoChange,
   onEditar,
-  onEliminar,
   onFotos,
   onVideo,
   comentarioUsuario = 'usuario',
@@ -790,26 +786,6 @@ export function ListadoDanosTable({
                           <PencilLine className="h-3.5 w-3.5" />
                         )}
                       </button>
-                      {onEliminar && (
-                        <button
-                          type="button"
-                          className="dms-icon-btn dms-icon-btn--rojo"
-                          disabled={bloqueadoAprobado}
-                          title={
-                            bloqueadoAprobado
-                              ? MSG_ITEM_APROBADO_BLOQUEADO
-                              : editable
-                                ? 'Eliminar ítem de daño'
-                                : 'Aperture la estimación para eliminar ítems'
-                          }
-                          onClick={() => {
-                            if (bloqueadoAprobado) return;
-                            onEliminar(d);
-                          }}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      )}
                       <button
                         type="button"
                         className="dms-icon-btn dms-icon-btn--indigo"

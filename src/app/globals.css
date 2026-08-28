@@ -807,21 +807,19 @@
   }
 
   .dms-row-estimado-revision td {
-    @apply bg-amber-50/60;
-    box-shadow: inset 4px 0 0 #f59e0b;
+    @apply bg-amber-50/40;
   }
 
   .dms-row-estimado-revision.dms-row-selected td {
-    @apply bg-amber-100/70;
+    @apply bg-amber-50/60;
   }
 
   .dms-row-item-pendiente td {
-    @apply bg-amber-50/50;
-    box-shadow: inset 3px 0 0 #fbbf24;
+    @apply bg-amber-50/30;
   }
 
   .dms-row-item-pendiente.dms-row-selected td {
-    @apply bg-amber-100/60;
+    @apply bg-amber-50/50;
   }
 
   .dms-hero-chip--revision {
