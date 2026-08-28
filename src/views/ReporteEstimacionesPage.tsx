@@ -25,6 +25,10 @@ import { Header } from '@/components/layout/Header';
 import { DmsReportLayout } from '@/components/dms/DmsReportLayout';
 import { DmsTableToolbar } from '@/components/dms/DmsTableToolbar';
 import { EstadoEstimacionBadge } from '@/components/dms/EstadoEstimacionBadge';
+import {
+  claseFilaRevisionPendiente,
+  PillItemsPendientesRevision,
+} from '@/components/dms/IndicadoresRevision';
 import { Modal } from '@/components/ui/Modal';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { ComentarioModal } from '@/components/aprobaciones/ComentarioModal';
@@ -52,12 +56,14 @@ import {
   contarComentariosPendientes,
   itemsSinRevisionSbm,
   inferirTipoCobro,
+  mensajeRevisionItemsPendientes,
   MSG_ITEMS_SIN_APROBAR,
   type Actividad,
   type Estimacion,
   type TipoCobro,
 } from '@/types/estimacion';
 import { descargarDataLog, type VarianteInforme } from '@/lib/descargas';
+import { estimadoRequiereRevisionItems } from '@/lib/revisionPendiente';
 import { cn, formatMoney, toast } from '@/lib/utils';
 
 /**
@@ -488,7 +494,10 @@ export default function ReporteEstimacionesPage() {
             title="Aprobar / rechazar estimado"
             onClick={() => {
               if (itemsSinRevisionSbm(row.danos).length > 0) {
-                toast(MSG_ITEMS_SIN_APROBAR, 'info');
+                toast(
+                  mensajeRevisionItemsPendientes(row.danos) ?? MSG_ITEMS_SIN_APROBAR,
+                  'info'
+                );
                 return;
               }
               setDialogo({ tipo: 'ENVIAR', id: row.id });
@@ -737,10 +746,14 @@ export default function ReporteEstimacionesPage() {
                     {paginated.map((row) => {
                       const abierta = expandidas.has(row.id);
                       const pendientes = contarComentariosPendientes(row.danos);
+                      const requiereRevision = estimadoRequiereRevisionItems(row);
                       return (
                         <Fragment key={row.id}>
                           <tr
-                            className={cn(abierta && 'dms-row-selected')}
+                            className={claseFilaRevisionPendiente({
+                              estimacion: row,
+                              seleccionada: abierta,
+                            })}
                             onDoubleClick={() =>
                               router.push(`/reportes/estimaciones/${row.codigo}`)
                             }
@@ -776,6 +789,12 @@ export default function ReporteEstimacionesPage() {
                               >
                                 {row.codigo}
                               </button>
+                              {requiereRevision && (
+                                <PillItemsPendientesRevision
+                                  estimacion={row}
+                                  className="block"
+                                />
+                              )}
                               {pendientes > 0 && (
                                 <span
                                   className="dms-pendiente-dot"
@@ -1182,18 +1201,17 @@ export default function ReporteEstimacionesPage() {
         modo="DECISION"
         estimacion={activa}
         onClose={cerrar}
-        onAprobar={() => {
+        onAprobar={(comentario) => {
           if (!activa) return;
           if (itemsSinRevisionSbm(activa.danos).length > 0) {
-            toast(MSG_ITEMS_SIN_APROBAR, 'info');
+            toast(
+              mensajeRevisionItemsPendientes(activa.danos) ?? MSG_ITEMS_SIN_APROBAR,
+              'info'
+            );
             return;
           }
-          aprobar(
-            [activa.id],
-            actor,
-            `Aprobado por ${actor}. Enviado a liquidaciones RFS.`
-          );
-          notificarAprobacionALiquidaciones(activa, actor);
+          aprobar([activa.id], actor, comentario);
+          notificarAprobacionALiquidaciones(activa, actor, comentario);
           toast(
             `Estimación ${activa.codigo} aprobada y enviada a liquidaciones RFS (APROBADO).`,
             'success'
@@ -1203,7 +1221,10 @@ export default function ReporteEstimacionesPage() {
         onRechazar={(comentario) => {
           if (!activa) return;
           if (itemsSinRevisionSbm(activa.danos).length > 0) {
-            toast(MSG_ITEMS_SIN_APROBAR, 'info');
+            toast(
+              mensajeRevisionItemsPendientes(activa.danos) ?? MSG_ITEMS_SIN_APROBAR,
+              'info'
+            );
             return;
           }
           rechazar([activa.id], actor, comentario);

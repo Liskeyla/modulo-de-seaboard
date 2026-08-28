@@ -769,6 +769,77 @@
     box-shadow: 0 0 0 2px rgba(241, 110, 38, 0.2);
   }
 
+  /* ── Identificación visual: revisión pendiente (estimados / ítems) ── */
+  .dms-badge-estado-item {
+    @apply inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide;
+  }
+
+  .dms-badge-estado-item--compacto {
+    @apply px-1.5 py-0 text-[9px];
+  }
+
+  .dms-badge-estado-item--pendiente {
+    @apply bg-amber-50 text-amber-900 ring-2 ring-amber-300/80;
+  }
+
+  .dms-badge-estado-item--aprobado {
+    @apply bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200;
+  }
+
+  .dms-badge-estado-item--rechazado {
+    @apply bg-red-50 text-red-800 ring-1 ring-red-200;
+  }
+
+  .dms-pill-revision {
+    @apply mt-1 inline-flex items-center gap-1 rounded-md bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950 ring-1 ring-amber-400;
+  }
+
+  .dms-pill-revision--parcial {
+    @apply bg-orange-100 text-orange-950 ring-orange-400;
+  }
+
+  .dms-pill-revision__count {
+    @apply inline-flex min-w-[1.1rem] items-center justify-center rounded-full bg-amber-600 px-1 text-[9px] font-extrabold text-white;
+  }
+
+  .dms-pill-revision--parcial .dms-pill-revision__count {
+    @apply bg-orange-600;
+  }
+
+  .dms-row-estimado-revision td {
+    @apply bg-amber-50/60;
+    box-shadow: inset 4px 0 0 #f59e0b;
+  }
+
+  .dms-row-estimado-revision.dms-row-selected td {
+    @apply bg-amber-100/70;
+  }
+
+  .dms-row-item-pendiente td {
+    @apply bg-amber-50/50;
+    box-shadow: inset 3px 0 0 #fbbf24;
+  }
+
+  .dms-row-item-pendiente.dms-row-selected td {
+    @apply bg-amber-100/60;
+  }
+
+  .dms-hero-chip--revision {
+    @apply border-amber-300 bg-amber-100 font-bold text-amber-950 ring-2 ring-amber-400/60;
+  }
+
+  .dms-banner-revision-pendiente {
+    @apply flex flex-wrap items-center gap-2 rounded-lg border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 px-3 py-2 text-xs text-amber-950 shadow-sm;
+  }
+
+  .dms-dano-check--pendiente {
+    @apply text-amber-500;
+  }
+
+  .dms-indicador-col-pendiente {
+    @apply inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-400 text-white shadow-sm;
+  }
+
   /* Alertas Liquidaciones (columna izq. de Acciones) — estilo DMS */
   .dms-alertas-cell {
     @apply flex min-w-[4.75rem] flex-col items-center gap-1.5 py-0.5;
@@ -1045,6 +1116,29 @@
     @apply bg-white text-black;
   }
 
+  /* Ítem pendiente de revisión (revisión parcial): resaltar frente a ya aprobados */
+  .dms-table--danos tbody tr.dms-row-pendiente-revision td {
+    @apply bg-amber-50/70;
+  }
+
+  .dms-table--danos tbody tr.dms-row-pendiente-revision.dms-row-selected td,
+  .dms-table--danos tbody tr.dms-row-pendiente-revision.dms-row-marcado td {
+    @apply bg-amber-100/80;
+  }
+
+  .dms-table--danos tbody tr.dms-row-item-bloqueado td {
+    @apply bg-emerald-50/40;
+    box-shadow: inset 3px 0 0 #10b981;
+  }
+
+  .dms-table--danos tbody tr.dms-row-item-bloqueado.dms-row-selected td {
+    @apply bg-emerald-100/50;
+  }
+
+  .dms-item-bloqueado-aviso {
+    @apply flex items-start gap-2 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs leading-snug text-emerald-950;
+  }
+
   .dms-table--danos tfoot tr.dms-danos-total td {
     @apply border border-slate-300 bg-white font-bold text-black;
   }
@@ -1104,6 +1198,64 @@
 
   .dms-badge-antes {
     @apply inline-block rounded bg-slate-200 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-slate-600;
+  }
+
+  /* Comparación valor anterior → valor nuevo (cantidades / montos) */
+  .dms-cmp-valores {
+    @apply inline-flex flex-col items-end gap-0 leading-tight;
+  }
+
+  .dms-cmp-antes {
+    @apply text-[10px] font-semibold text-slate-500 line-through decoration-slate-400;
+  }
+
+  .dms-cmp-flecha {
+    @apply mx-0.5 text-[10px] font-bold text-slate-400;
+  }
+
+  .dms-cmp-despues {
+    @apply text-[11px] font-bold text-emerald-800;
+  }
+
+  .dms-cmp-valores .dms-cmp-flecha {
+    @apply hidden;
+  }
+
+  @media (min-width: 1280px) {
+    .dms-cmp-valores {
+      @apply flex-row items-baseline gap-0.5;
+    }
+    .dms-cmp-valores .dms-cmp-flecha {
+      @apply inline;
+    }
+  }
+
+  .dms-dano-subfila-comparacion > td {
+    @apply border-t-0 bg-amber-50/90 px-2 py-1.5;
+  }
+
+  .dms-antes-despues-barra {
+    @apply flex flex-wrap items-center gap-2 rounded-md border border-amber-200 bg-white px-2.5 py-1.5;
+  }
+
+  .dms-antes-despues-barra__titulo {
+    @apply shrink-0 text-[10px] font-bold uppercase tracking-wide text-amber-900;
+  }
+
+  .dms-antes-despues-barra__chips {
+    @apply flex min-w-0 flex-1 flex-wrap gap-1.5;
+  }
+
+  .dms-antes-despues-chip {
+    @apply inline-flex items-center gap-1 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] text-slate-700;
+  }
+
+  .dms-antes-despues-chip strong {
+    @apply mr-0.5 font-bold text-slate-800;
+  }
+
+  .dms-antes-despues-barra__meta {
+    @apply shrink-0 text-[10px] text-slate-500;
   }
 
   /* Campos que fueron reemplazados (valor anterior tachado) */

@@ -1,18 +1,24 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { PencilLine, Save } from 'lucide-react';
+import { Lock, PencilLine, Save } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import {
-  APLICA_DANO,
-  APLICA_RECHAZADO_SBM,
+  APLICA_PENDIENTE,
   CARGOS_DANO,
-  CARGO_RECHAZADO,
+  CARGO_DEFAULT,
   esAplicaRechazado,
+  esItemAprobado,
+  MSG_ITEM_APROBADO_BLOQUEADO,
+  normalizarAplicaDano,
+  normalizarCargoDano,
+  snapshotDesdeDano,
   type AplicaDano,
   type CargoDano,
+  type CampoSnapshotLinea,
   type DanoEstimacion,
 } from '@/types/estimacion';
+import { resumirCambiosAntesDespues } from '@/lib/cambioAntesDespues';
 import { cn, toast } from '@/lib/utils';
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -94,8 +100,8 @@ function desdeDano(d: DanoEstimacion): Formulario {
     horasHombre: String(d.horasHombre),
     csHoraHombre: String(d.csHoraHombre),
     csMaterial: String(d.csMaterial),
-    cargo: d.cargo,
-    aplica: d.aplica,
+    cargo: normalizarCargoDano(d.cargo),
+    aplica: normalizarAplicaDano(d.aplica),
     medida: d.medida,
     remark: d.remark,
     contenedorDonante: d.contenedorDonante,
@@ -135,6 +141,8 @@ export function EditarDanoModal({
   if (!dano || !form) return null;
 
   const itemRechazado = esAplicaRechazado(form.aplica);
+  const itemAprobado = esItemAprobado(form.aplica);
+  const soloLectura = itemAprobado || itemRechazado;
 
   const set = <K extends keyof Formulario>(k: K, v: Formulario[K]) =>
     setForm((f) => (f ? { ...f, [k]: v } : f));
@@ -151,6 +159,10 @@ export function EditarDanoModal({
   const ancho = round2(numero(form.ancho));
 
   const guardar = () => {
+    if (itemAprobado) {
+      toast(MSG_ITEM_APROBADO_BLOQUEADO, 'info');
+      return;
+    }
     const largoFinal = mostrarDimensiones ? largo : dano.largo;
     const anchoFinal = mostrarDimensiones ? ancho : dano.ancho;
     const rechazado = esAplicaRechazado(form.aplica);
@@ -172,7 +184,7 @@ export function EditarDanoModal({
       horasHombre: rechazado ? 0 : hh,
       csHoraHombre: rechazado ? 0 : csHH,
       csMaterial: rechazado ? 0 : csMat,
-      cargo: rechazado ? CARGO_RECHAZADO : form.cargo,
+      cargo: form.cargo,
       aplica: form.aplica,
       medida: form.medida.trim(),
       remark: form.remark.trim(),
@@ -182,32 +194,29 @@ export function EditarDanoModal({
       cambios.csTotal = 0;
     }
 
-    const difs: string[] = [];
-    (Object.keys(cambios) as (keyof DanoEstimacion)[]).forEach((k) => {
-      const antes = dano[k];
-      const ahora = cambios[k];
-      if (String(antes ?? '') !== String(ahora ?? '') && k !== 'area' && k !== 'longitud') {
-        difs.push(`${String(k)}: «${antes ?? ''}» → «${ahora ?? ''}»`);
-      }
-    });
+    const antesSnap = snapshotDesdeDano(dano);
+    const despuesSnap = snapshotDesdeDano({ ...dano, ...cambios });
+    const camposCambiados = (Object.keys(despuesSnap) as CampoSnapshotLinea[]).filter(
+      (k) => String(antesSnap[k] ?? '') !== String(despuesSnap[k] ?? '')
+    );
+    const resumenLegible =
+      camposCambiados.length > 0
+        ? resumirCambiosAntesDespues(antesSnap, despuesSnap, camposCambiados)
+        : 'Sin cambios de campos (solo comentario SBM)';
 
     const sbm = form.comentarioSbm.trim();
 
-    if (difs.length > 0 && !sbm) {
+    if (camposCambiados.length > 0 && !sbm) {
       toast('Indique el motivo del cambio en Comentarios línea SBM.', 'info');
       return;
     }
 
-    if (difs.length === 0 && !sbm) {
+    if (camposCambiados.length === 0 && !sbm) {
       toast('No hay cambios ni comentarios SBM para guardar.', 'info');
       return;
     }
 
-    onGuardar(
-      cambios,
-      difs.length ? difs.join(' · ') : 'Sin cambios de campos (solo comentario SBM)',
-      { sbm, rfs: '' }
-    );
+    onGuardar(cambios, resumenLegible, { sbm, rfs: '' });
   };
 
   const campoTexto = (
@@ -216,17 +225,27 @@ export function EditarDanoModal({
     props: { type?: string; step?: string; placeholder?: string } = {}
   ) => {
     const bloqueado =
+      itemAprobado ||
       CAMPOS_BLOQUEADOS.includes(key) ||
       (itemRechazado && CAMPOS_COSTO_RECHAZO.includes(key));
     const valor =
       itemRechazado && CAMPOS_COSTO_RECHAZO.includes(key)
         ? '0'
         : (form[key] as string);
+    const valorOriginal = String(
+      (dano as unknown as Record<string, unknown>)[key] ?? ''
+    );
+    const cambioVsOriginal =
+      !bloqueado && valorOriginal !== '' && String(valor) !== valorOriginal;
     return (
       <div>
         <label className="dms-field-label">{label}</label>
         <input
-          className={cn('dms-input-sm', bloqueado && 'bg-slate-100 text-slate-600')}
+          className={cn(
+            'dms-input-sm',
+            bloqueado && 'bg-slate-100 text-slate-600',
+            cambioVsOriginal && 'border-amber-400 bg-amber-50/60'
+          )}
           value={valor}
           type={props.type ?? 'text'}
           step={props.step}
@@ -243,6 +262,13 @@ export function EditarDanoModal({
             set(key, e.target.value as Formulario[typeof key]);
           }}
         />
+        {cambioVsOriginal && (
+          <p className="mt-0.5 text-[10px] tabular-nums text-amber-800">
+            Antes: <span className="font-semibold line-through opacity-80">{valorOriginal}</span>
+            {' → '}
+            <span className="font-bold">{valor}</span>
+          </p>
+        )}
       </div>
     );
   };
@@ -252,9 +278,17 @@ export function EditarDanoModal({
       open={open}
       onClose={onClose}
       size="lg"
-      icon={<PencilLine className="h-4 w-4" />}
-      title={`Editar Daño · Línea ${String(dano.linea).padStart(2, '0')}`}
-      subtitle="Vista SBM · Los cambios quedan en el historial y como subfila del listado"
+      icon={itemAprobado ? <Lock className="h-4 w-4" /> : <PencilLine className="h-4 w-4" />}
+      title={
+        itemAprobado
+          ? `Ítem aprobado · Línea ${String(dano.linea).padStart(2, '0')}`
+          : `Editar Daño · Línea ${String(dano.linea).padStart(2, '0')}`
+      }
+      subtitle={
+        itemAprobado
+          ? 'Bloqueado por aprobación de línea · use Reversar ítems para modificar'
+          : 'Vista SBM · Los cambios quedan en el historial y como subfila del listado'
+      }
       footer={
         <>
           <button
@@ -262,15 +296,23 @@ export function EditarDanoModal({
             className="dms-btn-action border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
             onClick={onClose}
           >
-            Cancelar
+            {itemAprobado ? 'Cerrar' : 'Cancelar'}
           </button>
-          <button type="button" className="dms-btn-primary px-4 py-2 text-sm" onClick={guardar}>
-            <Save className="h-4 w-4" /> Guardar cambios
-          </button>
+          {!itemAprobado && (
+            <button type="button" className="dms-btn-primary px-4 py-2 text-sm" onClick={guardar}>
+              <Save className="h-4 w-4" /> Guardar cambios
+            </button>
+          )}
         </>
       }
     >
-      <div className="grid gap-3 sm:grid-cols-3">
+      {itemAprobado && (
+        <div className="dms-item-bloqueado-aviso mb-3" role="status">
+          <Lock className="h-4 w-4 shrink-0" aria-hidden />
+          <span>{MSG_ITEM_APROBADO_BLOQUEADO}</span>
+        </div>
+      )}
+      <div className={cn('grid gap-3 sm:grid-cols-3', itemAprobado && 'pointer-events-none opacity-90')}>
         {campoTexto('Comp.', 'comp')}
         {campoTexto('Part Number', 'partNumber')}
         {campoTexto('Ubicación', 'ubicacion')}
@@ -295,8 +337,8 @@ export function EditarDanoModal({
           <label className="dms-field-label">Cargo</label>
           <select
             className="dms-select"
-            value={itemRechazado ? CARGO_RECHAZADO : form.cargo || 'Línea'}
-            disabled={itemRechazado}
+            value={normalizarCargoDano(form.cargo)}
+            disabled={soloLectura}
             onChange={(e) => set('cargo', e.target.value as CargoDano)}
           >
             {CARGOS_DANO.map((c) => (
@@ -307,36 +349,13 @@ export function EditarDanoModal({
           </select>
         </div>
         <div>
-          <label className="dms-field-label">Aplica</label>
-          <select
-            className="dms-select"
-            value={form.aplica || 'Pendiente Revisión'}
-            onChange={(e) => {
-              const aplica = e.target.value as AplicaDano;
-              if (aplica === APLICA_RECHAZADO_SBM) {
-                setForm((f) =>
-                  f
-                    ? {
-                        ...f,
-                        aplica,
-                        cargo: CARGO_RECHAZADO,
-                        horasHombre: '0',
-                        csHoraHombre: '0',
-                        csMaterial: '0',
-                      }
-                    : f
-                );
-              } else {
-                set('aplica', aplica);
-              }
-            }}
+          <label className="dms-field-label">Estado</label>
+          <div
+            className="dms-input-sm flex items-center bg-slate-50 text-[12px] font-semibold text-slate-700"
+            title="El estado se define con Aprobar / Rechazar ítems, no desde aquí"
           >
-            {APLICA_DANO.map((a) => (
-              <option key={a} value={a}>
-                {a}
-              </option>
-            ))}
-          </select>
+            {normalizarAplicaDano(form.aplica) || APLICA_PENDIENTE}
+          </div>
         </div>
         <div>
           <label className="dms-field-label">Cs. Total</label>
@@ -351,7 +370,7 @@ export function EditarDanoModal({
         </div>
       </div>
 
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+      <div className={cn('mt-3 grid gap-3 sm:grid-cols-2', itemAprobado && 'pointer-events-none opacity-90')}>
         <div>
           <label className="dms-field-label">Obs. Análisis</label>
           <textarea
@@ -368,6 +387,8 @@ export function EditarDanoModal({
             rows={3}
             className="dms-input-sm h-auto"
             value={form.remark}
+            disabled={itemAprobado}
+            readOnly={itemAprobado}
             onChange={(e) => set('remark', e.target.value)}
           />
         </div>
@@ -377,6 +398,8 @@ export function EditarDanoModal({
             rows={3}
             className="dms-input-sm h-auto border-sky-200 bg-sky-50/50"
             value={form.comentarioSbm}
+            disabled={itemAprobado}
+            readOnly={itemAprobado}
             placeholder="Ej.: Se ajustó la cantidad según inspección en patio…"
             onChange={(e) => set('comentarioSbm', e.target.value)}
           />

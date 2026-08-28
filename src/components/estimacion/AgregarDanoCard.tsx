@@ -3,8 +3,9 @@
 import { useMemo, useRef, useState } from 'react';
 import { ChevronDown, Lock, Plus, Search, Upload, X } from 'lucide-react';
 import {
-  APLICA_DANO,
+  APLICA_PENDIENTE,
   CARGOS_DANO,
+  CARGO_DEFAULT,
   type AplicaDano,
   type CargoDano,
   type DanoEstimacion,
@@ -27,8 +28,8 @@ export function AgregarDanoCard({ editable, seccionSugerida, onAgregar }: Agrega
   const [tarifa, setTarifa] = useState<Tarifa | null>(null);
   const [danio, setDanio] = useState('');
   const [cantidad, setCantidad] = useState('1');
-  const [cargo, setCargo] = useState<CargoDano>('Línea');
-  const [aplica, setAplica] = useState<AplicaDano>('Pendiente Revisión');
+  const [cargo, setCargo] = useState<CargoDano>(CARGO_DEFAULT);
+  const [aplica] = useState<AplicaDano>(APLICA_PENDIENTE);
   const [archivos, setArchivos] = useState<File[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -59,8 +60,7 @@ export function AgregarDanoCard({ editable, seccionSugerida, onAgregar }: Agrega
     setBusqueda('');
     setDanio('');
     setCantidad('1');
-    setCargo('Línea');
-    setAplica('Pendiente Revisión');
+    setCargo(CARGO_DEFAULT);
     setArchivos([]);
     if (fileRef.current) fileRef.current.value = '';
   }
@@ -252,19 +252,13 @@ export function AgregarDanoCard({ editable, seccionSugerida, onAgregar }: Agrega
           </div>
 
           <div>
-            <label className="dms-field-label">Aplica</label>
-            <select
-              className="dms-select"
-              value={aplica}
-              disabled={!editable}
-              onChange={(e) => setAplica(e.target.value as AplicaDano)}
+            <label className="dms-field-label">Estado</label>
+            <div
+              className="dms-input-sm flex items-center bg-slate-50 text-[12px] font-semibold text-slate-700"
+              title="Nuevos ítems nacen en Pendiente de revisión; el estado se define con Aprobar / Rechazar"
             >
-              {APLICA_DANO.map((a) => (
-                <option key={a} value={a}>
-                  {a}
-                </option>
-              ))}
-            </select>
+              {aplica}
+            </div>
           </div>
         </div>
 

@@ -1,6 +1,7 @@
 import {
   APLICA_APROBADO_SBM,
   esAplicaRechazado,
+  normalizarAplicaDano,
   type Estimacion,
 } from '@/types/estimacion';
 
@@ -41,7 +42,9 @@ export function resumenRetornoSeaboard(e: Estimacion) {
         (d.edicionReciente.camposCambiados?.length ?? 0) > 0)
   ).length;
   const itemsRechazados = e.danos.filter((d) => esAplicaRechazado(d.aplica)).length;
-  const itemsAprobados = e.danos.filter((d) => d.aplica === APLICA_APROBADO_SBM).length;
+  const itemsAprobados = e.danos.filter(
+    (d) => normalizarAplicaDano(d.aplica) === APLICA_APROBADO_SBM
+  ).length;
   const rechazoTotal = e.estado === 'RECHAZADO';
   const ultimo = [...e.comentariosSeaboard]
     .reverse()

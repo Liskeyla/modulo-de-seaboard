@@ -9,6 +9,7 @@ import {
   ClipboardCheck,
   FileBarChart,
   Home,
+  ListChecks,
   LogOut,
   Pin,
   PinOff,
@@ -25,6 +26,7 @@ import { cn } from '@/lib/utils';
 const iconos: Record<string, React.ComponentType<{ className?: string }>> = {
   FileBarChart,
   ClipboardCheck,
+  ListChecks,
 };
 
 export function MenuLateral() {

@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   ArrowLeft,
   CheckCircle2,
+  Clock3,
   Database,
   FileStack,
   ListChecks,
@@ -21,6 +22,7 @@ import {
   Wrench,
   XCircle,
   Pencil,
+  RotateCcw,
   Ship,
 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
@@ -57,12 +59,20 @@ import {
   aLineaHistorial,
   snapshotDesdeDano,
   inferirTipoCobro,
+  esItemAprobado,
+  esRevisionParcialItems,
+  mensajeRevisionItemsPendientes,
+  MSG_ITEM_APROBADO_BLOQUEADO,
+  MSG_REVISION_PARCIAL,
   type CampoSnapshotLinea,
   type DanoEstimacion,
   type Estimacion,
   type TipoCobro,
 } from '@/types/estimacion';
 import { textoComentariosRfs } from '@/components/estimacion/EditarDanoModal';
+import { resumirCambiosAntesDespues } from '@/lib/cambioAntesDespues';
+import { estimadoRequiereRevisionItems, tituloIndicadorRevisionEstimado } from '@/lib/revisionPendiente';
+import { PillItemsPendientesRevision } from '@/components/dms/IndicadoresRevision';
 import { cn, formatMoney, toast } from '@/lib/utils';
 import { fotosRealesDano } from '@/lib/fotosDano';
 
@@ -144,6 +154,8 @@ type Dialogo =
   | { tipo: 'ENVIAR_SEABOARD' }
   | { tipo: 'ENVIAR_LIQUIDACIONES' }
   | { tipo: 'RECHAZAR_ITEMS' }
+  | { tipo: 'APROBAR_ITEMS' }
+  | { tipo: 'REVERSAR_ITEMS' }
   | { tipo: 'RECHAZAR_ITEM'; dano: DanoEstimacion }
   | { tipo: 'EDITAR_DANO'; dano: DanoEstimacion }
   | { tipo: 'FOTOS'; danoId: string | 'TODAS' }
@@ -175,6 +187,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     setTipoCobro,
     marcarReparado,
     resolverItemsMasivo,
+    reversarItemsMasivo,
     agregarComentarioDano,
     agregarNota,
     registrarActividad,
@@ -336,8 +349,12 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   const vistaReparadoLiq =
     esLiquidaciones && estimacion.estado === 'REPARADO';
   const vistaCerradaLiq = vistaAprobadoLiq || vistaReparadoLiq;
+  /**
+   * En APROBADO se puede aperturar para reversar/modificar ítems puntuales
+   * (revisión parcial). REPARADO permanece cerrado.
+   */
   const puedeAperturar =
-    (puedeRevisarItems || puedeEditarLiquidaciones) && !vistaCerradaLiq;
+    (puedeRevisarItems || puedeEditarLiquidaciones) && !vistaReparadoLiq;
   const editable = aperturada && (esSeaboard || esLiquidaciones);
   /** Liquidaciones puede cargar evidencias (fotos, PDF, video, data log) al aperturar. */
   const puedeCargarEvidencias =
@@ -375,6 +392,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   const danoSeleccionado = estimacion.danos.find((d) => d.id === danoSelId) ?? null;
   const pendientes = contarComentariosPendientes(estimacion.danos);
   const itemsPendientesRevision = itemsSinRevisionSbm(estimacion.danos);
+  const revisionParcial = esRevisionParcialItems(estimacion.danos);
 
   // Mientras visualiza un estimado accionable (sin aperturar), avisar al cambiar país.
   useEffect(() => {
@@ -482,9 +500,25 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       toast('Marque al menos un ítem del listado de daños.', 'info');
       return;
     }
-    resolverItemsMasivo(estimacion!.id, marcadosIds, 'APROBAR', actor);
-    toast(`${marcadosIds.length} ítem(s) aprobado(s).`, 'success');
-    setMarcadosIds([]);
+    const editables = marcadosIds.filter((id) => {
+      const d = estimacion?.danos.find((x) => x.id === id);
+      return d && !esItemAprobado(d.aplica);
+    });
+    if (editables.length === 0) {
+      toast(
+        'Los ítems marcados ya están aprobados. Para modificarlos debe reversarlos primero.',
+        'info'
+      );
+      return;
+    }
+    if (editables.length < marcadosIds.length) {
+      toast(
+        `${marcadosIds.length - editables.length} ítem(s) aprobado(s) se omitirán; solo se aprobarán los pendientes/rechazados.`,
+        'info'
+      );
+      setMarcadosIds(editables);
+    }
+    setDialogo({ tipo: 'APROBAR_ITEMS' });
   }
 
   function rechazarItemsMarcados() {
@@ -496,12 +530,88 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       toast('Marque al menos un ítem del listado de daños.', 'info');
       return;
     }
+    const editables = marcadosIds.filter((id) => {
+      const d = estimacion?.danos.find((x) => x.id === id);
+      return d && !esItemAprobado(d.aplica);
+    });
+    if (editables.length === 0) {
+      toast(
+        'Los ítems marcados ya están aprobados. Para cambiarlos debe reversarlos primero.',
+        'info'
+      );
+      return;
+    }
+    if (editables.length < marcadosIds.length) {
+      toast(
+        `${marcadosIds.length - editables.length} ítem(s) aprobado(s) se omitirán; solo se rechazarán los no aprobados.`,
+        'info'
+      );
+      setMarcadosIds(editables);
+    }
     setDialogo({ tipo: 'RECHAZAR_ITEMS' });
   }
 
-  function confirmarRechazoItems(comentario: string, danoIds: string[]) {
-    resolverItemsMasivo(estimacion!.id, danoIds, 'RECHAZAR', actor, comentario);
-    toast(`${danoIds.length} ítem(s) rechazado(s) con motivo registrado.`, 'success');
+  function reversarItemsMarcados() {
+    if (!aperturada) {
+      toast('Aperture la estimación para modificar ítems.', 'info');
+      return;
+    }
+    if (marcadosIds.length === 0) {
+      toast('Marque al menos un ítem aprobado del listado de daños.', 'info');
+      return;
+    }
+    const aprobados = marcadosIds.filter((id) => {
+      const d = estimacion?.danos.find((x) => x.id === id);
+      return d && esItemAprobado(d.aplica);
+    });
+    if (aprobados.length === 0) {
+      toast('Solo se pueden reversar ítems en estado Aprobado.', 'info');
+      return;
+    }
+    if (aprobados.length < marcadosIds.length) {
+      setMarcadosIds(aprobados);
+    }
+    setDialogo({ tipo: 'REVERSAR_ITEMS' });
+  }
+
+  function confirmarRevisionItems(
+    accion: 'APROBAR' | 'RECHAZAR',
+    comentario: string,
+    danoIds: string[]
+  ) {
+    const obs = comentario.trim();
+    if (obs.length < 5) {
+      toast(
+        'Indique una observación/comentario obligatorio (mín. 5 caracteres) para evidenciar la decisión manual.',
+        'info'
+      );
+      return;
+    }
+    resolverItemsMasivo(estimacion!.id, danoIds, accion, actor, obs);
+    toast(
+      accion === 'APROBAR'
+        ? `${danoIds.length} ítem(s) aprobado(s) con observación registrada.`
+        : `${danoIds.length} ítem(s) rechazado(s) con observación registrada.`,
+      'success'
+    );
+    setMarcadosIds([]);
+    cerrar();
+  }
+
+  function confirmarReversaItems(comentario: string, danoIds: string[]) {
+    const obs = comentario.trim();
+    if (obs.length < 5) {
+      toast(
+        'Indique una observación obligatoria (mín. 5 caracteres) para la reversa.',
+        'info'
+      );
+      return;
+    }
+    reversarItemsMasivo(estimacion!.id, danoIds, actor, obs);
+    toast(
+      `${danoIds.length} ítem(s) revertido(s) a Pendiente de revisión. Los demás ítems aprobados se conservan (revisión parcial). Ya puede modificarlo(s) y volver a enviarlo a revisión.`,
+      'success'
+    );
     setMarcadosIds([]);
     cerrar();
   }
@@ -530,7 +640,8 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     cerrar();
     if (itemsPendientesRevision.length > 0) {
       toast(
-        'Aperture la estimación, apruebe o rechace los ítems y luego envíe a liquidaciones RFS.',
+        (estimacion && mensajeRevisionItemsPendientes(estimacion.danos)) ??
+          'Aperture la estimación, apruebe o rechace los ítems pendientes y luego envíe a liquidaciones RFS.',
         'info'
       );
       return;
@@ -546,6 +657,10 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     resumen: string,
     comentarioSbm?: string
   ) {
+    if (esItemAprobado(dano.aplica)) {
+      toast(MSG_ITEM_APROBADO_BLOQUEADO, 'info');
+      return;
+    }
     if (exigirApertura()) return;
     const ahora = new Date().toLocaleString('es-EC', {
       day: '2-digit',
@@ -568,6 +683,10 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     const camposCambiados = (Object.keys(snapshot) as CampoSnapshotLinea[]).filter(
       (k) => String(antes[k] ?? '') !== String(snapshot[k] ?? '')
     );
+    const resumenLegible =
+      camposCambiados.length > 0
+        ? resumirCambiosAntesDespues(antes, snapshot, camposCambiados)
+        : resumen;
     const rfsExistente = textoComentariosRfs(dano);
     const sbm = comentarioSbm?.trim();
 
@@ -579,7 +698,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
         edicionReciente: {
           fecha: ahora,
           usuario: actor,
-          resumenCambios: resumen,
+          resumenCambios: resumenLegible || resumen,
           snapshot,
           snapshotAnterior: antes,
           camposCambiados,
@@ -590,7 +709,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
         },
       },
       actor,
-      `Línea ${dano.linea} · ${resumen}`
+      `Línea ${dano.linea} · ${resumenLegible || resumen}`
     );
 
     if (sbm) {
@@ -671,6 +790,16 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   Modificación · {estimacion.fechaModificacion}
                 </span>
               )}
+              {itemsPendientesRevision.length > 0 && (
+                <span
+                  className="dms-hero-chip dms-hero-chip--revision"
+                  title={tituloIndicadorRevisionEstimado(estimacion)}
+                >
+                  <Clock3 className="h-3 w-3" />
+                  {revisionParcial ? 'Revisión parcial' : 'Revisión pendiente'} ·{' '}
+                  {itemsPendientesRevision.length} ítem(s)
+                </span>
+              )}
               {pendientes > 0 && (
                 <span className="dms-hero-chip dms-hero-chip--alerta">
                   <MessageSquare className="h-3 w-3" /> {pendientes} cambio(s) solicitados
@@ -678,6 +807,35 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
               )}
             </div>
           </div>
+
+          {estimadoRequiereRevisionItems(estimacion) && (
+            <div
+              className="dms-banner-revision-pendiente"
+              role="status"
+              aria-live="polite"
+            >
+              <Clock3 className="h-4 w-4 shrink-0 text-amber-600" aria-hidden />
+              <span>
+                {revisionParcial ? (
+                  <>
+                    <strong>Revisión parcial:</strong> quedan{' '}
+                    <strong>{itemsPendientesRevision.length}</strong> ítem(s) por aprobar o
+                    rechazar (líneas{' '}
+                    {itemsPendientesRevision
+                      .map((d) => String(d.linea).padStart(2, '0'))
+                      .join(', ')}
+                    ). Los demás ítems aprobados no requieren nueva revisión.
+                  </>
+                ) : (
+                  <>
+                    <strong>Acción pendiente:</strong> hay{' '}
+                    <strong>{itemsPendientesRevision.length}</strong> ítem(s) sin revisar.
+                    Aperture la estimación y use «Aprobar ítems» / «Rechazar ítems».
+                  </>
+                )}
+              </span>
+            </div>
+          )}
 
           <div className="dms-detalle-toolbar">
             <div className="flex flex-wrap items-center gap-2">
@@ -841,7 +999,8 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                     }
                     if (itemsPendientesRevision.length > 0) {
                       toast(
-                        'Primero apruebe o rechace cada ítem de daño.\nAperture la estimación y use «Aprobar ítems» / «Rechazar ítems».',
+                        mensajeRevisionItemsPendientes(estimacion.danos) ??
+                          'Primero apruebe o rechace los ítems pendientes.',
                         'info'
                       );
                       return;
@@ -1066,10 +1225,28 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 </span>
                 <div className="min-w-0 truncate">
                   {puedeAperturar && !aperturada
-                    ? 'Aperture para modificar ítems (queda histórico), aprobar/rechazar cada línea y luego el estimado.'
-                    : 'Seleccione un daño para ver su detalle a la derecha.'}
+                    ? vistaAprobadoLiq || estimacion.estado === 'APROBADO'
+                      ? 'Estimado aprobado: aperture para reversar solo el ítem a modificar (el resto aprobado no se re-revisa).'
+                      : 'Aperture para modificar ítems (queda histórico), aprobar/rechazar cada línea y luego el estimado.'
+                    : revisionParcial
+                      ? `${MSG_REVISION_PARCIAL} Pendiente(s): ${itemsPendientesRevision.length} línea(s).`
+                      : 'Ítems Aprobados quedan bloqueados. Para editarlos: Reversar → modificar → volver a revisión.'}
                 </div>
               </div>
+
+              {revisionParcial && (
+                <div className="mb-3 flex gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-[11px] leading-snug text-amber-950">
+                  <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
+                  <span>
+                    <strong>Revisión parcial.</strong> Solo debe revisar{' '}
+                    <strong>{itemsPendientesRevision.length}</strong> ítem(s) pendiente(s) (líneas{' '}
+                    {itemsPendientesRevision
+                      .map((d) => String(d.linea).padStart(2, '0'))
+                      .join(', ')}
+                    ). Los ítems ya aprobados se conservan y no requieren nueva revisión.
+                  </span>
+                </div>
+              )}
 
               {puedeRevisarItems && (
                 <div className="dms-danos-acciones-masivas">
@@ -1104,10 +1281,25 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                       <XCircle className="h-3.5 w-3.5" /> Rechazar ítems
                       {marcadosIds.length > 0 ? ` (${marcadosIds.length})` : ''}
                     </button>
+                    <button
+                      type="button"
+                      className="dms-btn-reversar px-3 py-1.5 text-xs"
+                      title={
+                        !aperturada
+                          ? 'Aperture la estimación para reversar ítems'
+                          : marcadosIds.length === 0
+                            ? 'Marque ítems aprobados para reversar'
+                            : 'Revierte ítems aprobados a Pendiente de revisión'
+                      }
+                      onClick={reversarItemsMarcados}
+                    >
+                      <RotateCcw className="h-3.5 w-3.5" /> Reversar ítems
+                      {marcadosIds.length > 0 ? ` (${marcadosIds.length})` : ''}
+                    </button>
                   </div>
                   <span className="text-[11px] text-slate-500">
                     {!aperturada
-                      ? 'Aperture la estimación para marcar y aprobar/rechazar ítems'
+                      ? 'Aperture la estimación para marcar y aprobar/rechazar/reversar ítems'
                       : marcadosIds.length === 0
                         ? 'Marque ítems con el check a la izquierda de ⓘ'
                         : `${marcadosIds.length} ítem(s) marcado(s)`}
@@ -1139,7 +1331,10 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                     toast('Aperture la estimación para modificar ítems.', 'info');
                     return;
                   }
-                  setMarcadosIds(marcar ? estimacion.danos.map((d) => d.id) : []);
+                  /** Solo marca pendientes: los ya aprobados no se re-revisan. */
+                  setMarcadosIds(
+                    marcar ? itemsSinRevisionSbm(estimacion.danos).map((d) => d.id) : []
+                  );
                 }}
                 onSeleccionar={(d) => {
                   setDanoSelId((prev) => (prev === d.id ? null : d.id));
@@ -1152,10 +1347,18 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   }
                 }}
                 onRemarkChange={(d, remark) => {
+                  if (esItemAprobado(d.aplica)) {
+                    toast(MSG_ITEM_APROBADO_BLOQUEADO, 'info');
+                    return;
+                  }
                   if (exigirApertura()) return;
                   cambiarDano(d, { remark }, `Línea ${d.linea} · Remark actualizado: "${remark}"`);
                 }}
                 onDonanteChange={(d, contenedorDonante) => {
+                  if (esItemAprobado(d.aplica)) {
+                    toast(MSG_ITEM_APROBADO_BLOQUEADO, 'info');
+                    return;
+                  }
                   if (exigirApertura()) return;
                   cambiarDano(
                     d,
@@ -1164,30 +1367,18 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   );
                 }}
                 onCargoChange={(d, cargo) => {
+                  if (esItemAprobado(d.aplica)) {
+                    toast(MSG_ITEM_APROBADO_BLOQUEADO, 'info');
+                    return;
+                  }
                   if (exigirApertura()) return;
                   cambiarDano(d, { cargo }, `Línea ${d.linea} · Cargo: ${cargo}`);
                 }}
-                onAplicaChange={(d, aplica) => {
-                  if (exigirApertura()) return;
-                  const extra =
-                    aplica === 'Rechazado SBM'
-                      ? {
-                          cargo: 'Rechazado' as const,
-                          horasHombre: 0,
-                          csHoraHombre: 0,
-                          csMaterial: 0,
-                          csTotal: 0,
-                        }
-                      : {};
-                  cambiarDano(
-                    d,
-                    { aplica, ...extra },
-                    aplica === 'Rechazado SBM'
-                      ? `Línea ${d.linea} · Rechazado · valores en $0`
-                      : `Línea ${d.linea} · Aplica: ${aplica}`
-                  );
-                }}
                 onEditar={(d) => {
+                  if (esItemAprobado(d.aplica)) {
+                    setDialogo({ tipo: 'EDITAR_DANO', dano: d });
+                    return;
+                  }
                   if (!editable) {
                     toast(
                       puedeAperturar
@@ -1202,6 +1393,10 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 onEliminar={
                   esLiquidaciones || esSeaboard
                     ? (d) => {
+                        if (esItemAprobado(d.aplica)) {
+                          toast(MSG_ITEM_APROBADO_BLOQUEADO, 'info');
+                          return;
+                        }
                         if (!editable) {
                           toast(
                             puedeAperturar
@@ -1242,7 +1437,9 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
             <InfoDanoPanel
               estimacion={estimacion}
               dano={danoSeleccionado}
-              editable={puedeCargarEvidencias}
+              editable={
+                Boolean(puedeCargarEvidencias && danoSeleccionado && !esItemAprobado(danoSeleccionado.aplica))
+              }
               modoLiquidaciones={esLiquidaciones}
               onActualizar={(cambios, resumen) => {
                 if (!danoSeleccionado) return;
@@ -1264,13 +1461,9 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
         modo="DECISION"
         estimacion={estimacion}
         onClose={cerrar}
-        onAprobar={() => {
-          aprobar(
-            [estimacion.id],
-            actor,
-            `Aprobado por ${actor}. Enviado a liquidaciones RFS.`
-          );
-          notificarAprobacionALiquidaciones(estimacion, actor);
+        onAprobar={(comentario) => {
+          aprobar([estimacion.id], actor, comentario);
+          notificarAprobacionALiquidaciones(estimacion, actor, comentario);
           toast(
             `Estimación ${estimacion.codigo} aprobada y enviada a liquidaciones RFS (APROBADO).`,
             'success'
@@ -1450,14 +1643,34 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       >
         <div className="space-y-3 text-sm leading-relaxed text-gray-600">
           <p>
-            Al visualizar este estimado se espera que <strong>apruebe o rechace cada ítem</strong> y
-            luego use <strong>Aprobar / Rechazar</strong> sobre el estimado completo (notifica a
-            liquidaciones RFS).
+            Al visualizar este estimado se espera que resuelva los ítems{' '}
+            <strong>pendientes de revisión</strong> y luego use{' '}
+            <strong>Aprobar / Rechazar</strong> sobre el estimado (notifica a liquidaciones RFS).
+            {revisionParcial && (
+              <>
+                {' '}
+                En revisión parcial, <strong>no</strong> debe volver a revisar los ítems ya
+                aprobados.
+              </>
+            )}
           </p>
           {itemsPendientesRevision.length > 0 && (
             <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-              Aún hay <strong>{itemsPendientesRevision.length}</strong> ítem(s) sin revisar.
-              Aperture la estimación y use «Aprobar ítems» / «Rechazar ítems».
+              {revisionParcial ? (
+                <>
+                  Revisión parcial: quedan <strong>{itemsPendientesRevision.length}</strong>{' '}
+                  ítem(s) por revisar (líneas{' '}
+                  {itemsPendientesRevision
+                    .map((d) => String(d.linea).padStart(2, '0'))
+                    .join(', ')}
+                  ). El resto ya aprobado se mantiene.
+                </>
+              ) : (
+                <>
+                  Aún hay <strong>{itemsPendientesRevision.length}</strong> ítem(s) sin revisar.
+                  Aperture la estimación y use «Aprobar ítems» / «Rechazar ítems».
+                </>
+              )}
             </p>
           )}
           <p className="text-xs text-slate-500">
@@ -1468,14 +1681,66 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       </Modal>
 
       <ComentarioModal
+        open={dialogo.tipo === 'APROBAR_ITEMS'}
+        title="Aprobar ítems"
+        subtitle={`${marcadosIds.length} línea(s) marcada(s) · observación obligatoria`}
+        label="Observación de la aprobación (obligatoria)"
+        confirmLabel="Aprobar ítems"
+        confirmClass="dms-btn-aprobar"
+        onClose={cerrar}
+        onConfirm={(comentario) => {
+          const ids = marcadosIds.filter((id) => {
+            const d = estimacion?.danos.find((x) => x.id === id);
+            return Boolean(d && !esItemAprobado(d.aplica));
+          });
+          if (ids.length === 0) {
+            toast(MSG_ITEM_APROBADO_BLOQUEADO, 'info');
+            return;
+          }
+          confirmarRevisionItems('APROBAR', comentario, ids);
+        }}
+      />
+
+      <ComentarioModal
         open={dialogo.tipo === 'RECHAZAR_ITEMS'}
         title="Rechazar ítems"
-        subtitle={`${marcadosIds.length} línea(s) marcada(s) · indique el motivo`}
-        label="Motivo del rechazo (obligatorio)"
+        subtitle={`${marcadosIds.length} línea(s) marcada(s) · observación obligatoria`}
+        label="Observación del rechazo (obligatoria)"
         confirmLabel="Rechazar ítems"
         confirmClass="dms-btn-rechazar"
         onClose={cerrar}
-        onConfirm={(comentario) => confirmarRechazoItems(comentario, marcadosIds)}
+        onConfirm={(comentario) => {
+          const ids = marcadosIds.filter((id) => {
+            const d = estimacion?.danos.find((x) => x.id === id);
+            return Boolean(d && !esItemAprobado(d.aplica));
+          });
+          if (ids.length === 0) {
+            toast(MSG_ITEM_APROBADO_BLOQUEADO, 'info');
+            return;
+          }
+          confirmarRevisionItems('RECHAZAR', comentario, ids);
+        }}
+      />
+
+      <ComentarioModal
+        open={dialogo.tipo === 'REVERSAR_ITEMS'}
+        title="Reversar ítems aprobados"
+        subtitle={`${marcadosIds.length} línea(s) · pasan a Pendiente de revisión`}
+        label="Motivo de la reversa (obligatorio)"
+        confirmLabel="Reversar ítems"
+        confirmClass="dms-btn-reversar"
+        onClose={cerrar}
+        onConfirm={(comentario) => {
+          const ids = marcadosIds.filter((id) => {
+            const d = estimacion?.danos.find((x) => x.id === id);
+            return Boolean(d && esItemAprobado(d.aplica));
+          });
+          if (ids.length === 0) {
+            toast('Solo se pueden reversar ítems en estado Aprobado.', 'info');
+            return;
+          }
+          confirmarReversaItems(comentario, ids);
+        }}
       />
 
       <ComentarioModal
@@ -1486,13 +1751,13 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
             ? `Línea ${String(dialogo.dano.linea).padStart(2, '0')} · ${dialogo.dano.comp}`
             : undefined
         }
-        label="Motivo del rechazo (obligatorio)"
+        label="Observación del rechazo (obligatoria)"
         confirmLabel="Rechazar ítem"
         confirmClass="dms-btn-rechazar"
         onClose={cerrar}
         onConfirm={(comentario) => {
           if (dialogo.tipo !== 'RECHAZAR_ITEM') return;
-          confirmarRechazoItems(comentario, [dialogo.dano.id]);
+          confirmarRevisionItems('RECHAZAR', comentario, [dialogo.dano.id]);
         }}
       />
 

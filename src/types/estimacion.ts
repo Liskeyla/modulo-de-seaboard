@@ -17,20 +17,44 @@ export const ESTADOS_ESTIMACION: EstadoEstimacion[] = [
 export const ACTIVIDADES = ['WTY', 'SVL', 'DM', 'NO APLICA'] as const;
 export type Actividad = (typeof ACTIVIDADES)[number];
 
+/** Estado de revisión a nivel de cada ítem de daño (no del estimado). */
 export const APLICA_DANO = [
-  'Pendiente Revisión',
-  'Aprobado por Linea SBM',
-  'Rechazado SBM',
-  'No Aplica',
+  'Pendiente de revisión',
+  'Aprobado',
+  'Rechazado',
 ] as const;
 export type AplicaDano = (typeof APLICA_DANO)[number];
 
+export const APLICA_PENDIENTE: AplicaDano = 'Pendiente de revisión';
 /** Valores que asigna el gestor Seaboard al aprobar/rechazar ítems. */
-export const APLICA_APROBADO_SBM: AplicaDano = 'Aprobado por Linea SBM';
-export const APLICA_RECHAZADO_SBM: AplicaDano = 'Rechazado SBM';
+export const APLICA_APROBADO_SBM: AplicaDano = 'Aprobado';
+export const APLICA_RECHAZADO_SBM: AplicaDano = 'Rechazado';
+
+/** Mapea etiquetas legacy (incl. «No Aplica») al estado vigente del ítem. */
+const APLICA_LEGACY: Record<string, AplicaDano> = {
+  'Pendiente Revisión': APLICA_PENDIENTE,
+  'Pendiente de revisión': APLICA_PENDIENTE,
+  'Aprobado por Linea SBM': APLICA_APROBADO_SBM,
+  'Aprobado Linea': APLICA_APROBADO_SBM,
+  'Aprobado Dueño': APLICA_APROBADO_SBM,
+  Aprobado: APLICA_APROBADO_SBM,
+  'Rechazado SBM': APLICA_RECHAZADO_SBM,
+  Rechazado: APLICA_RECHAZADO_SBM,
+  /** Eliminado por ambigüedad: vuelve a pendiente para forzar decisión. */
+  'No Aplica': APLICA_PENDIENTE,
+};
+
+export function normalizarAplicaDano(aplica: string | undefined | null): AplicaDano {
+  if (!aplica) return APLICA_PENDIENTE;
+  const mapped = APLICA_LEGACY[aplica];
+  if (mapped) return mapped;
+  return (APLICA_DANO as readonly string[]).includes(aplica)
+    ? (aplica as AplicaDano)
+    : APLICA_PENDIENTE;
+}
 
 export function esAplicaRechazado(aplica: string) {
-  return aplica === APLICA_RECHAZADO_SBM;
+  return normalizarAplicaDano(aplica) === APLICA_RECHAZADO_SBM;
 }
 
 /** Al rechazar un ítem: H.H. y costos quedan en cero. */
@@ -43,16 +67,47 @@ export function valoresCeroPorRechazoItem() {
   };
 }
 
-/** Ítem ya revisado por Seaboard (aprobado o rechazado por línea SBM). */
+/** Ítem ya revisado por Seaboard (aprobado o rechazado). */
 export function esItemRevisadoSbm(aplica: string) {
-  return aplica === APLICA_APROBADO_SBM || aplica === APLICA_RECHAZADO_SBM;
+  const n = normalizarAplicaDano(aplica);
+  return n === APLICA_APROBADO_SBM || n === APLICA_RECHAZADO_SBM;
 }
 
-export const CARGOS_DANO = ['Línea', 'Cliente', 'Garantía', 'Rechazado'] as const;
+/** Ítem aprobado: bloqueado para edición hasta que se reverse. */
+export function esItemAprobado(aplica: string) {
+  return normalizarAplicaDano(aplica) === APLICA_APROBADO_SBM;
+}
+
+export const MSG_ITEM_APROBADO_BLOQUEADO =
+  'El ítem está aprobado y bloqueado. Para modificarlo debe reversarlo, editarlo y volver a enviarlo a revisión.';
+
+
+/** A quién corresponde el cargo del ítem (independiente del estado de revisión). */
+export const CARGOS_DANO = ['Cliente', 'Línea', 'Transportista', 'RFS'] as const;
 export type CargoDano = (typeof CARGOS_DANO)[number];
 
-/** Cargo que se asigna al rechazar un ítem por línea SBM. */
-export const CARGO_RECHAZADO: CargoDano = 'Rechazado';
+export const CARGO_DEFAULT: CargoDano = 'Línea';
+
+/** @deprecated El rechazo vive en el estado del ítem, no en el cargo. */
+export const CARGO_RECHAZADO = 'Rechazado' as const;
+
+const CARGO_LEGACY: Record<string, CargoDano> = {
+  Cliente: 'Cliente',
+  Línea: 'Línea',
+  Linea: 'Línea',
+  Transportista: 'Transportista',
+  RFS: 'RFS',
+  'Línea/RFS': 'Línea',
+  Puerto: 'Transportista',
+  Garantía: 'RFS',
+  Dueño: 'Cliente',
+  Rechazado: 'Línea',
+};
+
+export function normalizarCargoDano(cargo: string | undefined | null): CargoDano {
+  if (!cargo) return CARGO_DEFAULT;
+  return CARGO_LEGACY[cargo] ?? CARGO_DEFAULT;
+}
 
 /** Cobro del estimado (Liquidaciones): Cliente o Línea. */
 export type TipoCobro = 'CLIENTE' | 'LINEA';
@@ -61,14 +116,22 @@ export function cargoDesdeTipoCobro(tipo: TipoCobro): CargoDano {
   return tipo === 'CLIENTE' ? 'Cliente' : 'Línea';
 }
 
+export function tipoCobroDesdeCargo(cargo: CargoDano): TipoCobro | undefined {
+  if (cargo === 'Cliente') return 'CLIENTE';
+  if (cargo === 'Línea') return 'LINEA';
+  return undefined;
+}
+
 export function inferirTipoCobro(e: {
   tipoCobro?: TipoCobro;
-  danos: { cargo: string }[];
+  danos: { cargo: string; aplica?: string }[];
 }): TipoCobro {
   if (e.tipoCobro === 'CLIENTE' || e.tipoCobro === 'LINEA') return e.tipoCobro;
-  const vigentes = e.danos.filter((d) => d.cargo !== 'Rechazado');
+  const vigentes = e.danos.filter((d) => !esAplicaRechazado(d.aplica ?? ''));
   if (vigentes.length === 0) return 'LINEA';
-  const clientes = vigentes.filter((d) => d.cargo === 'Cliente').length;
+  const clientes = vigentes.filter(
+    (d) => normalizarCargoDano(d.cargo) === 'Cliente'
+  ).length;
   return clientes > vigentes.length / 2 ? 'CLIENTE' : 'LINEA';
 }
 
@@ -132,6 +195,34 @@ export interface EdicionRecienteDano {
   snapshotAnterior?: SnapshotLineaDano;
   /** Campos que cambiaron (verde en la fila actual; resaltados en «Antes»). */
   camposCambiados?: CampoSnapshotLinea[];
+}
+
+/** Acción registrada sobre un ítem de daño (histórico completo). */
+export type TipoAccionHistorialItem =
+  | 'CREACION'
+  | 'MODIFICACION'
+  | 'CAMBIO_CARGO'
+  | 'CAMBIO_ESTADO'
+  | 'APROBACION'
+  | 'RECHAZO'
+  | 'REVERSA'
+  | 'COMENTARIO';
+
+export interface HistorialAccionItem {
+  id: string;
+  fecha: string;
+  usuario: string;
+  tipo: TipoAccionHistorialItem;
+  /** Etiqueta de la acción (ej. «Aprobación de ítem»). */
+  accion: string;
+  /** Descripción del cambio realizado. */
+  cambio: string;
+  estadoAnterior?: string;
+  estadoNuevo?: string;
+  comentario?: string;
+  camposCambiados?: CampoSnapshotLinea[];
+  snapshotAnterior?: SnapshotLineaDano;
+  snapshot?: SnapshotLineaDano;
 }
 
 export function snapshotDesdeDano(d: DanoEstimacion): SnapshotLineaDano {
@@ -226,6 +317,8 @@ export interface DanoEstimacion {
   /** Marca explícita: la línea no tiene tarifa de catálogo. */
   sinTarifa?: boolean;
   comentarios: ComentarioDano[];
+  /** Histórico completo de acciones sobre el ítem. */
+  historialAcciones?: HistorialAccionItem[];
   /** Resumen de la última edición (subfila de color en el listado). */
   edicionReciente?: EdicionRecienteDano;
 }
@@ -364,6 +457,12 @@ export interface Estimacion {
   tipoCobro?: TipoCobro;
   /** Operación del estimado. Si falta, se infiere del código. */
   pais?: 'ECUADOR' | 'PERU';
+  /**
+   * Si el estimado se generó desde ítems rechazados de otro registro,
+   * referencia al código original (histórico, no se reutiliza).
+   */
+  codigoOrigen?: string;
+  estimadoOrigenId?: string;
 }
 
 export function totalesDanos(danos: DanoEstimacion[]) {
@@ -385,14 +484,35 @@ export function contarComentariosPendientes(danos: DanoEstimacion[]) {
   );
 }
 
-/** Líneas que aún no tienen decisión SBM (Aprobar/Rechazar ítems). */
+/** Líneas que aún no tienen decisión de estado (Aprobar/Rechazar ítems). */
 export function itemsSinRevisionSbm(danos: DanoEstimacion[]) {
   return danos.filter((d) => !esItemRevisadoSbm(d.aplica));
 }
 
-/** Mensaje cuando intentan aprobar/enviar sin haber revisado los ítems de daño. */
+/** Hay ítems pendientes y otros ya aprobados: la línea solo re-revisa lo modificado. */
+export function esRevisionParcialItems(danos: DanoEstimacion[]) {
+  const pendientes = itemsSinRevisionSbm(danos);
+  if (pendientes.length === 0) return false;
+  return danos.some((d) => esItemAprobado(d.aplica));
+}
+
+/** Mensaje cuando intentan aprobar el estimado sin haber definido el estado de cada ítem. */
 export const MSG_ITEMS_SIN_APROBAR =
-  'Debe aprobar los ítems de daño antes de enviar a liquidaciones RFS.\nIngrese al estimado, aperture la estimación y apruebe (o rechace) los ítems del listado de daños.';
+  'Debe definir el estado de cada ítem de daño (Pendiente de revisión → Aprobado o Rechazado) antes de decidir el estimado.\nIngrese al estimado, aperture la estimación y resuelva los ítems del listado de daños.';
+
+export const MSG_REVISION_PARCIAL =
+  'Revisión parcial: solo debe aprobar o rechazar el/los ítem(s) pendiente(s). Los ítems ya aprobados no requieren nueva revisión.';
+
+/** Mensaje contextual según si la revisión es total o solo de ítems modificados. */
+export function mensajeRevisionItemsPendientes(danos: DanoEstimacion[]) {
+  const pendientes = itemsSinRevisionSbm(danos);
+  if (pendientes.length === 0) return null;
+  const lineas = pendientes.map((d) => String(d.linea).padStart(2, '0')).join(', ');
+  if (esRevisionParcialItems(danos)) {
+    return `${MSG_REVISION_PARCIAL}\nPendiente(s): línea(s) ${lineas}.`;
+  }
+  return `${MSG_ITEMS_SIN_APROBAR}\nPendiente(s): línea(s) ${lineas}.`;
+}
 
 export function hayItemsSinAprobar(danos: DanoEstimacion[]) {
   return itemsSinRevisionSbm(danos).length > 0;

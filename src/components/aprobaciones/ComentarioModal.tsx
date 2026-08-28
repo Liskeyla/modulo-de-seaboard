@@ -66,7 +66,7 @@ export function ComentarioModal({
             e.preventDefault();
             const fd = new FormData(e.currentTarget);
             const comentario = String(fd.get('comentario') ?? '').trim();
-            if (required && !comentario) return;
+            if (required && comentario.length < 5) return;
             onConfirm(comentario);
           }}
         >
@@ -77,11 +77,14 @@ export function ComentarioModal({
               name="comentario"
               rows={4}
               className="w-full rounded-lg border border-gray-300 p-3 text-sm shadow-sm transition-colors focus:border-[#f16e26] focus:outline-none focus:ring-2 focus:ring-[#f16e26]/20"
-              placeholder="Ingrese el comentario…"
+              placeholder="Ingrese la observación (mín. 5 caracteres)…"
               required={required}
+              minLength={required ? 5 : undefined}
             />
             {required && (
-              <p className="text-[11px] text-gray-400">El comentario es obligatorio para continuar.</p>
+              <p className="text-[11px] text-gray-400">
+                La observación es obligatoria (mín. 5 caracteres) para evidenciar la decisión manual.
+              </p>
             )}
           </div>
           <div className="dms-modal-footer">

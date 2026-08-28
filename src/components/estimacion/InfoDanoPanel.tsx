@@ -8,6 +8,7 @@ import {
   FileText,
   FileWarning,
   ImagePlus,
+  Lock,
   RotateCcw,
   Trash2,
   Video,
@@ -32,6 +33,7 @@ import type {
   FotoDano,
   GrupoArchivo,
 } from '@/types/estimacion';
+import { esItemAprobado, MSG_ITEM_APROBADO_BLOQUEADO } from '@/types/estimacion';
 
 type TipoArchivoUi = 'NINGUNA' | GrupoArchivo;
 type ClaseCarga = ClaseArchivo;
@@ -161,14 +163,15 @@ export function InfoDanoPanel({
     REPARADO: archivos.filter((a) => a.grupo === 'REPARADO'),
   };
 
-  const puedeCargar = modoLiquidaciones && editable;
+  const puedeCargar = modoLiquidaciones && editable && Boolean(dano && !esItemAprobado(dano.aplica));
+  const itemBloqueado = Boolean(dano && esItemAprobado(dano.aplica));
 
   function persistirArchivos(
     lista: ArchivoDano[],
     resumen: string,
     extra: Partial<DanoEstimacion> = {}
   ) {
-    if (!dano) return;
+    if (!dano || esItemAprobado(dano.aplica)) return;
     onActualizar({ archivos: lista, ...extra }, resumen);
   }
 
@@ -409,6 +412,12 @@ export function InfoDanoPanel({
         <FileWarning className="h-3.5 w-3.5" /> Información del Daño
       </header>
       <div className="dms-card-body space-y-3">
+        {itemBloqueado && (
+          <div className="dms-item-bloqueado-aviso" role="status">
+            <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+            <span>{MSG_ITEM_APROBADO_BLOQUEADO}</span>
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-2">
           <span className="dms-mini-badge">Línea {String(dano.linea).padStart(2, '0')}</span>
           <span className="text-xs font-bold text-rfs-navy">{dano.comp}</span>

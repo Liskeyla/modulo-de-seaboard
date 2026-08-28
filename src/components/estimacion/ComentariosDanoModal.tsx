@@ -17,7 +17,7 @@ export const CAMPOS_DANO = [
   'H.H.',
   'Cant.',
   'Cargo',
-  'Aplica',
+  'Estado',
   'New Met. Rep.',
   'Número de Serie Entregado',
   'Contenedor Donante',

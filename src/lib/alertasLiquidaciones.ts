@@ -22,7 +22,7 @@ export interface AlertaLiquidaciones {
 
 /** Línea sin tarifa de catálogo o sin costos válidos (no rechazada). */
 export function danoSinTarifa(d: DanoEstimacion) {
-  if (esAplicaRechazado(d.aplica) || d.aplica === 'No Aplica') return false;
+  if (esAplicaRechazado(d.aplica)) return false;
   const enCatalogo = TARIFAS.some(
     (t) =>
       t.comp.toUpperCase() === d.comp.toUpperCase() ||

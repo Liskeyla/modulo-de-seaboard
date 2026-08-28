@@ -4,6 +4,7 @@ import seedData from '@/data/estimacionesSeed.json';
 import type {
   Actividad,
   AplicaDano,
+  CargoDano,
   ComentarioDano,
   ComentarioSeaboard,
   DanoEstimacion,
@@ -15,10 +16,33 @@ import type {
   TipoCobro,
   TipoComentario,
 } from '@/types/estimacion';
-import { aLineaHistorial, APLICA_APROBADO_SBM, APLICA_RECHAZADO_SBM, CARGO_RECHAZADO, cargoDesdeTipoCobro, valoresCeroPorRechazoItem } from '@/types/estimacion';
+import {
+  aLineaHistorial,
+  APLICA_APROBADO_SBM,
+  APLICA_PENDIENTE,
+  APLICA_RECHAZADO_SBM,
+  CARGO_DEFAULT,
+  cargoDesdeTipoCobro,
+  esAplicaRechazado,
+  esItemAprobado,
+  normalizarAplicaDano,
+  normalizarCargoDano,
+  tipoCobroDesdeCargo,
+  valoresCeroPorRechazoItem,
+} from '@/types/estimacion';
 import { esNavieraSeaboard } from '@/lib/seaboardFlow';
+import {
+  appendHistorialItem,
+  construirEntradaDesdeCambios,
+  entradaAprobacionItem,
+  entradaComentarioItem,
+  entradaCreacionItem,
+  entradaRechazoItem,
+  entradaReversaItem,
+  reconstruirHistorialItem,
+} from '@/lib/historialItem';
 
-const STORAGE_KEY = 'dms-estimaciones-prototipo-v17';
+const STORAGE_KEY = 'dms-estimaciones-prototipo-v21';
 const CLAVES_OBSOLETAS = [
   'dms-estimaciones-prototipo',
   'dms-estimaciones-prototipo-v2',
@@ -36,7 +60,29 @@ const CLAVES_OBSOLETAS = [
   'dms-estimaciones-prototipo-v14',
   'dms-estimaciones-prototipo-v15',
   'dms-estimaciones-prototipo-v16',
+  'dms-estimaciones-prototipo-v17',
+  'dms-estimaciones-prototipo-v18',
+  'dms-estimaciones-prototipo-v19',
+  'dms-estimaciones-prototipo-v20',
 ];
+
+function migrarEstadosItem(estims: Estimacion[]): Estimacion[] {
+  return estims.map((e) => ({
+    ...e,
+    danos: e.danos.map((d) => {
+      const normalizado = {
+        ...d,
+        aplica: normalizarAplicaDano(d.aplica),
+        cargo: normalizarCargoDano(d.cargo),
+      };
+      const historialAcciones =
+        d.historialAcciones && d.historialAcciones.length > 0
+          ? d.historialAcciones
+          : reconstruirHistorialItem(normalizado);
+      return { ...normalizado, historialAcciones };
+    }),
+  }));
+}
 
 function ahoraFmt() {
   const d = new Date();
@@ -51,6 +97,72 @@ function uid(prefijo: string) {
 }
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
+
+/** Intenta recuperar HH/costos previos al rechazo (quedan en $0 tras rechazar). */
+function costosPreviosAlRechazo(d: DanoEstimacion): {
+  horasHombre: number;
+  csHoraHombre: number;
+  csMaterial: number;
+  csTotal: number;
+} {
+  const snap =
+    d.historialAcciones?.find((h) => h.tipo === 'RECHAZO' && h.snapshotAnterior)?.snapshotAnterior ||
+    d.edicionReciente?.snapshotAnterior;
+  if (snap && (snap.csTotal > 0 || snap.horasHombre > 0)) {
+    return {
+      horasHombre: snap.horasHombre,
+      csHoraHombre: snap.csHoraHombre,
+      csMaterial: snap.csMaterial,
+      csTotal: snap.csTotal,
+    };
+  }
+  const cmt = [...d.comentarios]
+    .filter((c) => c.tipo === 'RECHAZADO' && c.valorAnterior)
+    .sort((a, b) => b.fecha.localeCompare(a.fecha, 'es'))[0];
+  if (cmt?.valorAnterior) {
+    const hh = cmt.valorAnterior.match(/HH\s+([\d.]+)/i);
+    const tot = cmt.valorAnterior.match(/\$\s*([\d.]+)/);
+    const horasHombre = hh ? Number(hh[1]) : 0;
+    const csTotal = tot ? Number(tot[1]) : 0;
+    if (horasHombre > 0 || csTotal > 0) {
+      const csHoraHombre = horasHombre > 0 ? round2(csTotal * 0.35) : 0;
+      const csMaterial = round2(csTotal - csHoraHombre);
+      return { horasHombre, csHoraHombre, csMaterial, csTotal };
+    }
+  }
+  return {
+    horasHombre: d.horasHombre,
+    csHoraHombre: d.csHoraHombre,
+    csMaterial: d.csMaterial,
+    csTotal: d.csTotal,
+  };
+}
+
+function semanaIso(d = new Date()) {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  return Math.ceil(((date.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+}
+
+/** Genera un código ERSBM-AAAA-NNNNNN único (nunca reutiliza el del estimado origen). */
+function siguienteCodigoEstimado(existentes: Estimacion[], anio: number) {
+  const usados = new Set(existentes.map((e) => e.codigo));
+  const nums = existentes
+    .map((e) => {
+      const m = e.codigo.match(/(\d+)$/);
+      return m ? Number(m[1]) : 0;
+    })
+    .filter((n) => n > 0);
+  let next = (nums.length ? Math.max(...nums) : 179200) + 1;
+  let codigo = `ERSBM-${anio}-${next}`;
+  while (usados.has(codigo)) {
+    next += 1;
+    codigo = `ERSBM-${anio}-${next}`;
+  }
+  return codigo;
+}
 
 function evento(
   usuario: string,
@@ -101,7 +213,7 @@ interface EstimacionesState {
   enviarAprobacion: (ids: string[], usuario: string) => void;
   /** Liquidaciones marca el estimado como validado (habilita push a SBM). */
   validarLiquidaciones: (id: string, usuario: string) => void;
-  aprobar: (ids: string[], usuario: string, comentario?: string) => void;
+  aprobar: (ids: string[], usuario: string, comentario: string) => void;
   rechazar: (ids: string[], usuario: string, comentario: string) => void;
   reversar: (ids: string[], usuario: string, comentario: string) => void;
   reversarAprobacion: (id: string, usuario: string, comentario: string) => void;
@@ -131,8 +243,18 @@ interface EstimacionesState {
     danoIds: string[],
     accion: 'APROBAR' | 'RECHAZAR',
     usuario: string,
-    /** Obligatorio al rechazar: motivo que queda en comentarios de cada línea. */
+  /** Obligatorio en aprobar y rechazar: evidencia de decisión manual. */
     comentario?: string
+  ) => void;
+  /**
+   * Revierte ítems aprobados a Pendiente de revisión (obligatorio comentar)
+   * para poder editarlos y volver a enviarlos a revisión.
+   */
+  reversarItemsMasivo: (
+    id: string,
+    danoIds: string[],
+    usuario: string,
+    comentario: string
   ) => void;
   eliminarDano: (id: string, danoId: string, usuario: string) => void;
   /** Restaura daños y notas al estado de una apertura (descartar cambios). */
@@ -163,6 +285,17 @@ interface EstimacionesState {
     detalle: string,
     lineas?: LineaHistorialDano[]
   ) => void;
+
+  /**
+   * Prototipo liquidaciones: genera un nuevo estimado PENDIENTE a partir de ítems rechazados.
+   * Sujeto a validación con Sistemas. Retorna el estimado creado o null si no aplica.
+   */
+  generarEstimadoDesdeItems: (
+    seleccion: { estimacionId: string; danoId: string }[],
+    usuario: string,
+    /** Responsable del cobro del nuevo estimado (aplica a todas las líneas). */
+    cargoCobro: CargoDano
+  ) => Estimacion | null;
 }
 
 export const useEstimacionesStore = create<EstimacionesState>()(
@@ -176,7 +309,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
       };
 
       return {
-        estimaciones: seedData as unknown as Estimacion[],
+        estimaciones: migrarEstadosItem(seedData as unknown as Estimacion[]),
 
         hydrate: () => {
           try {
@@ -191,14 +324,14 @@ export const useEstimacionesStore = create<EstimacionesState>()(
             const guardadas = parsed?.state?.estimaciones;
             // El seed cambió de forma: si lo persistido no trae daños, se descarta.
             if (Array.isArray(guardadas) && guardadas.length && guardadas[0]?.danos) {
-              set({ estimaciones: guardadas });
+              set({ estimaciones: migrarEstadosItem(guardadas) });
             }
           } catch {
             /* ignore */
           }
         },
 
-        reset: () => set({ estimaciones: seedData as unknown as Estimacion[] }),
+        reset: () => set({ estimaciones: migrarEstadosItem(seedData as unknown as Estimacion[]) }),
 
         getByCodigo: (codigo) => get().estimaciones.find((e) => e.codigo === codigo),
 
@@ -282,7 +415,9 @@ export const useEstimacionesStore = create<EstimacionesState>()(
           });
         },
 
-        aprobar: (ids, usuario, comentario = 'Aprobado por Seaboard Marine. Enviado a liquidaciones RFS.') => {
+        aprobar: (ids, usuario, comentario) => {
+          const obs = String(comentario ?? '').trim();
+          if (obs.length < 5) return;
           set((s) => ({
             estimaciones: s.estimaciones.map((e) => {
               if (!ids.includes(e.id)) return e;
@@ -302,14 +437,14 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                 fechaEnvio: e.fechaEnvio,
                 comentariosSeaboard: [
                   ...e.comentariosSeaboard,
-                  comentarioSeaboard('APROBAR', comentario, usuario),
+                  comentarioSeaboard('APROBAR', obs, usuario),
                 ],
                 auditoria: [
                   ...e.auditoria,
                   evento(
                     usuario,
                     'APROBACIÓN SEABOARD',
-                    'Seaboard Marine aprobó el estimado y lo envió a liquidaciones RFS. Habilitado para reparación.'
+                    `Seaboard Marine aprobó el estimado y lo envió a liquidaciones RFS. Observación: ${obs}`
                   ),
                 ],
               };
@@ -318,6 +453,8 @@ export const useEstimacionesStore = create<EstimacionesState>()(
         },
 
         rechazar: (ids, usuario, comentario) => {
+          const obs = String(comentario ?? '').trim();
+          if (obs.length < 5) return;
           set((s) => ({
             estimaciones: s.estimaciones.map((e) => {
               if (
@@ -336,14 +473,14 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                 fechaEnvio: e.fechaEnvio,
                 comentariosSeaboard: [
                   ...e.comentariosSeaboard,
-                  comentarioSeaboard('RECHAZAR', comentario, usuario),
+                  comentarioSeaboard('RECHAZAR', obs, usuario),
                 ],
                 auditoria: [
                   ...e.auditoria,
                   evento(
                     usuario,
                     'RECHAZO SEABOARD',
-                    `Seaboard Marine rechazó el estimado y notificó a liquidaciones RFS: ${comentario}`
+                    `Seaboard Marine rechazó el estimado y notificó a liquidaciones RFS: ${obs}`
                   ),
                 ],
               };
@@ -389,11 +526,22 @@ export const useEstimacionesStore = create<EstimacionesState>()(
               validadoLiquidaciones: false,
               fechaModificacion: ahoraFmt(),
               usuarioModificacion: usuario,
+              /**
+               * No se toca el estado de los ítems: los ya aprobados siguen Aprobado.
+               * Solo se re-revisan los que luego se reverse/modifique (revisión parcial).
+               */
               comentariosSeaboard: [
                 ...e.comentariosSeaboard,
                 comentarioSeaboard('REVERSAR', comentario, usuario),
               ],
-              auditoria: [...e.auditoria, evento(usuario, 'REVERSO DE APROBACIÓN', comentario)],
+              auditoria: [
+                ...e.auditoria,
+                evento(
+                  usuario,
+                  'REVERSO DE APROBACIÓN',
+                  `${comentario} · Ítems ya aprobados se conservan; la nueva revisión solo aplica a ítems que se reverse o modifique.`
+                ),
+              ],
             };
           });
         },
@@ -473,7 +621,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
             if (e.tipoCobro === tipo) return e;
             const cargo = cargoDesdeTipoCobro(tipo);
             const danos = e.danos.map((d) =>
-              d.cargo === CARGO_RECHAZADO ? d : { ...d, cargo }
+              esAplicaRechazado(d.aplica) || esItemAprobado(d.aplica) ? d : { ...d, cargo }
             );
             const etiqueta = tipo === 'CLIENTE' ? 'Cliente' : 'Línea';
             return {
@@ -515,13 +663,16 @@ export const useEstimacionesStore = create<EstimacionesState>()(
         agregarDano: (id, dano, usuario) => {
           mutar(id, (e) => {
             const linea = e.danos.reduce((max, d) => Math.max(max, d.linea), 0) + 1;
+            const fecha = ahoraFmt();
             const nuevo: DanoEstimacion = {
               ...dano,
               id: uid('dano'),
               linea,
-              cargo: dano.cargo || 'Línea',
-              aplica: dano.aplica || 'Pendiente Revisión',
+              cargo: normalizarCargoDano(dano.cargo) || CARGO_DEFAULT,
+              aplica: normalizarAplicaDano(dano.aplica) || APLICA_PENDIENTE,
+              historialAcciones: [],
             };
+            nuevo.historialAcciones = [entradaCreacionItem(nuevo, usuario, fecha)];
             return recalcular({
               ...e,
               danos: [...e.danos, nuevo],
@@ -543,12 +694,30 @@ export const useEstimacionesStore = create<EstimacionesState>()(
           mutar(id, (e) => {
             const anterior = e.danos.find((d) => d.id === danoId);
             if (!anterior) return e;
+            /** Ítem aprobado: no se edita hasta reversar. */
+            if (esItemAprobado(anterior.aplica)) return e;
+            const fecha = ahoraFmt();
             const danos = e.danos.map((d) => {
               if (d.id !== danoId) return d;
               const mezclado = { ...d, ...cambios };
-              return {
+              const actualizado = {
                 ...mezclado,
                 csTotal: round2(mezclado.csHoraHombre + mezclado.csMaterial),
+              };
+              const entrada = construirEntradaDesdeCambios(
+                anterior,
+                actualizado,
+                usuario,
+                fecha,
+                etiqueta ?? `Línea ${anterior.linea} · ${anterior.comp} actualizado`,
+                {
+                  comentario: cambios.edicionReciente?.comentarioSbm,
+                  edicionReciente: cambios.edicionReciente,
+                }
+              );
+              return {
+                ...actualizado,
+                historialAcciones: appendHistorialItem(d.historialAcciones, entrada),
               };
             });
             const actualizado = danos.find((d) => d.id === danoId)!;
@@ -572,42 +741,53 @@ export const useEstimacionesStore = create<EstimacionesState>()(
 
         resolverItemsMasivo: (id, danoIds, accion, usuario, comentario) => {
           if (danoIds.length === 0) return;
-          if (accion === 'RECHAZAR' && !String(comentario ?? '').trim()) return;
           const motivo = String(comentario ?? '').trim();
+          /** Observación obligatoria en aprobación y rechazo: evidencia de decisión manual. */
+          if (motivo.length < 5) return;
           const ids = new Set(danoIds);
           mutar(id, (e) => {
-            const afectados = e.danos.filter((d) => ids.has(d.id));
+            const afectados = e.danos.filter((d) => {
+              if (!ids.has(d.id)) return false;
+              /** Aprobados: solo se tocan vía reversa. */
+              if (esItemAprobado(d.aplica)) return false;
+              return true;
+            });
             if (afectados.length === 0) return e;
+            const idsOk = new Set(afectados.map((d) => d.id));
+            const fecha = ahoraFmt();
             const danos = e.danos.map((d) => {
-              if (!ids.has(d.id)) return d;
+              if (!idsOk.has(d.id)) return d;
               if (accion === 'RECHAZAR') {
                 const cmt: ComentarioDano = {
                   id: uid('cmt'),
                   usuario,
                   rol: 'SEABOARD',
-                  fecha: ahoraFmt(),
+                  fecha,
                   tipo: 'RECHAZADO',
                   mensaje: motivo,
-                  campoAfectado: 'Aplica / Cargo',
-                  valorAnterior: `${d.aplica} · ${d.cargo} · HH ${d.horasHombre} · $${d.csTotal}`,
-                  valorNuevo: `${APLICA_RECHAZADO_SBM} · ${CARGO_RECHAZADO} · HH 0 · $0`,
+                  campoAfectado: 'Estado',
+                  valorAnterior: `${d.aplica} · HH ${d.horasHombre} · $${d.csTotal}`,
+                  valorNuevo: `${APLICA_RECHAZADO_SBM} · HH 0 · $0`,
                 };
                 return {
                   ...d,
                   aplica: APLICA_RECHAZADO_SBM,
-                  cargo: CARGO_RECHAZADO,
                   ...valoresCeroPorRechazoItem(),
                   comentarios: [...d.comentarios, cmt],
+                  historialAcciones: appendHistorialItem(
+                    d.historialAcciones,
+                    entradaRechazoItem(d, usuario, fecha, motivo)
+                  ),
                 };
               }
               const cmtAprobado: ComentarioDano = {
                 id: uid('cmt'),
                 usuario,
                 rol: 'SEABOARD',
-                fecha: ahoraFmt(),
+                fecha,
                 tipo: 'ACEPTADO',
-                mensaje: `Ítem aprobado por ${usuario}`,
-                campoAfectado: 'Aplica',
+                mensaje: motivo,
+                campoAfectado: 'Estado',
                 valorAnterior: d.aplica,
                 valorNuevo: APLICA_APROBADO_SBM,
               };
@@ -615,10 +795,14 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                 ...d,
                 aplica: APLICA_APROBADO_SBM,
                 comentarios: [...d.comentarios, cmtAprobado],
+                historialAcciones: appendHistorialItem(
+                  d.historialAcciones,
+                  entradaAprobacionItem(d, usuario, fecha, motivo)
+                ),
               };
             });
             const lineasTxt = afectados.map((d) => String(d.linea).padStart(2, '0')).join(', ');
-            const lineasSnap = danos.filter((d) => ids.has(d.id)).map(aLineaHistorial);
+            const lineasSnap = danos.filter((d) => idsOk.has(d.id)).map(aLineaHistorial);
             return recalcular({
               ...e,
               danos,
@@ -630,8 +814,80 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                   usuario,
                   accion === 'RECHAZAR' ? 'ÍTEMS RECHAZADOS' : 'ÍTEMS APROBADOS',
                   accion === 'RECHAZAR'
-                    ? `${usuario} rechazó ${afectados.length} línea(s): ${lineasTxt}. Motivo: ${motivo}`
-                    : `${usuario} aprobó ${afectados.length} línea(s): ${lineasTxt}`,
+                    ? `${usuario} rechazó ${afectados.length} línea(s): ${lineasTxt}. Observación: ${motivo}`
+                    : `${usuario} aprobó ${afectados.length} línea(s): ${lineasTxt}. Observación: ${motivo}`,
+                  lineasSnap
+                ),
+              ],
+            });
+          });
+        },
+
+        reversarItemsMasivo: (id, danoIds, usuario, comentario) => {
+          if (danoIds.length === 0) return;
+          const motivo = String(comentario ?? '').trim();
+          if (motivo.length < 5) return;
+          const ids = new Set(danoIds);
+          mutar(id, (e) => {
+            const afectados = e.danos.filter(
+              (d) => ids.has(d.id) && esItemAprobado(d.aplica)
+            );
+            if (afectados.length === 0) return e;
+            const idsOk = new Set(afectados.map((d) => d.id));
+            const fecha = ahoraFmt();
+            const danos = e.danos.map((d) => {
+              if (!idsOk.has(d.id)) return d;
+              const cmt: ComentarioDano = {
+                id: uid('cmt'),
+                usuario,
+                rol: 'SEABOARD',
+                fecha,
+                tipo: 'INFORMATIVO',
+                mensaje: motivo,
+                campoAfectado: 'Estado',
+                valorAnterior: d.aplica,
+                valorNuevo: APLICA_PENDIENTE,
+              };
+              return {
+                ...d,
+                aplica: APLICA_PENDIENTE,
+                comentarios: [...d.comentarios, cmt],
+                historialAcciones: appendHistorialItem(
+                  d.historialAcciones,
+                  entradaReversaItem(d, usuario, fecha, motivo)
+                ),
+              };
+            });
+            const lineasTxt = afectados.map((d) => String(d.linea).padStart(2, '0')).join(', ');
+            const lineasSnap = danos.filter((d) => idsOk.has(d.id)).map(aLineaHistorial);
+            const eraAprobadoCabecera = ['APROBADO', 'REPARADO'].includes(e.estado);
+            /**
+             * Reversa de ítem(s) en estimado ya aprobado: el estimado vuelve a REVERSADO
+             * para editar/reenviar, pero el resto de ítems aprobados se conservan
+             * (revisión parcial — la línea solo re-revisa lo pendiente).
+             */
+            const cabecera = eraAprobadoCabecera
+              ? {
+                  estado: 'REVERSADO' as EstadoEstimacion,
+                  fechaAprobacion: '',
+                  enviarAprobacion: 'NO',
+                  validadoLiquidaciones: false,
+                }
+              : {};
+            return recalcular({
+              ...e,
+              ...cabecera,
+              danos,
+              fechaModificacion: ahoraFmt(),
+              usuarioModificacion: usuario,
+              auditoria: [
+                ...e.auditoria,
+                evento(
+                  usuario,
+                  eraAprobadoCabecera ? 'REVISIÓN PARCIAL · ÍTEMS REVERSADOS' : 'ÍTEMS REVERSADOS',
+                  eraAprobadoCabecera
+                    ? `${usuario} revirtió ${afectados.length} línea(s) (${lineasTxt}) a Pendiente de revisión. El estimado pasa a REVERSADO; los demás ítems aprobados se mantienen (no requieren nueva revisión). Observación: ${motivo}`
+                    : `${usuario} revirtió ${afectados.length} línea(s) aprobada(s) a Pendiente de revisión: ${lineasTxt}. Observación: ${motivo}`,
                   lineasSnap
                 ),
               ],
@@ -643,6 +899,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
           mutar(id, (e) => {
             const objetivo = e.danos.find((d) => d.id === danoId);
             if (!objetivo) return e;
+            if (esItemAprobado(objetivo.aplica)) return e;
             return recalcular({
               ...e,
               danos: e.danos
@@ -666,6 +923,9 @@ export const useEstimacionesStore = create<EstimacionesState>()(
           mutar(id, (e) => {
             const objetivo = e.danos.find((d) => d.id === danoId);
             if (!objetivo) return e;
+            if (esItemAprobado(objetivo.aplica) && entrada.tipo === 'SOLICITA_CAMBIO') {
+              return e;
+            }
             const comentario: ComentarioDano = {
               id: uid('cd'),
               usuario: entrada.usuario,
@@ -678,7 +938,16 @@ export const useEstimacionesStore = create<EstimacionesState>()(
             return {
               ...e,
               danos: e.danos.map((d) =>
-                d.id === danoId ? { ...d, comentarios: [...d.comentarios, comentario] } : d
+                d.id === danoId
+                  ? {
+                      ...d,
+                      comentarios: [...d.comentarios, comentario],
+                      historialAcciones: appendHistorialItem(
+                        d.historialAcciones,
+                        entradaComentarioItem(comentario)
+                      ),
+                    }
+                  : d
               ),
               fechaModificacion: ahoraFmt(),
               usuarioModificacion: entrada.usuario,
@@ -719,6 +988,174 @@ export const useEstimacionesStore = create<EstimacionesState>()(
               notas: e.notas.slice(0, Math.max(0, snap.notasCount)),
             })
           );
+        },
+
+        generarEstimadoDesdeItems: (seleccion, usuario, cargoCobro) => {
+          if (!seleccion.length) return null;
+          const cargo = normalizarCargoDano(cargoCobro);
+          const origenes: { est: Estimacion; dano: DanoEstimacion }[] = [];
+          for (const s of seleccion) {
+            const est = get().estimaciones.find((e) => e.id === s.estimacionId);
+            const dano = est?.danos.find((d) => d.id === s.danoId);
+            if (!est || !dano) continue;
+            if (!esAplicaRechazado(dano.aplica)) continue;
+            origenes.push({ est, dano });
+          }
+          if (origenes.length === 0) return null;
+
+          const contenedores = new Set(origenes.map((o) => o.est.contenedor));
+          if (contenedores.size > 1) return null;
+
+          const base = origenes[0].est;
+          const fecha = ahoraFmt();
+          const anio = new Date().getFullYear();
+          const codigo = siguienteCodigoEstimado(get().estimaciones, anio);
+          const refs = origenes
+            .map((o) => `${o.est.codigo} L${String(o.dano.linea).padStart(2, '0')} (${o.dano.comp})`)
+            .join('; ');
+          const codigosOrigen = Array.from(new Set(origenes.map((o) => o.est.codigo))).join(', ');
+
+          const danosNuevos: DanoEstimacion[] = origenes.map((o, i) => {
+            const costos = costosPreviosAlRechazo(o.dano);
+            const nuevo: DanoEstimacion = {
+              ...structuredClone(o.dano),
+              id: uid('dano'),
+              linea: i + 1,
+              ...costos,
+              aplica: APLICA_PENDIENTE,
+              cargo,
+              comentarios: [
+                {
+                  id: uid('cd'),
+                  usuario,
+                  rol: 'LIQUIDACIONES',
+                  fecha,
+                  tipo: 'INFORMATIVO',
+                  mensaje: `Ítem generado desde rechazo en ${o.est.codigo} línea ${o.dano.linea}. Cobro: ${cargo}. Observación origen: ${
+                    o.dano.comentarios.find((c) => c.tipo === 'RECHAZADO')?.mensaje ||
+                    o.dano.historialAcciones?.find((h) => h.tipo === 'RECHAZO')?.comentario ||
+                    's/d'
+                  }`,
+                  campoAfectado: 'Cargo',
+                  valorAnterior: normalizarCargoDano(o.dano.cargo),
+                  valorNuevo: cargo,
+                },
+              ],
+              edicionReciente: undefined,
+              historialAcciones: [],
+            };
+            nuevo.historialAcciones = [entradaCreacionItem(nuevo, usuario, fecha)];
+            return nuevo;
+          });
+
+          const tipoCobro = tipoCobroDesdeCargo(cargo);
+
+          // Nuevo registro: código distinto; mismo contenedor/movimiento del original.
+          // El estimado origen NO se modifica (queda como histórico), solo auditoría.
+          const creado = recalcular({
+            id: uid('est'),
+            codigo,
+            semana: semanaIso(),
+            anio,
+            estado: 'PENDIENTE',
+            // Datos de contenedor / movimiento (mismos del origen)
+            contenedor: base.contenedor,
+            tipoContenedor: base.tipoContenedor,
+            codigoRfs: base.codigoRfs,
+            modeloMaquina: base.modeloMaquina,
+            naviera: base.naviera,
+            buque: base.buque,
+            viaje: base.viaje,
+            fechaGateIn: base.fechaGateIn,
+            diasEstadia: base.diasEstadia,
+            lugarEstimacion: base.lugarEstimacion,
+            lugarAsistencia: base.lugarAsistencia,
+            actividad: base.actividad,
+            tipoEstimacion: base.tipoEstimacion,
+            tipoDano: base.tipoDano,
+            tecnico: base.tecnico,
+            estadoPti: base.estadoPti,
+            fechaFinPti: base.fechaFinPti,
+            itinerarioSap: base.itinerarioSap,
+            almacenSap: base.almacenSap,
+            ediEnviadoOne: 'NO',
+            fechaEnvioEdiOne: '',
+            niveles: base.niveles,
+            pais: base.pais,
+            garantia: structuredClone(base.garantia),
+            inspeccion: {
+              ...structuredClone(base.inspeccion),
+              codigo: `INSP-${codigo.slice(-6)}`,
+              fecha: base.fechaGateIn || base.inspeccion.fecha,
+            },
+            // Cabecera del nuevo estimado (no reutiliza el código origen)
+            fechaElaboracion: fecha,
+            fechaReparacion: '',
+            fechaEnvio: '',
+            fechaAprobacion: '',
+            fechaRevision: '',
+            enviarAprobacion: 'NO',
+            validadoLiquidaciones: false,
+            fechaValidacionLiquidaciones: undefined,
+            tipoCobro,
+            codigoOrigen: codigosOrigen,
+            estimadoOrigenId: base.id,
+            analisisObservacion: `Nuevo estimado ${codigo} (código distinto del origen ${codigosOrigen}). Mismo contenedor ${base.contenedor} · buque ${base.buque || '—'} · viaje ${base.viaje || '—'} · GateIn ${base.fechaGateIn || '—'}. Cobro: ${cargo}. Ítems desde: ${refs}`,
+            fechaModificacion: fecha,
+            usuarioModificacion: usuario,
+            horasHombre: 0,
+            pvpHorasHombre: 0,
+            pvpMateriales: 0,
+            pvpTotal: 0,
+            sinDanos: false,
+            danos: danosNuevos,
+            notas: [
+              {
+                id: uid('nota'),
+                fecha,
+                usuario,
+                texto: `Registro nuevo ${codigo} generado desde rechazos del histórico ${codigosOrigen}. Contenedor ${base.contenedor} · movimiento ${base.buque || 's/d'} / ${base.viaje || 's/d'}. Cobro: ${cargo}.`,
+              },
+            ],
+            auditoria: [
+              evento(
+                usuario,
+                'ESTIMADO GENERADO DESDE RECHAZOS',
+                `${usuario} creó ${codigo} (nuevo código) desde histórico ${codigosOrigen} · contenedor ${base.contenedor} · cobro ${cargo} · ${origenes.length} línea(s): ${refs}`,
+                danosNuevos.map(aLineaHistorial)
+              ),
+            ],
+            comentariosSeaboard: [],
+          });
+
+          // Inserta el nuevo; el original permanece intacto (solo se agrega auditoría).
+          set((s) => ({ estimaciones: [creado, ...s.estimaciones] }));
+
+          const porEst = new Map<string, DanoEstimacion[]>();
+          origenes.forEach((o) => {
+            const list = porEst.get(o.est.id) ?? [];
+            list.push(o.dano);
+            porEst.set(o.est.id, list);
+          });
+          porEst.forEach((danos, estId) => {
+            mutar(estId, (e) => ({
+              ...e,
+              // No cambia estado, daños ni código del estimado histórico.
+              auditoria: [
+                ...e.auditoria,
+                evento(
+                  usuario,
+                  'ÍTEMS ENVIADOS A NUEVO ESTIMADO',
+                  `Histórico conservado (${e.codigo}). Líneas ${danos
+                    .map((d) => String(d.linea).padStart(2, '0'))
+                    .join(', ')} generaron el nuevo registro ${codigo} · cobro ${cargo}`,
+                  danos.map(aLineaHistorial)
+                ),
+              ],
+            }));
+          });
+
+          return creado;
         },
       };
     },

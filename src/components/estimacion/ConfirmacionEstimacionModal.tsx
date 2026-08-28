@@ -5,12 +5,14 @@ import { AlertTriangle, CheckCircle2, FileText, XCircle } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import {
   contarComentariosPendientes,
+  esRevisionParcialItems,
   itemsSinRevisionSbm,
   MSG_ITEMS_SIN_APROBAR,
+  MSG_REVISION_PARCIAL,
   type Estimacion,
 } from '@/types/estimacion';
 import { construirInformeHtml } from '@/lib/descargas';
-import { formatMoney, toast } from '@/lib/utils';
+import { cn, formatMoney, toast } from '@/lib/utils';
 import { paisDe, type PaisOperacion } from '@/lib/pais';
 
 /** Destinatarios prototipo por país de operación. */
@@ -70,7 +72,8 @@ export function notificarRechazoALiquidaciones(
 /** Notifica a liquidaciones RFS la aprobación del estimado (prototipo mailto). */
 export function notificarAprobacionALiquidaciones(
   estimacion: Estimacion,
-  usuario: string
+  usuario: string,
+  comentario: string
 ) {
   const correos = correosDeEstimacion(estimacion);
   const paisLabel = paisDe(estimacion) === 'PERU' ? 'Perú' : 'Ecuador';
@@ -85,6 +88,9 @@ export function notificarAprobacionALiquidaciones(
     `Total PVP: $${estimacion.pvpTotal.toFixed(2)}`,
     `Líneas de daño: ${estimacion.danos.length}`,
     `Usuario Seaboard: ${usuario}`,
+    ``,
+    `Observación de la aprobación:`,
+    comentario.trim(),
     ``,
     `— Notificación automática · Gestor Seaboard Marine (prototipo)`,
   ].join('\n');
@@ -124,7 +130,7 @@ interface ConfirmacionEstimacionModalProps {
   modo: ModoConfirmacionEstimacion;
   estimacion: Estimacion | null;
   onClose: () => void;
-  onAprobar: () => void;
+  onAprobar: (comentario: string) => void;
   onRechazar: (comentario: string) => void;
 }
 
@@ -166,6 +172,10 @@ export function ConfirmacionEstimacionModal({
     () => (estimacion ? itemsSinRevisionSbm(estimacion.danos) : []),
     [estimacion]
   );
+  const revisionParcial = useMemo(
+    () => (estimacion ? esRevisionParcialItems(estimacion.danos) : false),
+    [estimacion]
+  );
   const faltanItems = sinRevision.length > 0;
 
   if (!estimacion) return null;
@@ -178,16 +188,25 @@ export function ConfirmacionEstimacionModal({
     estimacion.pvpTotal
   )}`;
 
+  function observacionValida() {
+    const motivo = comentario.trim();
+    if (motivo.length < 5) {
+      toast(
+        'Indique una observación/comentario obligatorio (mín. 5 caracteres) para evidenciar la decisión manual.',
+        'info'
+      );
+      return null;
+    }
+    return motivo;
+  }
+
   function confirmarRechazo() {
     if (faltanItems) {
       toast(MSG_ITEMS_SIN_APROBAR, 'info');
       return;
     }
-    const motivo = comentario.trim();
-    if (motivo.length < 5) {
-      toast('Indique un comentario general del rechazo (mín. 5 caracteres).', 'info');
-      return;
-    }
+    const motivo = observacionValida();
+    if (!motivo) return;
     onRechazar(motivo);
   }
 
@@ -196,7 +215,9 @@ export function ConfirmacionEstimacionModal({
       toast(MSG_ITEMS_SIN_APROBAR, 'info');
       return;
     }
-    onAprobar();
+    const motivo = observacionValida();
+    if (!motivo) return;
+    onAprobar(motivo);
   }
 
   return (
@@ -273,7 +294,15 @@ export function ConfirmacionEstimacionModal({
         <p className="text-xs leading-relaxed text-slate-600">
           Revise el informe. <strong>Aprobar</strong> deja el estimado en{' '}
           <strong>APROBADO</strong>; <strong>Rechazar</strong> en <strong>RECHAZADO</strong>. En
-          ambos casos se notifica a liquidaciones RFS.
+          ambos casos la observación es obligatoria (decisión manual) y se notifica a liquidaciones
+          RFS.
+          {revisionParcial && (
+            <>
+              {' '}
+              <strong>Revisión parcial:</strong> solo debe resolver los ítems pendientes; los ya
+              aprobados no se vuelven a revisar.
+            </>
+          )}
         </p>
 
         {pendientesLiq > 0 && (
@@ -290,11 +319,25 @@ export function ConfirmacionEstimacionModal({
           <div className="flex gap-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-[11px] leading-snug text-red-950">
             <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-600" />
             <span>
-              Debe aprobar o rechazar los ítems de daño antes de enviar a liquidaciones (
-              <strong>{sinRevision.length}</strong> pendiente
-              {sinRevision.length === 1 ? '' : 's'}: líneas{' '}
-              {sinRevision.map((d) => String(d.linea).padStart(2, '0')).join(', ')}). Aperture el
-              estimado y use «Aprobar ítems» / «Rechazar ítems».
+              {revisionParcial ? (
+                <>
+                  {MSG_REVISION_PARCIAL} Pendiente
+                  {sinRevision.length === 1 ? '' : 's'}: línea
+                  {sinRevision.length === 1 ? '' : 's'}{' '}
+                  <strong>
+                    {sinRevision.map((d) => String(d.linea).padStart(2, '0')).join(', ')}
+                  </strong>
+                  .
+                </>
+              ) : (
+                <>
+                  Debe aprobar o rechazar los ítems de daño antes de enviar a liquidaciones (
+                  <strong>{sinRevision.length}</strong> pendiente
+                  {sinRevision.length === 1 ? '' : 's'}: líneas{' '}
+                  {sinRevision.map((d) => String(d.linea).padStart(2, '0')).join(', ')}). Aperture el
+                  estimado y use «Aprobar ítems» / «Rechazar ítems».
+                </>
+              )}
             </span>
           </div>
         )}
@@ -313,21 +356,31 @@ export function ConfirmacionEstimacionModal({
             </ul>
           </div>
         )}
-        {rechazando && (
-          <div>
-            <label className="dms-field-label">Comentario general del rechazo</label>
-            <textarea
-              rows={3}
-              className="dms-input-sm h-auto w-full border-red-200 bg-white"
-              value={comentario}
-              placeholder="Indique el motivo por el cual Seaboard rechaza el estimado…"
-              onChange={(e) => setComentario(e.target.value)}
-            />
-            <p className="mt-1 text-[10px] text-slate-500">
-              Se notificará a: {correosDeEstimacion(estimacion).join(', ')}
-            </p>
-          </div>
-        )}
+        <div>
+          <label className="dms-field-label">
+            {rechazando
+              ? 'Observación del rechazo (obligatoria)'
+              : 'Observación de la decisión (obligatoria)'}
+          </label>
+          <textarea
+            rows={3}
+            className={cn(
+              'dms-input-sm h-auto w-full bg-white',
+              rechazando ? 'border-red-200' : 'border-slate-200'
+            )}
+            value={comentario}
+            placeholder={
+              rechazando
+                ? 'Indique el motivo por el cual Seaboard rechaza el estimado…'
+                : 'Indique la observación de la revisión (obligatoria para aprobar o rechazar)…'
+            }
+            onChange={(e) => setComentario(e.target.value)}
+          />
+          <p className="mt-1 text-[10px] text-slate-500">
+            Evidencia de decisión manual · Se notificará a:{' '}
+            {correosDeEstimacion(estimacion).join(', ')}
+          </p>
+        </div>
       </div>
       <iframe
         srcDoc={html}

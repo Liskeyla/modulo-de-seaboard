@@ -328,7 +328,6 @@ function danosDestacado() {
       csMaterial: 0,
       csTotal: 20,
       cargo: 'Línea',
-      aplica: 'Aprobado Linea',
       medida: '',
       remark: '',
       contenedorDonante: '',
@@ -438,7 +437,7 @@ function lineaPdf(opts) {
     csMaterial: csMat,
     csTotal: round2(csHH + csMat),
     cargo: 'Línea',
-    aplica: estado === 'ENVIADO' ? 'Pendiente Revisión' : 'Aprobado Linea',
+    aplica: estado === 'ENVIADO' ? 'Pendiente de revisión' : 'Aprobado',
     medida: medida || (conMedidas ? 'CM' : 'UN'),
     remark: '',
     contenedorDonante: '',
@@ -864,15 +863,13 @@ function generarDanos(row, estado) {
       csHoraHombre: csHH,
       csMaterial: csMat,
       csTotal: round2(csHH + csMat),
-      cargo: clean(row.Actividad) === 'WTY' ? 'Garantía' : rnd() > 0.82 ? 'Dueño' : 'Línea',
+      cargo: clean(row.Actividad) === 'WTY' ? 'RFS' : rnd() > 0.82 ? 'Cliente' : 'Línea',
       aplica:
         estado === 'RECHAZADO'
           ? 'Rechazado'
           : estado === 'ENVIADO'
-            ? 'Pendiente Revisión'
-            : clean(row.Actividad) === 'WTY'
-              ? 'Aprobado Dueño'
-              : 'Aprobado Linea',
+            ? 'Pendiente de revisión'
+            : 'Aprobado',
       medida: item.medida,
       remark: rnd() > 0.72 ? pick(rnd, ['APLICAR PARCHE OVERLAP', 'LAVADO SIMPLE', 'PTI / SHORT PTI', 'REVISAR EN PATIO']) : '',
       contenedorDonante: reemplazo && rnd() > 0.88 ? `SMLU${Math.floor(rnd() * 9000000 + 1000000)}` : '',
