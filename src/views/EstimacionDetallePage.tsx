@@ -331,10 +331,12 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   /**
    * Gestor Seaboard: aperturar · modificar · aprobar/rechazar ítems y enviar a liquidaciones.
    * Coordinador: aperturar · modificar · agregar daños (sin decidir ni enviar a línea).
-   * Liquidaciones: validar · enviar a SBM (Seaboard) · reversar aprobación · ítems.
+   * Liquidaciones: validar · aprobar/rechazar ítems · enviar a SBM · reversar aprobación.
    */
   const puedeRevisarItems =
-    esSeaboard && ESTADOS_SEABOARD.includes(estimacion.estado);
+    (esSeaboard && ESTADOS_SEABOARD.includes(estimacion.estado)) ||
+    (esLiquidaciones &&
+      ['PENDIENTE', 'RECHAZADO', 'REVERSADO', 'APROBADO'].includes(estimacion.estado));
   const puedeEditarLiquidaciones =
     esLiquidaciones &&
     ['PENDIENTE', 'RECHAZADO', 'REVERSADO', 'APROBADO', 'REPARADO'].includes(
@@ -591,7 +593,14 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       );
       return;
     }
-    resolverItemsMasivo(estimacion!.id, danoIds, accion, actor, obs);
+    resolverItemsMasivo(
+      estimacion!.id,
+      danoIds,
+      accion,
+      actor,
+      obs,
+      esLiquidaciones ? 'LIQUIDACIONES' : 'SEABOARD'
+    );
     toast(
       accion === 'APROBAR'
         ? `${danoIds.length} ítem(s) aprobado(s) con observación registrada.`
@@ -611,7 +620,13 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       );
       return;
     }
-    reversarItemsMasivo(estimacion!.id, danoIds, actor, obs);
+    reversarItemsMasivo(
+      estimacion!.id,
+      danoIds,
+      actor,
+      obs,
+      esLiquidaciones ? 'LIQUIDACIONES' : 'SEABOARD'
+    );
     toast(
       `${danoIds.length} ítem(s) revertido(s) a Pendiente de revisión. Los demás ítems aprobados se conservan (revisión parcial). Ya puede modificarlo(s) y volver a enviarlo a revisión.`,
       'success'

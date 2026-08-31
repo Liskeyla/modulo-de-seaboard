@@ -250,8 +250,9 @@ interface EstimacionesState {
     danoIds: string[],
     accion: 'APROBAR' | 'RECHAZAR',
     usuario: string,
-  /** Obligatorio en aprobar y rechazar: evidencia de decisión manual. */
-    comentario?: string
+    /** Obligatorio en aprobar y rechazar: evidencia de decisión manual. */
+    comentario?: string,
+    rol?: RolComentario
   ) => void;
   /**
    * Revierte ítems aprobados a Pendiente de revisión (obligatorio comentar)
@@ -261,7 +262,8 @@ interface EstimacionesState {
     id: string,
     danoIds: string[],
     usuario: string,
-    comentario: string
+    comentario: string,
+    rol?: RolComentario
   ) => void;
   eliminarDano: (id: string, danoId: string, usuario: string) => void;
   /** Restaura daños y notas al estado de una apertura (descartar cambios). */
@@ -816,11 +818,12 @@ export const useEstimacionesStore = create<EstimacionesState>()(
           });
         },
 
-        resolverItemsMasivo: (id, danoIds, accion, usuario, comentario) => {
+        resolverItemsMasivo: (id, danoIds, accion, usuario, comentario, rol) => {
           if (danoIds.length === 0) return;
           const motivo = String(comentario ?? '').trim();
           /** Observación obligatoria en aprobación y rechazo: evidencia de decisión manual. */
           if (motivo.length < 5) return;
+          const rolActor: RolComentario = rol ?? 'SEABOARD';
           const ids = new Set(danoIds);
           mutar(id, (e) => {
             const afectados = e.danos.filter((d) => {
@@ -838,7 +841,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                 const cmt: ComentarioDano = {
                   id: uid('cmt'),
                   usuario,
-                  rol: 'SEABOARD',
+                  rol: rolActor,
                   fecha,
                   tipo: 'RECHAZADO',
                   mensaje: motivo,
@@ -860,7 +863,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
               const cmtAprobado: ComentarioDano = {
                 id: uid('cmt'),
                 usuario,
-                rol: 'SEABOARD',
+                rol: rolActor,
                 fecha,
                 tipo: 'ACEPTADO',
                 mensaje: motivo,
@@ -900,10 +903,11 @@ export const useEstimacionesStore = create<EstimacionesState>()(
           });
         },
 
-        reversarItemsMasivo: (id, danoIds, usuario, comentario) => {
+        reversarItemsMasivo: (id, danoIds, usuario, comentario, rol) => {
           if (danoIds.length === 0) return;
           const motivo = String(comentario ?? '').trim();
           if (motivo.length < 5) return;
+          const rolActor: RolComentario = rol ?? 'SEABOARD';
           const ids = new Set(danoIds);
           mutar(id, (e) => {
             const afectados = e.danos.filter(
@@ -917,7 +921,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
               const cmt: ComentarioDano = {
                 id: uid('cmt'),
                 usuario,
-                rol: 'SEABOARD',
+                rol: rolActor,
                 fecha,
                 tipo: 'INFORMATIVO',
                 mensaje: motivo,
