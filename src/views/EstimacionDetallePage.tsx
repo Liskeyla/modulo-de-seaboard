@@ -377,7 +377,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   /** APROBADO y REPARADO: Actualizar Información Contenedor. */
   const puedeActualizarContenedorLiq = vistaCerradaLiq;
   const puedeDefinirCobroLiq =
-    (esLiquidaciones || esCoordinador) &&
+    esLiquidaciones &&
     ['PENDIENTE', 'RECHAZADO', 'REVERSADO', 'APROBADO', 'REPARADO'].includes(
       estimacion.estado
     );
