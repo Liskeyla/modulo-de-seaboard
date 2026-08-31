@@ -110,8 +110,29 @@
     @apply flex h-9 w-full items-center justify-center gap-1 rounded-md border border-slate-300 bg-white px-2 text-[10px] font-bold uppercase tracking-wide text-slate-600 transition-all hover:bg-slate-50 active:scale-[0.99];
   }
 
-  .dms-icon-actions {
-    @apply flex min-w-[7.5rem] flex-wrap items-center gap-1;
+  /* Menú Acciones (reporte) — lista desplegable con nombres */
+  .dms-acciones-menu {
+    @apply relative inline-block text-left;
+  }
+
+  .dms-acciones-menu__trigger {
+    @apply inline-flex h-8 items-center gap-1 rounded-md border border-slate-300 bg-white px-2 text-[11px] font-semibold text-slate-700 shadow-none transition hover:bg-slate-50;
+  }
+
+  .dms-acciones-menu__panel {
+    @apply absolute left-0 z-30 mt-1 min-w-[12.5rem] overflow-hidden rounded-md border border-slate-200 bg-white py-1 shadow-lg;
+  }
+
+  .dms-acciones-menu__item {
+    @apply flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] font-medium text-slate-700 transition hover:bg-slate-50;
+  }
+
+  .dms-acciones-menu__item--peligro {
+    @apply text-slate-800 hover:bg-slate-100;
+  }
+
+  .dms-acciones-menu__icono {
+    @apply inline-flex h-4 w-4 shrink-0 items-center justify-center text-slate-500;
   }
 
   .dms-icon-action {

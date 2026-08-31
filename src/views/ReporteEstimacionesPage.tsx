@@ -21,6 +21,7 @@ import {
   Upload,
   Users,
 } from 'lucide-react';
+import { AccionesMenu, type AccionMenuItem } from '@/components/dms/AccionesMenu';
 import { Header } from '@/components/layout/Header';
 import { DmsReportLayout } from '@/components/dms/DmsReportLayout';
 import { DmsTableToolbar } from '@/components/dms/DmsTableToolbar';
@@ -250,6 +251,7 @@ export default function ReporteEstimacionesPage() {
   const [filtroActivo, setFiltroActivo] = useState(false);
   const [expandidas, setExpandidas] = useState<Set<string>>(new Set());
   const [dialogo, setDialogo] = useState<Dialogo>({ tipo: 'NINGUNO' });
+  const [menuAccionesId, setMenuAccionesId] = useState<string | null>(null);
 
   const usuario = user?.username ?? 'seaboard';
   const actor =
@@ -381,150 +383,133 @@ export default function ReporteEstimacionesPage() {
 
   function accionesDe(row: Estimacion) {
     const abrir = () => router.push(`/reportes/estimaciones/${row.codigo}`);
+    const items: AccionMenuItem[] = [];
+    const iconCls = 'h-3.5 w-3.5';
 
     if (row.sinDanos) {
-      return (
-        <div className="dms-icon-actions">
-          <button
-            type="button"
-            className="dms-icon-action dms-icon-action--ver"
-            title="Abrir estimado"
-            onClick={abrir}
-          >
-            <Eye className="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
-            className="dms-icon-action dms-icon-action--info"
-            title="Sin daños registrados"
-            onClick={() => setDialogo({ tipo: 'INFO', id: row.id })}
-          >
-            <Info className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      );
-    }
-
-    return (
-      <div className="dms-icon-actions">
-        <button
-          type="button"
-          className="dms-icon-action dms-icon-action--ver"
-          title="Abrir estimado"
-          onClick={abrir}
-        >
-          <Eye className="h-3.5 w-3.5" />
-        </button>
-        {['ENVIADO', 'APROBADO', 'REPARADO', 'RECHAZADO'].includes(row.estado) && (
-          <button
-            type="button"
-            className="dms-icon-action dms-icon-action--pdf"
-            title="PDF preliminar"
-            onClick={() => setDialogo({ tipo: 'INFORME', id: row.id, variante: 'PRELIMINAR' })}
-          >
-            <FileText className="h-3.5 w-3.5" />
-          </button>
-        )}
-        {['APROBADO', 'REPARADO', 'RECHAZADO'].includes(row.estado) && (
-          <button
-            type="button"
-            className="dms-icon-action dms-icon-action--nota"
-            title="Ver nota Seaboard"
-            onClick={() => setDialogo({ tipo: 'NOTA', id: row.id })}
-          >
-            <Ship className="h-3.5 w-3.5" />
-          </button>
-        )}
-        {(row.analisisObservacion || row.niveles) && (
-          <button
-            type="button"
-            className="dms-icon-action dms-icon-action--info"
-            title="Información adicional"
-            onClick={() => setDialogo({ tipo: 'INFO', id: row.id })}
-          >
-            <Info className="h-3.5 w-3.5" />
-          </button>
-        )}
-        {(user?.rol === 'dms' &&
+      items.push({
+        id: 'abrir',
+        label: 'Abrir estimado',
+        icon: <Eye className={iconCls} />,
+        onClick: abrir,
+      });
+      items.push({
+        id: 'info',
+        label: 'Sin daños registrados',
+        icon: <Info className={iconCls} />,
+        onClick: () => setDialogo({ tipo: 'INFO', id: row.id }),
+      });
+    } else {
+      items.push({
+        id: 'abrir',
+        label: 'Abrir estimado',
+        icon: <Eye className={iconCls} />,
+        onClick: abrir,
+      });
+      if (['ENVIADO', 'APROBADO', 'REPARADO', 'RECHAZADO'].includes(row.estado)) {
+        items.push({
+          id: 'pdf',
+          label: 'PDF preliminar',
+          icon: <FileText className={iconCls} />,
+          onClick: () =>
+            setDialogo({ tipo: 'INFORME', id: row.id, variante: 'PRELIMINAR' }),
+        });
+      }
+      if (['APROBADO', 'REPARADO', 'RECHAZADO'].includes(row.estado)) {
+        items.push({
+          id: 'nota',
+          label: 'Ver nota Seaboard',
+          icon: <Ship className={iconCls} />,
+          onClick: () => setDialogo({ tipo: 'NOTA', id: row.id }),
+        });
+      }
+      if (row.analisisObservacion || row.niveles) {
+        items.push({
+          id: 'info',
+          label: 'Información adicional',
+          icon: <Info className={iconCls} />,
+          onClick: () => setDialogo({ tipo: 'INFO', id: row.id }),
+        });
+      }
+      if (
+        (user?.rol === 'dms' &&
           ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) &&
           esNavieraSeaboard(row.naviera) &&
           String(row.enviarAprobacion || '').toUpperCase() !== 'SI') ||
-        (esLiquidaciones && puedePushASbm(row)) ? (
-          <button
-            type="button"
-            className="dms-icon-action dms-icon-action--enviar"
-            title={
-              esLiquidaciones
-                ? 'Enviar a SBM · solo naviera Seaboard · queda ENVIADO'
-                : 'Enviar a Seaboard Marine'
+        (esLiquidaciones && puedePushASbm(row))
+      ) {
+        items.push({
+          id: 'enviar',
+          label: esLiquidaciones ? 'Enviar a SBM' : 'Enviar a Seaboard Marine',
+          icon: esLiquidaciones ? (
+            <Upload className={iconCls} />
+          ) : (
+            <Send className={iconCls} />
+          ),
+          onClick: () =>
+            setDialogo({ tipo: esLiquidaciones ? 'PUSH_SBM' : 'ENVIAR', id: row.id }),
+        });
+      }
+      if (esLiquidaciones && row.estado === 'APROBADO') {
+        items.push({
+          id: 'reversar',
+          label: 'Reversar aprobación',
+          icon: <Undo2 className={iconCls} />,
+          onClick: () => setDialogo({ tipo: 'REVERSAR_APROB', id: row.id }),
+        });
+      }
+      if (
+        esLiquidaciones &&
+        !enBandejaSeaboard(row) &&
+        ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado)
+      ) {
+        items.push({
+          id: 'eliminar',
+          label: 'Eliminar estimado',
+          icon: <Trash2 className={iconCls} />,
+          peligro: true,
+          onClick: () => setDialogo({ tipo: 'ELIMINAR', id: row.id }),
+        });
+      }
+      if (
+        ['ENVIADO', 'PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) &&
+        user?.rol === 'seaboard'
+      ) {
+        items.push({
+          id: 'decidir',
+          label: 'Aprobar / rechazar estimado',
+          icon: <Send className={iconCls} />,
+          onClick: () => {
+            if (itemsSinRevisionSbm(row.danos).length > 0) {
+              toast(
+                mensajeRevisionItemsPendientes(row.danos) ?? MSG_ITEMS_SIN_APROBAR,
+                'info'
+              );
+              return;
             }
-            onClick={() => {
-              setDialogo({ tipo: esLiquidaciones ? 'PUSH_SBM' : 'ENVIAR', id: row.id });
-            }}
-          >
-            {esLiquidaciones ? (
-              <Upload className="h-3.5 w-3.5" />
-            ) : (
-              <Send className="h-3.5 w-3.5" />
-            )}
-          </button>
-        ) : null}
-        {esLiquidaciones && row.estado === 'APROBADO' && (
-          <button
-            type="button"
-            className="dms-icon-action dms-icon-action--info"
-            title="Reversar aprobación"
-            onClick={() => setDialogo({ tipo: 'REVERSAR_APROB', id: row.id })}
-          >
-            <Undo2 className="h-3.5 w-3.5" />
-          </button>
-        )}
-        {esLiquidaciones &&
-          !enBandejaSeaboard(row) &&
-          ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) && (
-            <button
-              type="button"
-              className="dms-icon-action dms-icon-action--borrar"
-              title="Eliminar estimado"
-              onClick={() => setDialogo({ tipo: 'ELIMINAR', id: row.id })}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
-          )}
-        {['ENVIADO', 'PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) &&
-          user?.rol === 'seaboard' && (
-          <button
-            type="button"
-            className="dms-icon-action dms-icon-action--enviar"
-            title="Aprobar / rechazar estimado"
-            onClick={() => {
-              if (itemsSinRevisionSbm(row.danos).length > 0) {
-                toast(
-                  mensajeRevisionItemsPendientes(row.danos) ?? MSG_ITEMS_SIN_APROBAR,
-                  'info'
-                );
-                return;
-              }
-              setDialogo({ tipo: 'ENVIAR', id: row.id });
-            }}
-          >
-            <Send className="h-3.5 w-3.5" />
-          </button>
-        )}
-        {row.estadoPti && (
-          <button
-            type="button"
-            className="dms-icon-action dms-icon-action--log"
-            title="Descargar data log"
-            onClick={() => {
-              const n = descargarDataLog(row);
-              toast(`Data Log descargado (${n} registros).`, 'success');
-            }}
-          >
-            <Download className="h-3.5 w-3.5" />
-          </button>
-        )}
-      </div>
+            setDialogo({ tipo: 'ENVIAR', id: row.id });
+          },
+        });
+      }
+      if (row.estadoPti) {
+        items.push({
+          id: 'datalog',
+          label: 'Descargar data log',
+          icon: <Download className={iconCls} />,
+          onClick: () => {
+            const n = descargarDataLog(row);
+            toast(`Data Log descargado (${n} registros).`, 'success');
+          },
+        });
+      }
+    }
+
+    return (
+      <AccionesMenu
+        items={items}
+        open={menuAccionesId === row.id}
+        onOpenChange={(open) => setMenuAccionesId(open ? row.id : null)}
+      />
     );
   }
 
