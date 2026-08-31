@@ -30,7 +30,7 @@ import {
   tipoCobroDesdeCargo,
   valoresCeroPorRechazoItem,
 } from '@/types/estimacion';
-import { esNavieraSeaboard } from '@/lib/seaboardFlow';
+import { esNavieraSeaboard, resolverEstadoEnvioALiquidaciones } from '@/lib/seaboardFlow';
 import {
   appendHistorialItem,
   construirEntradaDesdeCambios,
@@ -217,8 +217,9 @@ interface EstimacionesState {
   rechazar: (ids: string[], usuario: string, comentario: string) => void;
   /**
    * Seaboard envía a liquidaciones RFS con comentarios generales.
-   * Si hay ítems rechazados → RECHAZADO (cae a liquidaciones como rechazado).
-   * Si todos aprobados → APROBADO.
+   * Todos aprobados → APROBADO.
+   * Solo rechazos cargo Cliente (+ resto aprobado) → APROBADO (ítems Cliente siguen Rechazado).
+   * Otros rechazos → RECHAZADO.
    */
   enviarALiquidaciones: (id: string, usuario: string, comentario: string) => void;
   reversar: (ids: string[], usuario: string, comentario: string) => void;
@@ -524,18 +525,15 @@ export const useEstimacionesStore = create<EstimacionesState>()(
               return e;
             }
             if (e.danos.length === 0) return e;
-            const hayRechazos = e.danos.some((d) => esAplicaRechazado(d.aplica));
-            const todosAprobados = e.danos.every((d) => esItemAprobado(d.aplica));
-            /**
-             * Con ítems rechazados: RECHAZADO → cae a liquidaciones como rechazado.
-             * Todos aprobados: APROBADO → liquidaciones recibe el aprobado.
-             */
-            const estado: EstadoEstimacion = hayRechazos
-              ? 'RECHAZADO'
-              : todosAprobados
-                ? 'APROBADO'
-                : 'RECHAZADO';
-            const liberarBandeja = hayRechazos || !todosAprobados;
+            const { estado, soloRechazosCargoCliente } =
+              resolverEstadoEnvioALiquidaciones(e.danos);
+            /** RECHAZADO libera bandeja; APROBADO (incl. solo Cliente rechazado) queda enviado. */
+            const liberarBandeja = estado === 'RECHAZADO';
+            const detalleAuditoria = soloRechazosCargoCliente
+              ? `Seaboard envió a liquidaciones RFS como APROBADO (ítems cargo Cliente rechazados; resto aprobado). Comentarios: ${obs}`
+              : estado === 'RECHAZADO'
+                ? `Seaboard envió a liquidaciones RFS como RECHAZADO (hay ítems rechazados). Comentarios: ${obs}`
+                : `Seaboard envió a liquidaciones RFS como APROBADO. Comentarios: ${obs}`;
             return {
               ...e,
               estado,
@@ -543,21 +541,24 @@ export const useEstimacionesStore = create<EstimacionesState>()(
               fechaModificacion: ahoraFmt(),
               usuarioModificacion: usuario,
               fechaAprobacion: estado === 'APROBADO' ? ahoraFmt() : e.fechaAprobacion,
-              /** Si hay rechazos, liquidaciones recupera el estimado (puede push otra vez). */
               enviarAprobacion: liberarBandeja ? 'NO' : 'SI',
               fechaEnvio: e.fechaEnvio,
               comentariosSeaboard: [
                 ...e.comentariosSeaboard,
-                comentarioSeaboard(hayRechazos ? 'RECHAZAR' : 'ENVIAR', obs, usuario),
+                comentarioSeaboard(
+                  estado === 'RECHAZADO' ? 'RECHAZAR' : 'ENVIAR',
+                  obs,
+                  usuario
+                ),
               ],
               auditoria: [
                 ...e.auditoria,
                 evento(
                   usuario,
-                  hayRechazos ? 'ENVÍO RECHAZADO A LIQUIDACIONES' : 'ENVÍO APROBADO A LIQUIDACIONES',
-                  hayRechazos
-                    ? `Seaboard envió a liquidaciones RFS como RECHAZADO (hay ítems rechazados). Comentarios: ${obs}`
-                    : `Seaboard envió a liquidaciones RFS como APROBADO. Comentarios: ${obs}`
+                  estado === 'RECHAZADO'
+                    ? 'ENVÍO RECHAZADO A LIQUIDACIONES'
+                    : 'ENVÍO APROBADO A LIQUIDACIONES',
+                  detalleAuditoria
                 ),
               ],
             };

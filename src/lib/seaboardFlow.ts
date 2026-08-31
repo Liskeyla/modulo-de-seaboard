@@ -1,9 +1,49 @@
 import {
   APLICA_APROBADO_SBM,
   esAplicaRechazado,
+  esItemAprobado,
   normalizarAplicaDano,
+  normalizarCargoDano,
+  type EstadoEstimacion,
   type Estimacion,
 } from '@/types/estimacion';
+
+/**
+ * Estado del estimado al enviar Seaboard → Liquidaciones RFS.
+ *
+ * - Todos aprobados → APROBADO
+ * - Solo hay rechazos con cargo Cliente y el resto aprobado → APROBADO
+ *   (Liquidaciones sigue viendo esos ítems como Rechazado para cobro/cliente)
+ * - Cualquier rechazo de cargo no Cliente (o todo rechazado) → RECHAZADO
+ */
+export function resolverEstadoEnvioALiquidaciones(
+  danos: { cargo: string; aplica?: string }[]
+): {
+  estado: Extract<EstadoEstimacion, 'APROBADO' | 'RECHAZADO'>;
+  hayRechazos: boolean;
+  soloRechazosCargoCliente: boolean;
+} {
+  const hayRechazos = danos.some((d) => esAplicaRechazado(d.aplica ?? ''));
+  const todosAprobados =
+    danos.length > 0 && danos.every((d) => esItemAprobado(d.aplica ?? ''));
+  const rechazados = danos.filter((d) => esAplicaRechazado(d.aplica ?? ''));
+  const aprobados = danos.filter((d) => esItemAprobado(d.aplica ?? ''));
+  const soloRechazosCargoCliente =
+    rechazados.length > 0 &&
+    rechazados.every((d) => normalizarCargoDano(d.cargo) === 'Cliente') &&
+    aprobados.length > 0;
+
+  if (todosAprobados) {
+    return { estado: 'APROBADO', hayRechazos: false, soloRechazosCargoCliente: false };
+  }
+  if (soloRechazosCargoCliente) {
+    return { estado: 'APROBADO', hayRechazos: true, soloRechazosCargoCliente: true };
+  }
+  if (hayRechazos) {
+    return { estado: 'RECHAZADO', hayRechazos: true, soloRechazosCargoCliente: false };
+  }
+  return { estado: 'RECHAZADO', hayRechazos: false, soloRechazosCargoCliente: false };
+}
 
 /** Naviera Seaboard (única que sube al reporte / bandeja SBM). */
 export function esNavieraSeaboard(naviera: string) {

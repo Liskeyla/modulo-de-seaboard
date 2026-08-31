@@ -48,6 +48,7 @@ import { VideoDanoModal } from '@/components/estimacion/VideoDanoModal';
 import {
   esNavieraSeaboard,
   puedePushASbm,
+  resolverEstadoEnvioALiquidaciones,
 } from '@/lib/seaboardFlow';
 import { useAuthStore } from '@/store';
 import { useEstimacionesStore } from '@/store/estimacionesStore';
@@ -59,7 +60,6 @@ import {
   snapshotDesdeDano,
   inferirTipoCobro,
   esItemAprobado,
-  esAplicaRechazado,
   esRevisionParcialItems,
   mensajeRevisionItemsPendientes,
   MSG_REVISION_PARCIAL,
@@ -1405,13 +1405,15 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
         onClose={cerrar}
         onEnviar={(comentario) => {
           enviarALiquidaciones(estimacion.id, actor, comentario);
-          const hayRechazos = estimacion.danos.some((d) => esAplicaRechazado(d.aplica));
-          const estadoResultante = hayRechazos ? 'RECHAZADO' : 'APROBADO';
+          const { estado: estadoResultante, soloRechazosCargoCliente } =
+            resolverEstadoEnvioALiquidaciones(estimacion.danos);
           notificarEnvioALiquidaciones(estimacion, comentario, actor, estadoResultante);
           toast(
-            hayRechazos
-              ? `Estimación ${estimacion.codigo} enviada a liquidaciones RFS como RECHAZADO.`
-              : `Estimación ${estimacion.codigo} enviada a liquidaciones RFS en estado APROBADO.`,
+            soloRechazosCargoCliente
+              ? `Estimación ${estimacion.codigo} enviada como APROBADO. Ítems cargo Cliente quedan Rechazado para liquidaciones.`
+              : estadoResultante === 'RECHAZADO'
+                ? `Estimación ${estimacion.codigo} enviada a liquidaciones RFS como RECHAZADO.`
+                : `Estimación ${estimacion.codigo} enviada a liquidaciones RFS en estado APROBADO.`,
             'success'
           );
           cerrar();

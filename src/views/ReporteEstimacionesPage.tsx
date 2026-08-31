@@ -46,6 +46,7 @@ import {
   esNavieraSeaboard,
   enBandejaSeaboard,
   puedePushASbm,
+  resolverEstadoEnvioALiquidaciones,
 } from '@/lib/seaboardFlow';
 import {
   ACTIVIDADES,
@@ -53,7 +54,6 @@ import {
   contarComentariosPendientes,
   itemsSinRevisionSbm,
   inferirTipoCobro,
-  esAplicaRechazado,
   mensajeRevisionItemsPendientes,
   MSG_ITEMS_SIN_APROBAR,
   type Actividad,
@@ -1182,13 +1182,15 @@ export default function ReporteEstimacionesPage() {
             return;
           }
           enviarALiquidaciones(activa.id, actor, comentario);
-          const hayRechazos = activa.danos.some((d) => esAplicaRechazado(d.aplica));
-          const estadoResultante = hayRechazos ? 'RECHAZADO' : 'APROBADO';
+          const { estado: estadoResultante, soloRechazosCargoCliente } =
+            resolverEstadoEnvioALiquidaciones(activa.danos);
           notificarEnvioALiquidaciones(activa, comentario, actor, estadoResultante);
           toast(
-            hayRechazos
-              ? `Estimación ${activa.codigo} enviada a liquidaciones RFS como RECHAZADO.`
-              : `Estimación ${activa.codigo} enviada a liquidaciones RFS en estado APROBADO.`,
+            soloRechazosCargoCliente
+              ? `Estimación ${activa.codigo} enviada como APROBADO. Ítems cargo Cliente quedan Rechazado para liquidaciones.`
+              : estadoResultante === 'RECHAZADO'
+                ? `Estimación ${activa.codigo} enviada a liquidaciones RFS como RECHAZADO.`
+                : `Estimación ${activa.codigo} enviada a liquidaciones RFS en estado APROBADO.`,
             'success'
           );
           cerrar();
