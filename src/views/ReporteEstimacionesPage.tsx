@@ -41,6 +41,7 @@ import {
   notificarAprobacionALiquidaciones,
   notificarRechazoALiquidaciones,
 } from '@/components/estimacion/ConfirmacionEstimacionModal';
+import { NuevoEstimadoModal } from '@/components/estimacion/NuevoEstimadoModal';
 import { useAuthStore } from '@/store';
 import { useEstimacionesStore } from '@/store/estimacionesStore';
 import { useUiStore } from '@/store/uiStore';
@@ -209,7 +210,8 @@ type Dialogo =
   | { tipo: 'ELIMINAR'; id: string }
   | { tipo: 'REVERSAR_APROB'; id: string }
   | { tipo: 'PUSH_SBM'; id: string }
-  | { tipo: 'PREVIEW_DANOS'; id: string };
+  | { tipo: 'PREVIEW_DANOS'; id: string }
+  | { tipo: 'NUEVO_ESTIMADO'; variante: 'Máquina' | 'Box' };
 
 export default function ReporteEstimacionesPage() {
   const router = useRouter();
@@ -223,6 +225,7 @@ export default function ReporteEstimacionesPage() {
     eliminar,
     setActividad,
     setTipoCobro,
+    crearEstimado,
   } = useEstimacionesStore();
   const { pais } = useUiStore();
 
@@ -257,11 +260,12 @@ export default function ReporteEstimacionesPage() {
       : usuario;
   const esLiquidaciones = user?.rol === 'liquidaciones';
   const esSeaboard = user?.rol === 'seaboard';
-  const puedeEditarActividad = esSeaboard || user?.rol === 'dms';
+  const esCoordinador = user?.rol === 'coordinador';
+  const puedeEditarActividad = esSeaboard || esCoordinador || user?.rol === 'dms';
   const etiquetasFecha = etiquetasFechasReporte(user?.rol);
   const cerrar = () => setDialogo({ tipo: 'NINGUNO' });
 
-  /** Liquidaciones: todas las navieras del país. Seaboard: solo Seaboard. */
+  /** Liquidaciones / Coordinador: todas las navieras del país. Seaboard: solo Seaboard. */
   const porPais = useMemo(() => {
     return estimaciones.filter((e) => {
       if (paisDe(e) !== pais) return false;
@@ -525,13 +529,17 @@ export default function ReporteEstimacionesPage() {
 
   const tituloReporte = esLiquidaciones
     ? `Aprobaciones de Estimados · ${metaPais(pais).label}`
-    : 'Reporte de Estimaciones Seaboard Marine';
+    : esCoordinador
+      ? `Estimaciones · Coordinador · ${metaPais(pais).label}`
+      : 'Reporte de Estimaciones Seaboard Marine';
 
   const subtituloReporte = esLiquidaciones
     ? user?.pais === 'PERU'
       ? 'Aprobaciones de Estimados · Perú · Enviar a SBM (Seaboard), reversar y eliminar'
       : 'Aprobaciones de Estimados · Ecuador · Enviar a SBM (Seaboard), reversar y eliminar'
-    : 'Usuario Seaboard · Ver, modificar y aprobar / rechazar estimados';
+    : esCoordinador
+      ? 'Crear y modificar estimados · el historial lo revisa Liquidaciones para enviar a la línea'
+      : 'Usuario Seaboard · Ver, modificar y aprobar / rechazar estimados';
 
   return (
     <>
@@ -632,12 +640,37 @@ export default function ReporteEstimacionesPage() {
                 <span className="dms-link-option dms-link-option--disabled">
                   <RefreshCw className="h-3 w-3" /> Generar Estimados desde Inspecciones
                 </span>
-                <span className="dms-link-option dms-link-option--disabled">
-                  <FileText className="h-3 w-3" /> Generar Nueva Estimación Box
-                </span>
-                <span className="dms-link-option dms-link-option--disabled">
-                  <FileText className="h-3 w-3" /> Generar Nueva Estimación Máquina
-                </span>
+                {esCoordinador ? (
+                  <>
+                    <button
+                      type="button"
+                      className="dms-link-option"
+                      onClick={() =>
+                        setDialogo({ tipo: 'NUEVO_ESTIMADO', variante: 'Box' })
+                      }
+                    >
+                      <FileText className="h-3 w-3" /> Generar Nueva Estimación Box
+                    </button>
+                    <button
+                      type="button"
+                      className="dms-link-option"
+                      onClick={() =>
+                        setDialogo({ tipo: 'NUEVO_ESTIMADO', variante: 'Máquina' })
+                      }
+                    >
+                      <FileText className="h-3 w-3" /> Generar Nueva Estimación Máquina
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <span className="dms-link-option dms-link-option--disabled">
+                      <FileText className="h-3 w-3" /> Generar Nueva Estimación Box
+                    </span>
+                    <span className="dms-link-option dms-link-option--disabled">
+                      <FileText className="h-3 w-3" /> Generar Nueva Estimación Máquina
+                    </span>
+                  </>
+                )}
               </div>
             }
           >
@@ -801,6 +834,19 @@ export default function ReporteEstimacionesPage() {
                                 )}
                               </div>
                               {esLiquidaciones && <ChipsRetornoSeaboard estimacion={row} />}
+                              {esLiquidaciones &&
+                                row.auditoria.some(
+                                  (a) =>
+                                    a.accion.includes('COORDINADOR') ||
+                                    /coord/i.test(a.usuario)
+                                ) && (
+                                  <span
+                                    className="mt-1 block rounded bg-sky-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-sky-800"
+                                    title="Creado o modificado por Coordinador · revise historial antes de enviar a la línea"
+                                  >
+                                    Coordinador · ver historial
+                                  </span>
+                                )}
                               {esLiquidaciones && enBandejaSeaboard(row) && (
                                 <span className="mt-1 block rounded bg-sky-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-sky-800">
                                   En SBM · {row.estado === 'ENVIADO' ? 'enviado' : 'pendiente'}
@@ -1312,6 +1358,29 @@ export default function ReporteEstimacionesPage() {
             );
           }
           cerrar();
+        }}
+      />
+
+      <NuevoEstimadoModal
+        open={dialogo.tipo === 'NUEVO_ESTIMADO'}
+        tipoInicial={dialogo.tipo === 'NUEVO_ESTIMADO' ? dialogo.variante : 'Máquina'}
+        navierasSugeridas={opciones.navieras.filter((n) => n !== 'Todas')}
+        patiosSugeridos={opciones.patios.filter((p) => p !== 'Todos')}
+        onClose={cerrar}
+        onCrear={(datos) => {
+          const creado = crearEstimado(
+            {
+              ...datos,
+              pais: pais === 'PERU' ? 'PERU' : 'ECUADOR',
+            },
+            actor
+          );
+          toast(
+            `Estimado ${creado.codigo} creado. Agregue daños y deje el historial para Liquidaciones.`,
+            'success'
+          );
+          cerrar();
+          router.push(`/reportes/estimaciones/${creado.codigo}`);
         }}
       />
     </>

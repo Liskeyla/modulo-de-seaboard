@@ -28,6 +28,13 @@ const LINKS_BASE = [
     hint: 'Ver, modificar con histórico y devolver a liquidaciones',
     roles: ['dms', 'seaboard'] as const,
   },
+  {
+    href: '/reportes/estimaciones',
+    label: 'Estimaciones · Coordinador',
+    icon: FileBarChart,
+    hint: 'Crear y modificar estimados; Liquidaciones envía a la línea',
+    roles: ['coordinador'] as const,
+  },
 ];
 
 export function Sidebar({ open, onClose }: SidebarProps) {
@@ -66,7 +73,9 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             <p className="text-[11px] text-gray-500">
               {user?.rol === 'liquidaciones'
                 ? 'Aprobaciones de Estimados'
-                : 'Gestor Seaboard Marine'}
+                : user?.rol === 'coordinador'
+                  ? 'Coordinador de Estimaciones'
+                  : 'Gestor Seaboard Marine'}
             </p>
           </div>
           <button

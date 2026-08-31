@@ -328,10 +328,12 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   const esOperadorDms = user?.rol === 'dms';
   const esSeaboard = user?.rol === 'seaboard';
   const esLiquidaciones = user?.rol === 'liquidaciones';
+  const esCoordinador = user?.rol === 'coordinador';
   const esSeaboardNav = esNavieraSeaboard(estimacion.naviera);
   /**
    * Gestor Seaboard: aperturar · modificar · aprobar/rechazar ítems y estimado.
-   * Liquidaciones: validar · enviar a SBM (Seaboard) · reversar aprobación · eliminar · ítems.
+   * Coordinador: aperturar · modificar · agregar daños (sin decidir ni enviar a línea).
+   * Liquidaciones: validar · enviar a SBM (Seaboard) · reversar aprobación · ítems.
    */
   const puedeRevisarItems =
     esSeaboard && ESTADOS_SEABOARD.includes(estimacion.estado);
@@ -340,6 +342,9 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     ['PENDIENTE', 'RECHAZADO', 'REVERSADO', 'APROBADO', 'REPARADO'].includes(
       estimacion.estado
     );
+  const puedeEditarCoordinador =
+    esCoordinador &&
+    ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(estimacion.estado);
   /** Vista post-aprobación Liquidaciones (como DMS). */
   const vistaAprobadoLiq =
     esLiquidaciones && estimacion.estado === 'APROBADO';
@@ -351,11 +356,14 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
    * (revisión parcial). REPARADO permanece cerrado.
    */
   const puedeAperturar =
-    (puedeRevisarItems || puedeEditarLiquidaciones) && !vistaReparadoLiq;
-  const editable = aperturada && (esSeaboard || esLiquidaciones);
-  /** Liquidaciones puede cargar evidencias (fotos, PDF, video, data log) al aperturar. */
+    (puedeRevisarItems || puedeEditarLiquidaciones || puedeEditarCoordinador) &&
+    !vistaReparadoLiq;
+  const editable =
+    aperturada && (esSeaboard || esLiquidaciones || esCoordinador);
+  /** Liquidaciones / Coordinador / Seaboard: evidencias al aperturar. */
   const puedeCargarEvidencias =
-    (editable && (esLiquidaciones || esSeaboard)) || vistaCerradaLiq;
+    (editable && (esLiquidaciones || esSeaboard || esCoordinador)) ||
+    vistaCerradaLiq;
   const puedeEnviarLiquidaciones =
     esSeaboard && ESTADOS_SEABOARD.includes(estimacion.estado);
   /** Liquidaciones: Enviar a SBM solo si naviera Seaboard (también tras reverso). */
@@ -375,17 +383,18 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       estimacion.estado
     );
   const tipoCobroActual = inferirTipoCobro(estimacion);
-  const puedeComentar = esSeaboard || esLiquidaciones;
-  /** Pendiente: SAP + Agregar daño + notas (inhabilitados hasta aperturar). */
+  const puedeComentar = esSeaboard || esLiquidaciones || esCoordinador;
+  /** Pendiente: Agregar daño (Liquidaciones y Coordinador; no Seaboard). */
   const mostrarAgregarDanoLiq =
-    esLiquidaciones &&
+    (esLiquidaciones || esCoordinador) &&
     ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(estimacion.estado);
   /** APROBADO/REPARADO/PENDIENTE: SAP y notas visibles. */
   const mostrarSapNotasLiq = mostrarAgregarDanoLiq || vistaCerradaLiq;
   /** En APROBADO/REPARADO los campos van habilitados (sin aperturar). */
   const formulariosLiqActivos = vistaCerradaLiq || aperturada;
   const puedeEditarNotas = editable || mostrarSapNotasLiq;
-  const puedeRevalidar = editable && (esSeaboard || esLiquidaciones);
+  const puedeRevalidar =
+    editable && (esSeaboard || esLiquidaciones || esCoordinador);
   const danoSeleccionado = estimacion.danos.find((d) => d.id === danoSelId) ?? null;
   const pendientes = contarComentariosPendientes(estimacion.danos);
   const itemsPendientesRevision = itemsSinRevisionSbm(estimacion.danos);

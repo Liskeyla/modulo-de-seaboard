@@ -32,6 +32,7 @@ const ROL_CORTO: Record<RolComentario, string> = {
   SEABOARD: 'Seaboard',
   SUPERVISOR: 'Supervisor',
   RFS: 'RFS',
+  COORDINADOR: 'Coordinador',
 };
 
 const ROL_CLASE: Record<RolComentario, string> = {
@@ -40,6 +41,7 @@ const ROL_CLASE: Record<RolComentario, string> = {
   SEABOARD: 'dms-cmt-rol--nav',
   SUPERVISOR: 'dms-cmt-rol--sup',
   RFS: 'dms-cmt-rol--rfs',
+  COORDINADOR: 'dms-cmt-rol--coord',
 };
 
 /** El rol del comentario se deduce del usuario autenticado. */
@@ -50,6 +52,7 @@ export function rolDeUsuario(
   if (rolUsuario === 'seaboard') return 'SEABOARD';
   if (rolUsuario === 'liquidaciones') return 'LIQUIDACIONES';
   if (rolUsuario === 'dms') return 'RFS';
+  if (rolUsuario === 'coordinador') return 'COORDINADOR';
   return 'SEABOARD';
 }
 

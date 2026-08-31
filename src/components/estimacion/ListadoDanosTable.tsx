@@ -54,6 +54,8 @@ function etiquetaRolCorto(rol: RolComentario) {
       return 'Técnico';
     case 'SUPERVISOR':
       return 'Supervisor';
+    case 'COORDINADOR':
+      return 'Coordinador';
     default:
       return 'RFS';
   }

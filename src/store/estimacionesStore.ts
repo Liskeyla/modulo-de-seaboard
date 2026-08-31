@@ -296,6 +296,28 @@ interface EstimacionesState {
     /** Responsable del cobro del nuevo estimado (aplica a todas las líneas). */
     cargoCobro: CargoDano
   ) => Estimacion | null;
+
+  /**
+   * Coordinador / patio: crea un estimado PENDIENTE vacío (sin daños).
+   * Luego se agregan líneas con AgregarDano; Liquidaciones envía a la línea.
+   */
+  crearEstimado: (
+    datos: {
+      contenedor: string;
+      naviera: string;
+      modeloMaquina?: string;
+      codigoRfs?: string;
+      tipoEstimacion: string;
+      lugarEstimacion?: string;
+      tecnico?: string;
+      actividad?: Actividad;
+      buque?: string;
+      viaje?: string;
+      tipoContenedor?: string;
+      pais?: 'ECUADOR' | 'PERU';
+    },
+    usuario: string
+  ) => Estimacion;
 }
 
 export const useEstimacionesStore = create<EstimacionesState>()(
@@ -1155,6 +1177,94 @@ export const useEstimacionesStore = create<EstimacionesState>()(
             }));
           });
 
+          return creado;
+        },
+
+        crearEstimado: (datos, usuario) => {
+          const fecha = ahoraFmt();
+          const anio = new Date().getFullYear();
+          const codigo = siguienteCodigoEstimado(get().estimaciones, anio);
+          const contenedor = datos.contenedor.trim().toUpperCase();
+          const tipoEst = datos.tipoEstimacion.trim() || 'Máquina';
+          const creado = recalcular({
+            id: uid('est'),
+            codigo,
+            semana: semanaIso(),
+            anio,
+            estado: 'PENDIENTE',
+            contenedor,
+            tipoContenedor: datos.tipoContenedor?.trim() || '',
+            codigoRfs: datos.codigoRfs?.trim() || '',
+            modeloMaquina: datos.modeloMaquina?.trim() || '',
+            naviera: datos.naviera.trim(),
+            buque: datos.buque?.trim() || '',
+            viaje: datos.viaje?.trim() || '',
+            fechaGateIn: '',
+            diasEstadia: 0,
+            lugarEstimacion: datos.lugarEstimacion?.trim() || '',
+            lugarAsistencia: datos.lugarEstimacion?.trim() || '',
+            actividad: datos.actividad ?? 'DM',
+            tipoEstimacion: tipoEst,
+            tipoDano: '',
+            tecnico: datos.tecnico?.trim() || usuario,
+            estadoPti: '',
+            fechaFinPti: '',
+            itinerarioSap: '',
+            almacenSap: '',
+            ediEnviadoOne: 'NO',
+            fechaEnvioEdiOne: '',
+            niveles: '',
+            pais: datos.pais,
+            garantia: {
+              enGarantia: false,
+              proveedor: '',
+              fechaInicio: '',
+              fechaFin: '',
+              ordenGarantia: '',
+              observacion: '',
+            },
+            inspeccion: {
+              codigo: `INSP-${codigo.slice(-6)}`,
+              fecha: '',
+              inspector: '',
+              resultado: '',
+              observacion: '',
+            },
+            fechaElaboracion: fecha,
+            fechaReparacion: '',
+            fechaEnvio: '',
+            fechaAprobacion: '',
+            fechaRevision: '',
+            enviarAprobacion: 'NO',
+            validadoLiquidaciones: false,
+            analisisObservacion: `Estimado creado por coordinador (${usuario}). Pendiente de agregar daños y de envío a línea por Liquidaciones.`,
+            fechaModificacion: fecha,
+            usuarioModificacion: usuario,
+            horasHombre: 0,
+            pvpHorasHombre: 0,
+            pvpMateriales: 0,
+            pvpTotal: 0,
+            sinDanos: true,
+            danos: [],
+            notas: [
+              {
+                id: uid('nota'),
+                fecha,
+                usuario,
+                texto: `Estimado ${codigo} creado por Coordinador. Contenedor ${contenedor} · naviera ${datos.naviera}. Liquidaciones revisará el historial y enviará a la línea cuando corresponda.`,
+              },
+            ],
+            auditoria: [
+              evento(
+                usuario,
+                'ESTIMADO CREADO POR COORDINADOR',
+                `${usuario} creó ${codigo} · contenedor ${contenedor} · naviera ${datos.naviera} · tipo ${tipoEst}. Queda PENDIENTE para Liquidaciones (envío a línea).`
+              ),
+            ],
+            comentariosSeaboard: [],
+          });
+
+          set((s) => ({ estimaciones: [creado, ...s.estimaciones] }));
           return creado;
         },
       };

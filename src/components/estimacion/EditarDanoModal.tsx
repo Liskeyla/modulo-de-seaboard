@@ -67,13 +67,14 @@ export type ComentariosEdicionDano = {
   rfs: string;
 };
 
-/** Comentarios de liquidador / RFS / técnico para mostrar solo lectura al usuario SBM. */
+/** Comentarios de liquidador / RFS / técnico / coordinador para mostrar solo lectura al usuario SBM. */
 export function textoComentariosRfs(dano: DanoEstimacion): string {
   const relevantes = dano.comentarios.filter(
     (c) =>
       c.rol === 'LIQUIDACIONES' ||
       c.rol === 'RFS' ||
       c.rol === 'TECNICO' ||
+      c.rol === 'COORDINADOR' ||
       c.campoAfectado === 'Comentarios RFS'
   );
   if (relevantes.length === 0) {

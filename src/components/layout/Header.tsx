@@ -63,7 +63,10 @@ export function Header({ title, subtitle }: HeaderProps) {
     useUiStore();
   const { user, logout } = useAuthStore();
 
-  const paisFijo = user?.rol === 'liquidaciones' && user.pais ? user.pais : null;
+  const paisFijo =
+    (user?.rol === 'liquidaciones' || user?.rol === 'coordinador') && user.pais
+      ? user.pais
+      : null;
 
   useEffect(() => {
     if (paisFijo && pais !== paisFijo) {
@@ -416,6 +419,11 @@ export function Header({ title, subtitle }: HeaderProps) {
                   {user?.rol === 'liquidaciones' && (
                     <p className="mt-1.5 text-[11px] text-amber-700">
                       Aprobaciones de Estimados · solo su país
+                    </p>
+                  )}
+                  {user?.rol === 'coordinador' && (
+                    <p className="mt-1.5 text-[11px] text-sky-700">
+                      Coordinador · crea y modifica; Liquidaciones envía a la línea
                     </p>
                   )}
                 </div>

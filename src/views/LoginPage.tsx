@@ -29,6 +29,16 @@ const DEMO = [
     rol: 'Usuario Seaboard · EC / PE',
   },
   {
+    usuario: 'coordecuador',
+    clave: 'admin123',
+    rol: 'Coordinador · Ecuador · crear / modificar estimados',
+  },
+  {
+    usuario: 'coordperu',
+    clave: 'admin123',
+    rol: 'Coordinador · Perú · crear / modificar estimados',
+  },
+  {
     usuario: 'liqecuador',
     clave: 'admin123',
     rol: 'Aprobaciones de Estimados · Ecuador',
@@ -94,9 +104,14 @@ export default function LoginPage() {
           `Aprobaciones de Estimados · ${u.pais === 'PERU' ? 'Perú' : 'Ecuador'}`,
           'success'
         );
+      } else if (u?.rol === 'coordinador' && u.pais) {
+        toast(
+          `Coordinador · ${u.pais === 'PERU' ? 'Perú' : 'Ecuador'} · edite y cree estimados; Liquidaciones envía a la línea`,
+          'success'
+        );
       }
     } catch {
-      setError('Credenciales inválidas. Use seaboard, liqecuador o liqperu / admin123');
+      setError('Credenciales inválidas. Use seaboard, coordecuador, coordperu, liqecuador o liqperu / admin123');
     } finally {
       setCargando(false);
     }

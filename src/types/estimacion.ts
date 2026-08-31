@@ -136,7 +136,13 @@ export function inferirTipoCobro(e: {
 }
 
 /** Área funcional del autor del comentario, para la trazabilidad con liquidaciones. */
-export type RolComentario = 'LIQUIDACIONES' | 'TECNICO' | 'SEABOARD' | 'SUPERVISOR' | 'RFS';
+export type RolComentario =
+  | 'LIQUIDACIONES'
+  | 'TECNICO'
+  | 'SEABOARD'
+  | 'SUPERVISOR'
+  | 'RFS'
+  | 'COORDINADOR';
 
 /** Intención del comentario: permite ver de un vistazo qué se pidió cambiar y si ya se resolvió. */
 export type TipoComentario = 'SOLICITA_CAMBIO' | 'ACEPTADO' | 'RECHAZADO' | 'INFORMATIVO';

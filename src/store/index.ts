@@ -5,8 +5,8 @@ import type { PaisOperacion } from '@/lib/pais';
 export interface User {
   username: string;
   nombre: string;
-  rol: 'dms' | 'seaboard' | 'liquidaciones';
-  /** País fijo para Liquidaciones (EC/PE). Seaboard puede cambiar en cabecera. */
+  rol: 'dms' | 'seaboard' | 'liquidaciones' | 'coordinador';
+  /** País fijo para Liquidaciones / Coordinador (EC/PE). Seaboard puede cambiar en cabecera. */
   pais?: PaisOperacion;
 }
 
@@ -56,6 +56,22 @@ const DEMO_USERS: Record<string, DemoUser> = {
     rol: 'liquidaciones',
     nombre: 'Aprobaciones de Estimados Ecuador',
     pais: 'ECUADOR',
+  },
+  /**
+   * Coordinador de patio: crea / modifica estimados y agrega daños.
+   * No envía a la línea: Liquidaciones revisa el historial y hace el push a SBM.
+   */
+  coordecuador: {
+    password: 'admin123',
+    rol: 'coordinador',
+    nombre: 'Coordinador Estimaciones Ecuador',
+    pais: 'ECUADOR',
+  },
+  coordperu: {
+    password: 'admin123',
+    rol: 'coordinador',
+    nombre: 'Coordinador Estimaciones Perú',
+    pais: 'PERU',
   },
 };
 

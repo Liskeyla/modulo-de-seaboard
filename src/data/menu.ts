@@ -4,7 +4,7 @@ export interface MenuItem {
   icon: string;
   descripcion: string;
   /** Si se omite, visible para todos los roles. */
-  roles?: Array<'dms' | 'seaboard' | 'liquidaciones'>;
+  roles?: Array<'dms' | 'seaboard' | 'liquidaciones' | 'coordinador'>;
 }
 
 export interface MenuGrupo {
@@ -40,6 +40,13 @@ export const MENU_GRUPOS: MenuGrupo[] = [
         icon: 'FileBarChart',
         descripcion: 'Ver, modificar con histórico y devolver a liquidaciones',
         roles: ['seaboard', 'dms'],
+      },
+      {
+        href: '/reportes/estimaciones',
+        label: 'Estimaciones · Coordinador',
+        icon: 'FileBarChart',
+        descripcion: 'Crear y modificar estimados; Liquidaciones envía a la línea',
+        roles: ['coordinador'],
       },
     ],
   },
