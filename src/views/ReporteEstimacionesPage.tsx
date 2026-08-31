@@ -259,6 +259,8 @@ export default function ReporteEstimacionesPage() {
   const esLiquidaciones = user?.rol === 'liquidaciones';
   const esSeaboard = user?.rol === 'seaboard';
   const esCoordinador = user?.rol === 'coordinador';
+  /** Columnas Alertas / Cobro: Liquidaciones y Coordinador. */
+  const verAlertasCobro = esLiquidaciones || esCoordinador;
   const puedeEditarActividad = esSeaboard || esCoordinador || user?.rol === 'dms';
   const etiquetasFecha = etiquetasFechasReporte(user?.rol);
   const cerrar = () => setDialogo({ tipo: 'NINGUNO' });
@@ -727,7 +729,7 @@ export default function ReporteEstimacionesPage() {
                   <thead>
                     <tr>
                       <th className="dms-sticky-col dms-sticky-col--1 w-8">···</th>
-                      {esLiquidaciones && (
+                      {verAlertasCobro && (
                         <th
                           className="w-14 text-center"
                           title="Alertas: sin tarifa · modificado · rechazo · cambio pendiente (pase el mouse sobre el icono)"
@@ -740,7 +742,7 @@ export default function ReporteEstimacionesPage() {
                       <th>Semana</th>
                       <th>Año</th>
                       <th>Estado</th>
-                      {esLiquidaciones && (
+                      {verAlertasCobro && (
                         <th title="Cobro del estimado (solo lectura; se define dentro del estimado)">Cobro</th>
                       )}
                       <th>Contenedor</th>
@@ -806,7 +808,7 @@ export default function ReporteEstimacionesPage() {
                                 )}
                               </button>
                             </td>
-                            {esLiquidaciones && (
+                            {verAlertasCobro && (
                               <td className="align-middle">
                                 <AlertasLiquidacionesCell estimacion={row} />
                               </td>
@@ -859,7 +861,7 @@ export default function ReporteEstimacionesPage() {
                             <td>
                               <EstadoEstimacionBadge estado={row.estado} />
                             </td>
-                            {esLiquidaciones && (
+                            {verAlertasCobro && (
                               <td className="align-middle">
                                 {(['PENDIENTE', 'RECHAZADO', 'REVERSADO', 'APROBADO', 'REPARADO'].includes(
                                   row.estado
