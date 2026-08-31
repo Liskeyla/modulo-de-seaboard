@@ -125,62 +125,11 @@
   }
 
   .dms-icon-actions {
-    @apply flex min-w-[7.5rem] flex-wrap items-center gap-1;
-  }
-
-  /* Acciones del reporte: chips compactos con nombre */
-  .dms-acciones-lista {
-    @apply flex min-w-[8.5rem] max-w-[10.25rem] flex-wrap gap-0.5 rounded-md border border-slate-200/90 bg-gradient-to-b from-slate-50 to-white p-1 shadow-sm;
-  }
-
-  .dms-accion-btn {
-    @apply inline-flex h-auto min-h-0 min-w-0 flex-[1_1_calc(50%-0.125rem)] items-center justify-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] font-semibold leading-tight text-white shadow-sm transition-all hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f16e26]/35 active:scale-[0.98];
-  }
-
-  .dms-accion-btn--ver,
-  .dms-accion-btn--enviar,
-  .dms-accion-btn--borrar {
-    @apply flex-[1_1_100%];
-  }
-
-  .dms-accion-btn svg {
-    @apply h-2.5 w-2.5 shrink-0 opacity-95;
-  }
-
-  .dms-accion-btn--ver {
-    @apply border-[#0f1c6b] bg-gradient-to-b from-[#1a2f9c] to-[#152483];
-  }
-
-  .dms-accion-btn--pdf {
-    @apply border-red-700/80 bg-gradient-to-b from-[#e06a66] to-[#d9534f];
-  }
-
-  .dms-accion-btn--nota {
-    @apply border-sky-700/70 bg-gradient-to-b from-[#4bc0df] to-[#31b0d5];
-  }
-
-  .dms-accion-btn--info {
-    @apply border-slate-600 bg-gradient-to-b from-slate-500 to-slate-600;
-  }
-
-  .dms-accion-btn--enviar {
-    @apply border-[#86198f] bg-gradient-to-b from-[#d946ef] to-[#c026d3];
-  }
-
-  .dms-accion-btn--reversar {
-    @apply border-amber-700/70 bg-gradient-to-b from-[#f6c16d] to-[#f0ad4e] text-slate-900;
-  }
-
-  .dms-accion-btn--borrar {
-    @apply border-red-900/80 bg-gradient-to-b from-[#e35d59] to-[#c9302c];
-  }
-
-  .dms-accion-btn--log {
-    @apply border-teal-800/70 bg-gradient-to-b from-teal-500 to-teal-700;
+    @apply flex min-w-[6.5rem] max-w-[7.75rem] flex-wrap items-center gap-1;
   }
 
   .dms-icon-action {
-    @apply inline-flex h-7 w-7 items-center justify-center rounded-md border text-white shadow-sm transition-all hover:shadow-md active:scale-95;
+    @apply inline-flex h-7 w-7 items-center justify-center rounded-md border text-white shadow-sm transition-all hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f16e26]/35 active:scale-95;
   }
 
   .dms-icon-action--ver {
@@ -860,7 +809,7 @@
 
   .dms-reporte-sticky--acciones {
     left: 0;
-    min-width: 10.5rem;
+    min-width: 7.5rem;
     box-shadow: 4px 0 10px -6px rgba(15, 23, 42, 0.18);
   }
 
@@ -869,13 +818,13 @@
   }
 
   .dms-reporte-sticky--codigo {
-    left: 10.5rem;
+    left: 7.5rem;
     min-width: 8.5rem;
     box-shadow: 4px 0 10px -6px rgba(15, 23, 42, 0.16);
   }
 
   .dms-reporte-sticky--codigo.has-alertas {
-    left: 13.75rem;
+    left: 10.75rem;
   }
 
   .dms-cell-link {

@@ -371,53 +371,67 @@ export default function ReporteEstimacionesPage() {
 
     if (row.sinDanos) {
       return (
-        <div className="dms-acciones-lista">
-          <button type="button" className="dms-accion-btn dms-accion-btn--ver" onClick={abrir}>
-            <Eye /> Abrir
+        <div className="dms-icon-actions">
+          <button
+            type="button"
+            className="dms-icon-action dms-icon-action--ver"
+            title="Abrir estimado"
+            onClick={abrir}
+          >
+            <Eye className="h-3.5 w-3.5" />
           </button>
           <button
             type="button"
-            className="dms-accion-btn dms-accion-btn--info"
+            className="dms-icon-action dms-icon-action--info"
+            title="Sin daños registrados"
             onClick={() => setDialogo({ tipo: 'INFO', id: row.id })}
           >
-            <Info /> Sin daños
+            <Info className="h-3.5 w-3.5" />
           </button>
         </div>
       );
     }
 
     return (
-      <div className="dms-acciones-lista">
-        <button type="button" className="dms-accion-btn dms-accion-btn--ver" onClick={abrir}>
-          <Eye /> Abrir
+      <div className="dms-icon-actions">
+        <button
+          type="button"
+          className="dms-icon-action dms-icon-action--ver"
+          title="Abrir estimado"
+          onClick={abrir}
+        >
+          <Eye className="h-3.5 w-3.5" />
         </button>
         {['ENVIADO', 'APROBADO', 'REPARADO', 'RECHAZADO'].includes(row.estado) && (
           <button
             type="button"
-            className="dms-accion-btn dms-accion-btn--pdf"
+            className="dms-icon-action dms-icon-action--pdf"
+            title="PDF preliminar"
             onClick={() =>
               setDialogo({ tipo: 'INFORME', id: row.id, variante: 'PRELIMINAR' })
             }
           >
-            <FileText /> PDF
+            <FileText className="h-3.5 w-3.5" />
           </button>
         )}
         {['APROBADO', 'REPARADO', 'RECHAZADO'].includes(row.estado) && (
           <button
             type="button"
-            className="dms-accion-btn dms-accion-btn--nota"
+            className="dms-icon-action dms-icon-action--nota"
+            title="Ver nota Seaboard"
             onClick={() => setDialogo({ tipo: 'NOTA', id: row.id })}
           >
-            <Ship /> Nota
+            <Ship className="h-3.5 w-3.5" />
           </button>
         )}
         {(row.analisisObservacion || row.niveles) && (
           <button
             type="button"
-            className="dms-accion-btn dms-accion-btn--info"
+            className="dms-icon-action dms-icon-action--info"
+            title="Información adicional"
             onClick={() => setDialogo({ tipo: 'INFO', id: row.id })}
           >
-            <Info /> Info
+            <Info className="h-3.5 w-3.5" />
           </button>
         )}
         {(user?.rol === 'dms' &&
@@ -427,7 +441,7 @@ export default function ReporteEstimacionesPage() {
         (esLiquidaciones && puedePushASbm(row)) ? (
           <button
             type="button"
-            className="dms-accion-btn dms-accion-btn--enviar"
+            className="dms-icon-action dms-icon-action--enviar"
             title={
               esLiquidaciones
                 ? 'Enviar a SBM · solo naviera Seaboard · queda ENVIADO'
@@ -437,17 +451,21 @@ export default function ReporteEstimacionesPage() {
               setDialogo({ tipo: esLiquidaciones ? 'PUSH_SBM' : 'ENVIAR', id: row.id });
             }}
           >
-            {esLiquidaciones ? <Upload /> : <Send />}
-            {esLiquidaciones ? 'Enviar SBM' : 'Enviar'}
+            {esLiquidaciones ? (
+              <Upload className="h-3.5 w-3.5" />
+            ) : (
+              <Send className="h-3.5 w-3.5" />
+            )}
           </button>
         ) : null}
         {esLiquidaciones && row.estado === 'APROBADO' && (
           <button
             type="button"
-            className="dms-accion-btn dms-accion-btn--reversar"
+            className="dms-icon-action dms-icon-action--reversar"
+            title="Reversar aprobación"
             onClick={() => setDialogo({ tipo: 'REVERSAR_APROB', id: row.id })}
           >
-            <Undo2 /> Reversar
+            <Undo2 className="h-3.5 w-3.5" />
           </button>
         )}
         {esLiquidaciones &&
@@ -455,17 +473,19 @@ export default function ReporteEstimacionesPage() {
           ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) && (
             <button
               type="button"
-              className="dms-accion-btn dms-accion-btn--borrar"
+              className="dms-icon-action dms-icon-action--borrar"
+              title="Eliminar estimado"
               onClick={() => setDialogo({ tipo: 'ELIMINAR', id: row.id })}
             >
-              <Trash2 /> Eliminar
+              <Trash2 className="h-3.5 w-3.5" />
             </button>
           )}
         {['ENVIADO', 'PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) &&
           user?.rol === 'seaboard' && (
             <button
               type="button"
-              className="dms-accion-btn dms-accion-btn--enviar"
+              className="dms-icon-action dms-icon-action--enviar"
+              title="Enviar"
               onClick={() => {
                 if (itemsSinRevisionSbm(row.danos).length > 0) {
                   toast(
@@ -477,19 +497,20 @@ export default function ReporteEstimacionesPage() {
                 setDialogo({ tipo: 'ENVIAR', id: row.id });
               }}
             >
-              <Send /> Enviar
+              <Send className="h-3.5 w-3.5" />
             </button>
           )}
         {row.estadoPti && (
           <button
             type="button"
-            className="dms-accion-btn dms-accion-btn--log"
+            className="dms-icon-action dms-icon-action--log"
+            title="Descargar data log"
             onClick={() => {
               const n = descargarDataLog(row);
               toast(`Data Log descargado (${n} registros).`, 'success');
             }}
           >
-            <Download /> Data log
+            <Download className="h-3.5 w-3.5" />
           </button>
         )}
       </div>
