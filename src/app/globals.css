@@ -128,49 +128,55 @@
     @apply flex min-w-[7.5rem] flex-wrap items-center gap-1;
   }
 
-  /* Acciones del reporte: botones con nombre (sin desplegable) */
+  /* Acciones del reporte: chips compactos con nombre */
   .dms-acciones-lista {
-    @apply flex min-w-[8.75rem] max-w-[10.5rem] flex-col gap-0.5;
+    @apply flex min-w-[9.25rem] max-w-[11rem] flex-wrap gap-1 rounded-lg border border-slate-200/90 bg-gradient-to-b from-slate-50 to-white p-1.5 shadow-sm;
   }
 
   .dms-accion-btn {
-    @apply inline-flex h-7 w-full items-center justify-start gap-1.5 rounded-md border px-2 text-left text-[10px] font-bold leading-none text-white shadow-sm transition-all hover:brightness-95 hover:shadow-md active:scale-[0.98];
+    @apply inline-flex h-7 min-w-0 flex-[1_1_calc(50%-0.125rem)] items-center justify-center gap-1 rounded-md border px-1.5 text-[10px] font-bold leading-none text-white shadow-sm transition-all hover:-translate-y-px hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f16e26]/35 active:translate-y-0 active:scale-[0.98];
+  }
+
+  .dms-accion-btn--ver,
+  .dms-accion-btn--enviar,
+  .dms-accion-btn--borrar {
+    @apply flex-[1_1_100%];
   }
 
   .dms-accion-btn svg {
-    @apply h-3 w-3 shrink-0;
+    @apply h-3 w-3 shrink-0 opacity-95;
   }
 
   .dms-accion-btn--ver {
-    @apply border-[#0f1c6b] bg-[#152483];
+    @apply border-[#0f1c6b] bg-gradient-to-b from-[#1a2f9c] to-[#152483];
   }
 
   .dms-accion-btn--pdf {
-    @apply border-red-700 bg-[#d9534f];
+    @apply border-red-700/80 bg-gradient-to-b from-[#e06a66] to-[#d9534f];
   }
 
   .dms-accion-btn--nota {
-    @apply border-sky-600 bg-[#31b0d5];
+    @apply border-sky-700/70 bg-gradient-to-b from-[#4bc0df] to-[#31b0d5];
   }
 
   .dms-accion-btn--info {
-    @apply border-slate-600 bg-slate-500;
+    @apply border-slate-600 bg-gradient-to-b from-slate-500 to-slate-600;
   }
 
   .dms-accion-btn--enviar {
-    @apply border-[#a21caf] bg-[#c026d3];
+    @apply border-[#86198f] bg-gradient-to-b from-[#d946ef] to-[#c026d3];
   }
 
   .dms-accion-btn--reversar {
-    @apply border-amber-600 bg-[#f0ad4e] text-slate-900;
+    @apply border-amber-700/70 bg-gradient-to-b from-[#f6c16d] to-[#f0ad4e] text-slate-900;
   }
 
   .dms-accion-btn--borrar {
-    @apply border-red-800 bg-[#c9302c];
+    @apply border-red-900/80 bg-gradient-to-b from-[#e35d59] to-[#c9302c];
   }
 
   .dms-accion-btn--log {
-    @apply border-teal-700 bg-teal-600;
+    @apply border-teal-800/70 bg-gradient-to-b from-teal-500 to-teal-700;
   }
 
   .dms-icon-action {
@@ -336,7 +342,7 @@
   }
 
   .dms-table-legend {
-    @apply flex flex-wrap items-center gap-4 border-b border-gray-100 bg-slate-50/70 px-4 py-2.5 text-[11px] text-gray-600;
+    @apply flex flex-wrap items-center gap-3 border-b border-slate-100 bg-gradient-to-r from-[#eef1fb]/80 to-white px-4 py-2.5 text-[11px] text-slate-600;
   }
 
   .dms-table-legend-item {
@@ -344,7 +350,7 @@
   }
 
   .dms-table-legend-dot {
-    @apply h-2 w-2 rounded-full;
+    @apply h-2.5 w-2.5 rounded-full shadow-sm ring-2 ring-white;
   }
 
   .dms-btn-action {
@@ -801,6 +807,77 @@
     @apply sticky top-0 z-10;
   }
 
+  .dms-table-scroll--reporte {
+    @apply max-h-[min(70vh,42rem)] overflow-auto;
+  }
+
+  .dms-table--reporte thead th {
+    @apply border border-slate-300/90 bg-[#eef1fb] px-2.5 py-2.5 text-center text-[10px] font-extrabold uppercase tracking-wider text-[#152483] shadow-[inset_0_-1px_0_0_rgba(21,36,131,0.12)];
+  }
+
+  .dms-table--reporte tbody td {
+    @apply border border-slate-200 px-2.5 py-2 text-[11px] leading-snug text-slate-800;
+  }
+
+  .dms-table--reporte tbody tr {
+    @apply transition-colors;
+  }
+
+  .dms-table--reporte tbody tr:nth-child(even) td {
+    @apply bg-[#fafbfd];
+  }
+
+  .dms-table--reporte tbody tr:hover td {
+    @apply bg-[#f0f4ff];
+  }
+
+  .dms-table--reporte tfoot tr.dms-danos-total td {
+    @apply border-slate-300 bg-[#eef1fb] text-[11px] font-extrabold uppercase tracking-wide text-[#152483];
+  }
+
+  /* Columnas fijas al desplazarse en horizontal */
+  .dms-reporte-sticky {
+    @apply sticky z-[3] bg-white;
+  }
+
+  .dms-table--reporte thead .dms-reporte-sticky {
+    @apply z-[12] bg-[#eef1fb];
+  }
+
+  .dms-table--reporte tbody tr:nth-child(even) .dms-reporte-sticky {
+    @apply bg-[#fafbfd];
+  }
+
+  .dms-table--reporte tbody tr:hover .dms-reporte-sticky {
+    @apply bg-[#f0f4ff];
+  }
+
+  .dms-reporte-sticky--alertas {
+    left: 0;
+    min-width: 3.25rem;
+    box-shadow: 2px 0 0 rgba(15, 23, 42, 0.04);
+  }
+
+  .dms-reporte-sticky--acciones {
+    left: 0;
+    min-width: 10.5rem;
+    box-shadow: 4px 0 10px -6px rgba(15, 23, 42, 0.18);
+  }
+
+  .dms-reporte-sticky--acciones.has-alertas {
+    left: 3.25rem;
+  }
+
+  .dms-reporte-sticky--codigo {
+    left: 10.5rem;
+    min-width: 8.5rem;
+    box-shadow: 4px 0 10px -6px rgba(15, 23, 42, 0.16);
+  }
+
+  .dms-reporte-sticky--codigo.has-alertas {
+    left: 13.75rem;
+  }
+
   .dms-cell-link {
     @apply cursor-pointer text-left underline-offset-2 transition-colors hover:text-[#f16e26] hover:underline;
   }
@@ -1133,7 +1210,7 @@
 
   /* ── Listado de daños / reporte (grilla con bordes) ──────────────── */
   .dms-danos-table-wrap {
-    @apply overflow-hidden rounded-lg border border-slate-300 bg-white shadow-sm;
+    @apply overflow-hidden rounded-xl border border-slate-200 bg-white shadow-md ring-1 ring-slate-900/5;
   }
 
   .dms-danos-table-wrap .dms-table-scroll {
@@ -1145,23 +1222,18 @@
     @apply w-max min-w-full border-collapse bg-white text-black;
   }
 
-  .dms-table--danos th,
-  .dms-table--reporte th {
+  .dms-table--danos th {
     @apply border border-slate-300 bg-white px-2 py-2 text-center text-[10px] font-bold uppercase tracking-wide text-black;
   }
 
-  .dms-table--danos td,
-  .dms-table--reporte td {
+  .dms-table--danos td {
     @apply border border-slate-200 bg-white px-2 py-2 text-[11px] text-black;
   }
 
   .dms-table--danos tbody tr:nth-child(even) td,
   .dms-table--danos tbody tr:hover td,
   .dms-table--danos tbody tr.dms-row-selected td,
-  .dms-table--danos tbody tr.dms-row-marcado td,
-  .dms-table--reporte tbody tr:nth-child(even) td,
-  .dms-table--reporte tbody tr:hover td,
-  .dms-table--reporte tbody tr.dms-row-selected td {
+  .dms-table--danos tbody tr.dms-row-marcado td {
     @apply bg-white text-black;
   }
 
@@ -1188,9 +1260,12 @@
     @apply flex items-start gap-2 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs leading-snug text-emerald-950;
   }
 
-  .dms-table--danos tfoot tr.dms-danos-total td,
-  .dms-table--reporte tfoot tr.dms-danos-total td {
+  .dms-table--danos tfoot tr.dms-danos-total td {
     @apply border border-slate-300 bg-white font-bold text-black;
+  }
+
+  .dms-table--reporte tfoot tr.dms-danos-total td {
+    @apply border border-slate-300 bg-[#eef1fb] font-extrabold text-[#152483];
   }
 
   .dms-table--danos .text-rfs-navy,

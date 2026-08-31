@@ -694,20 +694,34 @@ export default function ReporteEstimacionesPage() {
               </div>
             ) : (
               <div className="dms-danos-table-wrap mx-4 mb-4">
-              <div className="dms-table-scroll">
+              <div className="dms-table-scroll dms-table-scroll--reporte">
                 <table className="dms-table dms-table--reporte">
                   <thead>
                     <tr>
                       {verAlertas && (
                         <th
-                          className="w-14 text-center"
+                          className="dms-reporte-sticky dms-reporte-sticky--alertas w-14 text-center"
                           title="Alertas: sin tarifa · modificado · rechazo · cambio pendiente (pase el mouse sobre el icono)"
                         >
                           Alertas
                         </th>
                       )}
-                      <th>Acciones</th>
-                      <th>Codigo</th>
+                      <th
+                        className={cn(
+                          'dms-reporte-sticky dms-reporte-sticky--acciones',
+                          verAlertas && 'has-alertas'
+                        )}
+                      >
+                        Acciones
+                      </th>
+                      <th
+                        className={cn(
+                          'dms-reporte-sticky dms-reporte-sticky--codigo',
+                          verAlertas && 'has-alertas'
+                        )}
+                      >
+                        Codigo
+                      </th>
                       <th>Semana</th>
                       <th>Año</th>
                       <th>Estado</th>
@@ -762,14 +776,25 @@ export default function ReporteEstimacionesPage() {
                             }
                           >
                             {verAlertas && (
-                              <td className="align-middle">
+                              <td className="dms-reporte-sticky dms-reporte-sticky--alertas align-middle">
                                 <AlertasLiquidacionesCell estimacion={row} />
                               </td>
                             )}
-                            <td className="align-top" onDoubleClick={(e) => e.stopPropagation()}>
+                            <td
+                              className={cn(
+                                'dms-reporte-sticky dms-reporte-sticky--acciones align-top',
+                                verAlertas && 'has-alertas'
+                              )}
+                              onDoubleClick={(e) => e.stopPropagation()}
+                            >
                               {accionesDe(row)}
                             </td>
-                              <td>
+                              <td
+                              className={cn(
+                                'dms-reporte-sticky dms-reporte-sticky--codigo',
+                                verAlertas && 'has-alertas'
+                              )}
+                            >
                               <div className="flex flex-wrap items-center gap-1">
                                 {requiereRevision && (
                                   <IconoAlertaRevisionEstimado estimacion={row} />
