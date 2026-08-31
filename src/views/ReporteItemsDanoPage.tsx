@@ -4,12 +4,9 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   AlertTriangle,
-  CheckCircle2,
-  Clock3,
   Eye,
   FilePlus2,
   ListChecks,
-  XCircle,
 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { DmsReportLayout } from '@/components/dms/DmsReportLayout';
@@ -279,59 +276,6 @@ export default function ReporteItemsDanoPage() {
     search,
   ]);
 
-  const kpis = useMemo(() => {
-    const pool = filtroActivo || busqueda || search ? filtered : itemsBase;
-    // KPIs sobre el universo filtrado (sin forzar estado ítem) para ver distribución
-    const universo = itemsBase.filter((r) => {
-      if (!filtroActivo) return true;
-      if (cargo !== 'Todos' && r.cargo !== cargo) return false;
-      if (naviera !== 'Todas' && r.naviera !== naviera) return false;
-      if (componente !== 'Todos' && r.comp !== componente) return false;
-      if (estadoEstimacion !== 'Todos' && r.estadoEstimacion !== estadoEstimacion) {
-        return false;
-      }
-      const iso = aFechaIso(r.fechaElaboracion);
-      if (desde && iso && iso < desde) return false;
-      if (hasta && iso && iso > hasta) return false;
-      return true;
-    });
-    const contar = (est: AplicaDano) => universo.filter((r) => r.estadoItem === est).length;
-    return {
-      total: universo.length,
-      pendientes: contar(APLICA_PENDIENTE),
-      aprobados: contar(APLICA_APROBADO_SBM),
-      rechazados: contar(APLICA_RECHAZADO_SBM),
-      visibles: pool.length,
-    };
-  }, [
-    itemsBase,
-    filtered,
-    filtroActivo,
-    busqueda,
-    search,
-    cargo,
-    naviera,
-    componente,
-    estadoEstimacion,
-    desde,
-    hasta,
-  ]);
-
-  const rankingRechazos = useMemo(() => {
-    const mapa = new Map<string, { comp: string; cantidad: number; totalUsd: number }>();
-    filtered
-      .filter((r) => r.estadoItem === APLICA_RECHAZADO_SBM)
-      .forEach((r) => {
-        const cur = mapa.get(r.comp) ?? { comp: r.comp, cantidad: 0, totalUsd: 0 };
-        cur.cantidad += 1;
-        cur.totalUsd += r.csTotal;
-        mapa.set(r.comp, cur);
-      });
-    return Array.from(mapa.values())
-      .sort((a, b) => b.cantidad - a.cantidad || b.totalUsd - a.totalUsd)
-      .slice(0, 8);
-  }, [filtered]);
-
   const rechazadosVisibles = useMemo(
     () => filtered.filter((r) => r.estadoItem === APLICA_RECHAZADO_SBM),
     [filtered]
@@ -460,12 +404,6 @@ export default function ReporteItemsDanoPage() {
     toast('Filtros restablecidos.', 'info');
   }
 
-  function aplicarFiltroEstado(est: string) {
-    setEstadoItem(est);
-    setFiltroActivo(true);
-    setPage(1);
-  }
-
   return (
     <div className="min-h-screen">
       <Header
@@ -477,12 +415,6 @@ export default function ReporteItemsDanoPage() {
           title="Reporte de ítems"
           subtitle={`${user?.nombre ?? 'Liquidaciones'} · ${pais} · ${itemsBase.length} línea(s) en el depósito`}
           heroIcon={<ListChecks className="h-5 w-5" />}
-          infoMessage={
-            <span>
-              Visualice el <strong>cargo</strong> y la <strong>observación de rechazo/aprobación</strong>{' '}
-              por ítem (p. ej. rechazado por línea y cobro al cliente). Filtre y exporte para auditoría.
-            </span>
-          }
           filtros={[
             {
               label: 'Estado del ítem',
@@ -549,105 +481,6 @@ export default function ReporteItemsDanoPage() {
             },
           }}
         >
-          <div className="mb-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            <button
-              type="button"
-              className={cn(
-                'rounded-lg border bg-white px-3 py-2.5 text-left shadow-sm transition-colors hover:border-rfs-300',
-                estadoItem === 'Todos' && filtroActivo && 'ring-2 ring-rfs-200'
-              )}
-              onClick={() => aplicarFiltroEstado('Todos')}
-            >
-              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
-                Total ítems
-              </p>
-              <p className="mt-0.5 text-xl font-bold tabular-nums text-rfs-navy">{kpis.total}</p>
-            </button>
-            <button
-              type="button"
-              className={cn(
-                'rounded-lg border border-amber-200 bg-amber-50/60 px-3 py-2.5 text-left shadow-sm transition-colors hover:border-amber-400',
-                estadoItem === APLICA_PENDIENTE && 'ring-2 ring-amber-300'
-              )}
-              onClick={() => aplicarFiltroEstado(APLICA_PENDIENTE)}
-            >
-              <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-amber-800">
-                <Clock3 className="h-3 w-3" /> Pendientes
-              </p>
-              <p className="mt-0.5 text-xl font-bold tabular-nums text-amber-900">
-                {kpis.pendientes}
-              </p>
-            </button>
-            <button
-              type="button"
-              className={cn(
-                'rounded-lg border border-emerald-200 bg-emerald-50/60 px-3 py-2.5 text-left shadow-sm transition-colors hover:border-emerald-400',
-                estadoItem === APLICA_APROBADO_SBM && 'ring-2 ring-emerald-300'
-              )}
-              onClick={() => aplicarFiltroEstado(APLICA_APROBADO_SBM)}
-            >
-              <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-emerald-800">
-                <CheckCircle2 className="h-3 w-3" /> Aprobados
-              </p>
-              <p className="mt-0.5 text-xl font-bold tabular-nums text-emerald-900">
-                {kpis.aprobados}
-              </p>
-            </button>
-            <button
-              type="button"
-              className={cn(
-                'rounded-lg border border-red-200 bg-red-50/60 px-3 py-2.5 text-left shadow-sm transition-colors hover:border-red-400',
-                estadoItem === APLICA_RECHAZADO_SBM && 'ring-2 ring-red-300'
-              )}
-              onClick={() => aplicarFiltroEstado(APLICA_RECHAZADO_SBM)}
-            >
-              <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-red-800">
-                <XCircle className="h-3 w-3" /> Rechazados
-              </p>
-              <p className="mt-0.5 text-xl font-bold tabular-nums text-red-900">
-                {kpis.rechazados}
-              </p>
-            </button>
-          </div>
-
-          {rankingRechazos.length > 0 && (
-            <div className="mb-3 rounded-lg border border-red-100 bg-white p-3 shadow-sm">
-              <p className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-red-800">
-                <AlertTriangle className="h-3.5 w-3.5" />
-                Componentes más rechazados
-                {estadoItem !== APLICA_RECHAZADO_SBM && estadoItem !== 'Todos'
-                  ? ' (en el filtro actual)'
-                  : ''}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {rankingRechazos.map((r, i) => (
-                  <button
-                    key={r.comp}
-                    type="button"
-                    className="inline-flex items-center gap-2 rounded-md border border-red-100 bg-red-50/80 px-2.5 py-1.5 text-left text-[11px] transition-colors hover:border-red-300"
-                    title="Filtrar por este componente"
-                    onClick={() => {
-                      setComponente(r.comp);
-                      setEstadoItem(APLICA_RECHAZADO_SBM);
-                      setFiltroActivo(true);
-                      setPage(1);
-                    }}
-                  >
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white">
-                      {i + 1}
-                    </span>
-                    <span>
-                      <span className="font-bold text-slate-800">{r.comp}</span>
-                      <span className="ml-1.5 text-red-700">
-                        {r.cantidad}× · ${formatMoney(r.totalUsd)}
-                      </span>
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
           <DmsTableToolbar
             search={search}
             onSearchChange={(v) => {
