@@ -1,11 +1,8 @@
 'use client';
 
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  ChevronDown,
-  ChevronRight,
-  Database,
   Download,
   Eye,
   FileBarChart,
@@ -249,7 +246,6 @@ export default function ReporteEstimacionesPage() {
   const [pageSize, setPageSize] = useState(20);
   const [page, setPage] = useState(1);
   const [filtroActivo, setFiltroActivo] = useState(false);
-  const [expandidas, setExpandidas] = useState<Set<string>>(new Set());
   const [dialogo, setDialogo] = useState<Dialogo>({ tipo: 'NINGUNO' });
   const [menuAccionesId, setMenuAccionesId] = useState<string | null>(null);
 
@@ -371,15 +367,6 @@ export default function ReporteEstimacionesPage() {
   const seleccionada = (id: string) => estimaciones.find((e) => e.id === id) ?? null;
   const activa =
     dialogo.tipo !== 'NINGUNO' && 'id' in dialogo ? seleccionada(dialogo.id) : null;
-
-  function alternarExpandida(id: string) {
-    setExpandidas((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
 
   function accionesDe(row: Estimacion) {
     const abrir = () => router.push(`/reportes/estimaciones/${row.codigo}`);
@@ -714,7 +701,6 @@ export default function ReporteEstimacionesPage() {
                 <table className="dms-table dms-table--reporte">
                   <thead>
                     <tr>
-                      <th className="dms-sticky-col dms-sticky-col--1 w-8">···</th>
                       {verAlertas && (
                         <th
                           className="w-14 text-center"
@@ -766,34 +752,18 @@ export default function ReporteEstimacionesPage() {
                   </thead>
                   <tbody>
                     {paginated.map((row) => {
-                      const abierta = expandidas.has(row.id);
                       const pendientes = contarComentariosPendientes(row.danos);
                       const requiereRevision = estimadoRequiereRevisionItems(row);
                       return (
-                        <Fragment key={row.id}>
                           <tr
+                            key={row.id}
                             className={claseFilaRevisionPendiente({
                               estimacion: row,
-                              seleccionada: abierta,
                             })}
                             onDoubleClick={() =>
                               router.push(`/reportes/estimaciones/${row.codigo}`)
                             }
                           >
-                            <td className="dms-sticky-col dms-sticky-col--1 text-center">
-                              <button
-                                type="button"
-                                className="dms-expander"
-                                onClick={() => alternarExpandida(row.id)}
-                                aria-label={abierta ? 'Ocultar detalle' : 'Ver detalle'}
-                              >
-                                {abierta ? (
-                                  <ChevronDown className="h-3.5 w-3.5" />
-                                ) : (
-                                  <ChevronRight className="h-3.5 w-3.5" />
-                                )}
-                              </button>
-                            </td>
                             {verAlertas && (
                               <td className="align-middle">
                                 <AlertasLiquidacionesCell estimacion={row} />
@@ -991,38 +961,6 @@ export default function ReporteEstimacionesPage() {
                             </td>
                             <td className="text-xs">{row.usuarioModificacion || 'N/A'}</td>
                           </tr>
-
-                          {abierta && (
-                            <tr className="dms-row-detalle">
-                              <td />
-                              <td colSpan={35}>
-                                <div className="dms-detalle-inline">
-                                  <div className="dms-detalle-inline-acciones">
-                                    <button
-                                      type="button"
-                                      className="dms-btn-action dms-btn-ver"
-                                      onClick={() =>
-                                        router.push(`/reportes/estimaciones/${row.codigo}`)
-                                      }
-                                    >
-                                      Abrir estimado
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className="dms-btn-action dms-btn-datalog"
-                                      onClick={() => {
-                                        descargarDataLog(row);
-                                        toast('Data Log descargado.', 'success');
-                                      }}
-                                    >
-                                      <Database className="h-3 w-3" /> Data Log
-                                    </button>
-                                  </div>
-                                </div>
-                              </td>
-                            </tr>
-                          )}
-                        </Fragment>
                       );
                     })}
                   </tbody>
