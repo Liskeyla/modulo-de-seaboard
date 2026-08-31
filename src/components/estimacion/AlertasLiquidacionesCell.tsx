@@ -1,37 +1,67 @@
 'use client';
 
-import { AlertTriangle } from 'lucide-react';
+import {
+  AlertTriangle,
+  Ban,
+  CircleDollarSign,
+  MessageSquareWarning,
+  PencilLine,
+  XCircle,
+} from 'lucide-react';
 import {
   alertasLiquidaciones,
   type AlertaLiquidaciones,
+  type TipoAlertaLiquidaciones,
 } from '@/lib/alertasLiquidaciones';
 import type { Estimacion } from '@/types/estimacion';
 import { cn } from '@/lib/utils';
 
-function PillAlerta({ alerta }: { alerta: AlertaLiquidaciones }) {
+const ICONO_ALERTA: Record<
+  TipoAlertaLiquidaciones,
+  { Icon: typeof AlertTriangle; clase: string; etiqueta: string }
+> = {
+  SIN_TARIFA: {
+    Icon: CircleDollarSign,
+    clase: 'dms-alerta-icono--tarifa',
+    etiqueta: 'Sin tarifa',
+  },
+  MODIFICADO: {
+    Icon: PencilLine,
+    clase: 'dms-alerta-icono--mod',
+    etiqueta: 'Modificado',
+  },
+  ITEM_RECHAZADO: {
+    Icon: XCircle,
+    clase: 'dms-alerta-icono--rechazo',
+    etiqueta: 'Ítem rechazado',
+  },
+  RECHAZO_TOTAL: {
+    Icon: Ban,
+    clase: 'dms-alerta-icono--rechazo',
+    etiqueta: 'Rechazo total',
+  },
+  PENDIENTE_CAMBIO: {
+    Icon: MessageSquareWarning,
+    clase: 'dms-alerta-icono--cambio',
+    etiqueta: 'Cambio pendiente',
+  },
+};
+
+function IconoAlerta({ alerta }: { alerta: AlertaLiquidaciones }) {
+  const meta = ICONO_ALERTA[alerta.id];
+  const { Icon } = meta;
   return (
     <span
-      className={cn(
-        'dms-alerta-pill',
-        alerta.id === 'MODIFICADO' && 'dms-alerta-pill--mod',
-        alerta.id === 'PENDIENTE_CAMBIO' && 'dms-alerta-pill--cambio',
-        (alerta.id === 'ITEM_RECHAZADO' || alerta.id === 'RECHAZO_TOTAL') &&
-          'dms-alerta-pill--rechazo'
-      )}
+      className={cn('dms-alerta-icono', meta.clase)}
       title={alerta.title}
+      aria-label={`${meta.etiqueta}: ${alerta.title}`}
     >
-      <span className="dms-alerta-pill__icono">
-        <AlertTriangle className="h-3 w-3" aria-hidden />
-        <span>{alerta.lineas[0]}</span>
-      </span>
-      {alerta.lineas.slice(1).map((linea) => (
-        <span key={linea}>{linea}</span>
-      ))}
+      <Icon className="h-3.5 w-3.5" aria-hidden />
     </span>
   );
 }
 
-/** Columna de alertas (izq. de Acciones) para Aprobaciones de Estimados / Liquidaciones. */
+/** Columna de alertas (izq. de Acciones): solo iconos + tooltip. */
 export function AlertasLiquidacionesCell({ estimacion }: { estimacion: Estimacion }) {
   const alertas = alertasLiquidaciones(estimacion);
   if (alertas.length === 0) {
@@ -40,7 +70,7 @@ export function AlertasLiquidacionesCell({ estimacion }: { estimacion: Estimacio
   return (
     <div className="dms-alertas-cell" onDoubleClick={(e) => e.stopPropagation()}>
       {alertas.map((a) => (
-        <PillAlerta key={a.id} alerta={a} />
+        <IconoAlerta key={a.id} alerta={a} />
       ))}
     </div>
   );

@@ -61,7 +61,6 @@ import {
   MSG_ITEMS_SIN_APROBAR,
   type Actividad,
   type Estimacion,
-  type TipoCobro,
 } from '@/types/estimacion';
 import { descargarDataLog, type VarianteInforme } from '@/lib/descargas';
 import { estimadoRequiereRevisionItems } from '@/lib/revisionPendiente';
@@ -224,7 +223,6 @@ export default function ReporteEstimacionesPage() {
     reversarAprobacion,
     eliminar,
     setActividad,
-    setTipoCobro,
     crearEstimado,
   } = useEstimacionesStore();
   const { pais } = useUiStore();
@@ -730,7 +728,10 @@ export default function ReporteEstimacionesPage() {
                     <tr>
                       <th className="dms-sticky-col dms-sticky-col--1 w-8">···</th>
                       {esLiquidaciones && (
-                        <th className="text-center" title="Alertas del estimado">
+                        <th
+                          className="w-14 text-center"
+                          title="Alertas: sin tarifa · modificado · rechazo · cambio pendiente (pase el mouse sobre el icono)"
+                        >
                           Alertas
                         </th>
                       )}
@@ -740,7 +741,7 @@ export default function ReporteEstimacionesPage() {
                       <th>Año</th>
                       <th>Estado</th>
                       {esLiquidaciones && (
-                        <th title="Cobro del estimado: Cliente o Línea">Cobro</th>
+                        <th title="Cobro del estimado (solo lectura; se define dentro del estimado)">Cobro</th>
                       )}
                       <th>Contenedor</th>
                       <th>Modelo Maquina</th>
@@ -859,49 +860,29 @@ export default function ReporteEstimacionesPage() {
                               <EstadoEstimacionBadge estado={row.estado} />
                             </td>
                             {esLiquidaciones && (
-                              <td
-                                className="align-middle"
-                                onDoubleClick={(e) => e.stopPropagation()}
-                              >
+                              <td className="align-middle">
                                 {(['PENDIENTE', 'RECHAZADO', 'REVERSADO', 'APROBADO', 'REPARADO'].includes(
                                   row.estado
                                 ) && !row.sinDanos) ? (
-                                  <div className="dms-cobro-toggle dms-cobro-toggle--compact">
-                                    <button
-                                      type="button"
-                                      className={cn(
-                                        'dms-cobro-btn',
-                                        inferirTipoCobro(row) === 'CLIENTE' &&
-                                          'dms-cobro-btn--on-cliente'
-                                      )}
-                                      title="Cobro al Cliente"
-                                      onClick={() => {
-                                        const tipo: TipoCobro = 'CLIENTE';
-                                        if (inferirTipoCobro(row) === tipo) return;
-                                        setTipoCobro(row.id, tipo, actor);
-                                        toast(`${row.codigo}: cobro al Cliente.`, 'success');
-                                      }}
-                                    >
-                                      <Users className="h-3 w-3" /> Cliente
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className={cn(
-                                        'dms-cobro-btn',
-                                        inferirTipoCobro(row) === 'LINEA' &&
-                                          'dms-cobro-btn--on-linea'
-                                      )}
-                                      title="Cobro a la Línea"
-                                      onClick={() => {
-                                        const tipo: TipoCobro = 'LINEA';
-                                        if (inferirTipoCobro(row) === tipo) return;
-                                        setTipoCobro(row.id, tipo, actor);
-                                        toast(`${row.codigo}: cobro a la Línea.`, 'success');
-                                      }}
-                                    >
-                                      <Ship className="h-3 w-3" /> Línea
-                                    </button>
-                                  </div>
+                                  <span
+                                    className={cn(
+                                      'inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-wide',
+                                      inferirTipoCobro(row) === 'CLIENTE'
+                                        ? 'bg-orange-100 text-orange-800 ring-1 ring-orange-300'
+                                        : 'bg-indigo-100 text-indigo-900 ring-1 ring-indigo-300'
+                                    )}
+                                    title="Cobro definido dentro del estimado (solo lectura en el reporte)"
+                                  >
+                                    {inferirTipoCobro(row) === 'CLIENTE' ? (
+                                      <>
+                                        <Users className="h-3 w-3" /> Cliente
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Ship className="h-3 w-3" /> Línea
+                                      </>
+                                    )}
+                                  </span>
                                 ) : (
                                   <span className="text-[10px] text-slate-400">—</span>
                                 )}

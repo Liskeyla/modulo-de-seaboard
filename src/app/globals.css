@@ -838,28 +838,28 @@
     @apply inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-400 text-white shadow-sm;
   }
 
-  /* Alertas Liquidaciones (columna izq. de Acciones) — estilo DMS */
+  /* Alertas Liquidaciones (columna izq. de Acciones) — iconos compactos */
   .dms-alertas-cell {
-    @apply flex min-w-[4.75rem] flex-col items-center gap-1.5 py-0.5;
+    @apply flex min-w-[3.25rem] flex-wrap items-center justify-center gap-1 py-0.5;
   }
 
-  .dms-alerta-pill {
-    @apply inline-flex w-[4.6rem] flex-col items-center justify-center rounded-xl bg-[#e53935] px-1.5 py-1.5 text-center text-[9px] font-extrabold leading-[1.15] text-white shadow-sm;
+  .dms-alerta-icono {
+    @apply inline-flex h-7 w-7 items-center justify-center rounded-lg text-white shadow-sm ring-1 ring-black/10;
   }
 
-  .dms-alerta-pill__icono {
-    @apply inline-flex items-center justify-center gap-0.5;
+  .dms-alerta-icono--tarifa {
+    @apply bg-[#e53935];
   }
 
-  .dms-alerta-pill--mod {
+  .dms-alerta-icono--mod {
     @apply bg-[#f16e26];
   }
 
-  .dms-alerta-pill--cambio {
+  .dms-alerta-icono--cambio {
     @apply bg-[#d97706];
   }
 
-  .dms-alerta-pill--rechazo {
+  .dms-alerta-icono--rechazo {
     @apply bg-[#b91c1c];
   }
 
