@@ -759,41 +759,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <EstadoEstimacionBadge estado={estimacion.estado} />
-              <span className="dms-hero-chip">
-                {estimacion.danos.length} línea(s) de daño
-              </span>
-              <span className="dms-hero-chip dms-hero-chip--money">
-                Total ${formatMoney(estimacion.pvpTotal)}
-              </span>
-              {estimacion.fechaEnvio && (esSeaboard || esLiquidaciones) && (
-                <span
-                  className="dms-hero-chip"
-                  title={
-                    esLiquidaciones
-                      ? 'Fecha en que envió el estimado a aprobar (reporte Seaboard)'
-                      : 'Fecha de recepción · envío desde Liquidaciones a Línea'
-                  }
-                >
-                  {esLiquidaciones ? 'Envío a Línea' : 'Recepción Línea'} ·{' '}
-                  {estimacion.fechaEnvio}
-                </span>
-              )}
-              {estimacion.fechaAprobacion && (esSeaboard || esLiquidaciones) && (
-                <span
-                  className="dms-hero-chip"
-                  title="Fecha en que Seaboard aprobó el estimado"
-                >
-                  Aprobación SBM · {estimacion.fechaAprobacion}
-                </span>
-              )}
-              {estimacion.fechaModificacion && (esSeaboard || esLiquidaciones) && (
-                <span
-                  className="dms-hero-chip"
-                  title="Última modificación del estimado"
-                >
-                  Modificación · {estimacion.fechaModificacion}
-                </span>
-              )}
               {itemsPendientesRevision.length > 0 && (
                 <span
                   className="dms-hero-chip dms-hero-chip--revision"
