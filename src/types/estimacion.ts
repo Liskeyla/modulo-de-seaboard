@@ -78,8 +78,7 @@ export function esItemAprobado(aplica: string) {
   return normalizarAplicaDano(aplica) === APLICA_APROBADO_SBM;
 }
 
-export const MSG_ITEM_APROBADO_BLOQUEADO =
-  'El ítem está aprobado y bloqueado. Para modificarlo debe reversarlo, editarlo y volver a enviarlo a revisión.';
+export const MSG_ITEM_APROBADO_BLOQUEADO = 'Ítem aprobado';
 
 
 /** A quién corresponde el cargo del ítem (independiente del estado de revisión). */

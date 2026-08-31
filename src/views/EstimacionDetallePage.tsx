@@ -62,7 +62,6 @@ import {
   esItemAprobado,
   esRevisionParcialItems,
   mensajeRevisionItemsPendientes,
-  MSG_ITEM_APROBADO_BLOQUEADO,
   MSG_REVISION_PARCIAL,
   type CampoSnapshotLinea,
   type DanoEstimacion,
@@ -664,7 +663,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     comentarioSbm?: string
   ) {
     if (esItemAprobado(dano.aplica)) {
-      toast(MSG_ITEM_APROBADO_BLOQUEADO, 'info');
       return;
     }
     if (exigirApertura()) return;
@@ -1355,7 +1353,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 }}
                 onRemarkChange={(d, remark) => {
                   if (esItemAprobado(d.aplica)) {
-                    toast(MSG_ITEM_APROBADO_BLOQUEADO, 'info');
                     return;
                   }
                   if (exigirApertura()) return;
@@ -1363,7 +1360,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 }}
                 onDonanteChange={(d, contenedorDonante) => {
                   if (esItemAprobado(d.aplica)) {
-                    toast(MSG_ITEM_APROBADO_BLOQUEADO, 'info');
                     return;
                   }
                   if (exigirApertura()) return;
@@ -1375,7 +1371,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 }}
                 onCargoChange={(d, cargo) => {
                   if (esItemAprobado(d.aplica)) {
-                    toast(MSG_ITEM_APROBADO_BLOQUEADO, 'info');
                     return;
                   }
                   if (exigirApertura()) return;
@@ -1655,7 +1650,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
             return Boolean(d && !esItemAprobado(d.aplica));
           });
           if (ids.length === 0) {
-            toast(MSG_ITEM_APROBADO_BLOQUEADO, 'info');
             return;
           }
           confirmarRevisionItems('APROBAR', comentario, ids);
@@ -1676,7 +1670,6 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
             return Boolean(d && !esItemAprobado(d.aplica));
           });
           if (ids.length === 0) {
-            toast(MSG_ITEM_APROBADO_BLOQUEADO, 'info');
             return;
           }
           confirmarRevisionItems('RECHAZAR', comentario, ids);

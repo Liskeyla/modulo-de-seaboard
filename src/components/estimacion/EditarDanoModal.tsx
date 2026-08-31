@@ -9,7 +9,6 @@ import {
   CARGO_DEFAULT,
   esAplicaRechazado,
   esItemAprobado,
-  MSG_ITEM_APROBADO_BLOQUEADO,
   normalizarAplicaDano,
   normalizarCargoDano,
   snapshotDesdeDano,
@@ -161,7 +160,6 @@ export function EditarDanoModal({
 
   const guardar = () => {
     if (itemAprobado) {
-      toast(MSG_ITEM_APROBADO_BLOQUEADO, 'info');
       return;
     }
     const largoFinal = mostrarDimensiones ? largo : dano.largo;
@@ -307,12 +305,6 @@ export function EditarDanoModal({
         </>
       }
     >
-      {itemAprobado && (
-        <div className="dms-item-bloqueado-aviso mb-3" role="status">
-          <Lock className="h-4 w-4 shrink-0" aria-hidden />
-          <span>{MSG_ITEM_APROBADO_BLOQUEADO}</span>
-        </div>
-      )}
       <div className={cn('grid gap-3 sm:grid-cols-3', itemAprobado && 'pointer-events-none opacity-90')}>
         {campoTexto('Comp.', 'comp')}
         {campoTexto('Part Number', 'partNumber')}
