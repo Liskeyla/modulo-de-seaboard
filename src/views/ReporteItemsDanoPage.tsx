@@ -18,7 +18,6 @@ import {
 } from '@/components/dms/IndicadoresRevision';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import {
-  APLICA_APROBADO_SBM,
   APLICA_PENDIENTE,
   APLICA_RECHAZADO_SBM,
   APLICA_DANO,
