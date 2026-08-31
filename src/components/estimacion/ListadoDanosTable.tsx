@@ -15,13 +15,11 @@ import {
 import { BadgeEstadoItem } from '@/components/dms/IndicadoresRevision';
 import { type EntradaComentario } from '@/components/estimacion/ComentariosDanoModal';
 import {
-  APLICA_APROBADO_SBM,
   CARGOS_DANO,
   esAplicaRechazado,
   esItemAprobado,
   esItemRevisadoSbm,
   MSG_ITEM_APROBADO_BLOQUEADO,
-  normalizarAplicaDano,
   normalizarCargoDano,
   totalesDanos,
   type CampoSnapshotLinea,
@@ -221,6 +219,9 @@ function SubfilaHistorico({
       )}
       <tr className="dms-dano-subfila-row" title="Registro anterior al cambio (segundo nivel)">
       {mostrarMarcacion && <td className="dms-dano-nivel2-indent" />}
+      <td className={cn('text-center whitespace-nowrap text-[11px]', ch('aplica'))}>
+        {fmtCelda(s.aplica)}
+      </td>
       <td className="text-center">
         <span className="dms-badge-antes">Antes</span>
       </td>
@@ -271,9 +272,6 @@ function SubfilaHistorico({
         {fmtCelda(s.csTotal, true)}
       </td>
       <td className={cn('text-center whitespace-nowrap', ch('cargo'))}>{fmtCelda(s.cargo)}</td>
-      <td className={cn('text-center whitespace-nowrap text-[11px]', ch('aplica'))}>
-        {fmtCelda(s.aplica)}
-      </td>
       <td className={cn('text-center', ch('medida'))}>{fmtCelda(s.medida)}</td>
       <td className={cn('dms-cell-wrap max-w-[8rem] text-[10px]', ch('remark'))}>
         {fmtCelda(s.remark)}
@@ -338,16 +336,17 @@ export function ListadoDanosTable({
   void comentariosSoloLectura;
   void _onEnviarComentario;
   const colspanAntesHh =
-    (mostrarMarcacion ? 1 : 0) + 10 + (mostrarDimensiones ? 4 : 0) + 1;
+    (mostrarMarcacion ? 1 : 0) + 1 + 10 + (mostrarDimensiones ? 4 : 0) + 1;
   /** Columnas totales de la tabla (para barra Antes→Después a ancho completo). */
   const colspanTabla =
     (mostrarMarcacion ? 1 : 0) +
+    1 + // Estado
     1 + // check / ⓘ
     10 + // comp … serie
     (mostrarDimensiones ? 4 : 0) +
     1 + // cantidad
     4 + // HH + costos
-    6 + // cargo … comentario
+    5 + // cargo … comentario (sin Estado)
     (ocultarAcciones ? 0 : 1);
 
   /** Abre automáticamente el detalle Antes cuando hubo cambio de cantidad/valores. */
@@ -439,6 +438,9 @@ export function ListadoDanosTable({
                 />
               </th>
             )}
+            <th className="underline decoration-dotted" title="Estado de revisión del ítem">
+              Estado
+            </th>
             <th className="w-8" title="Seleccione un daño para ver su información">
               <span className="sr-only">Seleccionar</span>ⓘ
             </th>
@@ -473,9 +475,6 @@ export function ListadoDanosTable({
             <th className="underline decoration-dotted">Cs. Mat.</th>
             <th className="underline decoration-dotted">Cs. Total</th>
             <th>Cargo</th>
-            <th className="underline decoration-dotted" title="Estado de revisión del ítem">
-              Estado
-            </th>
             <th>Medida</th>
             <th>Remark</th>
             <th>Contenedor Donante</th>
@@ -511,7 +510,6 @@ export function ListadoDanosTable({
                     marcado && 'dms-row-marcado',
                     edicion && 'dms-row-modificada',
                     antesAbierto && 'dms-row-nivel1-abierta',
-                    bloqueadoAprobado && 'dms-row-item-bloqueado',
                     pendienteRevision && 'dms-row-pendiente-revision'
                   )}
                   onClick={() => onSeleccionar(d)}
@@ -532,6 +530,16 @@ export function ListadoDanosTable({
                       />
                     </td>
                   )}
+                  <td
+                    className={cn('text-center whitespace-nowrap', mod('aplica'))}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <BadgeEstadoItem
+                      estado={d.aplica}
+                      compacto
+                      className={bloqueadoAprobado ? 'opacity-90' : undefined}
+                    />
+                  </td>
                   <td className="text-center" onClick={(e) => e.stopPropagation()}>
                     <div className="inline-flex items-center justify-center gap-0.5">
                       {tieneAntes ? (
@@ -558,7 +566,7 @@ export function ListadoDanosTable({
                       <span
                         className={cn(
                           'dms-dano-check',
-                          activo || normalizarAplicaDano(d.aplica) === APLICA_APROBADO_SBM
+                          activo
                             ? 'dms-dano-check--on'
                             : pendienteRevision
                               ? 'dms-dano-check--pendiente'
@@ -715,16 +723,6 @@ export function ListadoDanosTable({
                       </span>
                     )}
                   </td>
-                  <td
-                    className={cn('text-center whitespace-nowrap', mod('aplica'))}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <BadgeEstadoItem
-                      estado={d.aplica}
-                      compacto
-                      className={bloqueadoAprobado ? 'opacity-90' : undefined}
-                    />
-                  </td>
                   <td className={cn('text-center', mod('medida'))}>{d.medida || '—'}</td>
                   <td
                     className={cn(mod('remark'))}
@@ -863,7 +861,7 @@ export function ListadoDanosTable({
             <td className="text-right tabular-nums">${formatMoney(totales.csHoraHombre)}</td>
             <td className="text-right tabular-nums">${formatMoney(totales.csMaterial)}</td>
             <td className="text-right tabular-nums">${formatMoney(totales.csTotal)}</td>
-            <td colSpan={7} />
+            <td colSpan={6} />
           </tr>
         </tfoot>
       </table>

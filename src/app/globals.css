@@ -1171,14 +1171,7 @@
     @apply bg-slate-50;
   }
 
-  .dms-table--danos tbody tr.dms-row-item-bloqueado td {
-    @apply bg-emerald-50/40;
-    box-shadow: inset 3px 0 0 #10b981;
-  }
-
-  .dms-table--danos tbody tr.dms-row-item-bloqueado.dms-row-selected td {
-    @apply bg-emerald-100/50;
-  }
+  /* Ítem aprobado: sin tintar la fila; el badge en columna Estado indica Aprobado */
 
   .dms-item-bloqueado-aviso {
     @apply flex items-start gap-2 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs leading-snug text-emerald-950;
