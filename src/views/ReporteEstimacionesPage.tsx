@@ -1012,30 +1012,6 @@ export default function ReporteEstimacionesPage() {
                               <td />
                               <td colSpan={35}>
                                 <div className="dms-detalle-inline">
-                                  <div>
-                                    <span>Líneas de daño</span>
-                                    <strong>{row.danos.length}</strong>
-                                  </div>
-                                  <div>
-                                    <span>Fotos cargadas</span>
-                                    <strong>
-                                      {row.danos.reduce((a, d) => a + d.fotos.length, 0)}
-                                    </strong>
-                                  </div>
-                                  <div>
-                                    <span>Comentarios liquidaciones</span>
-                                    <strong
-                                      className={pendientes > 0 ? 'text-rfsorange-600' : undefined}
-                                    >
-                                      {row.danos.reduce((a, d) => a + d.comentarios.length, 0)} (
-                                      {pendientes} pendiente
-                                      {pendientes === 1 ? '' : 's'})
-                                    </strong>
-                                  </div>
-                                  <div>
-                                    <span>Movimientos</span>
-                                    <strong>{row.auditoria.length}</strong>
-                                  </div>
                                   <div className="dms-detalle-inline-acciones">
                                     <button
                                       type="button"
