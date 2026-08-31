@@ -87,7 +87,7 @@ export function IconoAlertaRevisionEstimado({
       title={titulo}
       aria-label={titulo}
     >
-      <AlertCircle className="h-3.5 w-3.5 text-slate-500" aria-hidden />
+      <AlertCircle className="h-3.5 w-3.5 text-amber-600" aria-hidden />
     </span>
   );
 }

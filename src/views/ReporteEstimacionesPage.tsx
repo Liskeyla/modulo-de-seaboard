@@ -646,11 +646,11 @@ export default function ReporteEstimacionesPage() {
             <div className="dms-table-legend">
               {(
                 [
-                  ['Enviado', 'bg-slate-500'],
-                  ['Pendiente', 'bg-slate-400'],
-                  ['Aprobado', 'bg-slate-700'],
-                  ['Reparado', 'bg-slate-600'],
-                  ['Rechazado', 'bg-slate-800'],
+                  ['Enviado', 'bg-teal-500'],
+                  ['Pendiente', 'bg-amber-400'],
+                  ['Aprobado', 'bg-blue-500'],
+                  ['Reparado', 'bg-emerald-500'],
+                  ['Rechazado', 'bg-red-500'],
                 ] as const
               ).map(([label, color]) => (
                 <span key={label} className="dms-table-legend-item">
@@ -797,14 +797,14 @@ export default function ReporteEstimacionesPage() {
                                     /coord/i.test(a.usuario)
                                 ) && (
                                   <span
-                                    className="mt-1 block rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[9px] font-bold uppercase text-slate-700"
+                                    className="mt-1 block rounded bg-sky-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-sky-800"
                                     title="Creado o modificado por Coordinador · revise historial antes de enviar a la línea"
                                   >
                                     Coordinador · ver historial
                                   </span>
                                 )}
                               {esLiquidaciones && enBandejaSeaboard(row) && (
-                                <span className="mt-1 block rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[9px] font-bold uppercase text-slate-700">
+                                <span className="mt-1 block rounded bg-sky-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-sky-800">
                                   En SBM · {row.estado === 'ENVIADO' ? 'enviado' : 'pendiente'}
                                 </span>
                               )}
@@ -823,8 +823,8 @@ export default function ReporteEstimacionesPage() {
                                     className={cn(
                                       'inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-wide',
                                       inferirTipoCobro(row) === 'CLIENTE'
-                                        ? 'border border-slate-300 bg-slate-100 text-slate-800'
-                                        : 'border border-slate-400 bg-slate-200 text-slate-900'
+                                        ? 'bg-orange-100 text-orange-800 ring-1 ring-orange-300'
+                                        : 'bg-indigo-100 text-indigo-900 ring-1 ring-indigo-300'
                                     )}
                                     title="Cobro definido dentro del estimado (solo lectura en el reporte)"
                                   >

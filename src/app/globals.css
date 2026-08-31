@@ -15,7 +15,11 @@
   }
 
   body {
-    @apply bg-[#f7f8fa] text-foreground font-sans antialiased;
+    @apply bg-[#f4f6fb] text-foreground font-sans antialiased;
+    background-image:
+      radial-gradient(circle at 0% 0%, rgba(21, 36, 131, 0.04) 0%, transparent 50%),
+      radial-gradient(circle at 100% 100%, rgba(241, 110, 38, 0.05) 0%, transparent 50%);
+    background-attachment: fixed;
   }
 }
 
@@ -51,11 +55,12 @@
   }
 
   .dms-page-hero {
-    @apply relative overflow-hidden rounded-lg border border-slate-200 bg-slate-800 px-4 py-2.5 text-white shadow-sm md:px-5 md:py-3;
+    @apply relative overflow-hidden rounded-lg border border-white/60 bg-gradient-to-r from-[#152483] via-[#2a339c] to-[#3f4bb8] px-4 py-2.5 text-white shadow-md md:px-5 md:py-3;
   }
 
   .dms-page-hero::after {
-    display: none;
+    content: '';
+    @apply pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-white/10;
   }
 
   .dms-page-title {
@@ -82,11 +87,20 @@
     @apply flex min-h-[32px] items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wide text-white;
   }
 
-  .dms-sidebar-header--filtros,
-  .dms-sidebar-header--fecha,
-  .dms-sidebar-header--buscador,
+  .dms-sidebar-header--filtros {
+    @apply bg-gradient-to-r from-[#152483] to-[#111d6b];
+  }
+
+  .dms-sidebar-header--fecha {
+    @apply bg-gradient-to-r from-[#1a5276] to-[#2471a3];
+  }
+
+  .dms-sidebar-header--buscador {
+    @apply bg-gradient-to-r from-[#006666] to-[#008080];
+  }
+
   .dms-sidebar-header--opciones {
-    @apply bg-slate-700;
+    @apply bg-gradient-to-r from-[#5b2c6f] to-[#6a1b9a];
   }
 
   .dms-sidebar-body {
@@ -98,7 +112,7 @@
   }
 
   .dms-filter-control {
-    @apply box-border h-9 w-full min-w-0 max-w-full rounded-md border border-slate-300 bg-white px-2 text-[11px] text-gray-800 shadow-none transition-colors placeholder:text-gray-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-400/30 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:opacity-60;
+    @apply box-border h-9 w-full min-w-0 max-w-full rounded-md border border-[#c6c6c6] bg-white px-2 text-[11px] text-gray-800 shadow-none transition-colors placeholder:text-gray-400 focus:border-[#f16e26] focus:outline-none focus:ring-1 focus:ring-[#f16e26]/25 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:opacity-60;
   }
 
   .dms-select {
@@ -229,7 +243,7 @@
   }
 
   .dms-table tbody tr:hover td.dms-sticky-col {
-    @apply bg-slate-50;
+    @apply bg-sky-50;
   }
 
   .dms-table tbody tr.dms-row-selected td.dms-sticky-col {
@@ -237,15 +251,15 @@
   }
 
   .dms-btn-search {
-    @apply flex h-9 w-full items-center justify-center gap-1 rounded-md bg-slate-700 px-2 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm transition-all hover:bg-slate-800 active:scale-[0.99];
+    @apply flex h-9 w-full items-center justify-center gap-1 rounded-md bg-gradient-to-r from-[#006666] to-[#008080] px-2 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm transition-all hover:shadow-md active:scale-[0.99];
   }
 
   .dms-main-panel {
-    @apply min-w-0 flex-1 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm;
+    @apply min-w-0 flex-1 overflow-hidden rounded-xl border border-gray-200/80 bg-white shadow-md;
   }
 
   .dms-info-box {
-    @apply flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700;
+    @apply flex items-start gap-3 rounded-xl border border-sky-200 bg-gradient-to-r from-sky-50 to-blue-50 px-4 py-3 text-sm text-[#31708f];
   }
 
   .dms-info-box ul {
@@ -422,27 +436,27 @@
   }
 
   .dms-badge--reparado {
-    @apply bg-slate-100 text-slate-700 ring-slate-200;
+    @apply bg-emerald-100 text-emerald-800 ring-emerald-200;
   }
 
   .dms-badge--aprobado {
-    @apply bg-slate-100 text-slate-800 ring-slate-300;
+    @apply bg-blue-100 text-blue-800 ring-blue-200;
   }
 
   .dms-badge--enviado {
-    @apply bg-slate-50 text-slate-600 ring-slate-200;
+    @apply bg-teal-100 text-teal-800 ring-teal-200;
   }
 
   .dms-badge--pendiente {
-    @apply bg-white text-slate-700 ring-slate-300;
+    @apply bg-amber-100 text-amber-800 ring-amber-200;
   }
 
   .dms-badge--rechazado {
-    @apply bg-slate-200 text-slate-800 ring-slate-300;
+    @apply bg-red-100 text-red-800 ring-red-200;
   }
 
   .dms-badge--reversado {
-    @apply bg-slate-100 text-slate-600 ring-slate-200;
+    @apply bg-purple-100 text-purple-800 ring-purple-200;
   }
 
   .dms-pagination {
@@ -490,7 +504,7 @@
   }
 
   .dms-link-option {
-    @apply flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs text-slate-700 transition-colors hover:bg-slate-50 hover:underline;
+    @apply flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs text-[#f16e26] transition-colors hover:bg-sky-50 hover:underline;
   }
 
   .dms-link-option--disabled {
@@ -796,8 +810,8 @@
   }
 
   .dms-pendiente-dot {
-    @apply ml-1 inline-block h-1.5 w-1.5 rounded-full bg-slate-500 align-middle;
-    box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.2);
+    @apply ml-1 inline-block h-1.5 w-1.5 rounded-full bg-[#f16e26] align-middle;
+    box-shadow: 0 0 0 2px rgba(241, 110, 38, 0.2);
   }
 
   /* ── Identificación visual: revisión pendiente (estimados / ítems) ── */
@@ -810,79 +824,88 @@
   }
 
   .dms-badge-estado-item--pendiente {
-    @apply bg-slate-100 text-slate-700 ring-1 ring-slate-300;
+    @apply bg-amber-50 text-amber-900 ring-2 ring-amber-300/80;
   }
 
   .dms-badge-estado-item--aprobado {
-    @apply bg-slate-50 text-slate-700 ring-1 ring-slate-200;
+    @apply bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200;
   }
 
   .dms-badge-estado-item--rechazado {
-    @apply bg-slate-200 text-slate-800 ring-1 ring-slate-300;
+    @apply bg-red-50 text-red-800 ring-1 ring-red-200;
   }
 
   .dms-pill-revision {
-    @apply mt-1 inline-flex items-center gap-1 rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-slate-700 ring-1 ring-slate-300;
+    @apply mt-1 inline-flex items-center gap-1 rounded-md bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950 ring-1 ring-amber-400;
   }
 
   .dms-pill-revision--parcial {
-    @apply bg-slate-200 text-slate-800 ring-slate-400;
+    @apply bg-orange-100 text-orange-950 ring-orange-400;
   }
 
   .dms-pill-revision__count {
-    @apply inline-flex min-w-[1.1rem] items-center justify-center rounded-full bg-slate-600 px-1 text-[9px] font-extrabold text-white;
+    @apply inline-flex min-w-[1.1rem] items-center justify-center rounded-full bg-amber-600 px-1 text-[9px] font-extrabold text-white;
   }
 
   .dms-pill-revision--parcial .dms-pill-revision__count {
-    @apply bg-slate-700;
+    @apply bg-orange-600;
   }
 
   .dms-row-estimado-revision td {
-    @apply bg-slate-50;
+    @apply bg-amber-50/40;
   }
 
   .dms-row-estimado-revision.dms-row-selected td {
-    @apply bg-slate-100;
+    @apply bg-amber-50/60;
   }
 
   .dms-row-item-pendiente td {
-    @apply bg-slate-50;
+    @apply bg-amber-50/30;
   }
 
   .dms-row-item-pendiente.dms-row-selected td {
-    @apply bg-slate-100;
+    @apply bg-amber-50/50;
   }
 
   .dms-hero-chip--revision {
-    @apply border-slate-300 bg-slate-100 font-semibold text-slate-800 ring-1 ring-slate-300;
+    @apply border-amber-300 bg-amber-100 font-bold text-amber-950 ring-2 ring-amber-400/60;
   }
 
   .dms-banner-revision-pendiente {
-    @apply flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 shadow-none;
+    @apply flex flex-wrap items-center gap-2 rounded-lg border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 px-3 py-2 text-xs text-amber-950 shadow-sm;
   }
 
   .dms-dano-check--pendiente {
-    @apply text-slate-500;
+    @apply text-amber-500;
   }
 
   .dms-indicador-col-pendiente {
-    @apply inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-500 text-white shadow-none;
+    @apply inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-400 text-white shadow-sm;
   }
 
-  /* Alertas Liquidaciones — iconos sobrios */
+  /* Alertas Liquidaciones (columna izq. de Acciones) — iconos compactos */
   .dms-alertas-cell {
     @apply flex min-w-[3.25rem] flex-wrap items-center justify-center gap-1 py-0.5;
   }
 
   .dms-alerta-icono {
-    @apply inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-600 shadow-none;
+    @apply inline-flex h-7 w-7 items-center justify-center rounded-lg text-white shadow-sm ring-1 ring-black/10;
   }
 
-  .dms-alerta-icono--tarifa,
-  .dms-alerta-icono--mod,
-  .dms-alerta-icono--cambio,
+  .dms-alerta-icono--tarifa {
+    @apply bg-[#e53935];
+  }
+
+  .dms-alerta-icono--mod {
+    @apply bg-[#f16e26];
+  }
+
+  .dms-alerta-icono--cambio {
+    @apply bg-[#d97706];
+  }
+
   .dms-alerta-icono--rechazo {
-    @apply bg-slate-100 text-slate-700 border-slate-300;
+    @apply bg-[#b91c1c];
   }
 
   .dms-select-actividad {
@@ -995,7 +1018,7 @@
   }
 
   .dms-aviso-espera {
-    @apply inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] font-semibold text-slate-700;
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-[11px] font-semibold text-teal-700;
   }
 
   .dms-btn-descargas {
@@ -1144,25 +1167,25 @@
 
   /* Ítem pendiente de revisión (revisión parcial): resaltar frente a ya aprobados */
   .dms-table--danos tbody tr.dms-row-pendiente-revision td {
-    @apply bg-slate-50;
+    @apply bg-amber-50/70;
   }
 
   .dms-table--danos tbody tr.dms-row-pendiente-revision.dms-row-selected td,
   .dms-table--danos tbody tr.dms-row-pendiente-revision.dms-row-marcado td {
-    @apply bg-slate-100;
+    @apply bg-amber-100/80;
   }
 
   .dms-table--danos tbody tr.dms-row-item-bloqueado td {
-    @apply bg-slate-50/50;
-    box-shadow: inset 3px 0 0 #94a3b8;
+    @apply bg-emerald-50/40;
+    box-shadow: inset 3px 0 0 #10b981;
   }
 
   .dms-table--danos tbody tr.dms-row-item-bloqueado.dms-row-selected td {
-    @apply bg-slate-100;
+    @apply bg-emerald-100/50;
   }
 
   .dms-item-bloqueado-aviso {
-    @apply flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-snug text-slate-700;
+    @apply flex items-start gap-2 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs leading-snug text-emerald-950;
   }
 
   .dms-table--danos tfoot tr.dms-danos-total td,
@@ -1257,7 +1280,7 @@
   }
 
   .dms-cmp-despues {
-    @apply text-[11px] font-bold text-slate-800;
+    @apply text-[11px] font-bold text-emerald-800;
   }
 
   .dms-cmp-valores .dms-cmp-flecha {
@@ -1278,11 +1301,11 @@
   }
 
   .dms-antes-despues-barra {
-    @apply flex flex-wrap items-center gap-2 rounded-md border border-slate-200 bg-white px-2.5 py-1.5;
+    @apply flex flex-wrap items-center gap-2 rounded-md border border-amber-200 bg-white px-2.5 py-1.5;
   }
 
   .dms-antes-despues-barra__titulo {
-    @apply shrink-0 text-[10px] font-bold uppercase tracking-wide text-slate-600;
+    @apply shrink-0 text-[10px] font-bold uppercase tracking-wide text-amber-900;
   }
 
   .dms-antes-despues-barra__chips {
@@ -1402,11 +1425,11 @@
 
   /* Subfila Δ legacy */
   .dms-celda-cambiada {
-    @apply bg-slate-100 font-bold text-slate-800 ring-1 ring-inset ring-slate-300;
+    @apply bg-emerald-100/90 font-bold text-emerald-800 ring-1 ring-inset ring-emerald-400/50;
   }
 
   .dms-dano-cambio {
-    @apply space-y-1.5 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] leading-snug text-slate-800 shadow-none;
+    @apply space-y-1.5 rounded-md border border-amber-200/80 bg-gradient-to-r from-amber-50 to-orange-50/80 px-3 py-2 text-[11px] leading-snug text-amber-950 shadow-sm;
   }
 
   .dms-dano-cambio-meta {
