@@ -1323,6 +1323,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 mostrarMarcacion={puedeAperturar}
                 marcacionHabilitada={aperturada}
                 marcadosIds={marcadosIds}
+                ocultarAntesPorItem={esCoordinador}
                 onToggleMarcado={(id) => {
                   if (!aperturada) {
                     toast('Aperture la estimación para modificar ítems.', 'info');
@@ -1757,6 +1758,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
         open={dialogo.tipo === 'HISTORIAL'}
         estimacion={estimacion}
         onClose={cerrar}
+        ocultarAntesDespues={esCoordinador}
       />
 
       <InformePreviewModal

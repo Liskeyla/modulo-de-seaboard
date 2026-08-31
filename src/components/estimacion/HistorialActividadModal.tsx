@@ -146,10 +146,13 @@ export function HistorialActividadModal({
   open,
   estimacion,
   onClose,
+  ocultarAntesDespues = false,
 }: {
   open: boolean;
   estimacion: Estimacion | null;
   onClose: () => void;
+  /** Coordinador: oculta chips «antes → después» por ítem. */
+  ocultarAntesDespues?: boolean;
 }) {
   const [abiertos, setAbiertos] = useState<Set<string>>(new Set());
 
@@ -309,7 +312,10 @@ export function HistorialActividadModal({
                                         {ev.comentario || '—'}
                                       </td>
                                     </tr>
-                                    {ev.snapshotAnterior && ev.snapshot && ev.camposCambiados?.length ? (
+                                    {!ocultarAntesDespues &&
+                                    ev.snapshotAnterior &&
+                                    ev.snapshot &&
+                                    ev.camposCambiados?.length ? (
                                       <tr className="border-b border-slate-100 bg-amber-50/40">
                                         <td colSpan={7} className="px-2 py-2">
                                           <BloqueAntesDespuesHistorial ev={ev} />

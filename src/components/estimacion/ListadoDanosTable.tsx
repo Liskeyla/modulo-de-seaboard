@@ -87,6 +87,11 @@ interface ListadoDanosTableProps {
   onEnviarComentario?: (dano: DanoEstimacion, entrada: EntradaComentario) => void;
   /** Oculta columna Acciones (previsualización solo lectura). */
   ocultarAcciones?: boolean;
+  /**
+   * Coordinador: no muestra «antes → después» ni subfila histórica por ítem;
+   * solo un resumen de la última modificación.
+   */
+  ocultarAntesPorItem?: boolean;
 }
 
 function celdaCambiada(edicion: EdicionRecienteDano, campo: CampoSnapshotLinea) {
@@ -324,6 +329,7 @@ export function ListadoDanosTable({
   comentariosSoloLectura = true,
   onEnviarComentario: _onEnviarComentario,
   ocultarAcciones = false,
+  ocultarAntesPorItem = false,
 }: ListadoDanosTableProps) {
   const [antesExpandidoIds, setAntesExpandidoIds] = useState<Set<string>>(() => new Set());
   const totales = totalesDanos(danos);
@@ -346,6 +352,10 @@ export function ListadoDanosTable({
 
   /** Abre automáticamente el detalle Antes cuando hubo cambio de cantidad/valores. */
   useEffect(() => {
+    if (ocultarAntesPorItem) {
+      setAntesExpandidoIds(new Set());
+      return;
+    }
     const idsValor = danos
       .filter(
         (d) =>
@@ -365,7 +375,7 @@ export function ListadoDanosTable({
       });
       return cambio ? next : prev;
     });
-  }, [danos]);
+  }, [danos, ocultarAntesPorItem]);
 
   const idsPendientesRevision = danos
     .filter((d) => !esItemRevisadoSbm(d.aplica))
@@ -480,10 +490,13 @@ export function ListadoDanosTable({
             const ultimoCmt = ultimoComentarioDe(d);
             const pendientes = d.comentarios.filter((c) => c.tipo === 'SOLICITA_CAMBIO').length;
             const edicion = d.edicionReciente;
+            const edicionParaComparar = ocultarAntesPorItem ? undefined : edicion;
             const tieneAntes =
+              !ocultarAntesPorItem &&
               Boolean(edicion?.snapshotAnterior) &&
               Boolean(edicion?.camposCambiados?.length);
             const antesAbierto = tieneAntes && antesExpandidoIds.has(d.id);
+            /** Resalta celdas modificadas; sin texto «antes → después» si ocultarAntesPorItem. */
             const mod = (campo: CampoSnapshotLinea) => claseCampoModificado(edicion, campo);
             const bloqueadoAprobado = esItemAprobado(d.aplica);
             const puedeEditarFila = editable && !bloqueadoAprobado;
@@ -599,25 +612,25 @@ export function ListadoDanosTable({
                       <CeldaAntesDespues
                         campo="largo"
                         valorActual={d.largo || 0}
-                        edicion={edicion}
+                        edicion={edicionParaComparar}
                         className={cn('text-right tabular-nums', mod('largo'))}
                       />
                       <CeldaAntesDespues
                         campo="ancho"
                         valorActual={d.ancho || 0}
-                        edicion={edicion}
+                        edicion={edicionParaComparar}
                         className={cn('text-right tabular-nums', mod('ancho'))}
                       />
                       <CeldaAntesDespues
                         campo="area"
                         valorActual={d.area || 0}
-                        edicion={edicion}
+                        edicion={edicionParaComparar}
                         className={cn('text-right tabular-nums', mod('area'))}
                       />
                       <CeldaAntesDespues
                         campo="longitud"
                         valorActual={d.longitud || 0}
-                        edicion={edicion}
+                        edicion={edicionParaComparar}
                         className={cn('text-right tabular-nums', mod('longitud'))}
                       />
                     </>
@@ -625,13 +638,13 @@ export function ListadoDanosTable({
                   <CeldaAntesDespues
                     campo="cantidad"
                     valorActual={d.cantidad}
-                    edicion={edicion}
+                    edicion={edicionParaComparar}
                     className={cn('text-right tabular-nums', mod('cantidad'))}
                   />
                   <CeldaAntesDespues
                     campo="horasHombre"
                     valorActual={d.horasHombre}
-                    edicion={edicion}
+                    edicion={edicionParaComparar}
                     className={cn(
                       'text-right tabular-nums',
                       mod('horasHombre'),
@@ -641,7 +654,7 @@ export function ListadoDanosTable({
                   <CeldaAntesDespues
                     campo="csHoraHombre"
                     valorActual={d.csHoraHombre}
-                    edicion={edicion}
+                    edicion={edicionParaComparar}
                     money
                     className={cn(
                       'text-right tabular-nums',
@@ -652,7 +665,7 @@ export function ListadoDanosTable({
                   <CeldaAntesDespues
                     campo="csMaterial"
                     valorActual={d.csMaterial}
-                    edicion={edicion}
+                    edicion={edicionParaComparar}
                     money
                     className={cn(
                       'text-right tabular-nums',
@@ -663,7 +676,7 @@ export function ListadoDanosTable({
                   <CeldaAntesDespues
                     campo="csTotal"
                     valorActual={d.csTotal}
-                    edicion={edicion}
+                    edicion={edicionParaComparar}
                     money
                     className={cn(
                       'text-right font-semibold tabular-nums text-rfs-navy',
@@ -751,6 +764,22 @@ export function ListadoDanosTable({
                     )}
                     onClick={(e) => e.stopPropagation()}
                   >
+                    {ocultarAntesPorItem && edicion?.resumenCambios ? (
+                      <div
+                        className="mb-1 rounded border border-sky-200 bg-sky-50 px-1.5 py-1 text-[10px] leading-snug text-sky-950"
+                        title={`${edicion.usuario} · ${edicion.fecha}`}
+                      >
+                        <span className="font-bold uppercase tracking-wide text-sky-800">
+                          Última modificación
+                        </span>
+                        <span className="mt-0.5 block text-slate-700">
+                          {edicion.resumenCambios}
+                        </span>
+                        <span className="mt-0.5 block text-[9px] text-slate-500">
+                          {edicion.usuario} · {edicion.fecha}
+                        </span>
+                      </div>
+                    ) : null}
                     {ultimoCmt ? (
                       <div className="dms-cmt-celda">
                         <p className="dms-cmt-celda__meta">
@@ -812,7 +841,7 @@ export function ListadoDanosTable({
                   </td>
                   )}
                 </tr>
-                {antesAbierto && edicion ? (
+                {antesAbierto && edicion && !ocultarAntesPorItem ? (
                   <SubfilaHistorico
                     edicion={edicion}
                     mostrarMarcacion={mostrarMarcacion}
