@@ -26,6 +26,7 @@ import {
   normalizarCargoDano,
   type AplicaDano,
   type CargoDano,
+  type EstadoEstimacion,
   type Estimacion,
 } from '@/types/estimacion';
 import { useAuthStore } from '@/store';
@@ -34,6 +35,20 @@ import { useUiStore } from '@/store/uiStore';
 import { paisDe } from '@/lib/pais';
 import { esItemPendienteRevision } from '@/lib/revisionPendiente';
 import { cn, formatMoney, toast } from '@/lib/utils';
+
+/**
+ * Reportería de ítems (Liquidaciones): solo estimados ya devueltos / cerrados.
+ * Aunque el estimado caiga RECHAZADO, los ítems siguen en la bandeja para cobro o ejecución.
+ */
+const ESTADOS_REPORTE_ITEMS: EstadoEstimacion[] = [
+  'APROBADO',
+  'RECHAZADO',
+  'REPARADO',
+];
+
+function estimadoEnReporteriaItems(e: Estimacion) {
+  return ESTADOS_REPORTE_ITEMS.includes(e.estado);
+}
 
 export interface ItemReporteFila {
   key: string;
@@ -201,7 +216,10 @@ export default function ReporteItemsDanoPage() {
       : user?.username ?? user?.nombre ?? 'liquidaciones';
 
   const porPais = useMemo(
-    () => estimaciones.filter((e) => paisDe(e) === pais),
+    () =>
+      estimaciones.filter(
+        (e) => paisDe(e) === pais && estimadoEnReporteriaItems(e)
+      ),
     [estimaciones, pais]
   );
 
@@ -213,7 +231,7 @@ export default function ReporteItemsDanoPage() {
     return {
       navieras: ['Todas', ...unicos((r) => r.naviera)],
       componentes: ['Todos', ...unicos((r) => r.comp)],
-      estadosEst: ['Todos', ...unicos((r) => r.estadoEstimacion)],
+      estadosEst: ['Todos', ...ESTADOS_REPORTE_ITEMS],
     };
   }, [itemsBase]);
 
@@ -407,12 +425,12 @@ export default function ReporteItemsDanoPage() {
     <div className="min-h-screen">
       <Header
         title="Reportería de ítems de daño"
-        subtitle="Liquidaciones · seguimiento y auditoría por línea (aprobados, rechazados y pendientes)"
+        subtitle="Liquidaciones · ítems de estimados APROBADO / RECHAZADO / REPARADO (cobro y ejecución)"
       />
       <main className="mx-auto max-w-[1600px] px-3 py-4 sm:px-4">
         <DmsReportLayout
           title="Reporte de ítems"
-          subtitle={`${user?.nombre ?? 'Liquidaciones'} · ${pais} · ${itemsBase.length} línea(s) en el depósito`}
+          subtitle={`${user?.nombre ?? 'Liquidaciones'} · ${pais} · ${itemsBase.length} línea(s) · solo estimados resueltos`}
           heroIcon={<ListChecks className="h-5 w-5" />}
           filtros={[
             {
