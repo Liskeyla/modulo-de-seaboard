@@ -243,7 +243,8 @@ export function ConfirmacionEstimacionModal({
           ) : (
             <>
               {' '}
-              Si todos los ítems están aprobados, el estimado quedará en <strong>APROBADO</strong>.
+              Si todos los ítems están aprobados, al enviar el estimado pasa a{' '}
+              <strong>APROBADO</strong> y se notifica a liquidaciones RFS.
             </>
           )}
           {revisionParcial && (
