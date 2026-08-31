@@ -18,7 +18,6 @@ import {
   Upload,
   Users,
 } from 'lucide-react';
-import { AccionesMenu, type AccionMenuItem } from '@/components/dms/AccionesMenu';
 import { Header } from '@/components/layout/Header';
 import { DmsReportLayout } from '@/components/dms/DmsReportLayout';
 import { DmsTableToolbar } from '@/components/dms/DmsTableToolbar';
@@ -247,7 +246,6 @@ export default function ReporteEstimacionesPage() {
   const [page, setPage] = useState(1);
   const [filtroActivo, setFiltroActivo] = useState(false);
   const [dialogo, setDialogo] = useState<Dialogo>({ tipo: 'NINGUNO' });
-  const [menuAccionesId, setMenuAccionesId] = useState<string | null>(null);
 
   const usuario = user?.username ?? 'seaboard';
   const actor =
@@ -370,133 +368,131 @@ export default function ReporteEstimacionesPage() {
 
   function accionesDe(row: Estimacion) {
     const abrir = () => router.push(`/reportes/estimaciones/${row.codigo}`);
-    const items: AccionMenuItem[] = [];
-    const iconCls = 'h-3.5 w-3.5';
 
     if (row.sinDanos) {
-      items.push({
-        id: 'abrir',
-        label: 'Abrir estimado',
-        icon: <Eye className={iconCls} />,
-        onClick: abrir,
-      });
-      items.push({
-        id: 'info',
-        label: 'Sin daños registrados',
-        icon: <Info className={iconCls} />,
-        onClick: () => setDialogo({ tipo: 'INFO', id: row.id }),
-      });
-    } else {
-      items.push({
-        id: 'abrir',
-        label: 'Abrir estimado',
-        icon: <Eye className={iconCls} />,
-        onClick: abrir,
-      });
-      if (['ENVIADO', 'APROBADO', 'REPARADO', 'RECHAZADO'].includes(row.estado)) {
-        items.push({
-          id: 'pdf',
-          label: 'PDF preliminar',
-          icon: <FileText className={iconCls} />,
-          onClick: () =>
-            setDialogo({ tipo: 'INFORME', id: row.id, variante: 'PRELIMINAR' }),
-        });
-      }
-      if (['APROBADO', 'REPARADO', 'RECHAZADO'].includes(row.estado)) {
-        items.push({
-          id: 'nota',
-          label: 'Ver nota Seaboard',
-          icon: <Ship className={iconCls} />,
-          onClick: () => setDialogo({ tipo: 'NOTA', id: row.id }),
-        });
-      }
-      if (row.analisisObservacion || row.niveles) {
-        items.push({
-          id: 'info',
-          label: 'Información adicional',
-          icon: <Info className={iconCls} />,
-          onClick: () => setDialogo({ tipo: 'INFO', id: row.id }),
-        });
-      }
-      if (
-        (user?.rol === 'dms' &&
-          ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) &&
-          esNavieraSeaboard(row.naviera) &&
-          String(row.enviarAprobacion || '').toUpperCase() !== 'SI') ||
-        (esLiquidaciones && puedePushASbm(row))
-      ) {
-        items.push({
-          id: 'enviar',
-          label: esLiquidaciones ? 'Enviar a SBM' : 'Enviar a Seaboard Marine',
-          icon: esLiquidaciones ? (
-            <Upload className={iconCls} />
-          ) : (
-            <Send className={iconCls} />
-          ),
-          onClick: () =>
-            setDialogo({ tipo: esLiquidaciones ? 'PUSH_SBM' : 'ENVIAR', id: row.id }),
-        });
-      }
-      if (esLiquidaciones && row.estado === 'APROBADO') {
-        items.push({
-          id: 'reversar',
-          label: 'Reversar aprobación',
-          icon: <Undo2 className={iconCls} />,
-          onClick: () => setDialogo({ tipo: 'REVERSAR_APROB', id: row.id }),
-        });
-      }
-      if (
-        esLiquidaciones &&
-        !enBandejaSeaboard(row) &&
-        ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado)
-      ) {
-        items.push({
-          id: 'eliminar',
-          label: 'Eliminar estimado',
-          icon: <Trash2 className={iconCls} />,
-          peligro: true,
-          onClick: () => setDialogo({ tipo: 'ELIMINAR', id: row.id }),
-        });
-      }
-      if (
-        ['ENVIADO', 'PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) &&
-        user?.rol === 'seaboard'
-      ) {
-        items.push({
-          id: 'decidir',
-          label: 'Aprobar / rechazar estimado',
-          icon: <Send className={iconCls} />,
-          onClick: () => {
-            if (itemsSinRevisionSbm(row.danos).length > 0) {
-              toast(
-                mensajeRevisionItemsPendientes(row.danos) ?? MSG_ITEMS_SIN_APROBAR,
-                'info'
-              );
-              return;
-            }
-            setDialogo({ tipo: 'ENVIAR', id: row.id });
-          },
-        });
-      }
-      if (row.estadoPti) {
-        items.push({
-          id: 'datalog',
-          label: 'Descargar data log',
-          icon: <Download className={iconCls} />,
-          onClick: () => {
-            const n = descargarDataLog(row);
-            toast(`Data Log descargado (${n} registros).`, 'success');
-          },
-        });
-      }
+      return (
+        <div className="dms-acciones-lista">
+          <button type="button" className="dms-accion-btn dms-accion-btn--ver" onClick={abrir}>
+            <Eye /> Abrir
+          </button>
+          <button
+            type="button"
+            className="dms-accion-btn dms-accion-btn--info"
+            onClick={() => setDialogo({ tipo: 'INFO', id: row.id })}
+          >
+            <Info /> Sin daños
+          </button>
+        </div>
+      );
     }
 
     return (
-      <AccionesMenu
-        items={items}
-        open={menuAccionesId === row.id}
-        onOpenChange={(open) => setMenuAccionesId(open ? row.id : null)}
-      />
+      <div className="dms-acciones-lista">
+        <button type="button" className="dms-accion-btn dms-accion-btn--ver" onClick={abrir}>
+          <Eye /> Abrir
+        </button>
+        {['ENVIADO', 'APROBADO', 'REPARADO', 'RECHAZADO'].includes(row.estado) && (
+          <button
+            type="button"
+            className="dms-accion-btn dms-accion-btn--pdf"
+            onClick={() =>
+              setDialogo({ tipo: 'INFORME', id: row.id, variante: 'PRELIMINAR' })
+            }
+          >
+            <FileText /> PDF
+          </button>
+        )}
+        {['APROBADO', 'REPARADO', 'RECHAZADO'].includes(row.estado) && (
+          <button
+            type="button"
+            className="dms-accion-btn dms-accion-btn--nota"
+            onClick={() => setDialogo({ tipo: 'NOTA', id: row.id })}
+          >
+            <Ship /> Nota
+          </button>
+        )}
+        {(row.analisisObservacion || row.niveles) && (
+          <button
+            type="button"
+            className="dms-accion-btn dms-accion-btn--info"
+            onClick={() => setDialogo({ tipo: 'INFO', id: row.id })}
+          >
+            <Info /> Info
+          </button>
+        )}
+        {(user?.rol === 'dms' &&
+          ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) &&
+          esNavieraSeaboard(row.naviera) &&
+          String(row.enviarAprobacion || '').toUpperCase() !== 'SI') ||
+        (esLiquidaciones && puedePushASbm(row)) ? (
+          <button
+            type="button"
+            className="dms-accion-btn dms-accion-btn--enviar"
+            title={
+              esLiquidaciones
+                ? 'Enviar a SBM · solo naviera Seaboard · queda ENVIADO'
+                : 'Enviar a Seaboard Marine'
+            }
+            onClick={() => {
+              setDialogo({ tipo: esLiquidaciones ? 'PUSH_SBM' : 'ENVIAR', id: row.id });
+            }}
+          >
+            {esLiquidaciones ? <Upload /> : <Send />}
+            {esLiquidaciones ? 'Enviar SBM' : 'Enviar'}
+          </button>
+        ) : null}
+        {esLiquidaciones && row.estado === 'APROBADO' && (
+          <button
+            type="button"
+            className="dms-accion-btn dms-accion-btn--reversar"
+            onClick={() => setDialogo({ tipo: 'REVERSAR_APROB', id: row.id })}
+          >
+            <Undo2 /> Reversar
+          </button>
+        )}
+        {esLiquidaciones &&
+          !enBandejaSeaboard(row) &&
+          ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) && (
+            <button
+              type="button"
+              className="dms-accion-btn dms-accion-btn--borrar"
+              onClick={() => setDialogo({ tipo: 'ELIMINAR', id: row.id })}
+            >
+              <Trash2 /> Eliminar
+            </button>
+          )}
+        {['ENVIADO', 'PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(row.estado) &&
+          user?.rol === 'seaboard' && (
+            <button
+              type="button"
+              className="dms-accion-btn dms-accion-btn--enviar"
+              onClick={() => {
+                if (itemsSinRevisionSbm(row.danos).length > 0) {
+                  toast(
+                    mensajeRevisionItemsPendientes(row.danos) ?? MSG_ITEMS_SIN_APROBAR,
+                    'info'
+                  );
+                  return;
+                }
+                setDialogo({ tipo: 'ENVIAR', id: row.id });
+              }}
+            >
+              <Send /> Enviar
+            </button>
+          )}
+        {row.estadoPti && (
+          <button
+            type="button"
+            className="dms-accion-btn dms-accion-btn--log"
+            onClick={() => {
+              const n = descargarDataLog(row);
+              toast(`Data Log descargado (${n} registros).`, 'success');
+            }}
+          >
+            <Download /> Data log
+          </button>
+        )}
+      </div>
     );
   }
 
@@ -697,6 +693,7 @@ export default function ReporteEstimacionesPage() {
                 </button>
               </div>
             ) : (
+              <div className="dms-danos-table-wrap mx-4 mb-4">
               <div className="dms-table-scroll">
                 <table className="dms-table dms-table--reporte">
                   <thead>
@@ -769,7 +766,7 @@ export default function ReporteEstimacionesPage() {
                                 <AlertasLiquidacionesCell estimacion={row} />
                               </td>
                             )}
-                            <td onDoubleClick={(e) => e.stopPropagation()}>
+                            <td className="align-top" onDoubleClick={(e) => e.stopPropagation()}>
                               {accionesDe(row)}
                             </td>
                               <td>
@@ -977,6 +974,7 @@ export default function ReporteEstimacionesPage() {
                     </tr>
                   </tfoot>
                 </table>
+              </div>
               </div>
             )}
 

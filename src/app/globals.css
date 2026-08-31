@@ -110,50 +110,89 @@
     @apply flex h-9 w-full items-center justify-center gap-1 rounded-md border border-slate-300 bg-white px-2 text-[10px] font-bold uppercase tracking-wide text-slate-600 transition-all hover:bg-slate-50 active:scale-[0.99];
   }
 
-  /* Menú Acciones (reporte) — lista desplegable con nombres */
-  .dms-acciones-menu {
-    @apply relative inline-block text-left;
+  .dms-icon-actions {
+    @apply flex min-w-[7.5rem] flex-wrap items-center gap-1;
   }
 
-  .dms-acciones-menu__trigger {
-    @apply inline-flex h-8 items-center gap-1 rounded-md border border-slate-300 bg-white px-2 text-[11px] font-semibold text-slate-700 shadow-none transition hover:bg-slate-50;
+  /* Acciones del reporte: botones con nombre (sin desplegable) */
+  .dms-acciones-lista {
+    @apply flex min-w-[8.75rem] max-w-[10.5rem] flex-col gap-0.5;
   }
 
-  .dms-acciones-menu__panel {
-    @apply absolute left-0 z-30 mt-1 min-w-[12.5rem] overflow-hidden rounded-md border border-slate-200 bg-white py-1 shadow-lg;
+  .dms-accion-btn {
+    @apply inline-flex h-7 w-full items-center justify-start gap-1.5 rounded-md border px-2 text-left text-[10px] font-bold leading-none text-white shadow-sm transition-all hover:brightness-95 hover:shadow-md active:scale-[0.98];
   }
 
-  .dms-acciones-menu__item {
-    @apply flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] font-medium text-slate-700 transition hover:bg-slate-50;
+  .dms-accion-btn svg {
+    @apply h-3 w-3 shrink-0;
   }
 
-  .dms-acciones-menu__item--peligro {
-    @apply text-slate-800 hover:bg-slate-100;
+  .dms-accion-btn--ver {
+    @apply border-[#0f1c6b] bg-[#152483];
   }
 
-  .dms-acciones-menu__icono {
-    @apply inline-flex h-4 w-4 shrink-0 items-center justify-center text-slate-500;
+  .dms-accion-btn--pdf {
+    @apply border-red-700 bg-[#d9534f];
+  }
+
+  .dms-accion-btn--nota {
+    @apply border-sky-600 bg-[#31b0d5];
+  }
+
+  .dms-accion-btn--info {
+    @apply border-slate-600 bg-slate-500;
+  }
+
+  .dms-accion-btn--enviar {
+    @apply border-[#a21caf] bg-[#c026d3];
+  }
+
+  .dms-accion-btn--reversar {
+    @apply border-amber-600 bg-[#f0ad4e] text-slate-900;
+  }
+
+  .dms-accion-btn--borrar {
+    @apply border-red-800 bg-[#c9302c];
+  }
+
+  .dms-accion-btn--log {
+    @apply border-teal-700 bg-teal-600;
   }
 
   .dms-icon-action {
-    @apply inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-300 bg-slate-100 text-slate-700 shadow-none transition-all hover:bg-slate-200 hover:text-slate-900 active:scale-95;
+    @apply inline-flex h-7 w-7 items-center justify-center rounded-md border text-white shadow-sm transition-all hover:shadow-md active:scale-95;
   }
 
   .dms-icon-action--ver {
-    @apply border-slate-400 bg-slate-700 text-white hover:bg-slate-800 hover:text-white;
+    @apply border-[#0f1c6b] bg-[#152483];
   }
 
-  .dms-icon-action--pdf,
-  .dms-icon-action--nota,
-  .dms-icon-action--info,
-  .dms-icon-action--enviar,
-  .dms-icon-action--reversar,
+  .dms-icon-action--pdf {
+    @apply border-red-300 bg-[#d9534f];
+  }
+
+  .dms-icon-action--nota {
+    @apply border-sky-300 bg-[#31b0d5];
+  }
+
+  .dms-icon-action--info {
+    @apply border-slate-300 bg-slate-500;
+  }
+
+  .dms-icon-action--enviar {
+    @apply border-fuchsia-300 bg-[#c026d3];
+  }
+
+  .dms-icon-action--reversar {
+    @apply border-amber-300 bg-[#f0ad4e] text-slate-900;
+  }
+
   .dms-icon-action--log {
-    @apply border-slate-300 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900;
+    @apply border-teal-300 bg-teal-600;
   }
 
   .dms-icon-action--borrar {
-    @apply border-slate-300 bg-white text-slate-600 hover:border-slate-400 hover:bg-slate-50 hover:text-slate-900;
+    @apply border-red-700 bg-[#d9534f] hover:bg-[#c9302c];
   }
 
   .dms-sticky-col {
@@ -335,7 +374,7 @@
   }
 
   .dms-btn-reparar {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-slate-700 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600 active:scale-[0.98];
   }
 
   .dms-cobro-toggle {
@@ -355,11 +394,11 @@
   }
 
   .dms-cobro-btn--on-cliente {
-    @apply bg-slate-700 text-white shadow-none hover:bg-slate-800 hover:text-white;
+    @apply bg-[#f16e26] text-white shadow-sm hover:bg-[#e05310] hover:text-white;
   }
 
   .dms-cobro-btn--on-linea {
-    @apply bg-slate-600 text-white shadow-none hover:bg-slate-700 hover:text-white;
+    @apply bg-[#152483] text-white shadow-sm hover:bg-[#0f1a5c] hover:text-white;
   }
 
   .dms-btn-eliminar {
@@ -371,7 +410,7 @@
   }
 
   .dms-btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-slate-900 hover:shadow-md active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#f16e26] to-[#e05310] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98];
   }
 
   .dms-filters-row {
@@ -743,7 +782,7 @@
     @apply bg-sky-100 text-sky-700;
   }
 
-  /* ── Reporte: columnas de producción ─────────────────────────────── */
+  /* ── Reporte: mismas reglas de grilla que listado de daños + sticky ─ */
   .dms-table--reporte th {
     @apply sticky top-0 z-10;
   }
@@ -799,7 +838,7 @@
   }
 
   .dms-row-estimado-revision td {
-    @apply bg-slate-50/80;
+    @apply bg-slate-50;
   }
 
   .dms-row-estimado-revision.dms-row-selected td {
@@ -807,11 +846,11 @@
   }
 
   .dms-row-item-pendiente td {
-    @apply bg-slate-50/60;
+    @apply bg-slate-50;
   }
 
   .dms-row-item-pendiente.dms-row-selected td {
-    @apply bg-slate-100/80;
+    @apply bg-slate-100;
   }
 
   .dms-hero-chip--revision {
@@ -939,15 +978,20 @@
     @apply inline-flex items-center gap-1.5 rounded-lg border border-[#c2410c] bg-gradient-to-r from-[#f16e26] to-[#c2410c] px-3 py-2 text-xs font-bold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98];
   }
 
-  .dms-btn-cerrar-est,
-  .dms-btn-azul,
-  .dms-btn-teal,
-  .dms-btn-enviar {
-    @apply inline-flex items-center gap-1.5 rounded-lg border border-slate-400 bg-slate-700 px-3 py-2 text-xs font-bold text-white shadow-sm transition-all hover:bg-slate-800 hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+  .dms-btn-cerrar-est {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-[#9a3412] bg-gradient-to-r from-[#ea580c] to-[#9a3412] px-3 py-2 text-xs font-bold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98];
+  }
+
+  .dms-btn-azul {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-[#3f4bb8] bg-gradient-to-r from-[#4a57c7] to-[#3f4bb8] px-3 py-2 text-xs font-bold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98];
+  }
+
+  .dms-btn-teal {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-[#0f9b8e] bg-gradient-to-r from-[#14b8a6] to-[#0f9b8e] px-3 py-2 text-xs font-bold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98];
   }
 
   .dms-btn-enviar {
-    @apply px-4;
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-[#a21caf] bg-gradient-to-r from-[#c026d3] to-[#a21caf] px-4 py-2 text-xs font-bold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .dms-aviso-espera {
@@ -1064,7 +1108,7 @@
     @apply mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-lg border border-[#bce8f1] bg-[#d9edf7]/60 px-3 py-2 text-[11px] text-[#31708f];
   }
 
-  /* ── Listado de daños ───────────────────────────────────────────── */
+  /* ── Listado de daños / reporte (grilla con bordes) ──────────────── */
   .dms-danos-table-wrap {
     @apply overflow-hidden rounded-lg border border-slate-300 bg-white shadow-sm;
   }
@@ -1073,22 +1117,28 @@
     @apply bg-white;
   }
 
-  .dms-table--danos {
+  .dms-table--danos,
+  .dms-table--reporte {
     @apply w-max min-w-full border-collapse bg-white text-black;
   }
 
-  .dms-table--danos th {
+  .dms-table--danos th,
+  .dms-table--reporte th {
     @apply border border-slate-300 bg-white px-2 py-2 text-center text-[10px] font-bold uppercase tracking-wide text-black;
   }
 
-  .dms-table--danos td {
+  .dms-table--danos td,
+  .dms-table--reporte td {
     @apply border border-slate-200 bg-white px-2 py-2 text-[11px] text-black;
   }
 
   .dms-table--danos tbody tr:nth-child(even) td,
   .dms-table--danos tbody tr:hover td,
   .dms-table--danos tbody tr.dms-row-selected td,
-  .dms-table--danos tbody tr.dms-row-marcado td {
+  .dms-table--danos tbody tr.dms-row-marcado td,
+  .dms-table--reporte tbody tr:nth-child(even) td,
+  .dms-table--reporte tbody tr:hover td,
+  .dms-table--reporte tbody tr.dms-row-selected td {
     @apply bg-white text-black;
   }
 
@@ -1115,15 +1165,32 @@
     @apply flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-snug text-slate-700;
   }
 
-  .dms-table--danos tfoot tr.dms-danos-total td {
+  .dms-table--danos tfoot tr.dms-danos-total td,
+  .dms-table--reporte tfoot tr.dms-danos-total td {
     @apply border border-slate-300 bg-white font-bold text-black;
   }
 
   .dms-table--danos .text-rfs-navy,
   .dms-table--danos .text-gray-500,
   .dms-table--danos .text-gray-600,
-  .dms-table--danos .text-slate-800 {
+  .dms-table--danos .text-slate-800,
+  .dms-table--reporte .text-rfs-navy,
+  .dms-table--reporte .text-gray-500,
+  .dms-table--reporte .text-gray-600,
+  .dms-table--reporte .text-slate-800 {
     @apply text-black;
+  }
+
+  .dms-table--danos thead .dms-sticky-col,
+  .dms-table--reporte thead .dms-sticky-col {
+    @apply bg-white;
+  }
+
+  .dms-table--danos tbody tr:nth-child(even) td.dms-sticky-col,
+  .dms-table--danos tbody tr:hover td.dms-sticky-col,
+  .dms-table--reporte tbody tr:nth-child(even) td.dms-sticky-col,
+  .dms-table--reporte tbody tr:hover td.dms-sticky-col {
+    @apply bg-white;
   }
 
   .dms-danos-acciones-masivas {
@@ -1376,14 +1443,23 @@
   }
 
   .dms-icon-btn {
-    @apply inline-flex h-7 items-center justify-center rounded-md border border-slate-300 bg-white px-1.5 text-slate-700 shadow-none transition-all hover:bg-slate-50 hover:text-slate-900 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40;
+    @apply inline-flex h-7 items-center justify-center rounded-md px-1.5 text-white shadow-sm transition-all hover:shadow-md active:scale-95 disabled:cursor-not-allowed disabled:opacity-40;
   }
 
-  .dms-icon-btn--rojo,
-  .dms-icon-btn--azul,
-  .dms-icon-btn--indigo,
+  .dms-icon-btn--rojo {
+    @apply bg-[#d9534f] hover:bg-[#c9302c];
+  }
+
+  .dms-icon-btn--azul {
+    @apply bg-[#3f4bb8] hover:bg-[#2a339c];
+  }
+
+  .dms-icon-btn--indigo {
+    @apply bg-[#5f5fd6] hover:bg-[#4a4ac0];
+  }
+
   .dms-icon-btn--verde {
-    @apply bg-white text-slate-700 hover:bg-slate-50;
+    @apply bg-[#5cb85c] hover:bg-[#449d44];
   }
 
   .dms-btn-comentarios {
@@ -1659,14 +1735,23 @@
   }
 
   .dms-upload-btn {
-    @apply inline-flex min-h-[2.5rem] items-center justify-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-center text-[10px] font-bold leading-tight text-slate-700 shadow-none transition-all hover:bg-slate-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex min-h-[2.5rem] items-center justify-center gap-1 rounded-md px-2 py-1.5 text-center text-[10px] font-bold leading-tight text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
 
-  .dms-upload-btn--img,
-  .dms-upload-btn--video,
-  .dms-upload-btn--log,
+  .dms-upload-btn--img {
+    @apply bg-[#31b0d5] hover:bg-[#269abc];
+  }
+
+  .dms-upload-btn--video {
+    @apply bg-[#5cb85c] hover:bg-[#449d44];
+  }
+
+  .dms-upload-btn--log {
+    @apply bg-[#6b7280] hover:bg-[#4b5563];
+  }
+
   .dms-upload-btn--pdf {
-    @apply bg-white text-slate-700 hover:bg-slate-50;
+    @apply bg-[#14b8a6] hover:bg-[#0f9b8e];
   }
 
   .dms-zip-btn {

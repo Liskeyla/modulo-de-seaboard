@@ -955,13 +955,13 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   disabled={estimacion.danos.length === 0 || aperturada}
                   title={
                     aperturada
-                      ? 'Cierre la estimación antes de aprobar o rechazar'
-                      : 'Aprobar o rechazar el estimado hacia liquidaciones RFS'
+                      ? 'Cierre la estimación antes de enviar'
+                      : 'Enviar decisión del estimado a liquidaciones RFS'
                   }
                   onClick={() => {
                     if (aperturada) {
                       toast(
-                        'Cierre la estimación antes de aprobar o rechazar el estimado.',
+                        'Cierre la estimación antes de enviar el estimado.',
                         'info'
                       );
                       return;
@@ -977,7 +977,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                     setDialogo({ tipo: 'ENVIAR_LIQUIDACIONES' });
                   }}
                 >
-                  <Send className="h-4 w-4" /> Aprobar / Rechazar
+                  <Send className="h-4 w-4" /> Enviar
                 </button>
               )}
               {puedeEnviarASeaboard && (
@@ -1566,7 +1566,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
           <p>
             Al visualizar este estimado se espera que resuelva los ítems{' '}
             <strong>pendientes de revisión</strong> y luego use{' '}
-            <strong>Aprobar / Rechazar</strong> sobre el estimado (notifica a liquidaciones RFS).
+            <strong>Enviar</strong> sobre el estimado (notifica a liquidaciones RFS).
             {revisionParcial && (
               <>
                 {' '}

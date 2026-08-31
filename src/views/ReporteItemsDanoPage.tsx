@@ -720,6 +720,7 @@ export default function ReporteItemsDanoPage() {
               </button>
             </div>
           ) : (
+            <div className="dms-danos-table-wrap">
             <div className="dms-table-scroll">
               <table className="dms-table dms-table--reporte">
                 <thead>
@@ -882,6 +883,7 @@ export default function ReporteItemsDanoPage() {
                   })}
                 </tbody>
               </table>
+            </div>
             </div>
           )}
 
