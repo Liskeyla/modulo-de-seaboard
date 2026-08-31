@@ -35,6 +35,13 @@ export const MENU_GRUPOS: MenuGrupo[] = [
         roles: ['liquidaciones'],
       },
       {
+        href: '/catalogos/cargos',
+        label: 'Catálogo de cargo',
+        icon: 'BookOpen',
+        descripcion: 'Reglas de rechazo / envío por cargo (condiciones configurables)',
+        roles: ['liquidaciones'],
+      },
+      {
         href: '/reportes/estimaciones',
         label: 'Reporte de Estimaciones Seaboard Marine',
         icon: 'FileBarChart',

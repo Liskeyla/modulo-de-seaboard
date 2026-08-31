@@ -16,6 +16,7 @@ import { construirInformeHtml } from '@/lib/descargas';
 import { cn, formatMoney, toast } from '@/lib/utils';
 import { paisDe, type PaisOperacion } from '@/lib/pais';
 import { resolverEstadoEnvioALiquidaciones } from '@/lib/seaboardFlow';
+import { useCatalogoCargoStore } from '@/store/catalogoCargoStore';
 
 /** Destinatarios prototipo por país de operación. */
 export const CORREOS_LIQUIDACIONES_POR_PAIS: Record<PaisOperacion, string[]> = {
@@ -48,7 +49,9 @@ export function notificarEnvioALiquidaciones(
   const correos = correosDeEstimacion(estimacion);
   const paisLabel = paisDe(estimacion) === 'PERU' ? 'Perú' : 'Ecuador';
   const hayRechazos = estimacion.danos.some((d) => esAplicaRechazado(d.aplica));
-  const { soloRechazosCargoCliente } = resolverEstadoEnvioALiquidaciones(estimacion.danos);
+  const catalogo = useCatalogoCargoStore.getState().cargos;
+  const { soloRechazosNoBloqueantes, soloRechazosCargoCliente } =
+    resolverEstadoEnvioALiquidaciones(estimacion.danos, catalogo);
   const asunto =
     estadoResultante === 'APROBADO'
       ? `Estimación ${estimacion.codigo} APROBADA · ${estimacion.contenedor} · ${paisLabel}`
@@ -57,8 +60,8 @@ export function notificarEnvioALiquidaciones(
     `Estimados gestores de liquidaciones RFS (${paisLabel}),`,
     ``,
     estadoResultante === 'APROBADO'
-      ? soloRechazosCargoCliente
-        ? `La estimación ${estimacion.codigo} (${estimacion.contenedor}) fue enviada por Seaboard Marine en estado APROBADO. Hay ítems con cargo Cliente rechazados para gestión de liquidaciones.`
+      ? soloRechazosNoBloqueantes || soloRechazosCargoCliente
+        ? `La estimación ${estimacion.codigo} (${estimacion.contenedor}) fue enviada por Seaboard Marine en estado APROBADO. Hay ítems rechazados de cargos no bloqueantes (catálogo) para gestión de liquidaciones.`
         : `La estimación ${estimacion.codigo} (${estimacion.contenedor}) fue enviada por Seaboard Marine en estado APROBADO.`
       : `La estimación ${estimacion.codigo} (${estimacion.contenedor}) fue enviada por Seaboard Marine.`,
     ``,
@@ -66,8 +69,8 @@ export function notificarEnvioALiquidaciones(
     `Naviera: ${estimacion.naviera}`,
     `Estado resultante: ${estadoResultante}`,
     `Ítems con rechazo: ${hayRechazos ? 'Sí' : 'No'}`,
-    soloRechazosCargoCliente
-      ? `Rechazos solo cargo Cliente: Sí (el estimado queda APROBADO; ítems Cliente aparecen Rechazado)`
+    soloRechazosNoBloqueantes || soloRechazosCargoCliente
+      ? `Rechazos no bloqueantes (catálogo): Sí (estimado APROBADO; ítems rechazados siguen visibles)`
       : null,
     `Total PVP: $${estimacion.pvpTotal.toFixed(2)}`,
     `Líneas de daño: ${estimacion.danos.length}`,
@@ -181,12 +184,14 @@ export function ConfirmacionEstimacionModal({
     () => (estimacion ? estimacion.danos.some((d) => esAplicaRechazado(d.aplica)) : false),
     [estimacion]
   );
-  const soloRechazosCargoCliente = useMemo(
+  const cargosCatalogo = useCatalogoCargoStore((s) => s.cargos);
+  const soloRechazosNoBloqueantes = useMemo(
     () =>
       estimacion
-        ? resolverEstadoEnvioALiquidaciones(estimacion.danos).soloRechazosCargoCliente
+        ? resolverEstadoEnvioALiquidaciones(estimacion.danos, cargosCatalogo)
+            .soloRechazosNoBloqueantes
         : false,
-    [estimacion]
+    [estimacion, cargosCatalogo]
   );
   const faltanItems = sinRevision.length > 0;
 
@@ -250,19 +255,19 @@ export function ConfirmacionEstimacionModal({
         <p className="text-xs leading-relaxed text-slate-600">
           Revise el informe y envíe el estimado a <strong>liquidaciones RFS</strong>. La decisión
           de cada ítem (aprobar / rechazar) ya se define en el listado de daños.
-          {soloRechazosCargoCliente ? (
+          {soloRechazosNoBloqueantes ? (
             <>
               {' '}
-              Hay ítems rechazados solo con cargo <strong>Cliente</strong> y el resto
+              Hay ítems rechazados de cargos <strong>no bloqueantes</strong> (catálogo) y el resto
               aprobado: al enviar, el estimado queda <strong>APROBADO</strong>; liquidaciones
-              verá esos ítems Cliente como <strong>Rechazado</strong>.
+              verá esos ítems como <strong>Rechazado</strong>.
             </>
           ) : hayRechazos ? (
             <>
               {' '}
-              Hay ítems rechazados: al enviar, el estimado queda en estado{' '}
-              <strong>ENVIADO</strong> y liquidaciones RFS lo recibe como{' '}
-              <strong>RECHAZADO</strong>.
+              Hay ítems rechazados: al enviar, el estimado queda según el{' '}
+              <strong>catálogo de cargo</strong> (por defecto cabecera{' '}
+              <strong>ENVIADO</strong> y liquidaciones recibe <strong>RECHAZADO</strong>).
             </>
           ) : (
             <>

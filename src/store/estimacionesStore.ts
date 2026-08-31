@@ -31,6 +31,7 @@ import {
   valoresCeroPorRechazoItem,
 } from '@/types/estimacion';
 import { esNavieraSeaboard, resolverEstadoEnvioALiquidaciones } from '@/lib/seaboardFlow';
+import { useCatalogoCargoStore } from '@/store/catalogoCargoStore';
 import {
   appendHistorialItem,
   construirEntradaDesdeCambios,
@@ -527,18 +528,24 @@ export const useEstimacionesStore = create<EstimacionesState>()(
               return e;
             }
             if (e.danos.length === 0) return e;
-            const { estado, paraLiquidaciones, soloRechazosCargoCliente } =
-              resolverEstadoEnvioALiquidaciones(e.danos);
+            const catalogo = useCatalogoCargoStore.getState().cargos;
+            const {
+              estado,
+              paraLiquidaciones,
+              soloRechazosCargoCliente,
+              soloRechazosNoBloqueantes,
+            } = resolverEstadoEnvioALiquidaciones(e.danos, catalogo);
             /**
-             * Con ítems rechazados: cabecera ENVIADO; liquidaciones lo recibe como RECHAZADO.
-             * APROBADO (todos o solo Cliente rechazado) queda en bandeja enviada.
+             * Reglas desde catálogo de cargo.
+             * APROBADO queda enviado; retorno rechazado libera bandeja a liquidaciones.
              */
-            const liberarBandeja = paraLiquidaciones === 'RECHAZADO';
-            const detalleAuditoria = soloRechazosCargoCliente
-              ? `Seaboard envió a liquidaciones RFS como APROBADO (ítems cargo Cliente rechazados; resto aprobado). Comentarios: ${obs}`
-              : paraLiquidaciones === 'RECHAZADO'
-                ? `Seaboard envió a liquidaciones RFS (estado ENVIADO; liquidaciones recibe RECHAZADO por ítems rechazados). Comentarios: ${obs}`
-                : `Seaboard envió a liquidaciones RFS como APROBADO. Comentarios: ${obs}`;
+            const liberarBandeja = paraLiquidaciones === 'RECHAZADO' || estado === 'RECHAZADO';
+            const detalleAuditoria =
+              soloRechazosNoBloqueantes || soloRechazosCargoCliente
+                ? `Seaboard envió a liquidaciones RFS como APROBADO (rechazos de cargos no bloqueantes según catálogo; resto aprobado). Comentarios: ${obs}`
+                : paraLiquidaciones === 'RECHAZADO'
+                  ? `Seaboard envió a liquidaciones RFS (cabecera ${estado}; liquidaciones recibe ${paraLiquidaciones} según catálogo de cargo). Comentarios: ${obs}`
+                  : `Seaboard envió a liquidaciones RFS como APROBADO. Comentarios: ${obs}`;
             return {
               ...e,
               estado,

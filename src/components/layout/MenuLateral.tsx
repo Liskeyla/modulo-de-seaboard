@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
+  BookOpen,
   ChevronDown,
   ClipboardCheck,
   FileBarChart,
@@ -27,6 +28,7 @@ const iconos: Record<string, React.ComponentType<{ className?: string }>> = {
   FileBarChart,
   ClipboardCheck,
   ListChecks,
+  BookOpen,
 };
 
 export function MenuLateral() {

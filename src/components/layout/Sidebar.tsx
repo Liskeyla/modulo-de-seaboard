@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ClipboardCheck, FileBarChart, Search, X } from 'lucide-react';
+import { ClipboardCheck, FileBarChart, BookOpen, ListChecks, Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { useAuthStore } from '@/store';
@@ -19,6 +19,20 @@ const LINKS_BASE = [
     label: 'Aprobaciones de Estimados',
     icon: ClipboardCheck,
     hint: 'Enviar a SBM (Seaboard), reversar y eliminar',
+    roles: ['liquidaciones'] as const,
+  },
+  {
+    href: '/reportes/items-dano',
+    label: 'Reportería de ítems',
+    icon: ListChecks,
+    hint: 'Auditoría por línea · cobro / ejecución',
+    roles: ['liquidaciones'] as const,
+  },
+  {
+    href: '/catalogos/cargos',
+    label: 'Catálogo de cargo',
+    icon: BookOpen,
+    hint: 'Reglas de rechazo / envío por cargo',
     roles: ['liquidaciones'] as const,
   },
   {

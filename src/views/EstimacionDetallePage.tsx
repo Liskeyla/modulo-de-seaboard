@@ -51,6 +51,7 @@ import {
   resolverEstadoEnvioALiquidaciones,
   estadoVisibleLiquidaciones,
 } from '@/lib/seaboardFlow';
+import { useCatalogoCargoStore } from '@/store/catalogoCargoStore';
 import { useAuthStore } from '@/store';
 import { useEstimacionesStore } from '@/store/estimacionesStore';
 import { useUiStore } from '@/store/uiStore';
@@ -1445,14 +1446,15 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
         onClose={cerrar}
         onEnviar={(comentario) => {
           enviarALiquidaciones(estimacion.id, actor, comentario);
-          const { paraLiquidaciones, soloRechazosCargoCliente } =
-            resolverEstadoEnvioALiquidaciones(estimacion.danos);
+          const catalogo = useCatalogoCargoStore.getState().cargos;
+          const { paraLiquidaciones, soloRechazosNoBloqueantes, estado } =
+            resolverEstadoEnvioALiquidaciones(estimacion.danos, catalogo);
           notificarEnvioALiquidaciones(estimacion, comentario, actor, paraLiquidaciones);
           toast(
-            soloRechazosCargoCliente
-              ? `Estimación ${estimacion.codigo} enviada como APROBADO. Ítems cargo Cliente quedan Rechazado para liquidaciones.`
+            soloRechazosNoBloqueantes
+              ? `Estimación ${estimacion.codigo} enviada como APROBADO (cargos no bloqueantes del catálogo).`
               : paraLiquidaciones === 'RECHAZADO'
-                ? `Estimación ${estimacion.codigo} queda ENVIADO; liquidaciones RFS la recibe como RECHAZADO.`
+                ? `Estimación ${estimacion.codigo} queda ${estado}; liquidaciones la recibe como RECHAZADO.`
                 : `Estimación ${estimacion.codigo} enviada a liquidaciones RFS en estado APROBADO.`,
             'success'
           );
