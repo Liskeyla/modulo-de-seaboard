@@ -852,19 +852,19 @@
   }
 
   .dms-row-estimado-revision td {
-    @apply bg-amber-50/40;
+    @apply bg-white;
   }
 
   .dms-row-estimado-revision.dms-row-selected td {
-    @apply bg-amber-50/60;
+    @apply bg-[#d9edf7]/80;
   }
 
   .dms-row-item-pendiente td {
-    @apply bg-amber-50/30;
+    @apply bg-white;
   }
 
   .dms-row-item-pendiente.dms-row-selected td {
-    @apply bg-amber-50/50;
+    @apply bg-[#d9edf7]/80;
   }
 
   .dms-hero-chip--revision {
@@ -1167,12 +1167,12 @@
 
   /* Ítem pendiente de revisión (revisión parcial): resaltar frente a ya aprobados */
   .dms-table--danos tbody tr.dms-row-pendiente-revision td {
-    @apply bg-amber-50/70;
+    @apply bg-white;
   }
 
   .dms-table--danos tbody tr.dms-row-pendiente-revision.dms-row-selected td,
   .dms-table--danos tbody tr.dms-row-pendiente-revision.dms-row-marcado td {
-    @apply bg-amber-100/80;
+    @apply bg-slate-50;
   }
 
   .dms-table--danos tbody tr.dms-row-item-bloqueado td {
