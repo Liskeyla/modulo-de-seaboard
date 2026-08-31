@@ -14,7 +14,7 @@ export const ESTADOS_ESTIMACION: EstadoEstimacion[] = [
   'RECHAZADO',
 ];
 
-export const ACTIVIDADES = ['WTY', 'SVL', 'DM', 'NO APLICA'] as const;
+export const ACTIVIDADES = ['WTY', 'SVL', 'DM'] as const;
 export type Actividad = (typeof ACTIVIDADES)[number];
 
 /** Estado de revisión a nivel de cada ítem de daño (no del estimado). */

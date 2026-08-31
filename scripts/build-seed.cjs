@@ -892,7 +892,7 @@ function construirEstimacion(row, index) {
   const convertido = Boolean(CONVERSIONES_ESTADO[codigo]);
 
   const actividadRaw = clean(row.Actividad).toUpperCase();
-  const actividad = ['WTY', 'SVL', 'DM'].includes(actividadRaw) ? actividadRaw : 'NO APLICA';
+  const actividad = ['WTY', 'SVL', 'DM'].includes(actividadRaw) ? actividadRaw : 'DM';
 
   const danos = generarDanos(row, estado);
   const tecnico = clean(row['Técnico de Estimación']);
