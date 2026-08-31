@@ -766,10 +766,10 @@ export function ListadoDanosTable({
                   >
                     {ocultarAntesPorItem && edicion?.resumenCambios ? (
                       <div
-                        className="mb-1 rounded border border-sky-200 bg-sky-50 px-1.5 py-1 text-[10px] leading-snug text-sky-950"
+                        className="mb-1 rounded border border-slate-200 bg-slate-50 px-1.5 py-1 text-[10px] leading-snug text-slate-800"
                         title={`${edicion.usuario} · ${edicion.fecha}`}
                       >
-                        <span className="font-bold uppercase tracking-wide text-sky-800">
+                        <span className="font-bold uppercase tracking-wide text-slate-600">
                           Última modificación
                         </span>
                         <span className="mt-0.5 block text-slate-700">
