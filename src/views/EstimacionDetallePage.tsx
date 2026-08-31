@@ -71,7 +71,7 @@ import {
 import { textoComentariosRfs } from '@/components/estimacion/EditarDanoModal';
 import { resumirCambiosAntesDespues } from '@/lib/cambioAntesDespues';
 import { estimadoRequiereRevisionItems, tituloIndicadorRevisionEstimado } from '@/lib/revisionPendiente';
-import { cn, formatMoney, toast } from '@/lib/utils';
+import { cn, toast } from '@/lib/utils';
 import { fotosRealesDano } from '@/lib/fotosDano';
 
 /** Estados en los que el gestor Seaboard puede revisar, modificar y decidir. */
