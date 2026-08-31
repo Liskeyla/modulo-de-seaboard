@@ -418,7 +418,7 @@ export default function ReporteEstimacionesPage() {
           <button
             type="button"
             className="dms-icon-action dms-icon-action--nota"
-            title="Ver nota Seaboard"
+            title={esSeaboard ? 'Ver nota RFS' : 'Ver nota Seaboard'}
             onClick={() => setDialogo({ tipo: 'NOTA', id: row.id })}
           >
             <Ship className="h-3.5 w-3.5" />
@@ -1087,7 +1087,7 @@ export default function ReporteEstimacionesPage() {
         onClose={cerrar}
         size="md"
         icon={<Ship className="h-4 w-4" />}
-        title={`Nota Seaboard · ${activa?.codigo ?? ''}`}
+        title={`${esSeaboard ? 'Nota RFS' : 'Nota Seaboard'} · ${activa?.codigo ?? ''}`}
         subtitle={activa ? `${activa.naviera} · ${activa.contenedor}` : undefined}
         footer={
           <button
