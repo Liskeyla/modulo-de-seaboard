@@ -215,6 +215,12 @@ interface EstimacionesState {
   validarLiquidaciones: (id: string, usuario: string) => void;
   aprobar: (ids: string[], usuario: string, comentario: string) => void;
   rechazar: (ids: string[], usuario: string, comentario: string) => void;
+  /**
+   * Seaboard envía a liquidaciones RFS con comentarios generales.
+   * Si hay ítems rechazados → ENVIADO (liq. puede volver a gestionar / push).
+   * Si todos aprobados → APROBADO.
+   */
+  enviarALiquidaciones: (id: string, usuario: string, comentario: string) => void;
   reversar: (ids: string[], usuario: string, comentario: string) => void;
   reversarAprobacion: (id: string, usuario: string, comentario: string) => void;
   marcarReparado: (id: string, usuario: string) => void;
@@ -508,6 +514,49 @@ export const useEstimacionesStore = create<EstimacionesState>()(
               };
             }),
           }));
+        },
+
+        enviarALiquidaciones: (id, usuario, comentario) => {
+          const obs = String(comentario ?? '').trim();
+          if (obs.length < 5) return;
+          mutar(id, (e) => {
+            if (!['ENVIADO', 'PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(e.estado)) {
+              return e;
+            }
+            if (e.danos.length === 0) return e;
+            const hayRechazos = e.danos.some((d) => esAplicaRechazado(d.aplica));
+            const todosAprobados = e.danos.every((d) => esItemAprobado(d.aplica));
+            /** Con rechazos: ENVIADO para liquidaciones (pueden volver a gestionar / push). */
+            const estado: EstadoEstimacion = hayRechazos
+              ? 'ENVIADO'
+              : todosAprobados
+                ? 'APROBADO'
+                : 'ENVIADO';
+            const liberarBandeja = hayRechazos || !todosAprobados;
+            return {
+              ...e,
+              estado,
+              fechaRevision: ahoraFmt(),
+              fechaModificacion: ahoraFmt(),
+              usuarioModificacion: usuario,
+              fechaAprobacion: estado === 'APROBADO' ? ahoraFmt() : e.fechaAprobacion,
+              /** Si hay rechazos, liquidaciones recupera el estimado (puede push otra vez). */
+              enviarAprobacion: liberarBandeja ? 'NO' : 'SI',
+              fechaEnvio: e.fechaEnvio,
+              comentariosSeaboard: [
+                ...e.comentariosSeaboard,
+                comentarioSeaboard('ENVIAR', obs, usuario),
+              ],
+              auditoria: [
+                ...e.auditoria,
+                evento(
+                  usuario,
+                  'ENVÍO A LIQUIDACIONES',
+                  `Seaboard envió a liquidaciones RFS (estado ${estado}). Comentarios: ${obs}`
+                ),
+              ],
+            };
+          });
         },
 
         reversar: (ids, usuario, comentario) => {

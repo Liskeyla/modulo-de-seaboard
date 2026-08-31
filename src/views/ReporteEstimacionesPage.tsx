@@ -35,8 +35,7 @@ import { ChipsRetornoSeaboard } from '@/components/estimacion/RespuestaSeaboardB
 import { AlertasLiquidacionesCell } from '@/components/estimacion/AlertasLiquidacionesCell';
 import {
   ConfirmacionEstimacionModal,
-  notificarAprobacionALiquidaciones,
-  notificarRechazoALiquidaciones,
+  notificarEnvioALiquidaciones,
 } from '@/components/estimacion/ConfirmacionEstimacionModal';
 import { NuevoEstimadoModal } from '@/components/estimacion/NuevoEstimadoModal';
 import { useAuthStore } from '@/store';
@@ -54,6 +53,7 @@ import {
   contarComentariosPendientes,
   itemsSinRevisionSbm,
   inferirTipoCobro,
+  esAplicaRechazado,
   mensajeRevisionItemsPendientes,
   MSG_ITEMS_SIN_APROBAR,
   type Actividad,
@@ -215,8 +215,7 @@ export default function ReporteEstimacionesPage() {
   const {
     estimaciones,
     enviarAprobacion,
-    aprobar,
-    rechazar,
+    enviarALiquidaciones,
     reversarAprobacion,
     eliminar,
     setActividad,
@@ -529,7 +528,7 @@ export default function ReporteEstimacionesPage() {
       : 'Aprobaciones de Estimados · Ecuador · Enviar a SBM (Seaboard), reversar y eliminar'
     : esCoordinador
       ? 'Crear y modificar estimados · el historial lo revisa Liquidaciones para enviar a la línea'
-      : 'Usuario Seaboard · Ver, modificar y aprobar / rechazar estimados';
+      : 'Usuario Seaboard · Ver, modificar ítems y enviar a liquidaciones RFS';
 
   return (
     <>
@@ -1173,7 +1172,7 @@ export default function ReporteEstimacionesPage() {
         modo="DECISION"
         estimacion={activa}
         onClose={cerrar}
-        onAprobar={(comentario) => {
+        onEnviar={(comentario) => {
           if (!activa) return;
           if (itemsSinRevisionSbm(activa.danos).length > 0) {
             toast(
@@ -1182,27 +1181,14 @@ export default function ReporteEstimacionesPage() {
             );
             return;
           }
-          aprobar([activa.id], actor, comentario);
-          notificarAprobacionALiquidaciones(activa, actor, comentario);
+          enviarALiquidaciones(activa.id, actor, comentario);
+          const hayRechazos = activa.danos.some((d) => esAplicaRechazado(d.aplica));
+          const estadoResultante = hayRechazos ? 'ENVIADO' : 'APROBADO';
+          notificarEnvioALiquidaciones(activa, comentario, actor, estadoResultante);
           toast(
-            `Estimación ${activa.codigo} aprobada y enviada a liquidaciones RFS (APROBADO).`,
-            'success'
-          );
-          cerrar();
-        }}
-        onRechazar={(comentario) => {
-          if (!activa) return;
-          if (itemsSinRevisionSbm(activa.danos).length > 0) {
-            toast(
-              mensajeRevisionItemsPendientes(activa.danos) ?? MSG_ITEMS_SIN_APROBAR,
-              'info'
-            );
-            return;
-          }
-          rechazar([activa.id], actor, comentario);
-          notificarRechazoALiquidaciones(activa, comentario, actor);
-          toast(
-            `Estimación ${activa.codigo} rechazada y notificada a liquidaciones RFS.`,
+            hayRechazos
+              ? `Estimación ${activa.codigo} enviada a liquidaciones RFS (ENVIADO · hay ítems rechazados).`
+              : `Estimación ${activa.codigo} enviada a liquidaciones RFS (APROBADO).`,
             'success'
           );
           cerrar();

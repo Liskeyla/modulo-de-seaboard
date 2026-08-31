@@ -40,8 +40,7 @@ import { InfoLateralCards } from '@/components/estimacion/InfoLateralCards';
 import { InformePreviewModal } from '@/components/estimacion/InformePreviewModal';
 import {
   ConfirmacionEstimacionModal,
-  notificarAprobacionALiquidaciones,
-  notificarRechazoALiquidaciones,
+  notificarEnvioALiquidaciones,
 } from '@/components/estimacion/ConfirmacionEstimacionModal';
 import { ListadoDanosTable } from '@/components/estimacion/ListadoDanosTable';
 import { AgregarDanoCard } from '@/components/estimacion/AgregarDanoCard';
@@ -60,6 +59,7 @@ import {
   snapshotDesdeDano,
   inferirTipoCobro,
   esItemAprobado,
+  esAplicaRechazado,
   esRevisionParcialItems,
   mensajeRevisionItemsPendientes,
   MSG_REVISION_PARCIAL,
@@ -174,8 +174,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     getByCodigo,
     revalidarTarifas,
     enviarAprobacion,
-    aprobar,
-    rechazar,
+    enviarALiquidaciones,
     reversarAprobacion,
     actualizarDano,
     agregarDano,
@@ -330,7 +329,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   const esCoordinador = user?.rol === 'coordinador';
   const esSeaboardNav = esNavieraSeaboard(estimacion.naviera);
   /**
-   * Gestor Seaboard: aperturar · modificar · aprobar/rechazar ítems y estimado.
+   * Gestor Seaboard: aperturar · modificar · aprobar/rechazar ítems y enviar a liquidaciones.
    * Coordinador: aperturar · modificar · agregar daños (sin decidir ni enviar a línea).
    * Liquidaciones: validar · enviar a SBM (Seaboard) · reversar aprobación · ítems.
    */
@@ -1196,7 +1195,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   {puedeAperturar && !aperturada
                     ? vistaAprobadoLiq || estimacion.estado === 'APROBADO'
                       ? 'Estimado aprobado: aperture para reversar solo el ítem a modificar (el resto aprobado no se re-revisa).'
-                      : 'Aperture para modificar ítems (queda histórico), aprobar/rechazar cada línea y luego el estimado.'
+                      : 'Aperture para modificar ítems (queda histórico), aprobar/rechazar cada línea y luego Enviar a liquidaciones.'
                     : revisionParcial
                       ? `${MSG_REVISION_PARCIAL} Pendiente(s): ${itemsPendientesRevision.length} línea(s).`
                       : 'Ítems Aprobados quedan bloqueados. Para editarlos: Reversar → modificar → volver a revisión.'}
@@ -1398,26 +1397,21 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
 
       {/* ── Diálogos ─────────────────────────────────────────────── */}
 
-      {/* Gestor Seaboard: Aprobar/Rechazar → Liquidaciones RFS */}
+      {/* Gestor Seaboard: Enviar → Liquidaciones RFS */}
       <ConfirmacionEstimacionModal
         open={dialogo.tipo === 'ENVIAR_LIQUIDACIONES'}
         modo="DECISION"
         estimacion={estimacion}
         onClose={cerrar}
-        onAprobar={(comentario) => {
-          aprobar([estimacion.id], actor, comentario);
-          notificarAprobacionALiquidaciones(estimacion, actor, comentario);
+        onEnviar={(comentario) => {
+          enviarALiquidaciones(estimacion.id, actor, comentario);
+          const hayRechazos = estimacion.danos.some((d) => esAplicaRechazado(d.aplica));
+          const estadoResultante = hayRechazos ? 'ENVIADO' : 'APROBADO';
+          notificarEnvioALiquidaciones(estimacion, comentario, actor, estadoResultante);
           toast(
-            `Estimación ${estimacion.codigo} aprobada y enviada a liquidaciones RFS (APROBADO).`,
-            'success'
-          );
-          cerrar();
-        }}
-        onRechazar={(comentario) => {
-          rechazar([estimacion.id], actor, comentario);
-          notificarRechazoALiquidaciones(estimacion, comentario, actor);
-          toast(
-            `Estimación ${estimacion.codigo} rechazada y notificada a liquidaciones RFS.`,
+            hayRechazos
+              ? `Estimación ${estimacion.codigo} enviada a liquidaciones RFS (ENVIADO · hay ítems rechazados).`
+              : `Estimación ${estimacion.codigo} enviada a liquidaciones RFS (APROBADO).`,
             'success'
           );
           cerrar();

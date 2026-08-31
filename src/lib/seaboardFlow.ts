@@ -25,14 +25,14 @@ export function puedePushASbm(e: Estimacion) {
   return (
     esNavieraSeaboard(e.naviera) &&
     !yaEnviado &&
-    ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(e.estado) &&
+    ['PENDIENTE', 'RECHAZADO', 'REVERSADO', 'ENVIADO'].includes(e.estado) &&
     e.danos.length > 0
   );
 }
 
 /** Resumen visual de lo que devolvió Seaboard a Liquidaciones. */
 export function resumenRetornoSeaboard(e: Estimacion) {
-  if (!['APROBADO', 'RECHAZADO', 'REPARADO'].includes(e.estado)) {
+  if (!['APROBADO', 'RECHAZADO', 'REPARADO', 'ENVIADO'].includes(e.estado)) {
     return null;
   }
   const itemsModificados = e.danos.filter(
@@ -45,10 +45,10 @@ export function resumenRetornoSeaboard(e: Estimacion) {
   const itemsAprobados = e.danos.filter(
     (d) => normalizarAplicaDano(d.aplica) === APLICA_APROBADO_SBM
   ).length;
-  const rechazoTotal = e.estado === 'RECHAZADO';
+  const rechazoTotal = e.estado === 'RECHAZADO' || (e.estado === 'ENVIADO' && itemsRechazados > 0);
   const ultimo = [...e.comentariosSeaboard]
     .reverse()
-    .find((c) => c.accion === 'APROBAR' || c.accion === 'RECHAZAR');
+    .find((c) => c.accion === 'APROBAR' || c.accion === 'RECHAZAR' || c.accion === 'ENVIAR');
 
   return {
     rechazoTotal,

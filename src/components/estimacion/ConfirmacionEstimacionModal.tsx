@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, CheckCircle2, FileText, XCircle } from 'lucide-react';
+import { AlertTriangle, FileText, Send } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import {
   contarComentariosPendientes,
+  esAplicaRechazado,
   esRevisionParcialItems,
   itemsSinRevisionSbm,
   MSG_ITEMS_SIN_APROBAR,
@@ -36,70 +37,59 @@ function mailtoLiquidaciones(correos: string[], asunto: string, cuerpo: string) 
   }
 }
 
-/** Notifica a liquidaciones RFS el rechazo del estimado (prototipo mailto). */
+/** Notifica a liquidaciones RFS el envío del estimado (prototipo mailto). */
+export function notificarEnvioALiquidaciones(
+  estimacion: Estimacion,
+  comentario: string,
+  usuario: string,
+  estadoResultante: string
+) {
+  const correos = correosDeEstimacion(estimacion);
+  const paisLabel = paisDe(estimacion) === 'PERU' ? 'Perú' : 'Ecuador';
+  const hayRechazos = estimacion.danos.some((d) => esAplicaRechazado(d.aplica));
+  const asunto = `Estimación ${estimacion.codigo} ENVIADA · ${estimacion.contenedor} · ${paisLabel}`;
+  const cuerpo = [
+    `Estimados gestores de liquidaciones RFS (${paisLabel}),`,
+    ``,
+    `La estimación ${estimacion.codigo} (${estimacion.contenedor}) fue enviada por Seaboard Marine.`,
+    ``,
+    `País: ${paisLabel}`,
+    `Naviera: ${estimacion.naviera}`,
+    `Estado resultante: ${estadoResultante}`,
+    `Ítems con rechazo: ${hayRechazos ? 'Sí' : 'No'}`,
+    `Total PVP: $${estimacion.pvpTotal.toFixed(2)}`,
+    `Líneas de daño: ${estimacion.danos.length}`,
+    `Usuario Seaboard: ${usuario}`,
+    ``,
+    `Comentarios generales:`,
+    comentario.trim(),
+    ``,
+    `— Notificación automática · Gestor Seaboard Marine (prototipo)`,
+  ].join('\n');
+
+  mailtoLiquidaciones(correos, asunto, cuerpo);
+  toast(
+    `Correo de envío preparado para liquidaciones ${paisLabel}\n${correos.join(', ')}`,
+    'success'
+  );
+}
+
+/** @deprecated Use notificarEnvioALiquidaciones */
 export function notificarRechazoALiquidaciones(
   estimacion: Estimacion,
   comentario: string,
   usuario: string
 ) {
-  const correos = correosDeEstimacion(estimacion);
-  const paisLabel = paisDe(estimacion) === 'PERU' ? 'Perú' : 'Ecuador';
-  const asunto = `Estimación ${estimacion.codigo} RECHAZADA · ${estimacion.contenedor} · ${paisLabel}`;
-  const cuerpo = [
-    `Estimados gestores de liquidaciones RFS (${paisLabel}),`,
-    ``,
-    `La estimación ${estimacion.codigo} (${estimacion.contenedor}) fue rechazada por Seaboard Marine.`,
-    ``,
-    `País: ${paisLabel}`,
-    `Naviera: ${estimacion.naviera}`,
-    `Total PVP: $${estimacion.pvpTotal.toFixed(2)}`,
-    `Líneas de daño: ${estimacion.danos.length}`,
-    `Usuario Seaboard: ${usuario}`,
-    ``,
-    `Motivo del rechazo:`,
-    comentario.trim(),
-    ``,
-    `— Notificación automática · Gestor Seaboard Marine (prototipo)`,
-  ].join('\n');
-
-  mailtoLiquidaciones(correos, asunto, cuerpo);
-  toast(
-    `Correo de rechazo preparado para liquidaciones ${paisLabel}\n${correos.join(', ')}`,
-    'success'
-  );
+  notificarEnvioALiquidaciones(estimacion, comentario, usuario, 'RECHAZADO');
 }
 
-/** Notifica a liquidaciones RFS la aprobación del estimado (prototipo mailto). */
+/** @deprecated Use notificarEnvioALiquidaciones */
 export function notificarAprobacionALiquidaciones(
   estimacion: Estimacion,
   usuario: string,
   comentario: string
 ) {
-  const correos = correosDeEstimacion(estimacion);
-  const paisLabel = paisDe(estimacion) === 'PERU' ? 'Perú' : 'Ecuador';
-  const asunto = `Estimación ${estimacion.codigo} APROBADA · ${estimacion.contenedor} · ${paisLabel}`;
-  const cuerpo = [
-    `Estimados gestores de liquidaciones RFS (${paisLabel}),`,
-    ``,
-    `La estimación ${estimacion.codigo} (${estimacion.contenedor}) fue aprobada por Seaboard Marine.`,
-    ``,
-    `País: ${paisLabel}`,
-    `Naviera: ${estimacion.naviera}`,
-    `Total PVP: $${estimacion.pvpTotal.toFixed(2)}`,
-    `Líneas de daño: ${estimacion.danos.length}`,
-    `Usuario Seaboard: ${usuario}`,
-    ``,
-    `Observación de la aprobación:`,
-    comentario.trim(),
-    ``,
-    `— Notificación automática · Gestor Seaboard Marine (prototipo)`,
-  ].join('\n');
-
-  mailtoLiquidaciones(correos, asunto, cuerpo);
-  toast(
-    `Correo de aprobación preparado para liquidaciones ${paisLabel}\n${correos.join(', ')}`,
-    'success'
-  );
+  notificarEnvioALiquidaciones(estimacion, comentario, usuario, 'APROBADO');
 }
 
 function resumenCambiosEstimacion(est: Estimacion): string[] {
@@ -120,7 +110,7 @@ function resumenCambiosEstimacion(est: Estimacion): string[] {
       items.push(`${ev.fecha} · ${ev.accion}: ${ev.detalle}`);
     }
   });
-  return items.slice(0, 24);
+  return items;
 }
 
 export type ModoConfirmacionEstimacion = 'ENVIAR' | 'DECISION';
@@ -130,30 +120,25 @@ interface ConfirmacionEstimacionModalProps {
   modo: ModoConfirmacionEstimacion;
   estimacion: Estimacion | null;
   onClose: () => void;
-  onAprobar: (comentario: string) => void;
-  onRechazar: (comentario: string) => void;
+  /** Seaboard envía el estimado a liquidaciones RFS con comentarios generales. */
+  onEnviar: (comentario: string) => void;
 }
 
 /**
- * Confirmación del gestor Seaboard: informe + Aprobar/Rechazar
- * con destino Liquidaciones RFS (no al revés).
+ * Confirmación del gestor Seaboard: informe + Enviar a Liquidaciones RFS
+ * (sin aprobar/rechazar el estimado; la decisión de ítems ya se hizo en el listado).
  */
 export function ConfirmacionEstimacionModal({
   open,
   modo,
   estimacion,
   onClose,
-  onAprobar,
-  onRechazar,
+  onEnviar,
 }: ConfirmacionEstimacionModalProps) {
   const [comentario, setComentario] = useState('');
-  const [rechazando, setRechazando] = useState(false);
 
   useEffect(() => {
-    if (!open) {
-      setComentario('');
-      setRechazando(false);
-    }
+    if (!open) setComentario('');
   }, [open]);
 
   const html = useMemo(
@@ -176,48 +161,36 @@ export function ConfirmacionEstimacionModal({
     () => (estimacion ? esRevisionParcialItems(estimacion.danos) : false),
     [estimacion]
   );
+  const hayRechazos = useMemo(
+    () => (estimacion ? estimacion.danos.some((d) => esAplicaRechazado(d.aplica)) : false),
+    [estimacion]
+  );
   const faltanItems = sinRevision.length > 0;
 
   if (!estimacion) return null;
 
   const titulo =
     modo === 'ENVIAR' || modo === 'DECISION'
-      ? 'Aprobar o rechazar estimado'
-      : 'Decisión Seaboard';
+      ? 'Enviar a liquidaciones RFS'
+      : 'Enviar estimado';
   const subtitle = `${estimacion.codigo} · Seaboard → Liquidaciones RFS · Total $${formatMoney(
     estimacion.pvpTotal
   )}`;
 
-  function observacionValida() {
+  function confirmarEnviar() {
+    if (faltanItems) {
+      toast(MSG_ITEMS_SIN_APROBAR, 'info');
+      return;
+    }
     const motivo = comentario.trim();
     if (motivo.length < 5) {
       toast(
-        'Indique una observación/comentario obligatorio (mín. 5 caracteres) para evidenciar la decisión manual.',
+        'Indique comentarios generales (mín. 5 caracteres) antes de enviar.',
         'info'
       );
-      return null;
-    }
-    return motivo;
-  }
-
-  function confirmarRechazo() {
-    if (faltanItems) {
-      toast(MSG_ITEMS_SIN_APROBAR, 'info');
       return;
     }
-    const motivo = observacionValida();
-    if (!motivo) return;
-    onRechazar(motivo);
-  }
-
-  function confirmarAprobar() {
-    if (faltanItems) {
-      toast(MSG_ITEMS_SIN_APROBAR, 'info');
-      return;
-    }
-    const motivo = observacionValida();
-    if (!motivo) return;
-    onAprobar(motivo);
+    onEnviar(motivo);
   }
 
   return (
@@ -238,64 +211,34 @@ export function ConfirmacionEstimacionModal({
           >
             Cancelar
           </button>
-          {!rechazando && (
-            <>
-              <button
-                type="button"
-                className="dms-btn-rechazar px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={faltanItems}
-                title={faltanItems ? 'Revise todos los ítems antes de rechazar' : undefined}
-                onClick={() => {
-                  if (faltanItems) {
-                    toast(MSG_ITEMS_SIN_APROBAR, 'info');
-                    return;
-                  }
-                  setRechazando(true);
-                }}
-              >
-                <XCircle className="h-4 w-4" /> Rechazar y notificar
-              </button>
-              <button
-                type="button"
-                className="dms-btn-aprobar px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={faltanItems}
-                title={faltanItems ? 'Revise todos los ítems antes de aprobar' : undefined}
-                onClick={confirmarAprobar}
-              >
-                <CheckCircle2 className="h-4 w-4" /> Aprobar y enviar
-              </button>
-            </>
-          )}
-          {rechazando && (
-            <>
-              <button
-                type="button"
-                className="dms-btn-action border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
-                onClick={() => {
-                  setRechazando(false);
-                  setComentario('');
-                }}
-              >
-                Volver
-              </button>
-              <button
-                type="button"
-                className="dms-btn-rechazar px-4 py-2 text-sm"
-                onClick={confirmarRechazo}
-              >
-                <XCircle className="h-4 w-4" /> Confirmar rechazo a liquidaciones
-              </button>
-            </>
-          )}
+          <button
+            type="button"
+            className="dms-btn-enviar px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={faltanItems}
+            title={faltanItems ? 'Revise todos los ítems antes de enviar' : undefined}
+            onClick={confirmarEnviar}
+          >
+            <Send className="h-4 w-4" /> Enviar
+          </button>
         </>
       }
     >
       <div className="space-y-3 border-b border-slate-200 bg-slate-50 px-4 py-3">
         <p className="text-xs leading-relaxed text-slate-600">
-          Revise el informe. <strong>Aprobar</strong> deja el estimado en{' '}
-          <strong>APROBADO</strong>; <strong>Rechazar</strong> en <strong>RECHAZADO</strong>. En
-          ambos casos la observación es obligatoria (decisión manual) y se notifica a liquidaciones
-          RFS.
+          Revise el informe y envíe el estimado a <strong>liquidaciones RFS</strong>. La decisión
+          de cada ítem (aprobar / rechazar) ya se define en el listado de daños.
+          {hayRechazos ? (
+            <>
+              {' '}
+              Hay ítems rechazados: el estimado quedará en estado <strong>ENVIADO</strong> para que
+              liquidaciones lo gestione.
+            </>
+          ) : (
+            <>
+              {' '}
+              Si todos los ítems están aprobados, el estimado quedará en <strong>APROBADO</strong>.
+            </>
+          )}
           {revisionParcial && (
             <>
               {' '}
@@ -310,7 +253,7 @@ export function ConfirmacionEstimacionModal({
             <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
             <span>
               Atención: hay <strong>{pendientesLiq}</strong> comentario(s) de liquidaciones sin
-              resolver. Revíselos antes de decidir.
+              resolver. Revíselos antes de enviar.
             </span>
           </div>
         )}
@@ -322,12 +265,8 @@ export function ConfirmacionEstimacionModal({
               {revisionParcial ? (
                 <>
                   {MSG_REVISION_PARCIAL} Pendiente
-                  {sinRevision.length === 1 ? '' : 's'}: línea
-                  {sinRevision.length === 1 ? '' : 's'}{' '}
-                  <strong>
-                    {sinRevision.map((d) => String(d.linea).padStart(2, '0')).join(', ')}
-                  </strong>
-                  .
+                  {sinRevision.length === 1 ? '' : 's'}: líneas{' '}
+                  {sinRevision.map((d) => String(d.linea).padStart(2, '0')).join(', ')}.
                 </>
               ) : (
                 <>
@@ -357,28 +296,16 @@ export function ConfirmacionEstimacionModal({
           </div>
         )}
         <div>
-          <label className="dms-field-label">
-            {rechazando
-              ? 'Observación del rechazo (obligatoria)'
-              : 'Observación de la decisión (obligatoria)'}
-          </label>
+          <label className="dms-field-label">Comentarios generales (obligatorio)</label>
           <textarea
             rows={3}
-            className={cn(
-              'dms-input-sm h-auto w-full bg-white',
-              rechazando ? 'border-red-200' : 'border-slate-200'
-            )}
+            className={cn('dms-input-sm h-auto w-full border-slate-200 bg-white')}
             value={comentario}
-            placeholder={
-              rechazando
-                ? 'Indique el motivo por el cual Seaboard rechaza el estimado…'
-                : 'Indique la observación de la revisión (obligatoria para aprobar o rechazar)…'
-            }
+            placeholder="Escriba comentarios generales para liquidaciones RFS…"
             onChange={(e) => setComentario(e.target.value)}
           />
           <p className="mt-1 text-[10px] text-slate-500">
-            Evidencia de decisión manual · Se notificará a:{' '}
-            {correosDeEstimacion(estimacion).join(', ')}
+            Se notificará a: {correosDeEstimacion(estimacion).join(', ')}
           </p>
         </div>
       </div>
