@@ -130,11 +130,11 @@
 
   /* Acciones del reporte: chips compactos con nombre */
   .dms-acciones-lista {
-    @apply flex min-w-[9.25rem] max-w-[11rem] flex-wrap gap-1 rounded-lg border border-slate-200/90 bg-gradient-to-b from-slate-50 to-white p-1.5 shadow-sm;
+    @apply flex min-w-[8.5rem] max-w-[10.25rem] flex-wrap gap-0.5 rounded-md border border-slate-200/90 bg-gradient-to-b from-slate-50 to-white p-1 shadow-sm;
   }
 
   .dms-accion-btn {
-    @apply inline-flex h-7 min-w-0 flex-[1_1_calc(50%-0.125rem)] items-center justify-center gap-1 rounded-md border px-1.5 text-[10px] font-bold leading-none text-white shadow-sm transition-all hover:-translate-y-px hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f16e26]/35 active:translate-y-0 active:scale-[0.98];
+    @apply inline-flex h-auto min-h-0 min-w-0 flex-[1_1_calc(50%-0.125rem)] items-center justify-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] font-semibold leading-tight text-white shadow-sm transition-all hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f16e26]/35 active:scale-[0.98];
   }
 
   .dms-accion-btn--ver,
@@ -144,7 +144,7 @@
   }
 
   .dms-accion-btn svg {
-    @apply h-3 w-3 shrink-0 opacity-95;
+    @apply h-2.5 w-2.5 shrink-0 opacity-95;
   }
 
   .dms-accion-btn--ver {
