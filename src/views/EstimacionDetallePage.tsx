@@ -1406,11 +1406,11 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
         onEnviar={(comentario) => {
           enviarALiquidaciones(estimacion.id, actor, comentario);
           const hayRechazos = estimacion.danos.some((d) => esAplicaRechazado(d.aplica));
-          const estadoResultante = hayRechazos ? 'ENVIADO' : 'APROBADO';
+          const estadoResultante = hayRechazos ? 'RECHAZADO' : 'APROBADO';
           notificarEnvioALiquidaciones(estimacion, comentario, actor, estadoResultante);
           toast(
             hayRechazos
-              ? `Estimación ${estimacion.codigo} enviada a liquidaciones RFS (ENVIADO · hay ítems rechazados).`
+              ? `Estimación ${estimacion.codigo} enviada a liquidaciones RFS como RECHAZADO.`
               : `Estimación ${estimacion.codigo} enviada a liquidaciones RFS en estado APROBADO.`,
             'success'
           );

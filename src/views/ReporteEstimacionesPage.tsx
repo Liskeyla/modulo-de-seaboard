@@ -1183,11 +1183,11 @@ export default function ReporteEstimacionesPage() {
           }
           enviarALiquidaciones(activa.id, actor, comentario);
           const hayRechazos = activa.danos.some((d) => esAplicaRechazado(d.aplica));
-          const estadoResultante = hayRechazos ? 'ENVIADO' : 'APROBADO';
+          const estadoResultante = hayRechazos ? 'RECHAZADO' : 'APROBADO';
           notificarEnvioALiquidaciones(activa, comentario, actor, estadoResultante);
           toast(
             hayRechazos
-              ? `Estimación ${activa.codigo} enviada a liquidaciones RFS (ENVIADO · hay ítems rechazados).`
+              ? `Estimación ${activa.codigo} enviada a liquidaciones RFS como RECHAZADO.`
               : `Estimación ${activa.codigo} enviada a liquidaciones RFS en estado APROBADO.`,
             'success'
           );

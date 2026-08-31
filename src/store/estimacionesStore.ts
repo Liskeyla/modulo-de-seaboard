@@ -217,7 +217,7 @@ interface EstimacionesState {
   rechazar: (ids: string[], usuario: string, comentario: string) => void;
   /**
    * Seaboard envía a liquidaciones RFS con comentarios generales.
-   * Si hay ítems rechazados → ENVIADO (liq. puede volver a gestionar / push).
+   * Si hay ítems rechazados → RECHAZADO (cae a liquidaciones como rechazado).
    * Si todos aprobados → APROBADO.
    */
   enviarALiquidaciones: (id: string, usuario: string, comentario: string) => void;
@@ -526,12 +526,15 @@ export const useEstimacionesStore = create<EstimacionesState>()(
             if (e.danos.length === 0) return e;
             const hayRechazos = e.danos.some((d) => esAplicaRechazado(d.aplica));
             const todosAprobados = e.danos.every((d) => esItemAprobado(d.aplica));
-            /** Con rechazos: ENVIADO para liquidaciones (pueden volver a gestionar / push). */
+            /**
+             * Con ítems rechazados: RECHAZADO → cae a liquidaciones como rechazado.
+             * Todos aprobados: APROBADO → liquidaciones recibe el aprobado.
+             */
             const estado: EstadoEstimacion = hayRechazos
-              ? 'ENVIADO'
+              ? 'RECHAZADO'
               : todosAprobados
                 ? 'APROBADO'
-                : 'ENVIADO';
+                : 'RECHAZADO';
             const liberarBandeja = hayRechazos || !todosAprobados;
             return {
               ...e,
@@ -545,14 +548,16 @@ export const useEstimacionesStore = create<EstimacionesState>()(
               fechaEnvio: e.fechaEnvio,
               comentariosSeaboard: [
                 ...e.comentariosSeaboard,
-                comentarioSeaboard('ENVIAR', obs, usuario),
+                comentarioSeaboard(hayRechazos ? 'RECHAZAR' : 'ENVIAR', obs, usuario),
               ],
               auditoria: [
                 ...e.auditoria,
                 evento(
                   usuario,
-                  'ENVÍO A LIQUIDACIONES',
-                  `Seaboard envió a liquidaciones RFS (estado ${estado}). Comentarios: ${obs}`
+                  hayRechazos ? 'ENVÍO RECHAZADO A LIQUIDACIONES' : 'ENVÍO APROBADO A LIQUIDACIONES',
+                  hayRechazos
+                    ? `Seaboard envió a liquidaciones RFS como RECHAZADO (hay ítems rechazados). Comentarios: ${obs}`
+                    : `Seaboard envió a liquidaciones RFS como APROBADO. Comentarios: ${obs}`
                 ),
               ],
             };

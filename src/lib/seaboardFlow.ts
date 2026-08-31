@@ -45,7 +45,7 @@ export function resumenRetornoSeaboard(e: Estimacion) {
   const itemsAprobados = e.danos.filter(
     (d) => normalizarAplicaDano(d.aplica) === APLICA_APROBADO_SBM
   ).length;
-  const rechazoTotal = e.estado === 'RECHAZADO' || (e.estado === 'ENVIADO' && itemsRechazados > 0);
+  const rechazoTotal = e.estado === 'RECHAZADO';
   const ultimo = [...e.comentariosSeaboard]
     .reverse()
     .find((c) => c.accion === 'APROBAR' || c.accion === 'RECHAZAR' || c.accion === 'ENVIAR');
