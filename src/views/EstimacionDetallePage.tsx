@@ -1423,7 +1423,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
               editable={
                 Boolean(puedeCargarEvidencias && danoSeleccionado && !esItemAprobado(danoSeleccionado.aplica))
               }
-              modoLiquidaciones={esLiquidaciones}
+              modoLiquidaciones={esLiquidaciones || esCoordinador}
               onActualizar={(cambios, resumen) => {
                 if (!danoSeleccionado) return;
                 cambiarDano(danoSeleccionado, cambios, resumen);

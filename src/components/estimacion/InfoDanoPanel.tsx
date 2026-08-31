@@ -134,6 +134,7 @@ export function InfoDanoPanel({
   dano: DanoEstimacion | null;
   editable: boolean;
   /** UI de carga DMS (Tipo Archivo + 4 botones). Solo Liquidaciones. */
+  /** Liquidaciones / Coordinador: permite cargar imágenes, videos, data logs y PDF. */
   modoLiquidaciones?: boolean;
   onActualizar: (cambios: Partial<DanoEstimacion>, resumen: string) => void;
   onVerFotos: (dano: DanoEstimacion) => void;
@@ -519,7 +520,8 @@ export function InfoDanoPanel({
 
         {!modoLiquidaciones && (
           <p className="rounded-md bg-slate-50 px-2.5 py-1.5 text-[10px] text-slate-600">
-            Solo visualización de evidencias. La carga de archivos corresponde a Liquidaciones.
+            Solo visualización de evidencias. La carga de archivos corresponde a Liquidaciones o
+            Coordinador.
           </p>
         )}
 
