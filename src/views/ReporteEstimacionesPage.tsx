@@ -47,6 +47,8 @@ import {
   enBandejaSeaboard,
   puedePushASbm,
   resolverEstadoEnvioALiquidaciones,
+  estadoVisibleLiquidaciones,
+  esRetornoRechazadoALiquidaciones,
 } from '@/lib/seaboardFlow';
 import {
   ACTIVIDADES,
@@ -288,7 +290,13 @@ export default function ReporteEstimacionesPage() {
 
     return porPais.filter((e) => {
       if (patio !== 'Todos' && e.lugarEstimacion !== patio) return false;
-      if (estado !== 'Todos' && e.estado !== estado) return false;
+      if (estado !== 'Todos') {
+        if (esLiquidaciones) {
+          if (estadoVisibleLiquidaciones(e) !== estado) return false;
+        } else if (e.estado !== estado) {
+          return false;
+        }
+      }
       if (!hayCriterio) return true;
 
       if (filtroActivo) {
@@ -323,7 +331,7 @@ export default function ReporteEstimacionesPage() {
     });
   }, [
     porPais, desde, hasta, naviera, codigoRfs, patio, tipo, estado, actividad, tecnico,
-    aplica, completas, busqueda, parametro, search, filtroActivo,
+    aplica, completas, busqueda, parametro, search, filtroActivo, esLiquidaciones,
   ]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
@@ -857,7 +865,23 @@ export default function ReporteEstimacionesPage() {
                             <td className="text-center tabular-nums">{row.semana}</td>
                             <td className="text-center tabular-nums">{row.anio}</td>
                             <td>
-                              <EstadoEstimacionBadge estado={row.estado} />
+                              <EstadoEstimacionBadge
+                                estado={
+                                  esLiquidaciones
+                                    ? estadoVisibleLiquidaciones(row)
+                                    : row.estado
+                                }
+                              />
+                              {esLiquidaciones &&
+                                esRetornoRechazadoALiquidaciones(row) &&
+                                row.estado === 'ENVIADO' && (
+                                  <span
+                                    className="mt-0.5 block text-[9px] font-medium text-slate-500"
+                                    title="Cabecera Seaboard: ENVIADO · Liquidaciones recibe RECHAZADO"
+                                  >
+                                    (retorno SBM)
+                                  </span>
+                                )}
                             </td>
                             {verCobro && (
                               <td className="align-middle">
@@ -1182,14 +1206,14 @@ export default function ReporteEstimacionesPage() {
             return;
           }
           enviarALiquidaciones(activa.id, actor, comentario);
-          const { estado: estadoResultante, soloRechazosCargoCliente } =
+          const { paraLiquidaciones, soloRechazosCargoCliente } =
             resolverEstadoEnvioALiquidaciones(activa.danos);
-          notificarEnvioALiquidaciones(activa, comentario, actor, estadoResultante);
+          notificarEnvioALiquidaciones(activa, comentario, actor, paraLiquidaciones);
           toast(
             soloRechazosCargoCliente
               ? `Estimación ${activa.codigo} enviada como APROBADO. Ítems cargo Cliente quedan Rechazado para liquidaciones.`
-              : estadoResultante === 'RECHAZADO'
-                ? `Estimación ${activa.codigo} enviada a liquidaciones RFS como RECHAZADO.`
+              : paraLiquidaciones === 'RECHAZADO'
+                ? `Estimación ${activa.codigo} queda ENVIADO; liquidaciones RFS la recibe como RECHAZADO.`
                 : `Estimación ${activa.codigo} enviada a liquidaciones RFS en estado APROBADO.`,
             'success'
           );

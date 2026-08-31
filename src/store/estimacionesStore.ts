@@ -527,14 +527,17 @@ export const useEstimacionesStore = create<EstimacionesState>()(
               return e;
             }
             if (e.danos.length === 0) return e;
-            const { estado, soloRechazosCargoCliente } =
+            const { estado, paraLiquidaciones, soloRechazosCargoCliente } =
               resolverEstadoEnvioALiquidaciones(e.danos);
-            /** RECHAZADO libera bandeja; APROBADO (incl. solo Cliente rechazado) queda enviado. */
-            const liberarBandeja = estado === 'RECHAZADO';
+            /**
+             * Con ítems rechazados: cabecera ENVIADO; liquidaciones lo recibe como RECHAZADO.
+             * APROBADO (todos o solo Cliente rechazado) queda en bandeja enviada.
+             */
+            const liberarBandeja = paraLiquidaciones === 'RECHAZADO';
             const detalleAuditoria = soloRechazosCargoCliente
               ? `Seaboard envió a liquidaciones RFS como APROBADO (ítems cargo Cliente rechazados; resto aprobado). Comentarios: ${obs}`
-              : estado === 'RECHAZADO'
-                ? `Seaboard envió a liquidaciones RFS como RECHAZADO (hay ítems rechazados). Comentarios: ${obs}`
+              : paraLiquidaciones === 'RECHAZADO'
+                ? `Seaboard envió a liquidaciones RFS (estado ENVIADO; liquidaciones recibe RECHAZADO por ítems rechazados). Comentarios: ${obs}`
                 : `Seaboard envió a liquidaciones RFS como APROBADO. Comentarios: ${obs}`;
             return {
               ...e,
@@ -548,7 +551,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
               comentariosSeaboard: [
                 ...e.comentariosSeaboard,
                 comentarioSeaboard(
-                  estado === 'RECHAZADO' ? 'RECHAZAR' : 'ENVIAR',
+                  paraLiquidaciones === 'RECHAZADO' ? 'RECHAZAR' : 'ENVIAR',
                   obs,
                   usuario
                 ),
@@ -557,7 +560,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                 ...e.auditoria,
                 evento(
                   usuario,
-                  estado === 'RECHAZADO'
+                  paraLiquidaciones === 'RECHAZADO'
                     ? 'ENVÍO RECHAZADO A LIQUIDACIONES'
                     : 'ENVÍO APROBADO A LIQUIDACIONES',
                   detalleAuditoria

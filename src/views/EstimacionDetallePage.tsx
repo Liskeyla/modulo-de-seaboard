@@ -49,6 +49,7 @@ import {
   esNavieraSeaboard,
   puedePushASbm,
   resolverEstadoEnvioALiquidaciones,
+  estadoVisibleLiquidaciones,
 } from '@/lib/seaboardFlow';
 import { useAuthStore } from '@/store';
 import { useEstimacionesStore } from '@/store/estimacionesStore';
@@ -790,7 +791,13 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <EstadoEstimacionBadge estado={estimacion.estado} />
+              <EstadoEstimacionBadge
+                estado={
+                  esLiquidaciones
+                    ? estadoVisibleLiquidaciones(estimacion)
+                    : estimacion.estado
+                }
+              />
               {itemsPendientesRevision.length > 0 && (
                 <span
                   className="dms-hero-chip dms-hero-chip--revision"
@@ -1438,14 +1445,14 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
         onClose={cerrar}
         onEnviar={(comentario) => {
           enviarALiquidaciones(estimacion.id, actor, comentario);
-          const { estado: estadoResultante, soloRechazosCargoCliente } =
+          const { paraLiquidaciones, soloRechazosCargoCliente } =
             resolverEstadoEnvioALiquidaciones(estimacion.danos);
-          notificarEnvioALiquidaciones(estimacion, comentario, actor, estadoResultante);
+          notificarEnvioALiquidaciones(estimacion, comentario, actor, paraLiquidaciones);
           toast(
             soloRechazosCargoCliente
               ? `Estimación ${estimacion.codigo} enviada como APROBADO. Ítems cargo Cliente quedan Rechazado para liquidaciones.`
-              : estadoResultante === 'RECHAZADO'
-                ? `Estimación ${estimacion.codigo} enviada a liquidaciones RFS como RECHAZADO.`
+              : paraLiquidaciones === 'RECHAZADO'
+                ? `Estimación ${estimacion.codigo} queda ENVIADO; liquidaciones RFS la recibe como RECHAZADO.`
                 : `Estimación ${estimacion.codigo} enviada a liquidaciones RFS en estado APROBADO.`,
             'success'
           );

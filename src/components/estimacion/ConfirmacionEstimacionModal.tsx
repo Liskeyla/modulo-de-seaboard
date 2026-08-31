@@ -260,7 +260,8 @@ export function ConfirmacionEstimacionModal({
           ) : hayRechazos ? (
             <>
               {' '}
-              Hay ítems rechazados: al enviar, el estimado cae a liquidaciones RFS en estado{' '}
+              Hay ítems rechazados: al enviar, el estimado queda en estado{' '}
+              <strong>ENVIADO</strong> y liquidaciones RFS lo recibe como{' '}
               <strong>RECHAZADO</strong>.
             </>
           ) : (

@@ -26,28 +26,24 @@ import {
   normalizarCargoDano,
   type AplicaDano,
   type CargoDano,
-  type EstadoEstimacion,
   type Estimacion,
 } from '@/types/estimacion';
 import { useAuthStore } from '@/store';
 import { useEstimacionesStore } from '@/store/estimacionesStore';
 import { useUiStore } from '@/store/uiStore';
 import { paisDe } from '@/lib/pais';
+import {
+  esRetornoRechazadoALiquidaciones,
+  estadoVisibleLiquidaciones,
+} from '@/lib/seaboardFlow';
 import { esItemPendienteRevision } from '@/lib/revisionPendiente';
 import { cn, formatMoney, toast } from '@/lib/utils';
 
-/**
- * Reportería de ítems (Liquidaciones): solo estimados ya devueltos / cerrados.
- * Aunque el estimado caiga RECHAZADO, los ítems siguen en la bandeja para cobro o ejecución.
- */
-const ESTADOS_REPORTE_ITEMS: EstadoEstimacion[] = [
-  'APROBADO',
-  'RECHAZADO',
-  'REPARADO',
-];
-
 function estimadoEnReporteriaItems(e: Estimacion) {
-  return ESTADOS_REPORTE_ITEMS.includes(e.estado);
+  if (e.estado === 'APROBADO' || e.estado === 'RECHAZADO' || e.estado === 'REPARADO') {
+    return true;
+  }
+  return esRetornoRechazadoALiquidaciones(e);
 }
 
 export interface ItemReporteFila {
@@ -142,7 +138,7 @@ function aplanarItems(estimaciones: Estimacion[]): ItemReporteFila[] {
         codigo: est.codigo,
         contenedor: est.contenedor,
         naviera: est.naviera,
-        estadoEstimacion: est.estado,
+        estadoEstimacion: estadoVisibleLiquidaciones(est),
         fechaElaboracion: est.fechaElaboracion,
         linea: d.linea,
         danoId: d.id,
@@ -231,7 +227,7 @@ export default function ReporteItemsDanoPage() {
     return {
       navieras: ['Todas', ...unicos((r) => r.naviera)],
       componentes: ['Todos', ...unicos((r) => r.comp)],
-      estadosEst: ['Todos', ...ESTADOS_REPORTE_ITEMS],
+      estadosEst: ['Todos', 'APROBADO', 'RECHAZADO', 'REPARADO'],
     };
   }, [itemsBase]);
 
