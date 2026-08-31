@@ -1411,7 +1411,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
           toast(
             hayRechazos
               ? `Estimación ${estimacion.codigo} enviada a liquidaciones RFS (ENVIADO · hay ítems rechazados).`
-              : `Estimación ${estimacion.codigo} enviada a liquidaciones RFS (APROBADO).`,
+              : `Estimación ${estimacion.codigo} enviada a liquidaciones RFS en estado APROBADO.`,
             'success'
           );
           cerrar();

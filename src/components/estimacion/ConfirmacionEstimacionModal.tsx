@@ -47,11 +47,16 @@ export function notificarEnvioALiquidaciones(
   const correos = correosDeEstimacion(estimacion);
   const paisLabel = paisDe(estimacion) === 'PERU' ? 'Perú' : 'Ecuador';
   const hayRechazos = estimacion.danos.some((d) => esAplicaRechazado(d.aplica));
-  const asunto = `Estimación ${estimacion.codigo} ENVIADA · ${estimacion.contenedor} · ${paisLabel}`;
+  const asunto =
+    estadoResultante === 'APROBADO'
+      ? `Estimación ${estimacion.codigo} APROBADA · ${estimacion.contenedor} · ${paisLabel}`
+      : `Estimación ${estimacion.codigo} ENVIADA (${estadoResultante}) · ${estimacion.contenedor} · ${paisLabel}`;
   const cuerpo = [
     `Estimados gestores de liquidaciones RFS (${paisLabel}),`,
     ``,
-    `La estimación ${estimacion.codigo} (${estimacion.contenedor}) fue enviada por Seaboard Marine.`,
+    estadoResultante === 'APROBADO'
+      ? `La estimación ${estimacion.codigo} (${estimacion.contenedor}) fue enviada por Seaboard Marine en estado APROBADO.`
+      : `La estimación ${estimacion.codigo} (${estimacion.contenedor}) fue enviada por Seaboard Marine.`,
     ``,
     `País: ${paisLabel}`,
     `Naviera: ${estimacion.naviera}`,
@@ -69,7 +74,9 @@ export function notificarEnvioALiquidaciones(
 
   mailtoLiquidaciones(correos, asunto, cuerpo);
   toast(
-    `Correo de envío preparado para liquidaciones ${paisLabel}\n${correos.join(', ')}`,
+    estadoResultante === 'APROBADO'
+      ? `Correo de estimado APROBADO preparado para liquidaciones ${paisLabel}\n${correos.join(', ')}`
+      : `Correo de envío preparado para liquidaciones ${paisLabel}\n${correos.join(', ')}`,
     'success'
   );
 }
