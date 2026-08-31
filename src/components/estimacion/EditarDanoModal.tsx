@@ -66,6 +66,8 @@ export type ComentariosEdicionDano = {
   rfs: string;
 };
 
+export type RolEditorDano = 'seaboard' | 'liquidaciones' | 'coordinador' | 'dms';
+
 /** Comentarios de liquidador / RFS / técnico / coordinador para mostrar solo lectura al usuario SBM. */
 export function textoComentariosRfs(dano: DanoEstimacion): string {
   const relevantes = dano.comentarios.filter(
@@ -115,6 +117,7 @@ export function EditarDanoModal({
   onClose,
   onGuardar,
   mostrarDimensiones = false,
+  rolEditor = 'seaboard',
 }: {
   open: boolean;
   dano: DanoEstimacion | null;
@@ -126,23 +129,32 @@ export function EditarDanoModal({
   ) => void;
   /** Solo estimados BOX editan Largo / Ancho (Área y Longitud se recalculan). */
   mostrarDimensiones?: boolean;
+  /** Define qué bloque de notas es editable (Seaboard vs RFS/liquidaciones). */
+  rolEditor?: RolEditorDano;
 }) {
   const [form, setForm] = useState<Formulario | null>(null);
+  const [notaRfsNueva, setNotaRfsNueva] = useState('');
 
-  const comentariosRfs = useMemo(
+  const esEditorRfs = rolEditor === 'liquidaciones' || rolEditor === 'coordinador';
+  const comentariosRfsHist = useMemo(
     () => (dano ? textoComentariosRfs(dano) : ''),
     [dano]
   );
 
   useEffect(() => {
     setForm(dano ? desdeDano(dano) : null);
-  }, [dano]);
+    setNotaRfsNueva('');
+  }, [dano, open]);
 
   if (!dano || !form) return null;
 
   const itemRechazado = esAplicaRechazado(form.aplica);
   const itemAprobado = esItemAprobado(form.aplica);
   const soloLectura = itemAprobado || itemRechazado;
+  /** Liquidaciones/RFS: Motivo Seaboard bloqueado; Notas RFS editables. */
+  const motivoSbmBloqueado = esEditorRfs || itemAprobado;
+  const notasRfsEditables = esEditorRfs;
+  const puedeGuardar = !itemAprobado || (esEditorRfs && notaRfsNueva.trim().length > 0);
 
   const set = <K extends keyof Formulario>(k: K, v: Formulario[K]) =>
     setForm((f) => (f ? { ...f, [k]: v } : f));
@@ -159,63 +171,78 @@ export function EditarDanoModal({
   const ancho = round2(numero(form.ancho));
 
   const guardar = () => {
-    if (itemAprobado) {
+    if (itemAprobado && !(esEditorRfs && notaRfsNueva.trim())) {
       return;
     }
     const largoFinal = mostrarDimensiones ? largo : dano.largo;
     const anchoFinal = mostrarDimensiones ? ancho : dano.ancho;
     const rechazado = esAplicaRechazado(form.aplica);
     // Ubicación, Obs. Análisis y Contenedor Donante quedan fijos (solo lectura SBM).
-    const cambios: Partial<DanoEstimacion> = {
-      comp: form.comp.trim(),
-      partNumber: form.partNumber.trim(),
-      ubicacion: dano.ubicacion,
-      dano: form.dano.trim(),
-      obsAnalisis: dano.obsAnalisis,
-      newMetRep: form.newMetRep.trim(),
-      serieAnterior: dano.serieAnterior,
-      serieEntregado: dano.serieEntregado,
-      largo: largoFinal,
-      ancho: anchoFinal,
-      area: mostrarDimensiones ? round2((largoFinal * anchoFinal) / 10000) : dano.area,
-      longitud: mostrarDimensiones ? largoFinal : dano.longitud,
-      cantidad: round2(numero(form.cantidad)) || 1,
-      horasHombre: rechazado ? 0 : hh,
-      csHoraHombre: rechazado ? 0 : csHH,
-      csMaterial: rechazado ? 0 : csMat,
-      cargo: form.cargo,
-      aplica: form.aplica,
-      medida: form.medida.trim(),
-      remark: form.remark.trim(),
-      contenedorDonante: dano.contenedorDonante,
-    };
-    if (rechazado) {
+    const cambios: Partial<DanoEstimacion> = itemAprobado
+      ? {}
+      : {
+          comp: form.comp.trim(),
+          partNumber: form.partNumber.trim(),
+          ubicacion: dano.ubicacion,
+          dano: form.dano.trim(),
+          obsAnalisis: dano.obsAnalisis,
+          newMetRep: form.newMetRep.trim(),
+          serieAnterior: dano.serieAnterior,
+          serieEntregado: dano.serieEntregado,
+          largo: largoFinal,
+          ancho: anchoFinal,
+          area: mostrarDimensiones ? round2((largoFinal * anchoFinal) / 10000) : dano.area,
+          longitud: mostrarDimensiones ? largoFinal : dano.longitud,
+          cantidad: round2(numero(form.cantidad)) || 1,
+          horasHombre: rechazado ? 0 : hh,
+          csHoraHombre: rechazado ? 0 : csHH,
+          csMaterial: rechazado ? 0 : csMat,
+          cargo: form.cargo,
+          aplica: form.aplica,
+          medida: form.medida.trim(),
+          remark: form.remark.trim(),
+          contenedorDonante: dano.contenedorDonante,
+        };
+    if (!itemAprobado && rechazado) {
       cambios.csTotal = 0;
     }
 
     const antesSnap = snapshotDesdeDano(dano);
     const despuesSnap = snapshotDesdeDano({ ...dano, ...cambios });
-    const camposCambiados = (Object.keys(despuesSnap) as CampoSnapshotLinea[]).filter(
-      (k) => String(antesSnap[k] ?? '') !== String(despuesSnap[k] ?? '')
-    );
+    const camposCambiados = itemAprobado
+      ? []
+      : (Object.keys(despuesSnap) as CampoSnapshotLinea[]).filter(
+          (k) => String(antesSnap[k] ?? '') !== String(despuesSnap[k] ?? '')
+        );
     const resumenLegible =
       camposCambiados.length > 0
         ? resumirCambiosAntesDespues(antesSnap, despuesSnap, camposCambiados)
-        : 'Sin cambios de campos (solo comentario SBM)';
+        : esEditorRfs
+          ? 'Nota RFS / liquidaciones'
+          : 'Sin cambios de campos (solo comentario SBM)';
 
-    const sbm = form.comentarioSbm.trim();
+    const sbm = esEditorRfs ? '' : form.comentarioSbm.trim();
+    const rfs = esEditorRfs ? notaRfsNueva.trim() : '';
 
-    if (camposCambiados.length > 0 && !sbm) {
-      toast('Indique el motivo del cambio en Comentarios línea SBM.', 'info');
+    if (camposCambiados.length > 0 && esEditorRfs && !rfs) {
+      toast('Indique una nota en Notas de RFS / liquidaciones.', 'info');
+      return;
+    }
+    if (camposCambiados.length > 0 && !esEditorRfs && !sbm) {
+      toast('Indique el motivo del cambio en Motivo del cambio (Seaboard).', 'info');
+      return;
+    }
+    if (camposCambiados.length === 0 && !sbm && !rfs) {
+      toast(
+        esEditorRfs
+          ? 'Escriba una nota de RFS / liquidaciones para guardar.'
+          : 'No hay cambios ni comentarios SBM para guardar.',
+        'info'
+      );
       return;
     }
 
-    if (camposCambiados.length === 0 && !sbm) {
-      toast('No hay cambios ni comentarios SBM para guardar.', 'info');
-      return;
-    }
-
-    onGuardar(cambios, resumenLegible, { sbm, rfs: '' });
+    onGuardar(cambios, resumenLegible, { sbm, rfs });
   };
 
   const campoTexto = (
@@ -279,14 +306,16 @@ export function EditarDanoModal({
       size="lg"
       icon={itemAprobado ? <Lock className="h-4 w-4" /> : <PencilLine className="h-4 w-4" />}
       title={
-        itemAprobado
+        itemAprobado && !notasRfsEditables
           ? `Ítem aprobado · Línea ${String(dano.linea).padStart(2, '0')}`
           : `Editar Daño · Línea ${String(dano.linea).padStart(2, '0')}`
       }
       subtitle={
-        itemAprobado
-          ? 'Bloqueado por aprobación de línea · use Reversar ítems para modificar'
-          : 'Vista SBM · Los cambios quedan en el historial y como subfila del listado'
+        esEditorRfs
+          ? 'Vista RFS / liquidaciones · Notas RFS editables · Motivo Seaboard bloqueado'
+          : itemAprobado
+            ? 'Bloqueado por aprobación de línea · use Reversar ítems para modificar'
+            : 'Vista SBM · Los cambios quedan en el historial y como subfila del listado'
       }
       footer={
         <>
@@ -295,9 +324,9 @@ export function EditarDanoModal({
             className="dms-btn-action border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
             onClick={onClose}
           >
-            {itemAprobado ? 'Cerrar' : 'Cancelar'}
+            {itemAprobado && !notasRfsEditables ? 'Cerrar' : 'Cancelar'}
           </button>
-          {!itemAprobado && (
+          {puedeGuardar && (
             <button type="button" className="dms-btn-primary px-4 py-2 text-sm" onClick={guardar}>
               <Save className="h-4 w-4" /> Guardar cambios
             </button>
@@ -363,7 +392,7 @@ export function EditarDanoModal({
         </div>
       </div>
 
-      <div className={cn('mt-3 grid gap-3 sm:grid-cols-2', itemAprobado && 'pointer-events-none opacity-90')}>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <div>
           <label className="dms-field-label">Obs. Análisis</label>
           <textarea
@@ -389,27 +418,58 @@ export function EditarDanoModal({
           <label className="dms-field-label">Motivo del cambio (Seaboard)</label>
           <textarea
             rows={3}
-            className="dms-input-sm h-auto border-sky-200 bg-sky-50/50"
+            className={cn(
+              'dms-input-sm h-auto border-sky-200',
+              motivoSbmBloqueado ? 'bg-slate-100 text-slate-600' : 'bg-sky-50/50'
+            )}
             value={form.comentarioSbm}
-            disabled={itemAprobado}
-            readOnly={itemAprobado}
-            placeholder="Ej.: Se ajustó la cantidad según inspección en patio…"
+            disabled={motivoSbmBloqueado}
+            readOnly={motivoSbmBloqueado}
+            placeholder={
+              esEditorRfs
+                ? 'Solo el gestor Seaboard puede indicar el motivo del cambio'
+                : 'Ej.: Se ajustó la cantidad según inspección en patio…'
+            }
             onChange={(e) => set('comentarioSbm', e.target.value)}
           />
           <p className="mt-0.5 text-[10px] text-slate-400">
-            Este texto queda visible en el listado y en el historial.
+            {esEditorRfs
+              ? 'Bloqueado para liquidaciones / RFS'
+              : 'Este texto queda visible en el listado y en el historial.'}
           </p>
         </div>
         <div>
           <label className="dms-field-label">Notas de RFS / liquidaciones</label>
-          <textarea
-            rows={3}
-            className="dms-input-sm h-auto border-emerald-200 bg-emerald-50/80 text-emerald-950"
-            value={comentariosRfs}
-            disabled
-            readOnly
-          />
-          <p className="mt-0.5 text-[10px] text-slate-400">Solo lectura</p>
+          {notasRfsEditables ? (
+            <>
+              {comentariosRfsHist && !comentariosRfsHist.startsWith('Sin comentarios') && (
+                <div className="mb-1.5 max-h-24 overflow-y-auto rounded-md border border-emerald-100 bg-emerald-50/40 px-2 py-1.5 text-[10px] leading-snug whitespace-pre-wrap text-emerald-950">
+                  {comentariosRfsHist}
+                </div>
+              )}
+              <textarea
+                rows={3}
+                className="dms-input-sm h-auto border-emerald-200 bg-emerald-50/80 text-emerald-950"
+                value={notaRfsNueva}
+                placeholder="Escriba una nota para esta línea (RFS / liquidaciones)…"
+                onChange={(e) => setNotaRfsNueva(e.target.value)}
+              />
+              <p className="mt-0.5 text-[10px] text-slate-400">
+                Editable · queda en el historial de la línea
+              </p>
+            </>
+          ) : (
+            <>
+              <textarea
+                rows={3}
+                className="dms-input-sm h-auto border-emerald-200 bg-emerald-50/80 text-emerald-950"
+                value={comentariosRfsHist}
+                disabled
+                readOnly
+              />
+              <p className="mt-0.5 text-[10px] text-slate-400">Solo lectura</p>
+            </>
+          )}
         </div>
       </div>
       <p className="mt-2 text-[11px] leading-relaxed text-slate-500">

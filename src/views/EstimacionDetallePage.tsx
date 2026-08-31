@@ -659,12 +659,16 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     dano: DanoEstimacion,
     cambios: Partial<DanoEstimacion>,
     resumen: string,
-    comentarioSbm?: string
+    comentarioSbm?: string,
+    comentarioRfsNuevo?: string
   ) {
-    if (esItemAprobado(dano.aplica)) {
+    const rfsNuevo = comentarioRfsNuevo?.trim();
+    const soloNotaRfs =
+      esLiquidaciones && Boolean(rfsNuevo) && Object.keys(cambios).length === 0;
+    if (esItemAprobado(dano.aplica) && !soloNotaRfs) {
       return;
     }
-    if (exigirApertura()) return;
+    if (!soloNotaRfs && exigirApertura()) return;
     const ahora = new Date().toLocaleString('es-EC', {
       day: '2-digit',
       month: '2-digit',
@@ -693,35 +697,49 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     const rfsExistente = textoComentariosRfs(dano);
     const sbm = comentarioSbm?.trim();
 
-    actualizarDano(
-      estimacion!.id,
-      dano.id,
-      {
-        ...cambios,
-        edicionReciente: {
-          fecha: ahora,
-          usuario: actor,
-          resumenCambios: resumenLegible || resumen,
-          snapshot,
-          snapshotAnterior: antes,
-          camposCambiados,
-          ...(sbm ? { comentarioSbm: sbm } : {}),
-          comentarioRfs: rfsExistente.startsWith('Sin comentarios')
-            ? undefined
-            : rfsExistente,
+    if (!soloNotaRfs) {
+      actualizarDano(
+        estimacion!.id,
+        dano.id,
+        {
+          ...cambios,
+          edicionReciente: {
+            fecha: ahora,
+            usuario: actor,
+            resumenCambios: resumenLegible || resumen,
+            snapshot,
+            snapshotAnterior: antes,
+            camposCambiados,
+            ...(sbm ? { comentarioSbm: sbm } : {}),
+            comentarioRfs: rfsNuevo
+              ? rfsNuevo
+              : rfsExistente.startsWith('Sin comentarios')
+                ? undefined
+                : rfsExistente,
+          },
         },
-      },
-      actor,
-      `Línea ${dano.linea} · ${resumenLegible || resumen}`
-    );
+        actor,
+        `Línea ${dano.linea} · ${resumenLegible || resumen}`
+      );
+    }
 
-    if (sbm) {
+    if (sbm && !esLiquidaciones) {
       agregarComentarioDano(estimacion!.id, dano.id, {
         usuario: actor,
         rol: 'SEABOARD',
         tipo: 'INFORMATIVO',
         mensaje: sbm,
         campoAfectado: 'Motivo del cambio',
+      });
+    }
+
+    if (rfsNuevo && (esLiquidaciones || esCoordinador)) {
+      agregarComentarioDano(estimacion!.id, dano.id, {
+        usuario: actor,
+        rol: esCoordinador ? 'COORDINADOR' : 'LIQUIDACIONES',
+        tipo: esItemAprobado(dano.aplica) ? 'INFORMATIVO' : 'SOLICITA_CAMBIO',
+        mensaje: rfsNuevo,
+        campoAfectado: 'Comentarios RFS',
       });
     }
   }
@@ -736,7 +754,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     resumen: string,
     comentarios: { sbm: string; rfs: string }
   ) {
-    marcarEdicionDano(dano, cambios, resumen, comentarios.sbm);
+    marcarEdicionDano(dano, cambios, resumen, comentarios.sbm, comentarios.rfs);
   }
 
   return (
@@ -1680,11 +1698,25 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
         open={dialogo.tipo === 'EDITAR_DANO'}
         dano={dialogo.tipo === 'EDITAR_DANO' ? dialogo.dano : null}
         mostrarDimensiones={estimacion.tipoEstimacion.toUpperCase().includes('BOX')}
+        rolEditor={
+          esLiquidaciones
+            ? 'liquidaciones'
+            : esCoordinador
+              ? 'coordinador'
+              : esSeaboard
+                ? 'seaboard'
+                : 'dms'
+        }
         onClose={cerrar}
         onGuardar={(cambios, resumen, comentarios) => {
           if (dialogo.tipo !== 'EDITAR_DANO') return;
           guardarEdicionDano(dialogo.dano, cambios, resumen, comentarios);
-          toast('Línea de daño actualizada con comentarios.', 'success');
+          toast(
+            comentarios.rfs
+              ? 'Nota RFS / liquidaciones guardada en la línea.'
+              : 'Línea de daño actualizada con comentarios.',
+            'success'
+          );
           cerrar();
         }}
       />
