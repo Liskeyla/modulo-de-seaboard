@@ -328,4 +328,4 @@ export default function CatalogoCargoPage() {
     </div>
   );
 }
-
+

@@ -130,4 +130,4 @@ export const useCatalogoCargoStore = create<CatalogoCargoState>()(
     { name: STORAGE_KEY }
   )
 );
-
+

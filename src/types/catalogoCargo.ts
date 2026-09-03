@@ -92,4 +92,4 @@ export const CATALOGO_CARGO_SEED: CatalogoCargo[] = [
     usuarioModificacion: 'sistema',
   },
 ];
-
+
