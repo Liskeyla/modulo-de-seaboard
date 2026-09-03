@@ -47,7 +47,7 @@ import {
   reconstruirHistorialItem,
 } from '@/lib/historialItem';
 
-const STORAGE_KEY = 'dms-estimaciones-prototipo-v22';
+const STORAGE_KEY = 'dms-estimaciones-prototipo-v23';
 const CLAVES_OBSOLETAS = [
   'dms-estimaciones-prototipo',
   'dms-estimaciones-prototipo-v2',
@@ -70,6 +70,7 @@ const CLAVES_OBSOLETAS = [
   'dms-estimaciones-prototipo-v19',
   'dms-estimaciones-prototipo-v20',
   'dms-estimaciones-prototipo-v21',
+  'dms-estimaciones-prototipo-v22',
 ];
 
 function migrarEstadosItem(estims: Estimacion[]): Estimacion[] {
@@ -88,6 +89,50 @@ function migrarEstadosItem(estims: Estimacion[]): Estimacion[] {
       return { ...normalizado, historialAcciones };
     }),
   }));
+}
+
+/**
+ * Escenario de prueba desde cero:
+ * Liquidaciones tiene estimados Seaboard en PENDIENTE (aún no enviados).
+ * Envia a SBM → la línea los recibe para revisar y devolver.
+ */
+function escenarioPruebaCero(estims: Estimacion[]): Estimacion[] {
+  return estims.map((e) => {
+    if (!esNavieraSeaboard(e.naviera)) return e;
+    return {
+      ...e,
+      estado: 'PENDIENTE' as EstadoEstimacion,
+      enviarAprobacion: 'NO',
+      validadoLiquidaciones: false,
+      fechaEnvio: '',
+      fechaAprobacion: '',
+      fechaRevision: '',
+      comentariosSeaboard: [],
+      tipoCobro: e.tipoCobro ?? 'LINEA',
+      danos: e.danos.map((d) => ({
+        ...d,
+        aplica: APLICA_PENDIENTE,
+        edicionReciente: undefined,
+        comentarios: (d.comentarios || []).filter(
+          (c) => c.tipo !== 'ACEPTADO' && c.tipo !== 'RECHAZADO'
+        ),
+        historialAcciones: [],
+      })),
+      auditoria: [
+        {
+          id: `aud-cero-${e.id}`,
+          fecha: '03/09/2026 11:30:00',
+          usuario: 'sistema',
+          accion: 'DATOS DE PRUEBA',
+          detalle: `Escenario desde cero: ${e.codigo} en PENDIENTE. Liquidaciones envía a SBM; Seaboard revisa y devuelve.`,
+        },
+      ],
+    };
+  });
+}
+
+function seedPrueba() {
+  return escenarioPruebaCero(migrarEstadosItem(seedData as unknown as Estimacion[]));
 }
 
 function ahoraFmt() {
@@ -351,7 +396,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
       };
 
       return {
-        estimaciones: migrarEstadosItem(seedData as unknown as Estimacion[]),
+        estimaciones: seedPrueba(),
 
         hydrate: () => {
           try {
@@ -373,7 +418,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
           }
         },
 
-        reset: () => set({ estimaciones: migrarEstadosItem(seedData as unknown as Estimacion[]) }),
+        reset: () => set({ estimaciones: seedPrueba() }),
 
         getByCodigo: (codigo) => get().estimaciones.find((e) => e.codigo === codigo),
 

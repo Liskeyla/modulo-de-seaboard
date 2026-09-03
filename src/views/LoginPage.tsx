@@ -26,7 +26,7 @@ const DEMO = [
   {
     usuario: 'seaboard',
     clave: 'admin123',
-    rol: 'Línea · revisar ENVIADO · aprobar/rechazar ítems · Enviar a liquidaciones',
+    rol: 'Línea · recibe lo que envía Liquidaciones · decide ítems · Enviar a liquidaciones',
   },
   {
     usuario: 'liqecuador',
