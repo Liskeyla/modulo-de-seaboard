@@ -619,7 +619,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     if (marcadosIds.length === 0) {
       toast(
         revisarRechazadosSeaboardLinea
-          ? 'Marque al menos un ítem rechazado del listado de daños.'
+          ? 'Marque al menos un ítem aprobado o rechazado del listado de daños.'
           : 'Marque al menos un ítem aprobado del listado de daños.',
         'info'
       );
@@ -628,12 +628,14 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     const seleccionados = marcadosIds.filter((id) => {
       const d = estimacion?.danos.find((x) => x.id === id);
       if (!d) return false;
-      return revisarRechazadosSeaboardLinea ? esAplicaRechazado(d.aplica) : esItemAprobado(d.aplica);
+      return revisarRechazadosSeaboardLinea
+        ? esItemAprobado(d.aplica) || esAplicaRechazado(d.aplica)
+        : esItemAprobado(d.aplica);
     });
     if (seleccionados.length === 0) {
       toast(
         revisarRechazadosSeaboardLinea
-          ? 'Solo se pueden revisar ítems en estado Rechazado.'
+          ? 'Solo se pueden revisar ítems en estado Aprobado o Rechazado.'
           : 'Solo se pueden reversar ítems en estado Aprobado.',
         'info'
       );
@@ -1407,10 +1409,10 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                               : 'Aperture la estimación para reversar ítems'
                             : marcadosIds.length === 0
                               ? revisarRechazadosSeaboardLinea
-                                ? 'Marque ítems rechazados para revisar'
+                                ? 'Marque ítems aprobados o rechazados para revisar'
                                 : 'Marque ítems aprobados para reversar'
                               : revisarRechazadosSeaboardLinea
-                                ? 'Revisar: ítems rechazados pasan a Pendiente de revisión'
+                                ? 'Revisar: ítems aprobados/rechazados pasan a Pendiente de revisión'
                                 : 'Revierte ítems aprobados a Pendiente de revisión'
                         }
                         onClick={reversarItemsMarcados}
@@ -1839,7 +1841,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
         title={revisarRechazadosSeaboardLinea ? 'Revisar ítems' : 'Reversar ítems aprobados'}
         subtitle={
           revisarRechazadosSeaboardLinea
-            ? `${marcadosIds.length} línea(s) · pasan a Pendiente de revisión (desde Rechazado)`
+            ? `${marcadosIds.length} línea(s) · pasan a Pendiente de revisión`
             : `${marcadosIds.length} línea(s) · pasan a Pendiente de revisión`
         }
         label={
@@ -1856,14 +1858,14 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
             return Boolean(
               d &&
                 (revisarRechazadosSeaboardLinea
-                  ? esAplicaRechazado(d.aplica)
+                  ? esItemAprobado(d.aplica) || esAplicaRechazado(d.aplica)
                   : esItemAprobado(d.aplica))
             );
           });
           if (ids.length === 0) {
             toast(
               revisarRechazadosSeaboardLinea
-                ? 'Solo se pueden revisar ítems en estado Rechazado.'
+                ? 'Solo se pueden revisar ítems en estado Aprobado o Rechazado.'
                 : 'Solo se pueden reversar ítems en estado Aprobado.',
               'info'
             );
