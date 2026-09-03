@@ -31,6 +31,17 @@ const CAMPOS_BLOQUEADOS: (keyof Formulario)[] = [
   'serieEntregado',
 ];
 
+/**
+ * Campos que Seaboard Marine NUNCA puede editar, independientemente del estado del ítem.
+ * Son campos de costo/técnica que solo gestiona Liquidaciones/RFS.
+ */
+const CAMPOS_SOLO_RFS: (keyof Formulario)[] = [
+  'partNumber',
+  'horasHombre',
+  'csHoraHombre',
+  'csMaterial',
+];
+
 /** Campos de costo/HH inhabilitados cuando el ítem está rechazado. */
 const CAMPOS_COSTO_RECHAZO: (keyof Formulario)[] = [
   'horasHombre',
@@ -178,11 +189,13 @@ export function EditarDanoModal({
     const anchoFinal = mostrarDimensiones ? ancho : dano.ancho;
     const rechazado = esAplicaRechazado(form.aplica);
     // Ubicación, Obs. Análisis y Contenedor Donante quedan fijos (solo lectura SBM).
+    // H.H., Cs. H.H., Cs. Mat. y Part Number son exclusivos de RFS/liquidaciones.
     const cambios: Partial<DanoEstimacion> = itemAprobado
       ? {}
       : {
           comp: form.comp.trim(),
-          partNumber: form.partNumber.trim(),
+          // Part Number: solo RFS/liquidaciones puede modificarlo
+          partNumber: esEditorRfs ? form.partNumber.trim() : dano.partNumber,
           ubicacion: dano.ubicacion,
           dano: form.dano.trim(),
           obsAnalisis: dano.obsAnalisis,
@@ -194,9 +207,10 @@ export function EditarDanoModal({
           area: mostrarDimensiones ? round2((largoFinal * anchoFinal) / 10000) : dano.area,
           longitud: mostrarDimensiones ? largoFinal : dano.longitud,
           cantidad: round2(numero(form.cantidad)) || 1,
-          horasHombre: rechazado ? 0 : hh,
-          csHoraHombre: rechazado ? 0 : csHH,
-          csMaterial: rechazado ? 0 : csMat,
+          // H.H. y costos: solo RFS/liquidaciones puede modificarlos; Seaboard conserva los originales
+          horasHombre: esEditorRfs ? (rechazado ? 0 : hh) : dano.horasHombre,
+          csHoraHombre: esEditorRfs ? (rechazado ? 0 : csHH) : dano.csHoraHombre,
+          csMaterial: esEditorRfs ? (rechazado ? 0 : csMat) : dano.csMaterial,
           cargo: form.cargo,
           aplica: form.aplica,
           medida: form.medida.trim(),
@@ -253,7 +267,8 @@ export function EditarDanoModal({
     const bloqueado =
       itemAprobado ||
       CAMPOS_BLOQUEADOS.includes(key) ||
-      (itemRechazado && CAMPOS_COSTO_RECHAZO.includes(key));
+      (itemRechazado && CAMPOS_COSTO_RECHAZO.includes(key)) ||
+      (!esEditorRfs && CAMPOS_SOLO_RFS.includes(key));
     const valor =
       itemRechazado && CAMPOS_COSTO_RECHAZO.includes(key)
         ? '0'
