@@ -952,7 +952,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
           const ids = new Set(danoIds);
           mutar(id, (e) => {
             const afectados = e.danos.filter(
-              (d) => ids.has(d.id) && esItemAprobado(d.aplica)
+              (d) => ids.has(d.id) && (esItemAprobado(d.aplica) || esAplicaRechazado(d.aplica))
             );
             if (afectados.length === 0) return e;
             const idsOk = new Set(afectados.map((d) => d.id));

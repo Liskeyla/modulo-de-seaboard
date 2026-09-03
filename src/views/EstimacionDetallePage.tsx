@@ -64,6 +64,7 @@ import {
   snapshotDesdeDano,
   inferirTipoCobro,
   esItemAprobado,
+  esAplicaRechazado,
   esRevisionParcialItems,
   mensajeRevisionItemsPendientes,
   MSG_REVISION_PARCIAL,
@@ -421,6 +422,14 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       estimacion.estado
     );
   const tipoCobroActual = inferirTipoCobro(estimacion);
+  /**
+   * Caso específico:
+   * Liquidaciones · Naviera Seaboard (Seaboard Marine) · Cobro/Línea.
+   * En este caso, el usuario debe poder "Revisar" ítems en estado "Rechazado"
+   * para devolverlos a "Pendiente de revisión".
+   */
+  const revisarRechazadosSeaboardLinea =
+    esLiquidaciones && esSeaboardNav && tipoCobroActual === 'LINEA';
   const puedeComentar = esSeaboard || esLiquidaciones || esCoordinador;
   /** Pendiente: Agregar daño (Liquidaciones y Coordinador; no Seaboard). */
   const mostrarAgregarDanoLiq =
@@ -608,19 +617,30 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       return;
     }
     if (marcadosIds.length === 0) {
-      toast('Marque al menos un ítem aprobado del listado de daños.', 'info');
+      toast(
+        revisarRechazadosSeaboardLinea
+          ? 'Marque al menos un ítem rechazado del listado de daños.'
+          : 'Marque al menos un ítem aprobado del listado de daños.',
+        'info'
+      );
       return;
     }
-    const aprobados = marcadosIds.filter((id) => {
+    const seleccionados = marcadosIds.filter((id) => {
       const d = estimacion?.danos.find((x) => x.id === id);
-      return d && esItemAprobado(d.aplica);
+      if (!d) return false;
+      return revisarRechazadosSeaboardLinea ? esAplicaRechazado(d.aplica) : esItemAprobado(d.aplica);
     });
-    if (aprobados.length === 0) {
-      toast('Solo se pueden reversar ítems en estado Aprobado.', 'info');
+    if (seleccionados.length === 0) {
+      toast(
+        revisarRechazadosSeaboardLinea
+          ? 'Solo se pueden revisar ítems en estado Rechazado.'
+          : 'Solo se pueden reversar ítems en estado Aprobado.',
+        'info'
+      );
       return;
     }
-    if (aprobados.length < marcadosIds.length) {
-      setMarcadosIds(aprobados);
+    if (seleccionados.length < marcadosIds.length) {
+      setMarcadosIds(seleccionados);
     }
     setDialogo({ tipo: 'REVERSAR_ITEMS' });
   }
@@ -1382,14 +1402,21 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                         className="dms-btn-reversar px-3 py-1.5 text-xs"
                         title={
                           !aperturada
-                            ? 'Aperture la estimación para reversar ítems'
+                            ? revisarRechazadosSeaboardLinea
+                              ? 'Aperture la estimación para revisar ítems'
+                              : 'Aperture la estimación para reversar ítems'
                             : marcadosIds.length === 0
-                              ? 'Marque ítems aprobados para reversar'
-                              : 'Revierte ítems aprobados a Pendiente de revisión'
+                              ? revisarRechazadosSeaboardLinea
+                                ? 'Marque ítems rechazados para revisar'
+                                : 'Marque ítems aprobados para reversar'
+                              : revisarRechazadosSeaboardLinea
+                                ? 'Revisar: ítems rechazados pasan a Pendiente de revisión'
+                                : 'Revierte ítems aprobados a Pendiente de revisión'
                         }
                         onClick={reversarItemsMarcados}
                       >
-                        <RotateCcw className="h-3.5 w-3.5" /> Reversar ítems
+                        <RotateCcw className="h-3.5 w-3.5" />{' '}
+                        {revisarRechazadosSeaboardLinea ? 'Revisar' : 'Reversar ítems'}
                         {marcadosIds.length > 0 ? ` (${marcadosIds.length})` : ''}
                       </button>
                     )}
@@ -1809,19 +1836,37 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
 
       <ComentarioModal
         open={dialogo.tipo === 'REVERSAR_ITEMS'}
-        title="Reversar ítems aprobados"
-        subtitle={`${marcadosIds.length} línea(s) · pasan a Pendiente de revisión`}
-        label="Motivo de la reversa (obligatorio)"
-        confirmLabel="Reversar ítems"
+        title={revisarRechazadosSeaboardLinea ? 'Revisar ítems' : 'Reversar ítems aprobados'}
+        subtitle={
+          revisarRechazadosSeaboardLinea
+            ? `${marcadosIds.length} línea(s) · pasan a Pendiente de revisión (desde Rechazado)`
+            : `${marcadosIds.length} línea(s) · pasan a Pendiente de revisión`
+        }
+        label={
+          revisarRechazadosSeaboardLinea
+            ? 'Motivo de la revisión (obligatorio)'
+            : 'Motivo de la reversa (obligatorio)'
+        }
+        confirmLabel={revisarRechazadosSeaboardLinea ? 'Revisar' : 'Reversar ítems'}
         confirmClass="dms-btn-reversar"
         onClose={cerrar}
         onConfirm={(comentario) => {
           const ids = marcadosIds.filter((id) => {
             const d = estimacion?.danos.find((x) => x.id === id);
-            return Boolean(d && esItemAprobado(d.aplica));
+            return Boolean(
+              d &&
+                (revisarRechazadosSeaboardLinea
+                  ? esAplicaRechazado(d.aplica)
+                  : esItemAprobado(d.aplica))
+            );
           });
           if (ids.length === 0) {
-            toast('Solo se pueden reversar ítems en estado Aprobado.', 'info');
+            toast(
+              revisarRechazadosSeaboardLinea
+                ? 'Solo se pueden revisar ítems en estado Rechazado.'
+                : 'Solo se pueden reversar ítems en estado Aprobado.',
+              'info'
+            );
             return;
           }
           confirmarReversaItems(comentario, ids);
