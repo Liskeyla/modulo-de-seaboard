@@ -272,27 +272,6 @@ export default function LoginPage() {
                 </button>
                 {demoAbierto && (
                   <div className="mt-3 space-y-3 animate-fade-in">
-                    <div className="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-[11px] leading-relaxed text-sky-950">
-                      <p className="font-bold uppercase tracking-wide text-sky-800">
-                        Prueba desde cero · Línea ↔ Liquidaciones
-                      </p>
-                      <ol className="mt-1.5 list-decimal space-y-1 pl-4">
-                        <li>
-                          Entre como <strong>liqecuador</strong> / <strong>liqperu</strong>, abra un
-                          estimado <strong>PENDIENTE</strong> Seaboard y pulse <em>Enviar a SBM</em>.
-                        </li>
-                        <li>
-                          Cierre sesión y entre como <strong>seaboard</strong>: verá el estimado en{' '}
-                          <strong>ENVIADO</strong>, aperture, apruebe/rechace ítems y pulse{' '}
-                          <em>Enviar</em> a liquidaciones.
-                        </li>
-                        <li>
-                          Vuelva a Liquidaciones para ver el retorno (APROBADO / RECHAZADO). En el
-                          menú lateral use <em>Reiniciar datos de prueba</em> si necesita empezar de
-                          nuevo.
-                        </li>
-                      </ol>
-                    </div>
                     <ul className="space-y-1.5">
                     {DEMO.map((c) => (
                       <li key={c.usuario}>
