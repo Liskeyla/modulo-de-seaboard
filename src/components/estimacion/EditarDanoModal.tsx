@@ -161,7 +161,12 @@ export function EditarDanoModal({
 
   const itemRechazado = esAplicaRechazado(form.aplica);
   const itemAprobado = esItemAprobado(form.aplica);
-  const soloLectura = itemAprobado || itemRechazado;
+  /**
+   * Liquidaciones puede editar ítems rechazados como si fueran pendientes.
+   * Solo Seaboard/otros ven los rechazados como "solo lectura + costos en $0".
+   */
+  const rechazadoBloqueante = itemRechazado && !esEditorRfs;
+  const soloLectura = itemAprobado || rechazadoBloqueante;
   /** Liquidaciones/RFS: Motivo Seaboard bloqueado; Notas RFS editables. */
   const motivoSbmBloqueado = esEditorRfs || itemAprobado;
   const notasRfsEditables = esEditorRfs;
@@ -175,9 +180,9 @@ export function EditarDanoModal({
     return Number.isFinite(n) ? n : 0;
   };
 
-  const csHH = itemRechazado ? 0 : round2(numero(form.csHoraHombre));
-  const csMat = itemRechazado ? 0 : round2(numero(form.csMaterial));
-  const hh = itemRechazado ? 0 : round2(numero(form.horasHombre));
+  const csHH = rechazadoBloqueante ? 0 : round2(numero(form.csHoraHombre));
+  const csMat = rechazadoBloqueante ? 0 : round2(numero(form.csMaterial));
+  const hh = rechazadoBloqueante ? 0 : round2(numero(form.horasHombre));
   const largo = round2(numero(form.largo));
   const ancho = round2(numero(form.ancho));
 
@@ -208,16 +213,18 @@ export function EditarDanoModal({
           longitud: mostrarDimensiones ? largoFinal : dano.longitud,
           cantidad: round2(numero(form.cantidad)) || 1,
           // H.H. y costos: solo RFS/liquidaciones puede modificarlos; Seaboard conserva los originales
-          horasHombre: esEditorRfs ? (rechazado ? 0 : hh) : dano.horasHombre,
-          csHoraHombre: esEditorRfs ? (rechazado ? 0 : csHH) : dano.csHoraHombre,
-          csMaterial: esEditorRfs ? (rechazado ? 0 : csMat) : dano.csMaterial,
+          // Liquidaciones puede editar costos de ítems rechazados (los trata como pendientes)
+          horasHombre: esEditorRfs ? hh : dano.horasHombre,
+          csHoraHombre: esEditorRfs ? csHH : dano.csHoraHombre,
+          csMaterial: esEditorRfs ? csMat : dano.csMaterial,
           cargo: form.cargo,
           aplica: form.aplica,
           medida: form.medida.trim(),
           remark: form.remark.trim(),
           contenedorDonante: dano.contenedorDonante,
         };
-    if (!itemAprobado && rechazado) {
+    // Solo forzar $0 si el rechazo es bloqueante (Seaboard); Liquidaciones edita libremente
+    if (!itemAprobado && rechazado && !esEditorRfs) {
       cambios.csTotal = 0;
     }
 
@@ -267,10 +274,10 @@ export function EditarDanoModal({
     const bloqueado =
       itemAprobado ||
       CAMPOS_BLOQUEADOS.includes(key) ||
-      (itemRechazado && CAMPOS_COSTO_RECHAZO.includes(key)) ||
+      (rechazadoBloqueante && CAMPOS_COSTO_RECHAZO.includes(key)) ||
       (!esEditorRfs && CAMPOS_SOLO_RFS.includes(key));
     const valor =
-      itemRechazado && CAMPOS_COSTO_RECHAZO.includes(key)
+      rechazadoBloqueante && CAMPOS_COSTO_RECHAZO.includes(key)
         ? '0'
         : (form[key] as string);
     const valorOriginal = String(
@@ -294,7 +301,7 @@ export function EditarDanoModal({
           disabled={bloqueado}
           readOnly={bloqueado}
           title={
-            itemRechazado && CAMPOS_COSTO_RECHAZO.includes(key)
+            rechazadoBloqueante && CAMPOS_COSTO_RECHAZO.includes(key)
               ? 'Ítem rechazado: valor en $0 (no editable)'
               : undefined
           }
@@ -401,7 +408,7 @@ export function EditarDanoModal({
           <div className="dms-input-sm flex items-center bg-rfs-50 font-bold text-rfs-700">
             ${round2(csHH + csMat).toFixed(2)}
           </div>
-          {itemRechazado && (
+          {rechazadoBloqueante && (
             <p className="mt-0.5 text-[10px] text-slate-400">
               Ítem rechazado: H.H. y costos en $0
             </p>
