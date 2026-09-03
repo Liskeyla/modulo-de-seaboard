@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -860,7 +860,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
             </div>
           </div>
 
-          {estimadoRequiereRevisionItems(estimacion) && (
+          {estimadoRequiereRevisionItems(estimacion) && revisionParcial && (
             <div
               className="dms-banner-revision-pendiente"
               role="status"
@@ -868,23 +868,15 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
             >
               <Clock3 className="h-4 w-4 shrink-0 text-amber-600" aria-hidden />
               <span>
-                {revisionParcial ? (
-                  <>
-                    <strong>Revisión parcial:</strong> quedan{' '}
-                    <strong>{itemsPendientesRevision.length}</strong> ítem(s) por aprobar o
-                    rechazar (líneas{' '}
-                    {itemsPendientesRevision
-                      .map((d) => String(d.linea).padStart(2, '0'))
-                      .join(', ')}
-                    ). Los demás ítems aprobados no requieren nueva revisión.
-                  </>
-                ) : (
-                  <>
-                    <strong>Acción pendiente:</strong> hay{' '}
-                    <strong>{itemsPendientesRevision.length}</strong> ítem(s) sin revisar.
-                    Aperture la estimación y use «Aprobar ítems» / «Rechazar ítems».
-                  </>
-                )}
+                <>
+                  <strong>Revisión parcial:</strong> quedan{' '}
+                  <strong>{itemsPendientesRevision.length}</strong> ítem(s) por aprobar o
+                  rechazar (líneas{' '}
+                  {itemsPendientesRevision
+                    .map((d) => String(d.linea).padStart(2, '0'))
+                    .join(', ')}
+                  ). Los demás ítems aprobados no requieren nueva revisión.
+                </>
               </span>
             </div>
           )}
