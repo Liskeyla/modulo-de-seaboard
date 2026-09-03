@@ -414,6 +414,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   const rolSolicitudReverso = esCoordinador ? 'Coordinador RFS' : 'Seaboard Marine';
   /** APROBADO y REPARADO: Actualizar Información Contenedor. */
   const puedeActualizarContenedorLiq = vistaCerradaLiq;
+  /** Cobro: solo liquidaciones. */
   const puedeDefinirCobroLiq =
     esLiquidaciones &&
     ['PENDIENTE', 'RECHAZADO', 'REVERSADO', 'APROBADO', 'REPARADO'].includes(

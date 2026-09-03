@@ -1345,6 +1345,8 @@ export const useEstimacionesStore = create<EstimacionesState>()(
             pvpMateriales: 0,
             pvpTotal: 0,
             sinDanos: true,
+            /** Cargo por defecto: Línea. */
+            tipoCobro: 'LINEA' as const,
             danos: [],
             notas: [
               {
