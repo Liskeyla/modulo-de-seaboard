@@ -6,6 +6,7 @@ import {
   CircleDollarSign,
   MessageSquareWarning,
   PencilLine,
+  Undo2,
   XCircle,
 } from 'lucide-react';
 import {
@@ -44,6 +45,11 @@ const ICONO_ALERTA: Record<
     Icon: MessageSquareWarning,
     clase: 'dms-alerta-icono--cambio',
     etiqueta: 'Cambio pendiente',
+  },
+  SOLICITUD_REVERSO: {
+    Icon: Undo2,
+    clase: 'dms-alerta-icono--cambio',
+    etiqueta: 'Solicitud de reverso',
   },
 };
 

@@ -8,6 +8,7 @@ import {
   FileBarChart,
   FileText,
   Info,
+  Mail,
   MessageSquare,
   RefreshCw,
   SearchX,
@@ -36,6 +37,7 @@ import { AlertasLiquidacionesCell } from '@/components/estimacion/AlertasLiquida
 import {
   ConfirmacionEstimacionModal,
   notificarEnvioALiquidaciones,
+  notificarSolicitudReversoALiquidaciones,
 } from '@/components/estimacion/ConfirmacionEstimacionModal';
 import { NuevoEstimadoModal } from '@/components/estimacion/NuevoEstimadoModal';
 import { useAuthStore } from '@/store';
@@ -208,6 +210,7 @@ type Dialogo =
   | { tipo: 'ENVIAR'; id: string }
   | { tipo: 'ELIMINAR'; id: string }
   | { tipo: 'REVERSAR_APROB'; id: string }
+  | { tipo: 'SOLICITAR_REVERSO'; id: string }
   | { tipo: 'PUSH_SBM'; id: string }
   | { tipo: 'PREVIEW_DANOS'; id: string }
   | { tipo: 'NUEVO_ESTIMADO'; variante: 'Máquina' | 'Box' }
@@ -221,6 +224,7 @@ export default function ReporteEstimacionesPage() {
     enviarAprobacion,
     enviarALiquidaciones,
     reversarAprobacion,
+    solicitarReversoAprobacion,
     eliminar,
     setActividad,
     crearEstimado,
@@ -476,6 +480,16 @@ export default function ReporteEstimacionesPage() {
             onClick={() => setDialogo({ tipo: 'REVERSAR_APROB', id: row.id })}
           >
             <Undo2 className="h-3.5 w-3.5" />
+          </button>
+        )}
+        {(esSeaboard || esCoordinador) && row.estado === 'APROBADO' && (
+          <button
+            type="button"
+            className="dms-icon-action dms-icon-action--enviar"
+            title="Solicitar reverso a liquidaciones (mensaje + correo)"
+            onClick={() => setDialogo({ tipo: 'SOLICITAR_REVERSO', id: row.id })}
+          >
+            <Mail className="h-3.5 w-3.5" />
           </button>
         )}
         {esLiquidaciones &&
@@ -1335,15 +1349,42 @@ export default function ReporteEstimacionesPage() {
           reversarAprobacion(activa.id, actor, comentario);
           if (esNavieraSeaboard(activa.naviera)) {
             toast(
-              `${activa.codigo} reversado. Puede volver a Enviar a SBM (naviera Seaboard).`,
+              `${activa.codigo} reversado. Puede aperturar y volver a Enviar a SBM.`,
               'success'
             );
           } else {
-            toast(
-              `${activa.codigo} reversado. Enviar a SBM no aplica a esta naviera.`,
-              'success'
-            );
+            toast(`${activa.codigo} reversado. Puede aperturar y modificar.`, 'success');
           }
+          cerrar();
+        }}
+      />
+
+      <ComentarioModal
+        open={dialogo.tipo === 'SOLICITAR_REVERSO'}
+        title="Solicitar reverso a liquidaciones"
+        subtitle={
+          activa
+            ? `${activa.codigo} · ${activa.contenedor} · mensaje + correo`
+            : undefined
+        }
+        label="Motivo de la solicitud (obligatorio)"
+        placeholder="Indique por qué liquidaciones debe reversar este estimado y qué ítems deben modificarse…"
+        confirmLabel="Enviar solicitud"
+        confirmClass="dms-btn-azul"
+        onClose={cerrar}
+        onConfirm={(comentario) => {
+          if (!activa) return;
+          solicitarReversoAprobacion(activa.id, actor, comentario);
+          notificarSolicitudReversoALiquidaciones(
+            activa,
+            comentario,
+            actor,
+            esCoordinador ? 'Coordinador RFS' : 'Seaboard Marine'
+          );
+          toast(
+            'Solicitud registrada. Se preparó el correo a liquidaciones con el motivo.',
+            'success'
+          );
           cerrar();
         }}
       />

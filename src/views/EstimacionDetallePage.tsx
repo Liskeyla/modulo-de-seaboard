@@ -11,6 +11,7 @@ import {
   FileStack,
   ListChecks,
   Lock,
+  Mail,
   MessageSquare,
   RefreshCw,
   Save,
@@ -41,6 +42,7 @@ import { InformePreviewModal } from '@/components/estimacion/InformePreviewModal
 import {
   ConfirmacionEstimacionModal,
   notificarEnvioALiquidaciones,
+  notificarSolicitudReversoALiquidaciones,
 } from '@/components/estimacion/ConfirmacionEstimacionModal';
 import { ListadoDanosTable } from '@/components/estimacion/ListadoDanosTable';
 import { AgregarDanoCard } from '@/components/estimacion/AgregarDanoCard';
@@ -184,6 +186,7 @@ type Dialogo =
   | { tipo: 'SALIR_BLOQUEADO' }
   | { tipo: 'SALIR_SIN_ACCION' }
   | { tipo: 'REVERSAR_APROB' }
+  | { tipo: 'SOLICITAR_REVERSO' }
   | { tipo: 'PUSH_SBM' };
 
 export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
@@ -196,6 +199,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     enviarAprobacion,
     enviarALiquidaciones,
     reversarAprobacion,
+    solicitarReversoAprobacion,
     actualizarDano,
     agregarDano,
     setSap,
@@ -372,12 +376,16 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     esLiquidaciones && estimacion.estado === 'REPARADO';
   const vistaCerradaLiq = vistaAprobadoLiq || vistaReparadoLiq;
   /**
-   * En APROBADO se puede aperturar para reversar/modificar ítems puntuales
-   * (revisión parcial). REPARADO permanece cerrado.
+   * APROBADO (Liquidaciones): no se apertura hasta reversar la aprobación del estimado.
+   * Tras reverso (REVERSADO) sí se puede aperturar. REPARADO permanece cerrado.
    */
   const puedeAperturar =
     (puedeRevisarItems || puedeEditarLiquidaciones || puedeEditarCoordinador) &&
-    !vistaReparadoLiq;
+    !vistaReparadoLiq &&
+    !(esLiquidaciones && estimacion.estado === 'APROBADO');
+  /** Liquidaciones en APROBADO: botón visible pero deshabilitado hasta reversar. */
+  const mostrarAperturarDeshabilitadoLiq =
+    esLiquidaciones && estimacion.estado === 'APROBADO' && !aperturada;
   const editable =
     aperturada && (esSeaboard || esLiquidaciones || esCoordinador);
   /** Liquidaciones / Coordinador / Seaboard: evidencias al aperturar. */
@@ -392,11 +400,18 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       String(estimacion.enviarAprobacion || '').toUpperCase() !== 'SI' &&
       ESTADOS_DMS_ENVIO.includes(estimacion.estado)
     : esLiquidaciones && puedePushASbm(estimacion);
-  /** Solo APROBADO: se puede reparar o reversar. REPARADO ya no. */
+  /** Solo APROBADO: Liquidaciones puede reparar o reversar. Seaboard/Coordinador no ven Reversar. */
   const puedeReversarAprobLiq = vistaAprobadoLiq;
   const puedeRepararLiq = vistaAprobadoLiq;
   /** Solo liquidaciones puede reversar ítems aprobados (Seaboard no ve el botón). */
   const puedeReversarItems = esLiquidaciones;
+  /**
+   * Línea / Coordinador: en APROBADO no pueden reversar; solicitan a liquidaciones
+   * por mensaje + correo que reverse y modifique ítems.
+   */
+  const puedeSolicitarReverso =
+    (esSeaboard || esCoordinador) && estimacion.estado === 'APROBADO';
+  const rolSolicitudReverso = esCoordinador ? 'Coordinador RFS' : 'Seaboard Marine';
   /** APROBADO y REPARADO: Actualizar Información Contenedor. */
   const puedeActualizarContenedorLiq = vistaCerradaLiq;
   const puedeDefinirCobroLiq =
@@ -882,6 +897,22 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
               >
                 <ArrowLeft className="h-4 w-4" /> Regresar
               </button>
+              {mostrarAperturarDeshabilitadoLiq && (
+                <button
+                  type="button"
+                  className="dms-btn-aperturar opacity-55"
+                  disabled
+                  title="Estimado APROBADO: primero use Reversar aprobación. Luego podrá aperturar."
+                  onClick={() =>
+                    toast(
+                      'Estimado APROBADO: reverse la aprobación para poder aperturar y modificar.',
+                      'info'
+                    )
+                  }
+                >
+                  <Lock className="h-4 w-4" /> Aperturar estimación
+                </button>
+              )}
               {puedeAperturar && !aperturada && (
                 <button
                   type="button"
@@ -1034,6 +1065,16 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   onClick={() => setDialogo({ tipo: 'REVERSAR_APROB' })}
                 >
                   Reversar aprobación
+                </button>
+              )}
+              {puedeSolicitarReverso && (
+                <button
+                  type="button"
+                  className="dms-btn-azul"
+                  title="Envía mensaje y correo a liquidaciones solicitando el reverso"
+                  onClick={() => setDialogo({ tipo: 'SOLICITAR_REVERSO' })}
+                >
+                  <Mail className="h-4 w-4" /> Solicitar reverso a liquidaciones
                 </button>
               )}
               {puedeEnviarLiquidaciones && (
@@ -1281,17 +1322,17 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   i
                 </span>
                 <div className="min-w-0 truncate">
-                  {puedeAperturar && !aperturada
-                    ? vistaAprobadoLiq || estimacion.estado === 'APROBADO'
-                      ? esLiquidaciones
-                        ? 'Estimado aprobado: aperture para reversar solo el ítem a modificar (el resto aprobado no se re-revisa).'
-                        : 'Estimado aprobado: los ítems aprobados están bloqueados. Contacte liquidaciones si requiere cambios.'
-                      : 'Aperture para modificar ítems (queda histórico), aprobar/rechazar cada línea y luego Enviar a liquidaciones.'
-                    : revisionParcial
-                      ? `${MSG_REVISION_PARCIAL} Pendiente(s): ${itemsPendientesRevision.length} línea(s).`
-                      : esSeaboard
-                        ? 'Ítems aprobados quedan bloqueados. Solo liquidaciones puede revertirlos para modificarlos.'
-                        : 'Ítems aprobados quedan bloqueados. Para editarlos: Reversar → modificar → volver a revisión.'}
+                  {mostrarAperturarDeshabilitadoLiq
+                    ? 'Estimado APROBADO: reverse la aprobación para habilitar Aperturar y modificar ítems.'
+                    : puedeSolicitarReverso
+                      ? 'Estimado APROBADO: use «Solicitar reverso a liquidaciones» (mensaje + correo). No puede reversar usted mismo.'
+                      : puedeAperturar && !aperturada
+                        ? 'Aperture para modificar ítems (queda histórico), aprobar/rechazar cada línea y luego Enviar a liquidaciones.'
+                        : revisionParcial
+                          ? `${MSG_REVISION_PARCIAL} Pendiente(s): ${itemsPendientesRevision.length} línea(s).`
+                          : esSeaboard
+                            ? 'Ítems aprobados quedan bloqueados. Solo liquidaciones puede revertirlos para modificarlos.'
+                            : 'Ítems aprobados quedan bloqueados. Para editarlos: Reversar → modificar → volver a revisión.'}
                 </div>
               </div>
 
@@ -1565,15 +1606,40 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
           reversarAprobacion(estimacion.id, actor, comentario);
           if (esNavieraSeaboard(estimacion.naviera)) {
             toast(
-              `Aprobación de ${estimacion.codigo} reversada. Puede volver a Enviar a SBM (naviera Seaboard).`,
+              `Aprobación de ${estimacion.codigo} reversada. Ya puede aperturar y modificar. Luego Enviar a SBM si aplica.`,
               'success'
             );
           } else {
             toast(
-              `Aprobación de ${estimacion.codigo} reversada. Enviar a SBM no aplica a esta naviera.`,
+              `Aprobación de ${estimacion.codigo} reversada. Ya puede aperturar y modificar.`,
               'success'
             );
           }
+          cerrar();
+        }}
+      />
+
+      <ComentarioModal
+        open={dialogo.tipo === 'SOLICITAR_REVERSO'}
+        title="Solicitar reverso a liquidaciones"
+        subtitle={`${estimacion.codigo} · ${estimacion.contenedor} · mensaje + correo`}
+        label="Motivo de la solicitud (obligatorio)"
+        placeholder="Indique por qué liquidaciones debe reversar este estimado y qué ítems deben modificarse…"
+        confirmLabel="Enviar solicitud"
+        confirmClass="dms-btn-azul"
+        onClose={cerrar}
+        onConfirm={(comentario) => {
+          solicitarReversoAprobacion(estimacion.id, actor, comentario);
+          notificarSolicitudReversoALiquidaciones(
+            estimacion,
+            comentario,
+            actor,
+            rolSolicitudReverso
+          );
+          toast(
+            'Solicitud registrada. Se preparó el correo a liquidaciones con el motivo.',
+            'success'
+          );
           cerrar();
         }}
       />

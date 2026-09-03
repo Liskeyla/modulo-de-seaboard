@@ -403,7 +403,7 @@ export interface ComentarioSeaboard {
   id: string;
   fecha: string;
   usuario: string;
-  accion: 'APROBAR' | 'RECHAZAR' | 'REVERSAR' | 'ENVIAR';
+  accion: 'APROBAR' | 'RECHAZAR' | 'REVERSAR' | 'ENVIAR' | 'SOLICITAR_REVERSO';
   comentario: string;
 }
 

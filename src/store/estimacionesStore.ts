@@ -226,6 +226,11 @@ interface EstimacionesState {
   enviarALiquidaciones: (id: string, usuario: string, comentario: string) => void;
   reversar: (ids: string[], usuario: string, comentario: string) => void;
   reversarAprobacion: (id: string, usuario: string, comentario: string) => void;
+  /**
+   * Seaboard / Coordinador: solicita a liquidaciones que reverse un estimado APROBADO
+   * (mensaje interno + correo). No cambia el estado.
+   */
+  solicitarReversoAprobacion: (id: string, usuario: string, comentario: string) => void;
   marcarReparado: (id: string, usuario: string) => void;
   eliminar: (id: string, usuario: string) => void;
   getEnviadosSeaboard: () => Estimacion[];
@@ -630,6 +635,31 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                   usuario,
                   'REVERSO DE APROBACIÓN',
                   `${comentario} · Ítems ya aprobados se conservan; la nueva revisión solo aplica a ítems que se reverse o modifique.`
+                ),
+              ],
+            };
+          });
+        },
+
+        solicitarReversoAprobacion: (id, usuario, comentario) => {
+          const obs = comentario.trim();
+          if (obs.length < 5) return;
+          mutar(id, (e) => {
+            if (e.estado !== 'APROBADO') return e;
+            return {
+              ...e,
+              fechaModificacion: ahoraFmt(),
+              usuarioModificacion: usuario,
+              comentariosSeaboard: [
+                ...e.comentariosSeaboard,
+                comentarioSeaboard('SOLICITAR_REVERSO', obs, usuario),
+              ],
+              auditoria: [
+                ...e.auditoria,
+                evento(
+                  usuario,
+                  'SOLICITUD DE REVERSO',
+                  `${usuario} solicita a liquidaciones reversar ${e.codigo} para modificar ítems. Motivo: ${obs}`
                 ),
               ],
             };

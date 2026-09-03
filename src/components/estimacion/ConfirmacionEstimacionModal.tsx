@@ -93,13 +93,39 @@ export function notificarEnvioALiquidaciones(
   );
 }
 
-/** @deprecated Use notificarEnvioALiquidaciones */
-export function notificarRechazoALiquidaciones(
+/** Notifica a liquidaciones una solicitud de reverso (Seaboard / Coordinador). */
+export function notificarSolicitudReversoALiquidaciones(
   estimacion: Estimacion,
   comentario: string,
-  usuario: string
+  usuario: string,
+  rolLabel = 'Seaboard Marine'
 ) {
-  notificarEnvioALiquidaciones(estimacion, comentario, usuario, 'RECHAZADO');
+  const correos = correosDeEstimacion(estimacion);
+  const paisLabel = paisDe(estimacion) === 'PERU' ? 'Perú' : 'Ecuador';
+  const asunto = `Solicitud de reverso · ${estimacion.codigo} · ${estimacion.contenedor} · ${paisLabel}`;
+  const cuerpo = [
+    `Estimados gestores de liquidaciones RFS (${paisLabel}),`,
+    ``,
+    `${rolLabel} solicita reversar la aprobación del estimado ${estimacion.codigo} (${estimacion.contenedor}) para poder modificar ítems.`,
+    ``,
+    `País: ${paisLabel}`,
+    `Naviera: ${estimacion.naviera}`,
+    `Estado actual: ${estimacion.estado}`,
+    `Usuario: ${usuario}`,
+    ``,
+    `Motivo de la solicitud:`,
+    comentario.trim(),
+    ``,
+    `Por favor, reverse la aprobación del estimado y gestione la modificación de los ítems correspondientes.`,
+    ``,
+    `— Notificación automática · ${rolLabel} (prototipo)`,
+  ].join('\n');
+
+  mailtoLiquidaciones(correos, asunto, cuerpo);
+  toast(
+    `Correo de solicitud de reverso preparado para liquidaciones ${paisLabel}\n${correos.join(', ')}`,
+    'success'
+  );
 }
 
 /** @deprecated Use notificarEnvioALiquidaciones */

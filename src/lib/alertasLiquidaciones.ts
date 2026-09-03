@@ -11,7 +11,8 @@ export type TipoAlertaLiquidaciones =
   | 'MODIFICADO'
   | 'ITEM_RECHAZADO'
   | 'RECHAZO_TOTAL'
-  | 'PENDIENTE_CAMBIO';
+  | 'PENDIENTE_CAMBIO'
+  | 'SOLICITUD_REVERSO';
 
 export interface AlertaLiquidaciones {
   id: TipoAlertaLiquidaciones;
@@ -85,6 +86,25 @@ export function alertasLiquidaciones(e: Estimacion): AlertaLiquidaciones[] {
       lineas: ['Cambios', 'pendien-', 'tes'],
       title: `${pendientesCambio} solicitud(es) de cambio pendientes`,
     });
+  }
+
+  if (e.estado === 'APROBADO') {
+    const ultimaSolicitud = [...(e.comentariosSeaboard || [])]
+      .reverse()
+      .find((c) => c.accion === 'SOLICITAR_REVERSO');
+    const ultimoReverso = [...(e.comentariosSeaboard || [])]
+      .reverse()
+      .find((c) => c.accion === 'REVERSAR');
+    if (
+      ultimaSolicitud &&
+      (!ultimoReverso || String(ultimaSolicitud.fecha) >= String(ultimoReverso.fecha))
+    ) {
+      out.push({
+        id: 'SOLICITUD_REVERSO',
+        lineas: ['Solicita', 'reverso', 'SBM'],
+        title: `Seaboard solicita reverso: ${ultimaSolicitud.comentario}`,
+      });
+    }
   }
 
   return out;
