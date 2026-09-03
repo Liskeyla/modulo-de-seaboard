@@ -314,7 +314,9 @@ export function EditarDanoModal({
         esEditorRfs
           ? 'Vista RFS / liquidaciones · Notas RFS editables · Motivo Seaboard bloqueado'
           : itemAprobado
-            ? 'Bloqueado por aprobación de línea · use Reversar ítems para modificar'
+            ? esEditorRfs
+              ? 'Bloqueado por aprobación · use Reversar ítems para modificar'
+              : 'Bloqueado por aprobación · contacte liquidaciones para revertir el ítem'
             : 'Vista SBM · Los cambios quedan en el historial y como subfila del listado'
       }
       footer={

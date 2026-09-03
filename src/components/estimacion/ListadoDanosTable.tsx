@@ -68,6 +68,8 @@ interface ListadoDanosTableProps {
   mostrarDimensiones?: boolean;
   mostrarMarcacion?: boolean;
   marcacionHabilitada?: boolean;
+  /** Solo liquidaciones: permite marcar ítems aprobados para reversarlos. */
+  marcarAprobadosHabilitado?: boolean;
   marcadosIds?: string[];
   onToggleMarcado?: (danoId: string) => void;
   onToggleTodos?: (marcar: boolean) => void;
@@ -312,6 +314,7 @@ export function ListadoDanosTable({
   mostrarDimensiones = false,
   mostrarMarcacion = false,
   marcacionHabilitada = false,
+  marcarAprobadosHabilitado = false,
   marcadosIds = [],
   onToggleMarcado,
   onToggleTodos,
@@ -500,6 +503,8 @@ export function ListadoDanosTable({
             const bloqueadoAprobado = esItemAprobado(d.aplica);
             const puedeEditarFila = editable && !bloqueadoAprobado;
             const puedeCargoFila = Boolean(cargoAplicaEditable && onCargoChange && !bloqueadoAprobado);
+            const checkDeshabilitado =
+              !marcacionHabilitada || (bloqueadoAprobado && !marcarAprobadosHabilitado);
             const pendienteRevision = !esItemRevisadoSbm(d.aplica);
             return (
               <Fragment key={d.id}>
@@ -520,12 +525,17 @@ export function ListadoDanosTable({
                         type="checkbox"
                         className="dms-check-dano"
                         checked={marcado}
+                        disabled={checkDeshabilitado}
                         onChange={() => onToggleMarcado?.(d.id)}
                         aria-label={`Marcar línea ${d.linea}`}
                         title={
-                          marcacionHabilitada
-                            ? undefined
-                            : 'Aperture la estimación para marcar ítems'
+                          !marcacionHabilitada
+                            ? 'Aperture la estimación para marcar ítems'
+                            : bloqueadoAprobado && !marcarAprobadosHabilitado
+                              ? 'Ítem aprobado: bloqueado. Solo liquidaciones puede revertirlo.'
+                              : bloqueadoAprobado
+                                ? 'Marque para reversar el ítem aprobado'
+                                : undefined
                         }
                       />
                     </td>

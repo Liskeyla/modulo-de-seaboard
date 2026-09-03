@@ -177,10 +177,19 @@ export function Header({ title, subtitle }: HeaderProps) {
   }
 
   const iniciales = (user?.nombre ?? user?.username ?? 'U').charAt(0).toUpperCase();
+  const temaDmsRfs =
+    user?.rol === 'liquidaciones' || user?.rol === 'coordinador';
 
   return (
     <>
-    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 text-slate-800 shadow-sm backdrop-blur-md">
+    <header
+      className={cn(
+        'sticky top-0 z-30 border-b shadow-sm backdrop-blur-md',
+        temaDmsRfs
+          ? 'dms-header--dms border-[#1e2f52] bg-[#283d68] text-white'
+          : 'border-slate-200 bg-white/95 text-slate-800'
+      )}
+    >
       <div className="flex h-16 items-center justify-between gap-3 px-3 sm:px-5">
         <div className="flex min-w-0 items-center gap-3">
           <Link
@@ -193,14 +202,27 @@ export function Header({ title, subtitle }: HeaderProps) {
               alt="RFS · Road Feeder Services"
               width={1385}
               height={1080}
-              className="h-9 w-12 object-contain"
+              className={cn(
+                'h-9 w-12 object-contain',
+                temaDmsRfs && 'rounded bg-white/95 p-0.5'
+              )}
               priority
             />
             <span className="hidden min-w-0 sm:block">
-              <span className="block text-[13px] font-extrabold leading-tight text-rfs-700">
+              <span
+                className={cn(
+                  'dms-header-brand-name block text-[13px] font-extrabold leading-tight',
+                  temaDmsRfs ? 'text-white' : 'text-rfs-700'
+                )}
+              >
                 Road Feeder Services
               </span>
-              <span className="mt-0.5 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-rfsorange-600">
+              <span
+                className={cn(
+                  'dms-header-brand-meta mt-0.5 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider',
+                  temaDmsRfs ? 'text-[#c4d0e8]' : 'text-rfsorange-600'
+                )}
+              >
                 <Flag pais={pais} className="h-2.5 w-4" />
                 {metaPais(pais).label}
               </span>
@@ -212,27 +234,58 @@ export function Header({ title, subtitle }: HeaderProps) {
             onClick={alternarMenu}
             aria-expanded={menuAbierto}
             aria-controls="menu-principal"
-            className="flex items-center gap-2 rounded-lg bg-rfs-700 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-rfs-800 active:scale-[0.98]"
+            className={cn(
+              'dms-header-menu-btn flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-white transition-colors active:scale-[0.98]',
+              temaDmsRfs
+                ? 'bg-[#2d2675] hover:bg-[#241f5f]'
+                : 'bg-rfs-700 hover:bg-rfs-800'
+            )}
           >
             <Menu className="h-4 w-4" />
             <span className="hidden sm:inline">Menú</span>
           </button>
 
           <div className="min-w-0">
-            <h1 className="truncate text-sm font-bold tracking-wide text-rfs-700 sm:text-base">
+            <h1
+              className={cn(
+                'dms-header-title truncate text-sm font-bold tracking-wide sm:text-base',
+                temaDmsRfs ? 'text-white' : 'text-rfs-700'
+              )}
+            >
               {title}
             </h1>
             {subtitle && (
-              <p className="hidden truncate text-[10px] text-slate-500 sm:block">{subtitle}</p>
+              <p
+                className={cn(
+                  'dms-header-subtitle hidden truncate text-[10px] sm:block',
+                  temaDmsRfs ? 'text-white/70' : 'text-slate-500'
+                )}
+              >
+                {subtitle}
+              </p>
             )}
           </div>
         </div>
 
         <div ref={contenedorRef} className="flex items-center gap-1.5 sm:gap-2">
-          <span className="hidden items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1.5 text-xs font-medium text-slate-600 2xl:inline-flex">
-            <Clock className="h-3.5 w-3.5 text-rfsorange-500" />
+          <span
+            className={cn(
+              'hidden items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-medium 2xl:inline-flex',
+              temaDmsRfs
+                ? 'bg-white/10 text-white/90'
+                : 'bg-slate-100 text-slate-600'
+            )}
+          >
+            <Clock
+              className={cn(
+                'h-3.5 w-3.5',
+                temaDmsRfs ? 'text-[#c4d0e8]' : 'text-rfsorange-500'
+              )}
+            />
             {hora ?? '--:--'}
-            <span className="text-slate-400">{metaPais(pais).zona}</span>
+            <span className={temaDmsRfs ? 'text-white/50' : 'text-slate-400'}>
+              {metaPais(pais).zona}
+            </span>
           </span>
 
           <div className="relative">
@@ -248,7 +301,12 @@ export function Header({ title, subtitle }: HeaderProps) {
                 }
                 setMenuActivo((m) => (m === 'pais' ? null : 'pais'));
               }}
-              className="inline-flex items-center gap-1.5 rounded-full bg-rfs-50 px-2.5 py-1.5 text-xs font-semibold text-rfs-700 ring-1 ring-rfs-100 transition hover:bg-rfs-100"
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-semibold transition',
+                temaDmsRfs
+                  ? 'bg-white/10 text-white ring-1 ring-white/25 hover:bg-white/15'
+                  : 'bg-rfs-50 text-rfs-700 ring-1 ring-rfs-100 hover:bg-rfs-100'
+              )}
               aria-expanded={menuActivo === 'pais'}
               aria-haspopup="listbox"
               title={
@@ -262,7 +320,8 @@ export function Header({ title, subtitle }: HeaderProps) {
               {!paisFijo && (
                 <ChevronDown
                   className={cn(
-                    'h-3.5 w-3.5 text-rfs-700 transition-transform',
+                    'h-3.5 w-3.5 transition-transform',
+                    temaDmsRfs ? 'text-white/80' : 'text-rfs-700',
                     menuActivo === 'pais' && 'rotate-180'
                   )}
                 />
@@ -308,7 +367,12 @@ export function Header({ title, subtitle }: HeaderProps) {
               onClick={() =>
                 setMenuActivo((m) => (m === 'notificaciones' ? null : 'notificaciones'))
               }
-              className="relative flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 transition hover:bg-slate-100 active:scale-[0.98]"
+              className={cn(
+                'relative flex h-9 w-9 items-center justify-center rounded-lg transition active:scale-[0.98]',
+                temaDmsRfs
+                  ? 'text-white/90 hover:bg-white/10'
+                  : 'text-slate-600 hover:bg-slate-100'
+              )}
               aria-label={`Notificaciones (${pendientes.length} sin leer)`}
               aria-expanded={menuActivo === 'notificaciones'}
             >
@@ -316,7 +380,12 @@ export function Header({ title, subtitle }: HeaderProps) {
               {pendientes.length > 0 && (
                 <span className="absolute right-1.5 top-1.5 flex h-2.5 w-2.5">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rfsorange-400 opacity-75" />
-                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-rfsorange-500 ring-2 ring-white" />
+                  <span
+                    className={cn(
+                      'relative inline-flex h-2.5 w-2.5 rounded-full bg-rfsorange-500 ring-2',
+                      temaDmsRfs ? 'ring-[#283d68]' : 'ring-white'
+                    )}
+                  />
                 </span>
               )}
             </button>
@@ -385,21 +454,42 @@ export function Header({ title, subtitle }: HeaderProps) {
             <button
               type="button"
               onClick={() => setMenuActivo((m) => (m === 'usuario' ? null : 'usuario'))}
-              className="flex h-9 items-center gap-2 rounded-lg px-1.5 pr-2 transition hover:bg-slate-100 active:scale-[0.98]"
+              className={cn(
+                'flex h-9 items-center gap-2 rounded-lg px-1.5 pr-2 transition active:scale-[0.98]',
+                temaDmsRfs ? 'hover:bg-white/10' : 'hover:bg-slate-100'
+              )}
               aria-expanded={menuActivo === 'usuario'}
             >
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-rfsorange-500 text-[11px] font-bold text-white">
+              <span
+                className={cn(
+                  'flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold text-white',
+                  temaDmsRfs ? 'bg-[#2d2675]' : 'bg-rfsorange-500'
+                )}
+              >
                 {iniciales}
               </span>
               <span className="hidden text-left lg:block">
-                <span className="block text-[10px] leading-tight text-slate-400">Bienvenido,</span>
-                <span className="block text-xs font-semibold leading-tight text-slate-800">
+                <span
+                  className={cn(
+                    'block text-[10px] leading-tight',
+                    temaDmsRfs ? 'text-white/60' : 'text-slate-400'
+                  )}
+                >
+                  Bienvenido,
+                </span>
+                <span
+                  className={cn(
+                    'block text-xs font-semibold leading-tight',
+                    temaDmsRfs ? 'text-white' : 'text-slate-800'
+                  )}
+                >
                   {user?.nombre?.split(' ')[0] ?? 'Invitado'}
                 </span>
               </span>
               <ChevronDown
                 className={cn(
-                  'h-4 w-4 text-slate-400 transition-transform',
+                  'h-4 w-4 transition-transform',
+                  temaDmsRfs ? 'text-white/60' : 'text-slate-400',
                   menuActivo === 'usuario' && 'rotate-180'
                 )}
               />

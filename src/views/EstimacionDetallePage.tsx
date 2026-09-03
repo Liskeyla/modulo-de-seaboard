@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { EstadoEstimacionBadge } from '@/components/dms/EstadoEstimacionBadge';
-import { ComentarioModal } from '@/components/aprobaciones/ComentarioModal';
+import { ComentarioModal, type LineaResumenItem } from '@/components/aprobaciones/ComentarioModal';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Modal } from '@/components/ui/Modal';
 import { rolDeUsuario } from '@/components/estimacion/ComentariosDanoModal';
@@ -80,6 +80,24 @@ import { fotosRealesDano } from '@/lib/fotosDano';
 const ESTADOS_SEABOARD = ['ENVIADO', 'PENDIENTE', 'RECHAZADO', 'REVERSADO'];
 /** Operador RFS: solo envía estimados a la bandeja Seaboard. */
 const ESTADOS_DMS_ENVIO = ['PENDIENTE', 'RECHAZADO', 'REVERSADO'];
+
+function resumenLineaDano(d: DanoEstimacion): LineaResumenItem {
+  return {
+    linea: d.linea,
+    comp: d.comp,
+    dano: d.dano,
+    ubicacion: d.ubicacion,
+    cargo: d.cargo,
+  };
+}
+
+function resumenLineasDanos(danos: DanoEstimacion[], ids: string[]): LineaResumenItem[] {
+  return ids
+    .map((id) => danos.find((d) => d.id === id))
+    .filter((d): d is DanoEstimacion => Boolean(d && !esItemAprobado(d.aplica)))
+    .sort((a, b) => a.linea - b.linea)
+    .map(resumenLineaDano);
+}
 
 type SnapshotApertura = {
   notasCount: number;
@@ -377,6 +395,8 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   /** Solo APROBADO: se puede reparar o reversar. REPARADO ya no. */
   const puedeReversarAprobLiq = vistaAprobadoLiq;
   const puedeRepararLiq = vistaAprobadoLiq;
+  /** Solo liquidaciones puede reversar ítems aprobados (Seaboard no ve el botón). */
+  const puedeReversarItems = esLiquidaciones;
   /** APROBADO y REPARADO: Actualizar Información Contenedor. */
   const puedeActualizarContenedorLiq = vistaCerradaLiq;
   const puedeDefinirCobroLiq =
@@ -394,6 +414,8 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   const mostrarSapNotasLiq = mostrarAgregarDanoLiq || vistaCerradaLiq;
   /** En APROBADO/REPARADO los campos van habilitados (sin aperturar). */
   const formulariosLiqActivos = vistaCerradaLiq || aperturada;
+  /** Cobro editable al aperturar (PENDIENTE/…) o en APROBADO/REPARADO sin aperturar. */
+  const puedeEditarCobroLiq = puedeDefinirCobroLiq && formulariosLiqActivos;
   const puedeEditarNotas = editable || mostrarSapNotasLiq;
   const puedeRevalidar =
     editable && (esSeaboard || esLiquidaciones || esCoordinador);
@@ -514,7 +536,9 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     });
     if (editables.length === 0) {
       toast(
-        'Los ítems marcados ya están aprobados. Para modificarlos debe reversarlos primero.',
+        esSeaboard
+          ? 'Los ítems marcados ya están aprobados y no pueden modificarse. Contacte liquidaciones si requiere cambios.'
+          : 'Los ítems marcados ya están aprobados. Para modificarlos debe reversarlos primero.',
         'info'
       );
       return;
@@ -544,7 +568,9 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     });
     if (editables.length === 0) {
       toast(
-        'Los ítems marcados ya están aprobados. Para cambiarlos debe reversarlos primero.',
+        esSeaboard
+          ? 'Los ítems marcados ya están aprobados y no pueden modificarse. Contacte liquidaciones si requiere cambios.'
+          : 'Los ítems marcados ya están aprobados. Para cambiarlos debe reversarlos primero.',
         'info'
       );
       return;
@@ -560,6 +586,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   }
 
   function reversarItemsMarcados() {
+    if (!esLiquidaciones) return;
     if (!aperturada) {
       toast('Aperture la estimación para modificar ítems.', 'info');
       return;
@@ -915,17 +942,32 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
               )}
               {puedeDefinirCobroLiq && (
                 <div
-                  className="dms-cobro-toggle"
-                  title="Define si el cobro del estimado es al Cliente o a la Línea"
+                  className={cn('dms-cobro-toggle', !puedeEditarCobroLiq && 'opacity-60')}
+                  title={
+                    puedeEditarCobroLiq
+                      ? 'Define si el cobro del estimado es al Cliente o a la Línea'
+                      : 'Aperture la estimación para definir el cobro'
+                  }
+                  onClick={() => {
+                    if (!puedeEditarCobroLiq) {
+                      toast('Aperture la estimación para definir el cobro.', 'info');
+                    }
+                  }}
                 >
                   <span className="dms-cobro-toggle__label">Cobro</span>
                   <button
                     type="button"
                     className={cn(
                       'dms-cobro-btn',
-                      tipoCobroActual === 'CLIENTE' && 'dms-cobro-btn--on-cliente'
+                      tipoCobroActual === 'CLIENTE' && 'dms-cobro-btn--on-cliente',
+                      !puedeEditarCobroLiq && 'cursor-not-allowed'
                     )}
+                    disabled={!puedeEditarCobroLiq}
                     onClick={() => {
+                      if (!puedeEditarCobroLiq) {
+                        toast('Aperture la estimación para definir el cobro.', 'info');
+                        return;
+                      }
                       const tipo: TipoCobro = 'CLIENTE';
                       if (tipoCobroActual === tipo) return;
                       setTipoCobro(estimacion.id, tipo, actor);
@@ -938,9 +980,15 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                     type="button"
                     className={cn(
                       'dms-cobro-btn',
-                      tipoCobroActual === 'LINEA' && 'dms-cobro-btn--on-linea'
+                      tipoCobroActual === 'LINEA' && 'dms-cobro-btn--on-linea',
+                      !puedeEditarCobroLiq && 'cursor-not-allowed'
                     )}
+                    disabled={!puedeEditarCobroLiq}
                     onClick={() => {
+                      if (!puedeEditarCobroLiq) {
+                        toast('Aperture la estimación para definir el cobro.', 'info');
+                        return;
+                      }
                       const tipo: TipoCobro = 'LINEA';
                       if (tipoCobroActual === tipo) return;
                       setTipoCobro(estimacion.id, tipo, actor);
@@ -1235,11 +1283,15 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 <div className="min-w-0 truncate">
                   {puedeAperturar && !aperturada
                     ? vistaAprobadoLiq || estimacion.estado === 'APROBADO'
-                      ? 'Estimado aprobado: aperture para reversar solo el ítem a modificar (el resto aprobado no se re-revisa).'
+                      ? esLiquidaciones
+                        ? 'Estimado aprobado: aperture para reversar solo el ítem a modificar (el resto aprobado no se re-revisa).'
+                        : 'Estimado aprobado: los ítems aprobados están bloqueados. Contacte liquidaciones si requiere cambios.'
                       : 'Aperture para modificar ítems (queda histórico), aprobar/rechazar cada línea y luego Enviar a liquidaciones.'
                     : revisionParcial
                       ? `${MSG_REVISION_PARCIAL} Pendiente(s): ${itemsPendientesRevision.length} línea(s).`
-                      : 'Ítems Aprobados quedan bloqueados. Para editarlos: Reversar → modificar → volver a revisión.'}
+                      : esSeaboard
+                        ? 'Ítems aprobados quedan bloqueados. Solo liquidaciones puede revertirlos para modificarlos.'
+                        : 'Ítems aprobados quedan bloqueados. Para editarlos: Reversar → modificar → volver a revisión.'}
                 </div>
               </div>
 
@@ -1290,27 +1342,33 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                       <XCircle className="h-3.5 w-3.5" /> Rechazar ítems
                       {marcadosIds.length > 0 ? ` (${marcadosIds.length})` : ''}
                     </button>
-                    <button
-                      type="button"
-                      className="dms-btn-reversar px-3 py-1.5 text-xs"
-                      title={
-                        !aperturada
-                          ? 'Aperture la estimación para reversar ítems'
-                          : marcadosIds.length === 0
-                            ? 'Marque ítems aprobados para reversar'
-                            : 'Revierte ítems aprobados a Pendiente de revisión'
-                      }
-                      onClick={reversarItemsMarcados}
-                    >
-                      <RotateCcw className="h-3.5 w-3.5" /> Reversar ítems
-                      {marcadosIds.length > 0 ? ` (${marcadosIds.length})` : ''}
-                    </button>
+                    {puedeReversarItems && (
+                      <button
+                        type="button"
+                        className="dms-btn-reversar px-3 py-1.5 text-xs"
+                        title={
+                          !aperturada
+                            ? 'Aperture la estimación para reversar ítems'
+                            : marcadosIds.length === 0
+                              ? 'Marque ítems aprobados para reversar'
+                              : 'Revierte ítems aprobados a Pendiente de revisión'
+                        }
+                        onClick={reversarItemsMarcados}
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" /> Reversar ítems
+                        {marcadosIds.length > 0 ? ` (${marcadosIds.length})` : ''}
+                      </button>
+                    )}
                   </div>
                   <span className="text-[11px] text-slate-500">
                     {!aperturada
-                      ? 'Aperture la estimación para marcar y aprobar/rechazar/reversar ítems'
+                      ? esLiquidaciones
+                        ? 'Aperture la estimación para marcar y aprobar/rechazar/reversar ítems'
+                        : 'Aperture la estimación para marcar y aprobar/rechazar ítems'
                       : marcadosIds.length === 0
-                        ? 'Marque ítems con el check a la izquierda de ⓘ'
+                        ? esSeaboard
+                          ? 'Marque ítems pendientes con el check (los aprobados están bloqueados)'
+                          : 'Marque ítems con el check a la izquierda de ⓘ'
                         : `${marcadosIds.length} ítem(s) marcado(s)`}
                   </span>
                 </div>
@@ -1325,11 +1383,20 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 mostrarDimensiones={estimacion.tipoEstimacion.toUpperCase().includes('BOX')}
                 mostrarMarcacion={puedeAperturar}
                 marcacionHabilitada={aperturada}
+                marcarAprobadosHabilitado={esLiquidaciones}
                 marcadosIds={marcadosIds}
                 ocultarAntesPorItem={esCoordinador}
                 onToggleMarcado={(id) => {
                   if (!aperturada) {
                     toast('Aperture la estimación para modificar ítems.', 'info');
+                    return;
+                  }
+                  const d = estimacion.danos.find((x) => x.id === id);
+                  if (d && esItemAprobado(d.aplica) && !esLiquidaciones) {
+                    toast(
+                      'Ítem aprobado: bloqueado. Solo liquidaciones puede revertirlo para modificarlo.',
+                      'info'
+                    );
                     return;
                   }
                   setMarcadosIds((prev) =>
@@ -1662,8 +1729,10 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       <ComentarioModal
         open={dialogo.tipo === 'RECHAZAR_ITEMS'}
         title="Rechazar ítems"
-        subtitle={`${marcadosIds.length} línea(s) marcada(s) · observación obligatoria`}
-        label="Observación del rechazo (obligatoria)"
+        subtitle="Revise las líneas seleccionadas e indique el motivo del rechazo"
+        label="Motivo del rechazo (obligatorio)"
+        placeholder="Explique por qué rechaza estos ítems (mín. 5 caracteres)…"
+        lineasResumen={resumenLineasDanos(estimacion.danos, marcadosIds)}
         confirmLabel="Rechazar ítems"
         confirmClass="dms-btn-rechazar"
         onClose={cerrar}
@@ -1703,12 +1772,12 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
       <ComentarioModal
         open={dialogo.tipo === 'RECHAZAR_ITEM'}
         title="Rechazar ítem"
-        subtitle={
-          dialogo.tipo === 'RECHAZAR_ITEM'
-            ? `Línea ${String(dialogo.dano.linea).padStart(2, '0')} · ${dialogo.dano.comp}`
-            : undefined
+        subtitle="Confirme la línea e indique el motivo del rechazo"
+        label="Motivo del rechazo (obligatorio)"
+        placeholder="Explique por qué rechaza este ítem (mín. 5 caracteres)…"
+        lineasResumen={
+          dialogo.tipo === 'RECHAZAR_ITEM' ? [resumenLineaDano(dialogo.dano)] : undefined
         }
-        label="Observación del rechazo (obligatoria)"
         confirmLabel="Rechazar ítem"
         confirmClass="dms-btn-rechazar"
         onClose={cerrar}

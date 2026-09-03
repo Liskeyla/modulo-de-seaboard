@@ -1842,3 +1842,101 @@
     @apply bg-[#152483] hover:bg-[#152483];
   }
 }
+
+/*
+ * Tema DMS Ecuador — Liquidaciones y Coordinación
+ * Fondo gris-azul, cabecera navy, acentos índigo (referencia dashboard RFS DMS).
+ * Seaboard conserva el look naranja/azul actual.
+ */
+html[data-tema='dms-rfs'] {
+  --dms-tema-bg: #d1dcee;
+  --dms-tema-header: #283d68;
+  --dms-tema-accent: #2d2675;
+  --dms-tema-accent-hover: #241f5f;
+  --dms-tema-info: #e8f4f8;
+  --dms-tema-info-border: #b8d4e0;
+  --dms-tema-info-text: #31708f;
+}
+
+html[data-tema='dms-rfs'] body {
+  background-color: var(--dms-tema-bg) !important;
+  background-image: none !important;
+}
+
+html[data-tema='dms-rfs'] .bg-dms-bg {
+  background-color: var(--dms-tema-bg) !important;
+}
+
+html[data-tema='dms-rfs'] .dms-page-hero {
+  background-image: linear-gradient(
+    to right,
+    #283d68,
+    #2d2675,
+    #3a3488
+  ) !important;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+html[data-tema='dms-rfs'] .dms-info-box {
+  background: var(--dms-tema-info) !important;
+  border-color: var(--dms-tema-info-border) !important;
+  color: var(--dms-tema-info-text) !important;
+}
+
+html[data-tema='dms-rfs'] .dms-sidebar-header--filtros {
+  background-image: linear-gradient(to right, #283d68, #1e2f52) !important;
+}
+
+html[data-tema='dms-rfs'] .dms-sidebar-header--opciones {
+  background-image: linear-gradient(to right, #2d2675, #3a3488) !important;
+}
+
+html[data-tema='dms-rfs'] .dms-btn-azul,
+html[data-tema='dms-rfs'] .dms-btn-enviar,
+html[data-tema='dms-rfs'] .dms-btn-aperturar {
+  background-color: var(--dms-tema-accent) !important;
+  border-color: var(--dms-tema-accent) !important;
+}
+
+html[data-tema='dms-rfs'] .dms-btn-azul:hover,
+html[data-tema='dms-rfs'] .dms-btn-enviar:hover,
+html[data-tema='dms-rfs'] .dms-btn-aperturar:hover {
+  background-color: var(--dms-tema-accent-hover) !important;
+}
+
+html[data-tema='dms-rfs'] .dms-main-panel,
+html[data-tema='dms-rfs'] .dms-card,
+html[data-tema='dms-rfs'] .dms-sidebar-box {
+  border-color: #b8c5d9;
+  box-shadow: 0 1px 3px rgba(40, 61, 104, 0.08);
+}
+
+html[data-tema='dms-rfs'] .dms-header--dms {
+  background: var(--dms-tema-header) !important;
+  border-bottom-color: #1e2f52 !important;
+  color: #fff;
+}
+
+html[data-tema='dms-rfs'] .dms-header--dms .dms-header-title {
+  color: #fff !important;
+}
+
+html[data-tema='dms-rfs'] .dms-header--dms .dms-header-subtitle {
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+
+html[data-tema='dms-rfs'] .dms-header--dms .dms-header-brand-name {
+  color: #fff !important;
+}
+
+html[data-tema='dms-rfs'] .dms-header--dms .dms-header-brand-meta {
+  color: #c4d0e8 !important;
+}
+
+html[data-tema='dms-rfs'] .dms-header-menu-btn {
+  background-color: var(--dms-tema-accent) !important;
+}
+
+html[data-tema='dms-rfs'] .dms-header-menu-btn:hover {
+  background-color: var(--dms-tema-accent-hover) !important;
+}

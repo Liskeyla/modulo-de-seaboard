@@ -26,10 +26,14 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
 
 function ShellProtegido({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { isAuthenticated, hydrate } = useAuthStore();
+  const { isAuthenticated, hydrate, user } = useAuthStore();
   const { hydrate: hydrateEst } = useEstimacionesStore();
   const { menuFijado, hidratadoUi, hidratarUi } = useUiStore();
   const [listo, setListo] = useState(false);
+
+  /** Liquidaciones / Coordinación: colores del dashboard DMS Ecuador. */
+  const temaDmsRfs =
+    user?.rol === 'liquidaciones' || user?.rol === 'coordinador';
 
   useEffect(() => {
     hydrate();
@@ -43,6 +47,16 @@ function ShellProtegido({ children }: { children: React.ReactNode }) {
     const token = localStorage.getItem('dms_estimaciones_token');
     if (!token) router.replace('/login');
   }, [listo, isAuthenticated, router]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (temaDmsRfs) {
+      root.setAttribute('data-tema', 'dms-rfs');
+    } else {
+      root.removeAttribute('data-tema');
+    }
+    return () => root.removeAttribute('data-tema');
+  }, [temaDmsRfs]);
 
   if (!listo) return <PantallaCarga />;
 
