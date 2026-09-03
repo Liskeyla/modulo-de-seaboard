@@ -210,7 +210,8 @@ type Dialogo =
   | { tipo: 'REVERSAR_APROB'; id: string }
   | { tipo: 'PUSH_SBM'; id: string }
   | { tipo: 'PREVIEW_DANOS'; id: string }
-  | { tipo: 'NUEVO_ESTIMADO'; variante: 'Máquina' | 'Box' };
+  | { tipo: 'NUEVO_ESTIMADO'; variante: 'Máquina' | 'Box' }
+  | { tipo: 'REINICIAR_DEMO' };
 
 export default function ReporteEstimacionesPage() {
   const router = useRouter();
@@ -223,6 +224,7 @@ export default function ReporteEstimacionesPage() {
     eliminar,
     setActividad,
     crearEstimado,
+    reset,
   } = useEstimacionesStore();
   const { pais } = useUiStore();
 
@@ -533,11 +535,11 @@ export default function ReporteEstimacionesPage() {
 
   const subtituloReporte = esLiquidaciones
     ? user?.pais === 'PERU'
-      ? 'Aprobaciones de Estimados · Perú · Enviar a SBM (Seaboard), reversar y eliminar'
-      : 'Aprobaciones de Estimados · Ecuador · Enviar a SBM (Seaboard), reversar y eliminar'
+      ? 'Prueba desde cero · Enviar a SBM · reversar · eliminar'
+      : 'Prueba desde cero · Enviar a SBM · reversar · eliminar'
     : esCoordinador
-      ? 'Crear y modificar estimados · el historial lo revisa Liquidaciones para enviar a la línea'
-      : 'Usuario Seaboard · Ver, modificar ítems y enviar a liquidaciones RFS';
+      ? 'Crear y modificar estimados · Liquidaciones envía a la línea'
+      : 'Prueba desde cero · Revisar ENVIADO · aprobar/rechazar ítems · Enviar a liquidaciones';
 
   return (
     <>
@@ -635,6 +637,14 @@ export default function ReporteEstimacionesPage() {
             }}
             opcionesRelacionadas={
               <div className="space-y-1">
+                <button
+                  type="button"
+                  className="dms-link-option"
+                  title="Vuelve al escenario inicial: Liquidaciones envía a SBM y Seaboard responde"
+                  onClick={() => setDialogo({ tipo: 'REINICIAR_DEMO' })}
+                >
+                  <RefreshCw className="h-3 w-3" /> Reiniciar datos de prueba
+                </button>
                 <span className="dms-link-option dms-link-option--disabled">
                   <RefreshCw className="h-3 w-3" /> Generar Estimados desde Inspecciones
                 </span>
@@ -1274,6 +1284,42 @@ export default function ReporteEstimacionesPage() {
         <p className="text-sm text-gray-600">
           Se eliminará el estimado del reporte de liquidaciones (prototipo).
         </p>
+      </ConfirmModal>
+
+      <ConfirmModal
+        open={dialogo.tipo === 'REINICIAR_DEMO'}
+        title="Reiniciar datos de prueba"
+        subtitle="Escenario desde cero · Línea ↔ Liquidaciones"
+        confirmLabel="Reiniciar ahora"
+        confirmClass="dms-btn-azul"
+        onClose={cerrar}
+        onConfirm={() => {
+          reset();
+          setFiltroActivo(false);
+          setPage(1);
+          cerrar();
+          toast(
+            'Datos reiniciados. Liquidaciones: PENDIENTE → Enviar a SBM. Seaboard: ENVIADO → revisar ítems y Enviar.',
+            'success'
+          );
+        }}
+      >
+        <div className="space-y-2 text-sm text-gray-600">
+          <p>
+            Se restaurará el escenario inicial de pruebas. Se perderán aprobaciones, rechazos y
+            comentarios hechos en esta sesión del navegador.
+          </p>
+          <ul className="list-disc space-y-1 pl-4 text-[12px]">
+            <li>
+              <strong>Liquidaciones:</strong> estimados Seaboard en <strong>PENDIENTE</strong> listos
+              para <em>Enviar a SBM</em>.
+            </li>
+            <li>
+              <strong>Seaboard (Línea):</strong> estimados en <strong>ENVIADO</strong> con ítems
+              pendientes de revisión, listos para aprobar/rechazar y devolver.
+            </li>
+          </ul>
+        </div>
       </ConfirmModal>
 
       <ComentarioModal

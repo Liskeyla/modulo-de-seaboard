@@ -43,7 +43,7 @@ import {
   reconstruirHistorialItem,
 } from '@/lib/historialItem';
 
-const STORAGE_KEY = 'dms-estimaciones-prototipo-v21';
+const STORAGE_KEY = 'dms-estimaciones-prototipo-v22';
 const CLAVES_OBSOLETAS = [
   'dms-estimaciones-prototipo',
   'dms-estimaciones-prototipo-v2',
@@ -65,6 +65,7 @@ const CLAVES_OBSOLETAS = [
   'dms-estimaciones-prototipo-v18',
   'dms-estimaciones-prototipo-v19',
   'dms-estimaciones-prototipo-v20',
+  'dms-estimaciones-prototipo-v21',
 ];
 
 function migrarEstadosItem(estims: Estimacion[]): Estimacion[] {

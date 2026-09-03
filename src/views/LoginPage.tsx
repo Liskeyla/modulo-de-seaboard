@@ -26,7 +26,17 @@ const DEMO = [
   {
     usuario: 'seaboard',
     clave: 'admin123',
-    rol: 'Usuario Seaboard · EC / PE',
+    rol: 'Línea · revisar ENVIADO · aprobar/rechazar ítems · Enviar a liquidaciones',
+  },
+  {
+    usuario: 'liqecuador',
+    clave: 'admin123',
+    rol: 'Liquidaciones EC · PENDIENTE → Enviar a SBM',
+  },
+  {
+    usuario: 'liqperu',
+    clave: 'admin123',
+    rol: 'Liquidaciones PE · PENDIENTE → Enviar a SBM',
   },
   {
     usuario: 'coordecuador',
@@ -37,16 +47,6 @@ const DEMO = [
     usuario: 'coordperu',
     clave: 'admin123',
     rol: 'Coordinador · Perú · crear / modificar estimados',
-  },
-  {
-    usuario: 'liqecuador',
-    clave: 'admin123',
-    rol: 'Aprobaciones de Estimados · Ecuador',
-  },
-  {
-    usuario: 'liqperu',
-    clave: 'admin123',
-    rol: 'Aprobaciones de Estimados · Perú',
   },
 ];
 
@@ -271,7 +271,29 @@ export default function LoginPage() {
                   </span>
                 </button>
                 {demoAbierto && (
-                  <ul className="mt-3 space-y-1.5 animate-fade-in">
+                  <div className="mt-3 space-y-3 animate-fade-in">
+                    <div className="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-[11px] leading-relaxed text-sky-950">
+                      <p className="font-bold uppercase tracking-wide text-sky-800">
+                        Prueba desde cero · Línea ↔ Liquidaciones
+                      </p>
+                      <ol className="mt-1.5 list-decimal space-y-1 pl-4">
+                        <li>
+                          Entre como <strong>liqecuador</strong> / <strong>liqperu</strong>, abra un
+                          estimado <strong>PENDIENTE</strong> Seaboard y pulse <em>Enviar a SBM</em>.
+                        </li>
+                        <li>
+                          Cierre sesión y entre como <strong>seaboard</strong>: verá el estimado en{' '}
+                          <strong>ENVIADO</strong>, aperture, apruebe/rechace ítems y pulse{' '}
+                          <em>Enviar</em> a liquidaciones.
+                        </li>
+                        <li>
+                          Vuelva a Liquidaciones para ver el retorno (APROBADO / RECHAZADO). En el
+                          menú lateral use <em>Reiniciar datos de prueba</em> si necesita empezar de
+                          nuevo.
+                        </li>
+                      </ol>
+                    </div>
+                    <ul className="space-y-1.5">
                     {DEMO.map((c) => (
                       <li key={c.usuario}>
                         <button
@@ -291,7 +313,8 @@ export default function LoginPage() {
                         </button>
                       </li>
                     ))}
-                  </ul>
+                    </ul>
+                  </div>
                 )}
               </div>
             </div>
