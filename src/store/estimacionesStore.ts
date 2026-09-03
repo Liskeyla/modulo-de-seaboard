@@ -386,16 +386,20 @@ export const useEstimacionesStore = create<EstimacionesState>()(
               if (e.enviarAprobacion === 'SI') return e;
               // Push a SBM solo aplica a naviera Seaboard (otras navieras no entran a bandeja SBM).
               if (!esNavieraSeaboard(e.naviera)) return e;
+              // Si Liquidaciones envía SIN modificar ítems (sin cambios de línea),
+              // Seaboard debe verlo como PENDIENTE para volver a revisar.
+              const hayCambiosLinea = e.danos.some((d) => itemModificadoPorLinea(d));
               const pendientesLiq = e.danos.reduce(
                 (acc, d) =>
                   acc + d.comentarios.filter((c) => c.tipo === 'SOLICITA_CAMBIO').length,
                 0
               );
               const destino = 'Seaboard Marine';
+              const estadoSeaboard: EstadoEstimacion = hayCambiosLinea ? 'ENVIADO' : 'PENDIENTE';
               return {
                 ...e,
-                /** Llega a la bandeja Seaboard en estado ENVIADO. */
-                estado: 'ENVIADO' as EstadoEstimacion,
+                /** Llega a la bandeja Seaboard según si hubo o no cambios en ítems. */
+                estado: estadoSeaboard,
                 enviarAprobacion: 'SI',
                 validadoLiquidaciones: true,
                 /** Fecha en que Liquidaciones envió el estimado al reporte Seaboard. */
@@ -408,7 +412,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                     'ENVIAR',
                     pendientesLiq > 0
                       ? `Enviar a SBM · ${pendientesLiq} comentario(s) de liquidaciones pendientes.`
-                      : 'Enviar a SBM · estimado en revisión Seaboard.',
+                      : `Enviar a SBM · estimado ${estadoSeaboard.toLowerCase()} Seaboard.`,
                     usuario
                   ),
                 ],
@@ -417,7 +421,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                   evento(
                     usuario,
                     'PUSH A SEABOARD',
-                    `Enviado a ${destino} (estado ENVIADO) · $${e.pvpTotal.toFixed(2)}` +
+                    `Enviado a ${destino} (estado ${estadoSeaboard}) · $${e.pvpTotal.toFixed(2)}` +
                       (pendientesLiq > 0
                         ? ` · ${pendientesLiq} comentario(s) liquidaciones pendientes`
                         : '')
