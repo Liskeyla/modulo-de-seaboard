@@ -30,7 +30,11 @@ import {
   tipoCobroDesdeCargo,
   valoresCeroPorRechazoItem,
 } from '@/types/estimacion';
-import { esNavieraSeaboard, resolverEstadoEnvioALiquidaciones } from '@/lib/seaboardFlow';
+import {
+  esNavieraSeaboard,
+  itemModificadoPorLinea,
+  resolverEstadoEnvioALiquidaciones,
+} from '@/lib/seaboardFlow';
 import { useCatalogoCargoStore } from '@/store/catalogoCargoStore';
 import {
   appendHistorialItem,
@@ -546,6 +550,43 @@ export const useEstimacionesStore = create<EstimacionesState>()(
              * APROBADO queda enviado; retorno rechazado libera bandeja a liquidaciones.
              */
             const liberarBandeja = paraLiquidaciones === 'RECHAZADO' || estado === 'RECHAZADO';
+            const fecha = ahoraFmt();
+            const danos =
+              paraLiquidaciones === 'RECHAZADO'
+                ? e.danos.map((d) => {
+                    if (!itemModificadoPorLinea(d) || esAplicaRechazado(d.aplica)) return d;
+                    const cmt: ComentarioDano = {
+                      id: uid('cmt'),
+                      usuario,
+                      rol: 'SEABOARD',
+                      fecha,
+                      tipo: 'INFORMATIVO',
+                      mensaje:
+                        'Seaboard modificó este ítem (p. ej. cantidad). Liquidaciones debe revisar, ajustar e insistir a la línea.',
+                      campoAfectado: 'Estado',
+                      valorAnterior: d.aplica,
+                      valorNuevo: APLICA_RECHAZADO_SBM,
+                    };
+                    return {
+                      ...d,
+                      aplica: APLICA_RECHAZADO_SBM,
+                      comentarios: [...d.comentarios, cmt],
+                      historialAcciones: appendHistorialItem(
+                        d.historialAcciones,
+                        {
+                          fecha,
+                          usuario,
+                          tipo: 'CAMBIO_ESTADO',
+                          accion: 'Retorno con cambios a liquidaciones',
+                          cambio: `${d.aplica} → Rechazado (ítem modificado por Seaboard; costos se conservan)`,
+                          estadoAnterior: normalizarAplicaDano(d.aplica),
+                          estadoNuevo: APLICA_RECHAZADO_SBM,
+                          comentario: d.edicionReciente?.resumenCambios,
+                        }
+                      ),
+                    };
+                  })
+                : e.danos;
             const detalleAuditoria =
               soloRechazosNoBloqueantes || soloRechazosCargoCliente
                 ? `Seaboard envió a liquidaciones RFS como APROBADO (rechazos de cargos no bloqueantes según catálogo; resto aprobado). Comentarios: ${obs}`
@@ -555,6 +596,7 @@ export const useEstimacionesStore = create<EstimacionesState>()(
             return {
               ...e,
               estado,
+              danos,
               fechaRevision: ahoraFmt(),
               fechaModificacion: ahoraFmt(),
               usuarioModificacion: usuario,

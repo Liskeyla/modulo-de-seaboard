@@ -49,6 +49,8 @@ import { AgregarDanoCard } from '@/components/estimacion/AgregarDanoCard';
 import { VideoDanoModal } from '@/components/estimacion/VideoDanoModal';
 import {
   esNavieraSeaboard,
+  esRetornoConCambiosALiquidaciones,
+  itemModificadoPorLinea,
   puedePushASbm,
   resolverEstadoEnvioALiquidaciones,
   estadoVisibleLiquidaciones,
@@ -370,9 +372,11 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   const puedeEditarCoordinador =
     esCoordinador &&
     ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(estimacion.estado);
-  /** Vista post-aprobación Liquidaciones (como DMS). */
+  const retornoConCambiosLiq =
+    esLiquidaciones && esRetornoConCambiosALiquidaciones(estimacion);
+  /** Vista post-aprobación Liquidaciones (como DMS). No aplica si SBM devolvió con cambios. */
   const vistaAprobadoLiq =
-    esLiquidaciones && estimacion.estado === 'APROBADO';
+    esLiquidaciones && estimacion.estado === 'APROBADO' && !retornoConCambiosLiq;
   const vistaReparadoLiq =
     esLiquidaciones && estimacion.estado === 'REPARADO';
   const vistaCerradaLiq = vistaAprobadoLiq || vistaReparadoLiq;
@@ -383,10 +387,13 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   const puedeAperturar =
     (puedeRevisarItems || puedeEditarLiquidaciones || puedeEditarCoordinador) &&
     !vistaReparadoLiq &&
-    !(esLiquidaciones && estimacion.estado === 'APROBADO');
+    !(esLiquidaciones && estimacion.estado === 'APROBADO' && !retornoConCambiosLiq);
   /** Liquidaciones en APROBADO: botón visible pero deshabilitado hasta reversar. */
   const mostrarAperturarDeshabilitadoLiq =
-    esLiquidaciones && estimacion.estado === 'APROBADO' && !aperturada;
+    esLiquidaciones &&
+    estimacion.estado === 'APROBADO' &&
+    !retornoConCambiosLiq &&
+    !aperturada;
   const editable =
     aperturada && (esSeaboard || esLiquidaciones || esCoordinador);
   /** Liquidaciones / Coordinador / Seaboard: evidencias al aperturar. */
@@ -434,7 +441,8 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
   /** Pendiente: Agregar daño (Liquidaciones y Coordinador; no Seaboard). */
   const mostrarAgregarDanoLiq =
     (esLiquidaciones || esCoordinador) &&
-    ['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(estimacion.estado);
+    (['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(estimacion.estado) ||
+      retornoConCambiosLiq);
   /** APROBADO/REPARADO/PENDIENTE: SAP y notas visibles. */
   const mostrarSapNotasLiq = mostrarAgregarDanoLiq || vistaCerradaLiq;
   /** En APROBADO/REPARADO los campos van habilitados (sin aperturar). */
@@ -747,7 +755,11 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     const rfsNuevo = comentarioRfsNuevo?.trim();
     const soloNotaRfs =
       esLiquidaciones && Boolean(rfsNuevo) && Object.keys(cambios).length === 0;
-    if (esItemAprobado(dano.aplica) && !soloNotaRfs) {
+    if (
+      esItemAprobado(dano.aplica) &&
+      !soloNotaRfs &&
+      !(esLiquidaciones && itemModificadoPorLinea(dano))
+    ) {
       return;
     }
     if (!soloNotaRfs && exigirApertura()) return;
@@ -1447,6 +1459,7 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                 mostrarMarcacion={puedeAperturar}
                 marcacionHabilitada={aperturada}
                 marcarAprobadosHabilitado={esLiquidaciones}
+                editarAprobadosModificados={esLiquidaciones}
                 marcadosIds={marcadosIds}
                 ocultarAntesPorItem={esCoordinador}
                 onToggleMarcado={(id) => {
@@ -1455,7 +1468,11 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                     return;
                   }
                   const d = estimacion.danos.find((x) => x.id === id);
-                  if (d && esItemAprobado(d.aplica) && !esLiquidaciones) {
+                  if (
+                    d &&
+                    esItemAprobado(d.aplica) &&
+                    !esLiquidaciones
+                  ) {
                     toast(
                       'Ítem aprobado: bloqueado. Solo liquidaciones puede revertirlo para modificarlo.',
                       'info'
@@ -1487,14 +1504,20 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   }
                 }}
                 onRemarkChange={(d, remark) => {
-                  if (esItemAprobado(d.aplica)) {
+                  if (
+                    esItemAprobado(d.aplica) &&
+                    !(esLiquidaciones && itemModificadoPorLinea(d))
+                  ) {
                     return;
                   }
                   if (exigirApertura()) return;
                   cambiarDano(d, { remark }, `Línea ${d.linea} · Remark actualizado: "${remark}"`);
                 }}
                 onDonanteChange={(d, contenedorDonante) => {
-                  if (esItemAprobado(d.aplica)) {
+                  if (
+                    esItemAprobado(d.aplica) &&
+                    !(esLiquidaciones && itemModificadoPorLinea(d))
+                  ) {
                     return;
                   }
                   if (exigirApertura()) return;
@@ -1505,14 +1528,20 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
                   );
                 }}
                 onCargoChange={(d, cargo) => {
-                  if (esItemAprobado(d.aplica)) {
+                  if (
+                    esItemAprobado(d.aplica) &&
+                    !(esLiquidaciones && itemModificadoPorLinea(d))
+                  ) {
                     return;
                   }
                   if (exigirApertura()) return;
                   cambiarDano(d, { cargo }, `Línea ${d.linea} · Cargo: ${cargo}`);
                 }}
                 onEditar={(d) => {
-                  if (esItemAprobado(d.aplica)) {
+                  if (
+                    esItemAprobado(d.aplica) &&
+                    !(esLiquidaciones && itemModificadoPorLinea(d))
+                  ) {
                     setDialogo({ tipo: 'EDITAR_DANO', dano: d });
                     return;
                   }

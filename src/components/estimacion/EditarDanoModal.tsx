@@ -18,6 +18,7 @@ import {
   type DanoEstimacion,
 } from '@/types/estimacion';
 import { resumirCambiosAntesDespues } from '@/lib/cambioAntesDespues';
+import { itemModificadoPorLinea } from '@/lib/seaboardFlow';
 import { cn, toast } from '@/lib/utils';
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -160,7 +161,12 @@ export function EditarDanoModal({
   if (!dano || !form) return null;
 
   const itemRechazado = esAplicaRechazado(form.aplica);
-  const itemAprobado = esItemAprobado(form.aplica);
+  const itemAprobadoRaw = esItemAprobado(form.aplica);
+  /**
+   * Liquidaciones trata como pendiente: rechazados, y aprobados que Seaboard modificó.
+   */
+  const itemAprobado =
+    itemAprobadoRaw && !(esEditorRfs && itemModificadoPorLinea(dano));
   /**
    * Liquidaciones puede editar ítems rechazados como si fueran pendientes.
    * Solo Seaboard/otros ven los rechazados como "solo lectura + costos en $0".

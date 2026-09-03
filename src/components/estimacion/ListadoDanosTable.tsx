@@ -29,6 +29,7 @@ import {
   type EdicionRecienteDano,
   type RolComentario,
 } from '@/types/estimacion';
+import { itemModificadoPorLinea } from '@/lib/seaboardFlow';
 import {
   esCampoValorNumerico,
   formatearValorCampo,
@@ -70,6 +71,8 @@ interface ListadoDanosTableProps {
   marcacionHabilitada?: boolean;
   /** Solo liquidaciones: permite marcar ítems aprobados para reversarlos. */
   marcarAprobadosHabilitado?: boolean;
+  /** Liquidaciones: ítems aprobados que Seaboard modificó se editan como pendientes. */
+  editarAprobadosModificados?: boolean;
   marcadosIds?: string[];
   onToggleMarcado?: (danoId: string) => void;
   onToggleTodos?: (marcar: boolean) => void;
@@ -315,6 +318,7 @@ export function ListadoDanosTable({
   mostrarMarcacion = false,
   marcacionHabilitada = false,
   marcarAprobadosHabilitado = false,
+  editarAprobadosModificados = false,
   marcadosIds = [],
   onToggleMarcado,
   onToggleTodos,
@@ -500,7 +504,9 @@ export function ListadoDanosTable({
             const antesAbierto = tieneAntes && antesExpandidoIds.has(d.id);
             /** Resalta celdas modificadas; sin texto «antes → después» si ocultarAntesPorItem. */
             const mod = (campo: CampoSnapshotLinea) => claseCampoModificado(edicion, campo);
-            const bloqueadoAprobado = esItemAprobado(d.aplica);
+            const bloqueadoAprobado =
+              esItemAprobado(d.aplica) &&
+              !(editarAprobadosModificados && itemModificadoPorLinea(d));
             const puedeEditarFila = editable && !bloqueadoAprobado;
             const puedeCargoFila = Boolean(cargoAplicaEditable && onCargoChange && !bloqueadoAprobado);
             const checkDeshabilitado =

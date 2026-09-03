@@ -22,8 +22,19 @@ function cargoDeCatalogo(
  * Estado del estimado al enviar Seaboard → Liquidaciones RFS.
  * Reglas tomadas del catálogo de cargo (Liquidaciones).
  */
+/** Ítem que Seaboard modificó (cantidad, costos, etc.) y Liquidaciones debe revalidar. */
+export function itemModificadoPorLinea(d: {
+  edicionReciente?: { camposCambiados?: string[] };
+}) {
+  return (d.edicionReciente?.camposCambiados?.length ?? 0) > 0;
+}
+
+export function estimadoConCambiosDeLinea(e: Estimacion) {
+  return e.danos.some(itemModificadoPorLinea);
+}
+
 export function resolverEstadoEnvioALiquidaciones(
-  danos: { cargo: string; aplica?: string }[],
+  danos: { cargo: string; aplica?: string; edicionReciente?: { camposCambiados?: string[] } }[],
   catalogoCargos: CatalogoCargo[] = CATALOGO_CARGO_SEED
 ): {
   estado: Extract<EstadoEstimacion, 'APROBADO' | 'ENVIADO' | 'RECHAZADO'>;
@@ -33,6 +44,20 @@ export function resolverEstadoEnvioALiquidaciones(
   soloRechazosNoBloqueantes: boolean;
 } {
   const hayRechazos = danos.some((d) => esAplicaRechazado(d.aplica ?? ''));
+  const hayCambiosLinea = danos.some(itemModificadoPorLinea);
+  /**
+   * Si Seaboard cambió valores (ej. cantidad) y reenvía, Liquidaciones lo recibe
+   * como RECHAZADO para poder ajustar e insistir a la línea.
+   */
+  if (hayCambiosLinea) {
+    return {
+      estado: 'RECHAZADO',
+      paraLiquidaciones: 'RECHAZADO',
+      hayRechazos,
+      soloRechazosCargoCliente: false,
+      soloRechazosNoBloqueantes: false,
+    };
+  }
   const todosAprobados =
     danos.length > 0 && danos.every((d) => esItemAprobado(d.aplica ?? ''));
   const rechazados = danos.filter((d) => esAplicaRechazado(d.aplica ?? ''));
@@ -121,8 +146,19 @@ export function esRetornoRechazadoALiquidaciones(e: Estimacion) {
   return e.danos.some((d) => esAplicaRechazado(d.aplica));
 }
 
+/**
+ * Seaboard ya devolvió el estimado con cambios de ítem:
+ * Liquidaciones lo trata como RECHAZADO (aunque la cabecera haya quedado APROBADO).
+ */
+export function esRetornoConCambiosALiquidaciones(e: Estimacion) {
+  if (!estimadoConCambiosDeLinea(e)) return false;
+  if (enBandejaSeaboard(e)) return false;
+  return ['APROBADO', 'RECHAZADO', 'ENVIADO'].includes(e.estado);
+}
+
 /** Estado que debe ver liquidaciones en badge / filtros. */
 export function estadoVisibleLiquidaciones(e: Estimacion): EstadoEstimacion {
+  if (esRetornoConCambiosALiquidaciones(e)) return 'RECHAZADO';
   if (esRetornoRechazadoALiquidaciones(e) && e.estado === 'ENVIADO') {
     return 'RECHAZADO';
   }
@@ -146,11 +182,16 @@ export function enBandejaSeaboard(e: Estimacion) {
 
 /** Liquidaciones puede enviar a SBM solo si la naviera es Seaboard y aún no está enviado (incl. tras reverso). */
 export function puedePushASbm(e: Estimacion) {
-  const yaEnviado = String(e.enviarAprobacion || '').toUpperCase() === 'SI';
+  const retornoCambios = esRetornoConCambiosALiquidaciones(e);
+  const yaEnviado =
+    String(e.enviarAprobacion || '').toUpperCase() === 'SI' && !retornoCambios;
+  const estadosOk =
+    ['PENDIENTE', 'RECHAZADO', 'REVERSADO', 'ENVIADO'].includes(e.estado) ||
+    (e.estado === 'APROBADO' && retornoCambios);
   return (
     esNavieraSeaboard(e.naviera) &&
     !yaEnviado &&
-    ['PENDIENTE', 'RECHAZADO', 'REVERSADO', 'ENVIADO'].includes(e.estado) &&
+    estadosOk &&
     e.danos.length > 0
   );
 }
@@ -171,7 +212,8 @@ export function resumenRetornoSeaboard(e: Estimacion) {
     (d) => normalizarAplicaDano(d.aplica) === APLICA_APROBADO_SBM
   ).length;
   const rechazoTotal =
-    e.estado === 'RECHAZADO' || esRetornoRechazadoALiquidaciones(e);
+    (e.estado === 'RECHAZADO' || esRetornoRechazadoALiquidaciones(e)) &&
+    !estimadoConCambiosDeLinea(e);
   const ultimo = [...e.comentariosSeaboard]
     .reverse()
     .find((c) => c.accion === 'APROBAR' || c.accion === 'RECHAZAR' || c.accion === 'ENVIAR');
@@ -186,4 +228,4 @@ export function resumenRetornoSeaboard(e: Estimacion) {
     usuario: ultimo?.usuario ?? e.usuarioModificacion,
   };
 }
-
+
