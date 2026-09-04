@@ -18,6 +18,7 @@ import {
   Undo2,
   Upload,
   Users,
+  Zap,
 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { DmsReportLayout } from '@/components/dms/DmsReportLayout';
@@ -54,6 +55,8 @@ import {
   esRetornoRechazadoALiquidaciones,
 } from '@/lib/seaboardFlow';
 import { useCatalogoCargoStore } from '@/store/catalogoCargoStore';
+import { useMontoReparacionStore } from '@/store/montoReparacionStore';
+import { estimadoEsAutoaprobable } from '@/lib/montoReparacion';
 import {
   ACTIVIDADES,
   ESTADOS_ESTIMACION,
@@ -215,7 +218,8 @@ type Dialogo =
   | { tipo: 'PUSH_SBM'; id: string }
   | { tipo: 'PREVIEW_DANOS'; id: string }
   | { tipo: 'NUEVO_ESTIMADO'; variante: 'Máquina' | 'Box' }
-  | { tipo: 'REINICIAR_DEMO' };
+  | { tipo: 'REINICIAR_DEMO' }
+  | { tipo: 'AUTOAPROBAR_MASIVO' };
 
 export default function ReporteEstimacionesPage() {
   const router = useRouter();
@@ -232,6 +236,7 @@ export default function ReporteEstimacionesPage() {
     reset,
   } = useEstimacionesStore();
   const { pais } = useUiStore();
+  const montosReparacion = useMontoReparacionStore((s) => s.montos);
 
   useEffect(() => {
     setPage(1);
@@ -362,6 +367,16 @@ export default function ReporteEstimacionesPage() {
     { hh: 0, pvpHh: 0, pvpMat: 0, pvpTotal: 0 }
   );
 
+  /** Estimados que cumplen catálogo Monto Reparación y aún no fueron enviados a SBM. */
+  const autoaprobables = useMemo(() => {
+    if (!esLiquidaciones) return [];
+    return filtered.filter((e) => estimadoEsAutoaprobable(e, montosReparacion).ok);
+  }, [filtered, montosReparacion, esLiquidaciones]);
+
+  function infoAutoaprobacion(e: Estimacion) {
+    return estimadoEsAutoaprobable(e, montosReparacion);
+  }
+
   function limpiarFiltros() {
     setDesde('2026-08-17');
     setHasta('2026-08-23');
@@ -460,17 +475,26 @@ export default function ReporteEstimacionesPage() {
         (esLiquidaciones && puedePushASbm(row)) ? (
           <button
             type="button"
-            className="dms-icon-action dms-icon-action--enviar"
+            className={cn(
+              'dms-icon-action',
+              esLiquidaciones && infoAutoaprobacion(row).ok
+                ? 'dms-icon-action--aprobar'
+                : 'dms-icon-action--enviar'
+            )}
             title={
-              esLiquidaciones
-                ? 'Enviar a SBM · solo naviera Seaboard · queda ENVIADO'
-                : 'Enviar a Seaboard Marine'
+              esLiquidaciones && infoAutoaprobacion(row).ok
+                ? `Autoaprobar · ${infoAutoaprobacion(row).reglas[0]?.descripcion ?? 'catálogo monto reparación'}`
+                : esLiquidaciones
+                  ? 'Enviar a SBM · solo naviera Seaboard'
+                  : 'Enviar a Seaboard Marine'
             }
             onClick={() => {
               setDialogo({ tipo: esLiquidaciones ? 'PUSH_SBM' : 'ENVIAR', id: row.id });
             }}
           >
-            {esLiquidaciones ? (
+            {esLiquidaciones && infoAutoaprobacion(row).ok ? (
+              <Zap className="h-3.5 w-3.5" />
+            ) : esLiquidaciones ? (
               <Upload className="h-3.5 w-3.5" />
             ) : (
               <Send className="h-3.5 w-3.5" />
@@ -669,6 +693,17 @@ export default function ReporteEstimacionesPage() {
                 >
                   <RefreshCw className="h-3 w-3" /> Reiniciar datos de prueba
                 </button>
+                {esLiquidaciones && (
+                  <button
+                    type="button"
+                    className="dms-link-option"
+                    disabled={autoaprobables.length === 0}
+                    title="Envía a Seaboard los estimados que cumplen el catálogo Monto Reparación"
+                    onClick={() => setDialogo({ tipo: 'AUTOAPROBAR_MASIVO' })}
+                  >
+                    <Zap className="h-3 w-3" /> Autoaprobar elegibles ({autoaprobables.length})
+                  </button>
+                )}
                 <span className="dms-link-option dms-link-option--disabled">
                   <RefreshCw className="h-3 w-3" /> Generar Estimados desde Inspecciones
                 </span>
@@ -894,6 +929,16 @@ export default function ReporteEstimacionesPage() {
                               {esLiquidaciones && enBandejaSeaboard(row) && (
                                 <span className="mt-1 block rounded bg-sky-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-sky-800">
                                   En SBM · {row.estado === 'ENVIADO' ? 'enviado' : 'pendiente'}
+                                </span>
+                              )}
+                              {esLiquidaciones && infoAutoaprobacion(row).ok && (
+                                <span
+                                  className="mt-1 block rounded bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-emerald-800"
+                                  title={infoAutoaprobacion(row)
+                                    .reglas.map((r) => r.descripcion)
+                                    .join(' · ')}
+                                >
+                                  Autoaprobable · catálogo monto
                                 </span>
                               )}
                             </td>
@@ -1264,9 +1309,17 @@ export default function ReporteEstimacionesPage() {
           (dialogo.tipo === 'ENVIAR' && user?.rol === 'dms') ||
           dialogo.tipo === 'PUSH_SBM'
         }
-        title="Enviar a Seaboard Marine"
+        title={
+          activa && esLiquidaciones && infoAutoaprobacion(activa).ok
+            ? 'Autoaprobar y enviar a Seaboard'
+            : 'Enviar a Seaboard Marine'
+        }
         subtitle={activa ? `${activa.codigo} · ${activa.contenedor}` : undefined}
-        confirmLabel="Confirmar envío a SBM"
+        confirmLabel={
+          activa && esLiquidaciones && infoAutoaprobacion(activa).ok
+            ? 'Confirmar autoaprobación'
+            : 'Confirmar envío a SBM'
+        }
         confirmClass="dms-btn-enviar"
         onClose={cerrar}
         onConfirm={() => {
@@ -1278,19 +1331,78 @@ export default function ReporteEstimacionesPage() {
             );
             return;
           }
+          const auto = esLiquidaciones ? infoAutoaprobacion(activa) : { ok: false, reglas: [] };
           enviarAprobacion([activa.id], actor);
           toast(
-            `Estimación ${activa.codigo} enviada a Seaboard (estado ENVIADO).`,
+            auto.ok
+              ? `Autoaprobado por catálogo (${auto.reglas[0]?.descripcion}). ${activa.codigo} enviado a Seaboard.`
+              : `Estimación ${activa.codigo} enviada a Seaboard.`,
             'success'
           );
           cerrar();
         }}
       >
-        <p className="text-sm leading-relaxed text-gray-600">
-          El estimado se envía al reporte Seaboard en estado <strong>ENVIADO</strong>.
-          Cuando el gestor lo apruebe o rechace (con comentarios y cambios), volverá visible aquí
-          con el detalle de ítems modificados / rechazados.
+        {activa && esLiquidaciones && infoAutoaprobacion(activa).ok ? (
+          <div className="space-y-2 text-sm text-gray-600">
+            <p>
+              El estimado cumple la regla del catálogo <strong>Monto Reparación</strong> y se
+              autoaprueba para caer en el reporte Seaboard.
+            </p>
+            <ul className="list-disc space-y-1 pl-5 text-xs">
+              {infoAutoaprobacion(activa).reglas.map((r) => (
+                <li key={r.id}>
+                  {r.descripcion} · ${r.valorMinimo.toFixed(2)} – ${r.valorMaximo.toFixed(2)} ·{' '}
+                  {r.actividad || 'act. cualquiera'}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <p className="text-sm leading-relaxed text-gray-600">
+            El estimado se envía al reporte Seaboard. Cuando el gestor lo apruebe o rechace (con
+            comentarios y cambios), volverá visible aquí con el detalle de ítems.
+          </p>
+        )}
+      </ConfirmModal>
+
+      <ConfirmModal
+        open={dialogo.tipo === 'AUTOAPROBAR_MASIVO'}
+        title="Autoaprobar elegibles"
+        subtitle={`${autoaprobables.length} estimado(s) · catálogo Monto Reparación`}
+        confirmLabel="Autoaprobar y enviar a SBM"
+        confirmClass="dms-btn-aprobar"
+        onClose={cerrar}
+        onConfirm={() => {
+          if (autoaprobables.length === 0) return;
+          enviarAprobacion(
+            autoaprobables.map((e) => e.id),
+            actor
+          );
+          toast(
+            `${autoaprobables.length} estimado(s) autoaprobados y enviados a Seaboard según catálogo.`,
+            'success'
+          );
+          cerrar();
+        }}
+      >
+        <p className="mb-2 text-sm text-gray-600">
+          Se enviarán a la bandeja Seaboard solo los estimados que cumplen rangos y condiciones del
+          catálogo (naviera, tipo, clasificación, modelo, actividad y monto).
         </p>
+        <ul className="max-h-40 space-y-1 overflow-auto text-[11px] text-slate-700">
+          {autoaprobables.slice(0, 12).map((e) => {
+            const { reglas } = infoAutoaprobacion(e);
+            return (
+              <li key={e.id}>
+                <strong>{e.codigo}</strong> · ${e.pvpTotal.toFixed(2)} ·{' '}
+                {reglas[0]?.descripcion ?? 'regla'}
+              </li>
+            );
+          })}
+          {autoaprobables.length > 12 && (
+            <li>… y {autoaprobables.length - 12} más</li>
+          )}
+        </ul>
       </ConfirmModal>
 
       <ConfirmModal

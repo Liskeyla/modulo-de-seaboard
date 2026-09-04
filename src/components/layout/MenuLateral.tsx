@@ -8,6 +8,7 @@ import {
   BookOpen,
   ChevronDown,
   ClipboardCheck,
+  DollarSign,
   FileBarChart,
   Home,
   ListChecks,
@@ -29,6 +30,7 @@ const iconos: Record<string, React.ComponentType<{ className?: string }>> = {
   ClipboardCheck,
   ListChecks,
   BookOpen,
+  DollarSign,
 };
 
 export function MenuLateral() {

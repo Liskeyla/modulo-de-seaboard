@@ -152,6 +152,10 @@
     @apply border-fuchsia-300 bg-[#c026d3];
   }
 
+  .dms-icon-action--aprobar {
+    @apply border-emerald-300 bg-emerald-600;
+  }
+
   .dms-icon-action--reversar {
     @apply border-amber-300 bg-[#f0ad4e] text-slate-900;
   }

@@ -42,6 +42,13 @@ export const MENU_GRUPOS: MenuGrupo[] = [
         roles: ['liquidaciones'],
       },
       {
+        href: '/catalogos/monto-reparacion',
+        label: 'Lista Monto Reparación',
+        icon: 'DollarSign',
+        descripcion: 'Rangos y condiciones de autoaprobación de estimados',
+        roles: ['liquidaciones'],
+      },
+      {
         href: '/reportes/estimaciones',
         label: 'Reporte de Estimaciones Seaboard Marine',
         icon: 'FileBarChart',
