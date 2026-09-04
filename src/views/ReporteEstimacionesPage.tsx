@@ -621,13 +621,18 @@ export default function ReporteEstimacionesPage() {
                 onChange: (v) => setTecnico(String(v)),
                 options: opciones.tecnicos,
               },
-              {
-                label: 'Aplica',
-                type: 'select',
-                value: aplica,
-                onChange: (v) => setAplica(String(v)),
-                options: ['Todos', 'SI', 'NO'],
-              },
+              // Aplica (SI/NO) es control de Liquidaciones; Seaboard no usa lista desplegable.
+              ...(!esSeaboard
+                ? [
+                    {
+                      label: 'Aplica',
+                      type: 'select' as const,
+                      value: aplica,
+                      onChange: (v: string | boolean) => setAplica(String(v)),
+                      options: ['Todos', 'SI', 'NO'],
+                    },
+                  ]
+                : []),
               {
                 label: 'Estimaciones completas',
                 type: 'toggle',
@@ -805,7 +810,7 @@ export default function ReporteEstimacionesPage() {
                       <th>PVP Total</th>
                       <th>Estado PTI</th>
                       <th>Fecha Fin PTI</th>
-                      <th>Enviar Aprobacion</th>
+                      {!esSeaboard && <th>Enviar Aprobacion</th>}
                       <th title={etiquetasFecha.envioTitle}>{etiquetasFecha.envio}</th>
                       <th title={etiquetasFecha.revisionTitle}>{etiquetasFecha.revision}</th>
                       <th title={etiquetasFecha.aprobacionTitle}>{etiquetasFecha.aprobacion}</th>
@@ -999,16 +1004,18 @@ export default function ReporteEstimacionesPage() {
                             </td>
                             <td className="text-center">{row.estadoPti || '—'}</td>
                             <td className="text-[10px] tabular-nums">{row.fechaFinPti || '—'}</td>
-                            <td className="text-center">
-                              <span
-                                className={cn(
-                                  'dms-si-no',
-                                  row.enviarAprobacion === 'SI' ? 'dms-si-no--si' : 'dms-si-no--no'
-                                )}
-                              >
-                                {row.enviarAprobacion}
-                              </span>
-                            </td>
+                            {!esSeaboard && (
+                              <td className="text-center">
+                                <span
+                                  className={cn(
+                                    'dms-si-no',
+                                    row.enviarAprobacion === 'SI' ? 'dms-si-no--si' : 'dms-si-no--no'
+                                  )}
+                                >
+                                  {row.enviarAprobacion}
+                                </span>
+                              </td>
+                            )}
                             <td
                               className="text-[10px] tabular-nums"
                               title={
