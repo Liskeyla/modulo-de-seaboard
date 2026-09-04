@@ -138,7 +138,7 @@ export function resolverEstadoEnvioALiquidaciones(
 export function esRetornoRechazadoALiquidaciones(e: Estimacion) {
   if (e.estado === 'RECHAZADO') return true;
   if (e.estado !== 'ENVIADO') return false;
-  if (String(e.enviarAprobacion || '').toUpperCase() === 'SI') return false;
+  if (fueEnviadoASeaboard(e)) return false;
   const ultimo = [...e.comentariosSeaboard]
     .reverse()
     .find((c) => c.accion === 'APROBAR' || c.accion === 'RECHAZAR' || c.accion === 'ENVIAR');
@@ -170,11 +170,23 @@ export function esNavieraSeaboard(naviera: string) {
   return naviera.toUpperCase().includes('SEABOARD');
 }
 
+/** Liquidaciones ya envió el estimado al reporte / bandeja Seaboard. */
+export function fueEnviadoASeaboard(e: { enviarAprobacion?: string }) {
+  return String(e.enviarAprobacion || '').toUpperCase() === 'SI';
+}
+
+/**
+ * Visible en el reporte Seaboard solo si Liquidaciones lo envió.
+ * Hasta ese momento permanece exclusivo de Liquidaciones/Coordinador.
+ */
+export function visibleEnReporteSeaboard(e: Estimacion) {
+  return esNavieraSeaboard(e.naviera) && fueEnviadoASeaboard(e);
+}
+
 /** Enviado a SBM y aún sin decisión final (bandeja Seaboard). */
 export function enBandejaSeaboard(e: Estimacion) {
   return (
-    esNavieraSeaboard(e.naviera) &&
-    e.enviarAprobacion === 'SI' &&
+    visibleEnReporteSeaboard(e) &&
     (e.estado === 'PENDIENTE' || e.estado === 'ENVIADO') &&
     !esRetornoRechazadoALiquidaciones(e)
   );
@@ -183,8 +195,7 @@ export function enBandejaSeaboard(e: Estimacion) {
 /** Liquidaciones puede enviar a SBM solo si la naviera es Seaboard y aún no está enviado (incl. tras reverso). */
 export function puedePushASbm(e: Estimacion) {
   const retornoCambios = esRetornoConCambiosALiquidaciones(e);
-  const yaEnviado =
-    String(e.enviarAprobacion || '').toUpperCase() === 'SI' && !retornoCambios;
+  const yaEnviado = fueEnviadoASeaboard(e) && !retornoCambios;
   const estadosOk =
     ['PENDIENTE', 'RECHAZADO', 'REVERSADO', 'ENVIADO'].includes(e.estado) ||
     (e.estado === 'APROBADO' && retornoCambios);

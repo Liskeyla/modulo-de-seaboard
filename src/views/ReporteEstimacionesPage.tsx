@@ -47,6 +47,7 @@ import { metaPais, paisDe } from '@/lib/pais';
 import {
   esNavieraSeaboard,
   enBandejaSeaboard,
+  visibleEnReporteSeaboard,
   puedePushASbm,
   resolverEstadoEnvioALiquidaciones,
   estadoVisibleLiquidaciones,
@@ -270,11 +271,15 @@ export default function ReporteEstimacionesPage() {
   const etiquetasFecha = etiquetasFechasReporte(user?.rol);
   const cerrar = () => setDialogo({ tipo: 'NINGUNO' });
 
-  /** Liquidaciones / Coordinador: todas las navieras del país. Seaboard: solo Seaboard. */
+  /**
+   * Liquidaciones / Coordinador: todas las navieras del país.
+   * Seaboard: solo estimados que Liquidaciones ya envió (enviarAprobacion = SI).
+   * Mientras Liquidaciones no envíe, NO cae en el reporte/bandeja Seaboard.
+   */
   const porPais = useMemo(() => {
     return estimaciones.filter((e) => {
       if (paisDe(e) !== pais) return false;
-      if (esSeaboard) return esNavieraSeaboard(e.naviera);
+      if (esSeaboard) return visibleEnReporteSeaboard(e);
       return true;
     });
   }, [estimaciones, pais, esSeaboard]);

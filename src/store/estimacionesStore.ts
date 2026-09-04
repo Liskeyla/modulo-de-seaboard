@@ -32,6 +32,7 @@ import {
 } from '@/types/estimacion';
 import {
   esNavieraSeaboard,
+  fueEnviadoASeaboard,
   itemModificadoPorLinea,
   resolverEstadoEnvioALiquidaciones,
 } from '@/lib/seaboardFlow';
@@ -782,8 +783,8 @@ export const useEstimacionesStore = create<EstimacionesState>()(
         getEnviadosSeaboard: () =>
           get().estimaciones.filter(
             (e) =>
+              fueEnviadoASeaboard(e) &&
               esNavieraSeaboard(e.naviera) &&
-              e.enviarAprobacion === 'SI' &&
               (e.estado === 'PENDIENTE' || e.estado === 'ENVIADO')
           ),
 

@@ -50,6 +50,7 @@ import { VideoDanoModal } from '@/components/estimacion/VideoDanoModal';
 import {
   esNavieraSeaboard,
   esRetornoConCambiosALiquidaciones,
+  fueEnviadoASeaboard,
   itemModificadoPorLinea,
   puedePushASbm,
   resolverEstadoEnvioALiquidaciones,
@@ -350,18 +351,52 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     );
   }
 
+  if (user?.rol === 'seaboard' && !fueEnviadoASeaboard(estimacion)) {
+    return (
+      <>
+        <Header title="Estimado no disponible" subtitle="Bandeja Seaboard Marine" />
+        <main className="px-3 py-4 md:px-5 md:py-6">
+          <div className="dms-shell">
+            <div className="dms-empty-state">
+              <div className="dms-empty-icon">
+                <Lock className="h-7 w-7" />
+              </div>
+              <p className="text-sm font-semibold text-gray-700">
+                {codigo} aún no fue enviado por Liquidaciones
+              </p>
+              <p className="mt-1 max-w-sm text-xs text-gray-500">
+                Hasta que Liquidaciones envíe el estimado (aprobación / autoaprobación), no aparece
+                en el reporte ni en la bandeja de Seaboard.
+              </p>
+              <button
+                type="button"
+                className="dms-btn-primary mt-4 px-4 py-2 text-sm"
+                onClick={() => router.push('/reportes/estimaciones')}
+              >
+                <ArrowLeft className="h-4 w-4" /> Volver al reporte
+              </button>
+            </div>
+          </div>
+        </main>
+      </>
+    );
+  }
+
   const esOperadorDms = user?.rol === 'dms';
   const esSeaboard = user?.rol === 'seaboard';
   const esLiquidaciones = user?.rol === 'liquidaciones';
   const esCoordinador = user?.rol === 'coordinador';
   const esSeaboardNav = esNavieraSeaboard(estimacion.naviera);
+  const enviadoASeaboard = fueEnviadoASeaboard(estimacion);
   /**
-   * Gestor Seaboard: aperturar · modificar · aprobar/rechazar ítems y enviar a liquidaciones.
+   * Gestor Seaboard: solo si Liquidaciones ya envió el estimado a la bandeja.
    * Coordinador: aperturar · modificar · agregar daños (sin decidir ni enviar a línea).
    * Liquidaciones: validar · aprobar/rechazar ítems · enviar a SBM · reversar aprobación.
    */
   const puedeRevisarItems =
-    (esSeaboard && ESTADOS_SEABOARD.includes(estimacion.estado)) ||
+    (esSeaboard &&
+      enviadoASeaboard &&
+      ESTADOS_SEABOARD.includes(estimacion.estado)) ||
     (esLiquidaciones &&
       ['PENDIENTE', 'RECHAZADO', 'REVERSADO', 'APROBADO'].includes(estimacion.estado));
   const puedeEditarLiquidaciones =
@@ -401,7 +436,9 @@ export default function EstimacionDetallePage({ codigo }: { codigo: string }) {
     (editable && (esLiquidaciones || esSeaboard || esCoordinador)) ||
     vistaCerradaLiq;
   const puedeEnviarLiquidaciones =
-    esSeaboard && ESTADOS_SEABOARD.includes(estimacion.estado);
+    esSeaboard &&
+    enviadoASeaboard &&
+    ESTADOS_SEABOARD.includes(estimacion.estado);
   /** Liquidaciones: Enviar a SBM solo si naviera Seaboard (también tras reverso). */
   const puedeEnviarASeaboard = esOperadorDms
     ? esSeaboardNav &&
