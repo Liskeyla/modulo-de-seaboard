@@ -263,6 +263,15 @@ interface EstimacionesState {
 
   // Flujo de aprobación
   enviarAprobacion: (ids: string[], usuario: string) => void;
+  /**
+   * Liquidaciones: autoaprueba por catálogo Monto Reparación.
+   * Aprueba TODOS los ítems y el estimado completo (estado APROBADO).
+   */
+  autoaprobarPorCatalogo: (
+    ids: string[],
+    usuario: string,
+    motivoRegla?: string
+  ) => void;
   /** Liquidaciones marca el estimado como validado (habilita push a SBM). */
   validarLiquidaciones: (id: string, usuario: string) => void;
   aprobar: (ids: string[], usuario: string, comentario: string) => void;
@@ -474,6 +483,71 @@ export const useEstimacionesStore = create<EstimacionesState>()(
                   ),
                 ],
               };
+            }),
+          }));
+        },
+
+        autoaprobarPorCatalogo: (ids, usuario, motivoRegla) => {
+          const motivo =
+            (motivoRegla || '').trim() ||
+            'Autoaprobación por catálogo Monto Reparación (Liquidaciones)';
+          set((s) => ({
+            estimaciones: s.estimaciones.map((e) => {
+              if (!ids.includes(e.id)) return e;
+              if (!['PENDIENTE', 'RECHAZADO', 'REVERSADO'].includes(e.estado)) return e;
+              if (fueEnviadoASeaboard(e) && e.estado === 'APROBADO') return e;
+              if (e.danos.length === 0) return e;
+
+              const fecha = ahoraFmt();
+              const danos = e.danos.map((d) => {
+                if (esItemAprobado(d.aplica)) return d;
+                const cmt: ComentarioDano = {
+                  id: uid('cmt'),
+                  usuario,
+                  rol: 'LIQUIDACIONES',
+                  fecha,
+                  tipo: 'ACEPTADO',
+                  mensaje: motivo,
+                  campoAfectado: 'Estado',
+                  valorAnterior: d.aplica,
+                  valorNuevo: APLICA_APROBADO_SBM,
+                };
+                return {
+                  ...d,
+                  aplica: APLICA_APROBADO_SBM,
+                  comentarios: [...d.comentarios, cmt],
+                  historialAcciones: appendHistorialItem(
+                    d.historialAcciones,
+                    entradaAprobacionItem(d, usuario, fecha, motivo)
+                  ),
+                };
+              });
+              const lineasSnap = danos.map(aLineaHistorial);
+              return recalcular({
+                ...e,
+                danos,
+                estado: 'APROBADO' as EstadoEstimacion,
+                enviarAprobacion: 'SI',
+                validadoLiquidaciones: true,
+                fechaEnvio: e.fechaEnvio || fecha,
+                fechaAprobacion: fecha,
+                fechaRevision: fecha,
+                fechaModificacion: fecha,
+                usuarioModificacion: usuario,
+                comentariosSeaboard: [
+                  ...e.comentariosSeaboard,
+                  comentarioSeaboard('APROBAR', motivo, usuario),
+                ],
+                auditoria: [
+                  ...e.auditoria,
+                  evento(
+                    usuario,
+                    'AUTOAPROBACIÓN CATÁLOGO',
+                    `${usuario} autoaprobó ${e.codigo}: estimado + ${danos.length} ítem(s). ${motivo}`,
+                    lineasSnap
+                  ),
+                ],
+              });
             }),
           }));
         },

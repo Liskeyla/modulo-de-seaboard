@@ -227,6 +227,7 @@ export default function ReporteEstimacionesPage() {
   const {
     estimaciones,
     enviarAprobacion,
+    autoaprobarPorCatalogo,
     enviarALiquidaciones,
     reversarAprobacion,
     solicitarReversoAprobacion,
@@ -1317,7 +1318,7 @@ export default function ReporteEstimacionesPage() {
         subtitle={activa ? `${activa.codigo} · ${activa.contenedor}` : undefined}
         confirmLabel={
           activa && esLiquidaciones && infoAutoaprobacion(activa).ok
-            ? 'Confirmar autoaprobación'
+            ? 'Confirmar autoaprobación (estimado + ítems)'
             : 'Confirmar envío a SBM'
         }
         confirmClass="dms-btn-enviar"
@@ -1332,21 +1333,26 @@ export default function ReporteEstimacionesPage() {
             return;
           }
           const auto = esLiquidaciones ? infoAutoaprobacion(activa) : { ok: false, reglas: [] };
-          enviarAprobacion([activa.id], actor);
-          toast(
-            auto.ok
-              ? `Autoaprobado por catálogo (${auto.reglas[0]?.descripcion}). ${activa.codigo} enviado a Seaboard.`
-              : `Estimación ${activa.codigo} enviada a Seaboard.`,
-            'success'
-          );
+          if (auto.ok) {
+            const motivo = auto.reglas.map((r) => r.descripcion).join(' · ');
+            autoaprobarPorCatalogo([activa.id], actor, motivo);
+            toast(
+              `Autoaprobado ${activa.codigo}: estimado + ${activa.danos.length} ítem(s) · ${motivo}`,
+              'success'
+            );
+          } else {
+            enviarAprobacion([activa.id], actor);
+            toast(`Estimación ${activa.codigo} enviada a Seaboard.`, 'success');
+          }
           cerrar();
         }}
       >
         {activa && esLiquidaciones && infoAutoaprobacion(activa).ok ? (
           <div className="space-y-2 text-sm text-gray-600">
             <p>
-              El estimado cumple la regla del catálogo <strong>Monto Reparación</strong> y se
-              autoaprueba para caer en el reporte Seaboard.
+              Se <strong>aprobará el estimado completo</strong> y{' '}
+              <strong>todos sus ítems</strong> ({activa.danos.length} línea(s)) según el catálogo{' '}
+              <strong>Monto Reparación</strong>. Quedará en estado <strong>APROBADO</strong>.
             </p>
             <ul className="list-disc space-y-1 pl-5 text-xs">
               {infoAutoaprobacion(activa).reglas.map((r) => (
@@ -1369,32 +1375,34 @@ export default function ReporteEstimacionesPage() {
         open={dialogo.tipo === 'AUTOAPROBAR_MASIVO'}
         title="Autoaprobar elegibles"
         subtitle={`${autoaprobables.length} estimado(s) · catálogo Monto Reparación`}
-        confirmLabel="Autoaprobar y enviar a SBM"
+        confirmLabel="Aprobar estimados + ítems"
         confirmClass="dms-btn-aprobar"
         onClose={cerrar}
         onConfirm={() => {
           if (autoaprobables.length === 0) return;
-          enviarAprobacion(
+          const totalItems = autoaprobables.reduce((n, e) => n + e.danos.length, 0);
+          autoaprobarPorCatalogo(
             autoaprobables.map((e) => e.id),
-            actor
+            actor,
+            'Autoaprobación masiva por catálogo Monto Reparación'
           );
           toast(
-            `${autoaprobables.length} estimado(s) autoaprobados y enviados a Seaboard según catálogo.`,
+            `${autoaprobables.length} estimado(s) y ${totalItems} ítem(s) autoaprobados.`,
             'success'
           );
           cerrar();
         }}
       >
         <p className="mb-2 text-sm text-gray-600">
-          Se enviarán a la bandeja Seaboard solo los estimados que cumplen rangos y condiciones del
-          catálogo (naviera, tipo, clasificación, modelo, actividad y monto).
+          Cada estimado elegible quedará <strong>APROBADO</strong> con{' '}
+          <strong>todos sus ítems en Aprobado</strong>, según rangos y condiciones del catálogo.
         </p>
         <ul className="max-h-40 space-y-1 overflow-auto text-[11px] text-slate-700">
           {autoaprobables.slice(0, 12).map((e) => {
             const { reglas } = infoAutoaprobacion(e);
             return (
               <li key={e.id}>
-                <strong>{e.codigo}</strong> · ${e.pvpTotal.toFixed(2)} ·{' '}
+                <strong>{e.codigo}</strong> · ${e.pvpTotal.toFixed(2)} · {e.danos.length} ítem(s) ·{' '}
                 {reglas[0]?.descripcion ?? 'regla'}
               </li>
             );
